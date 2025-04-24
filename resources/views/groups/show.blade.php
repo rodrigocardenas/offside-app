@@ -1,5 +1,15 @@
 <x-app-layout>
-    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6">
+    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6 pb-24">
+        <!-- Botón para volver -->
+        <div class="max-w-4xl mx-auto mb-4">
+            <a href="{{ route('groups.index') }}" class="inline-flex items-center text-offside-light hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Volver a grupos
+            </a>
+        </div>
+
         <!-- Encabezado del grupo -->
         <div class="max-w-4xl mx-auto mb-8">
             <div class="bg-offside-primary rounded-lg p-4 mb-8">
@@ -125,6 +135,44 @@
                             </form>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú inferior fijo -->
+        <div class="fixed bottom-0 left-0 right-0 bg-offside-dark border-t border-offside-primary">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-around items-center py-3">
+                    <a href="{{ route('dashboard') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span class="text-xs mt-1">Inicio</span>
+                    </a>
+                    <a href="{{ route('groups.index') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="text-xs mt-1">Grupos</span>
+                    </a>
+                    <a href="{{ route('questions.index') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-xs mt-1">Preguntas</span>
+                    </a>
+                    <a href="{{ route('rankings.daily') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        <span class="text-xs mt-1">Ranking</span>
+                    </a>
+                    <a href="{{ route('profile.edit') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span class="text-xs mt-1">Perfil</span>
+                    </a>
                 </div>
             </div>
         </div>

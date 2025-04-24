@@ -64,8 +64,8 @@ class QuestionController extends Controller
             'points_earned' => $points,
         ]);
 
-        return redirect()->route('questions.show', $question)
-            ->with('success', 'Respuesta enviada exitosamente.');
+        return redirect()->route('groups.show', $question->group)
+            ->with('success', '¡Respuesta enviada exitosamente!');
     }
 
     public function results(Question $question)

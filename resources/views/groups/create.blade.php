@@ -1,46 +1,54 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Crear Grupo') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form method="POST" action="{{ route('groups.store') }}" class="space-y-6">
-                        @csrf
-
-                        <div>
-                            <x-input-label for="name" :value="__('Nombre del Grupo')" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name')" required autofocus />
-                            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-                        </div>
-
-                        <div>
-                            <x-input-label for="competition_id" :value="__('Competición')" />
-                            <select id="competition_id" name="competition_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <option value="">Selecciona una competición</option>
-                                @foreach($competitions as $competition)
-                                    <option value="{{ $competition->id }}" {{ old('competition_id') == $competition->id ? 'selected' : '' }}>
-                                        {{ $competition->name }} ({{ $competition->type }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('competition_id')" />
-                        </div>
-
-                        <div class="flex items-center justify-end">
-                            <a href="{{ route('groups.index') }}" class="text-gray-600 hover:text-gray-900 mr-4">
-                                Cancelar
-                            </a>
-                            <x-primary-button>
-                                {{ __('Crear Grupo') }}
-                            </x-primary-button>
-                        </div>
-                    </form>
+    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6">
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-offside-light">Crear nuevo grupo</h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-offside-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
                 </div>
+
+                <form method="POST" action="{{ route('groups.store') }}" class="space-y-6">
+                    @csrf
+
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-400 mb-2">Nombre del grupo</label>
+                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
+                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('name') border-red-500 @enderror"
+                            placeholder="Ej: Grupo de amigos">
+                        @error('name')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="competition_id" class="block text-sm font-medium text-gray-400 mb-2">Competición</label>
+                        <select id="competition_id" name="competition_id"
+                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('competition_id') border-red-500 @enderror">
+                            <option value="">Selecciona una competición</option>
+                            @foreach($competitions as $competition)
+                                <option value="{{ $competition->id }}" {{ old('competition_id') == $competition->id ? 'selected' : '' }}>
+                                    {{ $competition->name }} ({{ $competition->type }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('competition_id')
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <a href="{{ route('groups.index') }}"
+                           class="text-sm text-offside-light hover:text-white transition-colors">
+                            Cancelar
+                        </a>
+                        <button type="submit"
+                                class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all">
+                            Crear grupo
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
