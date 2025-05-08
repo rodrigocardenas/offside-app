@@ -12,17 +12,17 @@ class CompetitionSeeder extends Seeder
         $competitions = [
             [
                 'name' => 'UEFA Champions League',
-                'type' => 'champions',
+                'type' => 'champions-league',
                 'country' => 'Europa'
             ],
             [
                 'name' => 'La Liga',
-                'type' => 'laliga',
+                'type' => 'la-liga',
                 'country' => 'España'
             ],
             [
                 'name' => 'Premier League',
-                'type' => 'premier',
+                'type' => 'premier-league',
                 'country' => 'Inglaterra'
             ]
         ];

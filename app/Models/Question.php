@@ -15,16 +15,23 @@ class Question extends Model
         'type',
         'points',
         'available_until',
-        'group_id'
+        'group_id',
+        'match_id',
+        'is_featured',
+        'category',
+        'user_id',
+        'template_question_id',
+        'competition_id',
     ];
 
     protected $casts = [
-        'available_until' => 'datetime'
+        'available_until' => 'datetime',
+        'is_featured' => 'boolean'
     ];
 
     public function options()
     {
-        return $this->hasMany(Option::class);
+        return $this->hasMany(QuestionOption::class);
     }
 
     public function answers()
@@ -40,5 +47,15 @@ class Question extends Model
     public function group()
     {
         return $this->belongsTo(Group::class);
+    }
+
+    public function football_match()
+    {
+        return $this->belongsTo(FootballMatch::class);
+    }
+
+    public function templateQuestion()
+    {
+        return $this->belongsTo(TemplateQuestion::class);
     }
 }

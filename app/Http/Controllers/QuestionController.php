@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Question;
+use App\Models\TemplateQuestion;
 use App\Models\Answer;
 use App\Models\Option;
 use Illuminate\Http\Request;
@@ -39,29 +40,58 @@ class QuestionController extends Controller
         return view('questions.show', compact('question', 'userAnswer'));
     }
 
+    /**
+     * Handle like/dislike reactions for a question
+     */
+    public function react(Request $request, TemplateQuestion $question)
+    {
+        $request->validate([
+            'reaction' => 'required|in:like,dislike'
+        ]);
+
+        try {
+            $reaction = $request->input('reaction');
+            $field = $reaction . 's';
+            
+            // Increment the reaction count
+            $question->increment($field);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Reacción guardada correctamente',
+                'likes' => $question->likes,
+                'dislikes' => $question->dislikes
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al guardar la reacción: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar la reacción: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function answer(Request $request, Question $question)
     {
         if ($question->available_from > Carbon::now() || $question->available_until < Carbon::now()) {
             return back()->with('error', 'No puedes responder a esta pregunta en este momento.');
         }
-
+        
         if ($question->answers()->where('user_id', auth()->id())->exists()) {
             return back()->with('error', 'Ya has respondido a esta pregunta.');
         }
-
+        
         $request->validate([
-            'option_id' => 'required|exists:options,id,question_id,' . $question->id,
+            'option_id' => 'required',
         ]);
-
-        $selectedOption = Option::findOrFail($request->option_id);
-        $points = $selectedOption->is_correct ? $question->points : 0;
 
         Answer::create([
             'user_id' => auth()->id(),
             'question_id' => $question->id,
-            'option_id' => $selectedOption->id,
-            'is_correct' => $selectedOption->is_correct,
-            'points_earned' => $points,
+            'option_id' => intval($request->option_id),
+            'is_correct' => null,
+            'points_earned' => 0,
         ]);
 
         return redirect()->route('groups.show', $question->group)

@@ -24,7 +24,7 @@
 
                     <div>
                         <label for="competition_id" class="block text-sm font-medium text-gray-400 mb-2">Competición</label>
-                        <select id="competition_id" name="competition_id"
+                        <select id="competition_id" name="competition_id" required
                             class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('competition_id') border-red-500 @enderror">
                             <option value="">Selecciona una competición</option>
                             @foreach($competitions as $competition)

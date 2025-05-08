@@ -20,7 +20,7 @@
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                             </svg>
-                            {{ $group->competition->name }} - {{ ucfirst($group->competition->type) }}
+                            {{ $group->competition->name }} 
                             @if($group->competition->country)
                                 ({{ $group->competition->country }})
                             @endif
@@ -31,81 +31,282 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
-                    <!-- Ranking Histórico -->
-                    <div class="bg-offside-dark rounded-lg p-6 mb-8">
-                        <h2 class="text-xl font-bold mb-4">Ranking Histórico del grupo</h2>
-                        <div class="space-y-3">
-                            @foreach($rankings as $index => $ranking)
-                                <div class="flex justify-between items-center bg-offside-primary bg-opacity-20 p-3 rounded-lg">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="text-yellow-400">🏆</span>
-                                        <span>{{ $ranking->name }}</span>
+
+                    <!-- Preguntas de Partidos -->
+                    <div class="bg-offside-dark rounded-lg p-6">
+                        <h2 class="text-xl font-bold mb-2">
+                            @if($currentMatchday)
+                                JORNADA {{ $currentMatchday }}
+                            @else
+                                PRÓXIMOS PARTIDOS
+                            @endif
+                        </h2>
+                        {{-- <h3 class="text-lg mb-6">Responde las preguntas de los próximos partidos:</h3> --}}
+
+                        <!-- Carrusel de preguntas -->
+                        <div class="relative">
+                            <!-- Contenedor del carrusel con scroll horizontal -->
+                            <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 pb-4">
+                                @forelse($matchQuestions as $question)
+                                    <div class="snap-center flex-none w-full">
+                                        <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6 {{ $question->is_disabled || $question->available_until < now() ? 'opacity-50' : '' }}">
+                                            <div class="mb-4">
+                                                <h4 class="text-xl font-bold mb-2">{{ $question->title }}</h4>
+                                                <p class="text-sm text-offside-light">
+                                                    @if($question->is_disabled)
+                                                        Pregunta deshabilitada
+                                                    @elseif($question->available_until > now())
+                                                        Disponible hasta: {{ $question->available_until->timezone('Europe/Madrid')->format('d/m/Y H:i') }}
+                                                    @else
+                                                        Partido finalizado
+                                                    @endif
+                                                </p>
+                                            </div>
+
+                                            @if(!isset($userAnswers[$question->id]) && $question->available_until > now() && !$question->is_disabled)
+                                                <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3">
+                                                    @csrf
+                                                    @foreach($question->options as $option)
+                                                        <button type="submit"
+                                                                name="option_id"
+                                                                value="{{ $option->id }}"
+                                                                class="w-full text-left bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg">
+                                                            {{ $option->text }}
+                                                        </button>
+                                                    @endforeach
+                                                </form>
+                                            @else
+                                                <div class="space-y-3">
+                                                    @foreach($question->options as $option)
+                                                        <div class="p-4 rounded-lg {{
+                                                            $question->available_until > now() && !$question->is_disabled
+                                                                ? ($userAnswers[$question->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
+                                                                : ($option->is_correct ? 'bg-green-600' : (($userAnswers[$question->id] ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
+                                                        }}">
+                                                            <div class="flex justify-between items-center">
+                                                                <span>{{ $option->text }}</span>
+                                                                <div class="text-sm">
+                                                                    @foreach($question->answers->where('option_id', $option->id) as $answer)
+                                                                        @php
+                                                                            $initials = '';
+                                                                            $nameParts = explode(' ', $answer->user->name);
+                                                                            foreach($nameParts as $part) {
+                                                                                $initials .= strtoupper(substr($part, 0, 1));
+                                                                            }
+                                                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                                                            $color = $colors[array_rand($colors)];
+                                                                        @endphp
+                                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm" 
+                                                                             title="{{ $answer->user->name }}">
+                                                                            {{ $initials }}
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                @endif
+                                                <!-- Like/Dislike Buttons -->
+                                                <div class="flex justify-end space-x-4 mt-4">
+                                                    <button type="button" 
+                                                            class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
+                                                            data-question-id="{{ $question->id }}"
+                                                            data-template-question-id="{{ $question->template_question_id }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                                        </svg>
+                                                        <!-- <span class="like-count">{{ $question->templateQuestion->likes ?? 0 }}</span> -->
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="dislike-btn flex items-center text-red-500 hover:text-red-400 transition-colors"
+                                                            data-question-id="{{ $question->id }}"
+                                                            data-template-question-id="{{ $question->template_question_id }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m0 0h2.25a2.25 2.25 0 012.15 2.9l-1.75 7a2.25 2.25 0 01-2.15 1.6H17m-7-10v10m0-10H9m0 0h2.25M17 14h2.25M17 4h2.25" />
+                                                        </svg>
+                                                        <!-- <span class="dislike-count">{{ $question->templateQuestion->dislikes ?? 0 }}</span> -->
+                                                    </button>
+                                                </div>
+                                        </div>
                                     </div>
-                                    <span class="font-semibold">{{ $ranking->total_points }} ponts.</span>
-                                </div>
-                            @endforeach
+                                @empty
+                                    <div class="text-center text-gray-400 py-8">
+                                        No hay preguntas disponibles para los próximos partidos.
+                                    </div>
+                                @endforelse
+                            </div>
+
+                            <!-- Indicadores de navegación -->
+                            <div class="flex justify-center mt-4 space-x-2">
+                                @foreach($matchQuestions as $index => $question)
+                                    <button class="w-2 h-2 rounded-full bg-offside-light question-indicator" data-index="{{ $index }}"></button>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Pregunta del día -->
-                    <div class="bg-offside-dark rounded-lg p-6">
-                        <h2 class="text-xl font-bold mb-2">JORNADA {{ now()->format('d') }}</h2>
-                        <h3 class="text-lg mb-6">Responde las preguntas de hoy:</h3>
-
-                        @if($dailyQuestion && !$userAnswer)
-                            <div class="space-y-6">
-                                <h4 class="text-xl">{{ $dailyQuestion->title }}</h4>
-                                <form action="{{ route('questions.answer', $dailyQuestion) }}" method="POST" class="space-y-4">
-                                    @csrf
-                                    @foreach($dailyQuestion->options as $option)
-                                        <button type="submit"
-                                                name="option_id"
-                                                value="{{ $option->id }}"
-                                                class="w-full text-center bg-offside-secondary hover:bg-offside-primary transition-colors p-4 rounded-lg">
-                                            {{ $option->text }}
-                                        </button>
-                                    @endforeach
-                                </form>
+                    <!-- Pregunta Social -->
+                    @if($group->users->count() >= 2)
+                        @if($socialQuestion)
+                        <div class="bg-offside-dark rounded-lg p-6 mt-8">
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-xl font-bold">Pregunta del Día</h2>
+                                <span class="text-sm text-offside-light">
+                                    Disponible hasta: {{ $socialQuestion->available_until->format('d/m/Y H:i') }}
+                                </span>
                             </div>
-                        @elseif($dailyQuestion && $userAnswer)
-                            <div class="space-y-6">
-                                <h4 class="text-xl">{{ $dailyQuestion->title }}</h4>
-                                <div class="space-y-4">
-                                    @foreach($dailyQuestion->options as $option)
-                                        <div class="p-4 rounded-lg {{
-                                            $dailyQuestion->type === 'predictive' && $dailyQuestion->available_until > now()
-                                                ? ($userAnswer->option_id == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
-                                                : ($option->is_correct ? 'bg-green-600' : ($userAnswer->option_id == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
-                                        }}">
-                                            <div class="flex justify-between items-center">
-                                                <div>
-                                                    <span>{{ $option->text }}</span>
-                                                    @if($dailyQuestion->type === 'predictive' && $dailyQuestion->available_until > now() && $userAnswer->option_id == $option->id)
-                                                        <span class="text-xs ml-2 text-white">(Tu predicción)</span>
+
+                            <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6">
+                                <div class="mb-4">
+                                    <h3 class="text-xl mb-2">{{ $socialQuestion->title }}</h3>
+                                    @if($socialQuestion->description)
+                                        <p class="text-sm text-offside-light">{{ $socialQuestion->description }}</p>
+                                    @endif
+                                </div>
+
+                                @php
+                                    $userHasAnswered = isset($userAnswers[$socialQuestion->id]);
+                                @endphp
+
+                                @if(!$userHasAnswered && $socialQuestion->available_until > now())
+                                    <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="space-y-3">
+                                        @csrf
+                                        @foreach($socialQuestion->options as $option)
+                                            <button type="submit"
+                                                    name="option_id"
+                                                    value="{{ $option->id }}"
+                                                    class="w-full text-left bg-offside-primary hover:bg-offside-primary transition-colors p-4 rounded-lg">
+                                                {{ $option->text }}
+                                            </button>
+                                        @endforeach
+                                    </form>
+                                @else
+                                    <div class="space-y-3">
+                                        @foreach($socialQuestion->options as $option)
+                                            @php
+                                                $optionAnswers = $socialQuestion->answers->where('option_id', $option->id);
+                                                $isSelected = $userHasAnswered && $userAnswers[$socialQuestion->id] == $option->id;
+                                            @endphp
+                                            <div class="p-4 rounded-lg {{ $isSelected ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20' }}">
+                                                <div class="flex flex-col space-y-2">
+                                                    <div class="flex justify-between items-center">
+                                                        <span>{{ $option->text }}</span>
+                                                        <div class="text-sm">
+                                                            {{ $optionAnswers->count() }} {{ Str::plural('voto', $optionAnswers->count()) }}
+                                                        </div>
+                                                    </div>
+                                                    @if($optionAnswers->count() > 0)
+                                                        <div class="mt-2">
+                                                            <div class="flex -space-x-2 overflow-hidden">
+                                                                @foreach($optionAnswers as $answer)
+                                                                    <div class="inline-block h-8 w-8 rounded-full ring-2 ring-offside-dark overflow-hidden" title="{{ $answer->user->name }}">
+                                                                        <div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm font-medium">
+                                                                            {{ strtoupper(substr($answer->user->name, 0, 1)) }}
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
                                                     @endif
                                                 </div>
-                                                <div class="space-x-2">
-                                                    @foreach($dailyQuestion->answers as $answer)
-                                                        @if($answer->option_id == $option->id)
-                                                            <span class="inline-block">{{ $answer->user->name }}</span>
-                                                        @endif
-                                                    @endforeach
+                                                <!-- Like/Dislike Buttons for Social Question -->
+                                                <div class="flex justify-end space-x-4 mt-4">
+                                                    <button type="button" 
+                                                            class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
+                                                            data-question-id="{{ $socialQuestion->id }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                                        </svg>
+                                                        <span class="like-count">{{ $socialQuestion->likes ?? 0 }}</span>
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="dislike-btn flex items-center text-red-500 hover:text-red-400 transition-colors"
+                                                            data-question-id="{{ $socialQuestion->id }}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m0 0h2.25a2.25 2.25 0 012.15 2.9l-1.75 7a2.25 2.25 0 01-2.15 1.6H17m-7-10v10m0-10H9m0 0h2.25M17 14h2.25M17 4h2.25" />
+                                                        </svg>
+                                                        <span class="dislike-count">{{ $socialQuestion->dislikes ?? 0 }}</span>
+                                                    </button>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endforeach
+
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+                    @else
+                        <div class="bg-offside-dark rounded-lg p-6 mt-8">
+                            <div class="text-center">
+                                <h2 class="text-xl font-bold mb-2">Preguntas Sociales</h2>
+                                <p class="text-offside-light">Invita a más miembros al grupo para desbloquear las preguntas sociales.</p>
+                                <div class="mt-4">
+                                    <p class="text-sm">Código de invitación: <span class="font-mono bg-offside-primary bg-opacity-20 px-2 py-1 rounded">{{ $group->code }}</span></p>
                                 </div>
                             </div>
-                        @else
-                            <p class="text-center text-gray-400">No hay preguntas disponibles para hoy.</p>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
+
+                    <style>
+                        .hide-scrollbar::-webkit-scrollbar {
+                            display: none;
+                        }
+                        .hide-scrollbar {
+                            -ms-overflow-style: none;
+                            scrollbar-width: none;
+                        }
+                        .question-indicator.active {
+                            background-color: theme('colors.offside-secondary');
+                        }
+                    </style>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const container = document.querySelector('.overflow-x-auto');
+                            const indicators = document.querySelectorAll('.question-indicator');
+                            let currentIndex = 0;
+
+                            // Actualizar indicadores al hacer scroll
+                            container.addEventListener('scroll', () => {
+                                const scrollPosition = container.scrollLeft;
+                                const itemWidth = container.offsetWidth;
+                                currentIndex = Math.round(scrollPosition / itemWidth);
+                                updateIndicators();
+                            });
+
+                            // Click en los indicadores
+                            indicators.forEach((indicator, index) => {
+                                indicator.addEventListener('click', () => {
+                                    const itemWidth = container.offsetWidth;
+                                    container.scrollTo({
+                                        left: itemWidth * index,
+                                        behavior: 'smooth'
+                                    });
+                                    currentIndex = index;
+                                    updateIndicators();
+                                });
+                            });
+
+                            function updateIndicators() {
+                                indicators.forEach((indicator, index) => {
+                                    indicator.classList.toggle('active', index === currentIndex);
+                                });
+                            }
+
+                            // Inicializar indicadores
+                            updateIndicators();
+                        });
+                    </script>
                 </div>
 
                 <!-- Chat del Grupo -->
-                <div class="bg-offside-dark rounded-lg p-6">
+                <div id="chatSection" class="bg-offside-dark rounded-lg p-6">
                     <h2 class="text-xl font-bold mb-4">Chat del Grupo</h2>
-                    <div class="bg-offside-primary bg-opacity-20 rounded-lg h-[600px] flex flex-col">
+                    <div class="bg-offside-primary bg-opacity-20 rounded-lg h-[300px] flex flex-col">
                         <div class="flex-1 p-4 overflow-y-auto space-y-4">
                             @foreach($group->chatMessages()->with('user')->latest()->get() as $message)
                                 <div class="flex items-start space-x-3">
@@ -129,7 +330,7 @@
                                     class="flex-1 bg-offside-primary bg-opacity-40 border-0 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-offside-secondary"
                                     placeholder="Escribe un mensaje..."
                                     required>
-                                <button type="submit" class="bg-offside-secondary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
+                                <button type="submit" class="bg-offside-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
                                     Enviar
                                 </button>
                             </form>
@@ -143,29 +344,29 @@
         <div class="fixed bottom-0 left-0 right-0 bg-offside-dark border-t border-offside-primary">
             <div class="max-w-4xl mx-auto">
                 <div class="flex justify-around items-center py-3">
-                    <a href="{{ route('dashboard') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                    <!-- <a href="{{ route('dashboard') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                         <span class="text-xs mt-1">Inicio</span>
-                    </a>
+                    </a> -->
                     <a href="{{ route('groups.index') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         <span class="text-xs mt-1">Grupos</span>
                     </a>
-                    <a href="{{ route('questions.index') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span class="text-xs mt-1">Preguntas</span>
-                    </a>
-                    <a href="{{ route('rankings.daily') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                    <a href="{{ route('rankings.group', $group) }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                         <span class="text-xs mt-1">Ranking</span>
+                    </a>
+                    <a href="#" id="openFeedbackModal" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span class="text-xs mt-1">Tu opinión</span>
                     </a>
                     <a href="{{ route('profile.edit') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -175,6 +376,148 @@
                     </a>
                 </div>
             </div>
+            <!-- Botón flotante del chat -->
+        <button id="chatToggle" class="fixed bottom-24 right-8 bg-offside-primary hover:bg-offside-primary/90 text-white rounded-full p-4 shadow-lg transition-all duration-300 flex items-center justify-center z-50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span id="unreadCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {{ $group->chatMessages()->count() }}
+            </span>
+        </button>
+    </div>
+
+    <!-- Modal de Feedback -->
+    <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-offside-dark rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Envíanos tu opinión</h3>
+                <button id="closeFeedbackModal" onclick="document.getElementById('feedbackModal').classList.add('hidden')" class="text-offside-light hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="feedbackForm">
+                @csrf
+                <div class="mb-4">
+                    <label for="type" class="block text-sm font-medium mb-2">Tipo de comentario</label>
+                    <select id="type" name="type" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white">
+                        <option value="suggestion">Sugerencia</option>
+                        <option value="bug">Reportar un error</option>
+                        <option value="compliment">Elogio</option>
+                        <option value="other">Otro</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="message" class="block text-sm font-medium mb-2">Mensaje</label>
+                    <textarea id="message" name="message" rows="4" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white" required></textarea>
+                </div>
+                <div class="mb-4 flex items-center">
+                    <input type="checkbox" id="is_anonymous" name="is_anonymous" class="rounded border-offside-primary bg-offside-primary bg-opacity-20 text-offside-primary focus:ring-offside-primary">
+                    <label for="is_anonymous" class="ml-2 text-sm">Enviar como anónimo</label>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="cancelFeedback" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-offside-primary text-white rounded-md hover:bg-offside-primary/90">Enviar</button>
+                </div>
+            </form>
         </div>
     </div>
+
+   
 </x-app-layout>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Abrir modal
+        $('#openFeedbackModal').on('click', function(e) {
+            console.log('Open feedback modal clicked');
+            
+            e.preventDefault();
+            $('#feedbackModal').removeClass('hidden');
+        });
+
+        // Cerrar modal
+        $('#closeFeedbackModal, #cancelFeedback').on('click', function() {
+            $('#feedbackModal').addClass('hidden');
+        });
+
+        // Enviar formulario
+        $('#feedbackForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            $.ajax({
+                url: '{{ route("feedback.store") }}',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    alert(response.message);
+                    $('#feedbackModal').addClass('hidden');
+                    $('#feedbackForm')[0].reset();
+                },
+                error: function(xhr) {
+                    const errors = xhr.responseJSON.errors;
+                    let errorMessage = 'Por favor, corrige los siguientes errores:\n';
+                    
+                    for (const field in errors) {
+                        errorMessage += `- ${errors[field][0]}\n`;
+                    }
+                    
+                    alert(errorMessage);
+                }
+            });
+        });
+        $('#chatToggle').on('click', function() {
+            $('html, body').animate({
+                scrollTop: $('#chatSection').offset().top - 20
+            }, 500);
+        });
+        console.log('Document ready');
+        
+        // Handle like button click
+        $(document).on('click', '.like-btn', function(e) {
+            e.preventDefault();
+            const questionId = $(this).data('question-id');
+            const templateQuestionId = $(this).data('template-question-id');
+            handleReaction(questionId, templateQuestionId, 'like');
+        });
+
+        // Handle dislike button click
+        $(document).on('click', '.dislike-btn', function(e) {
+            e.preventDefault();
+            const questionId = $(this).data('question-id');
+            const templateQuestionId = $(this).data('template-question-id');
+            handleReaction(questionId, templateQuestionId, 'dislike');
+        });
+
+        // Function to handle reaction (like/dislike)
+        function handleReaction(questionId, templateQuestionId, type) {
+            const url = '/questions/' + templateQuestionId + '/react';
+            const token = $('meta[name="csrf-token"]').attr('content');
+            
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    _token: token,
+                    reaction: type
+                },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.success) {
+                        // Update the UI with the new counts for all questions with this template
+                        $('.like-btn[data-template-question-id="' + templateQuestionId + '"] .like-count').text(data.likes);
+                        $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"] .dislike-count').text(data.dislikes);
+                    } else {
+                        console.error('Error:', data.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+    });
+</script>
+

@@ -12,9 +12,11 @@ class Answer extends Model
     protected $fillable = [
         'user_id',
         'question_id',
-        'option_id',
+        'question_option_id',
+        'group_id',
         'is_correct',
-        'points_earned'
+        'points',
+        'option_id'
     ];
 
     protected $casts = [
@@ -29,6 +31,16 @@ class Answer extends Model
     public function question()
     {
         return $this->belongsTo(Question::class);
+    }
+
+    public function questionOption()
+    {
+        return $this->belongsTo(QuestionOption::class, 'question_option_id');
+    }
+
+    public function group()
+    {
+        return $this->belongsTo(Group::class);
     }
 
     public function option()

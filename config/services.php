@@ -22,7 +22,7 @@ return [
     ],
 
     'football_data' => [
-        'api_key' => env('FOOTBALL_DATA_API_KEY'),
+        'api_token' => env('FOOTBALL_DATA_API_TOKEN'),
     ],
 
     'postmark' => [
@@ -33,6 +33,9 @@ return [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+    ],
+    'football' => [
+        'key' => env('FOOTBALL_API_KEY'),
     ],
 
 ];

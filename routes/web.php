@@ -34,7 +34,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
-// Rutas protegidas
+// Protected Routes
 Route::middleware(['auth'])->group(function () {
     // Página principal (grupos)
     Route::get('/', [GroupController::class, 'index'])->name('home');
@@ -49,6 +49,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('questions/{question}/answer', [QuestionController::class, 'answer'])->name('questions.answer');
     Route::get('questions/{question}/results', [QuestionController::class, 'results'])->name('questions.results');
 
+    // Feedback
+    Route::post('feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
+
     // Chat
     Route::post('groups/{group}/chat', [ChatController::class, 'store'])->name('chat.store');
 
@@ -58,12 +61,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('questions/{question}/ranking', [RankingController::class, 'questionRanking'])->name('rankings.question');
     Route::get('users/{user}/stats', [RankingController::class, 'userStats'])->name('rankings.user-stats');
 
+    // Rutas de perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::resource('competitions', CompetitionController::class);
 
     Route::get('/groups/invite/{code}', [GroupController::class, 'joinByInvite'])->name('groups.invite');
+
+    Route::get('/test-questions', [GroupController::class, 'testGenerateQuestions'])->middleware(['auth']);
+    
+    // Handle question reactions (like/dislike)
+    Route::post('/questions/{question}/react', [QuestionController::class, 'react'])->name('questions.react');
 });
 
