@@ -1,0 +1,22 @@
+{
+  "name": "Offside Club",
+  "short_name": "Offside",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a202c",
+  "theme_color": "#2d3748",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/images/logo-offside-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/logo-offside-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

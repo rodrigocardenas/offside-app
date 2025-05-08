@@ -21,6 +21,7 @@
                 </button>
             </div> -->
             <!-- User Dropdown -->
+            @if(Auth::check())
             <div class="relative ml-3">
                 <div>
                     <button type="button" class="flex items-center max-w-xs rounded-full bg-offside-primary text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary" id="user-menu" aria-expanded="false" aria-haspopup="true">
@@ -49,6 +50,7 @@
                     </form>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </nav>

@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             outDir: 'public/build',
+            assetsDir: 'assets',
             manifest: {
                 fileName: 'manifest.json',
                 path: 'public/build/manifest.json'
@@ -34,6 +35,15 @@ export default defineConfig(({ mode }) => {
                 input: {
                     app: 'resources/js/app.js',
                     css: 'resources/css/app.css'
+                },
+                output: {
+                    assetFileNames: (assetInfo) => {
+                        // Mover los íconos a la raíz de public
+                        if (assetInfo.name && /^(logo-offside-).*(\.(png|svg|jpg|jpeg|webp|gif))$/.test(assetInfo.name)) {
+                            return `images/[name][extname]`;
+                        }
+                        return 'assets/[name]-[hash][extname]';
+                    }
                 }
             }
         }
