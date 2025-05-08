@@ -27,6 +27,8 @@
                 navigator.serviceWorker.register('{{ asset('sw.js') }}')
                     .then(registration => {
                         console.log('ServiceWorker registrado con éxito');
+                        // Verificar si la aplicación ya está instalada
+                        checkInstallationStatus();
                     })
                     .catch(error => {
                         console.log('Error al registrar el ServiceWorker:', error);
@@ -34,41 +36,95 @@
             });
         }
 
+        // Verificar si la aplicación ya está instalada
+        function checkInstallationStatus() {
+            // Para navegadores móviles
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('La aplicación ya está instalada');
+                return true;
+            }
+            // Para Chrome en escritorio
+            if (window.navigator.standalone === true) {
+                console.log('La aplicación ya está instalada');
+                return true;
+            }
+            return false;
+        }
 
-        // Manejar el evento beforeinstallprompt
+        // Variables globales
         let deferredPrompt;
         const installButton = document.getElementById('installButton');
+        const installButtonNav = document.getElementById('installButtonNav');
+        const installButtonContainer = document.getElementById('installButtonContainer');
         const installModal = document.getElementById('installModal');
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevenir que Chrome 67 y versiones anteriores muestren automáticamente el prompt
-            e.preventDefault();
-            // Guardar el evento para que se pueda activar más tarde
-            deferredPrompt = e;
-            // Mostrar el botón de instalación
+        // Mostrar el botón de instalación si es compatible
+        function showInstallPromotion() {
+            // Mostrar el botón en la barra de navegación
+            if (installButtonContainer) {
+                installButtonContainer.style.display = 'flex';
+            }
+            // Mostrar el modal (como respaldo)
             if (installModal) {
                 installModal.classList.remove('hidden');
             }
+        }
+
+        // Manejar el evento beforeinstallprompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('Evento beforeinstallprompt activado');
+            // Prevenir que el navegador muestre automáticamente el prompt
+            e.preventDefault();
+            // Guardar el evento para usarlo después
+            deferredPrompt = e;
+            // Mostrar el botón de instalación
+            showInstallPromotion();
         });
 
+        // Verificar si el evento beforeinstallprompt no se disparó
+        // (algunos navegadores no lo disparan en ciertas condiciones)
+        window.addEventListener('load', () => {
+            // Esperar un momento para dar tiempo a que se dispare el evento beforeinstallprompt
+            setTimeout(() => {
+                if (!deferredPrompt && !checkInstallationStatus()) {
+                    console.log('Mostrando botón de instalación manual');
+                    showInstallPromotion();
+                }
+            }, 3000);
+        });
+
+        // Función para instalar la aplicación
         function installApp() {
             if (deferredPrompt) {
+                console.log('Mostrando prompt de instalación');
                 // Mostrar el prompt de instalación
                 deferredPrompt.prompt();
                 // Esperar a que el usuario responda al prompt
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
                         console.log('Usuario aceptó la instalación');
+                        // Ocultar el botón después de la instalación
+                        if (installButtonContainer) {
+                            installButtonContainer.style.display = 'none';
+                        }
                     } else {
                         console.log('Usuario rechazó la instalación');
                     }
-                    // Limpiar el deferredPrompt para que solo se muestre una vez
+                    // Limpiar el deferredPrompt
                     deferredPrompt = null;
-                    // Ocultar el botón de instalación
-                    if (installModal) {
-                        installModal.classList.add('hidden');
-                    }
+                    // Ocultar el modal de instalación
+                    closeInstallModal();
                 });
+            } else {
+                // Si no hay deferredPrompt, redirigir a la documentación de instalación
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    // Instrucciones para iOS
+                    alert('Para instalar esta aplicación en iOS, toca el botón compartir y luego "Añadir a la pantalla de inicio"');
+                } else {
+                    // Instrucciones para Android/otros
+                    alert('Para instalar esta aplicación, por favor usa el menú de opciones de tu navegador.');
+                }
             }
         }
 
@@ -132,5 +188,26 @@
     
     @stack('modals')
     @livewireScripts
+    <script src="{{ asset('sw-update.js') }}"></script>
+    
+    <script>
+        // Manejar clic en el botón de instalación de la barra de navegación
+        document.addEventListener('DOMContentLoaded', function() {
+            const installButtonNav = document.getElementById('installButtonNav');
+            if (installButtonNav) {
+                installButtonNav.addEventListener('click', function() {
+                    installApp();
+                });
+            }
+            
+            // Ocultar el botón si la aplicación ya está instalada
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                const installButtonContainer = document.getElementById('installButtonContainer');
+                if (installButtonContainer) {
+                    installButtonContainer.style.display = 'none';
+                }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1,11 +1,14 @@
 {
   "name": "Offside Club",
   "short_name": "Offside",
-  "start_url": "/",
+  "description": "Predicciones de fútbol y competición con amigos",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#1a202c",
   "theme_color": "#2d3748",
   "orientation": "portrait",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/images/logo-offside-192x192.png",
@@ -16,7 +19,31 @@
     {
       "src": "/images/logo-offside-512x512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/logo-offside-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["sports", "games"],
+  "shortcuts": [
+    {
+      "name": "Ver predicciones",
+      "short_name": "Predicciones",
+      "description": "Ver y hacer predicciones de partidos",
+      "url": "/predictions"
+    },
+    {
+      "name": "Ver ranking",
+      "short_name": "Ranking",
+      "description": "Ver el ranking de jugadores",
+      "url": "/ranking"
     }
   ]
 }
