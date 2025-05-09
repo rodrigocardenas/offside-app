@@ -30,20 +30,6 @@
                                 </div>
                             </a>
                             <div class="flex space-x-2 ml-4">
-                                <form action="{{ route('groups.destroy', $group) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button
-                                        type="submit"
-                                        class="flex items-center space-x-1 text-red-500 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-white/10"
-                                        title="Eliminar grupo"
-                                        onclick="return confirm('¿Estás seguro de que quieres eliminar este grupo?')">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        <span class="text-sm"></span>
-                                    </button>
-                                </form>
                                 <button
                                     type="button"
                                     onclick="showInviteModal('{{ $group->name }}', '{{ route('groups.invite', $group->code) }}')"
@@ -54,6 +40,37 @@
                                     </svg>
                                     <span class="text-sm"></span>
                                 </button>
+                                @if($group->users()->where('user_id', auth()->id())->exists())
+                                    <form action="{{ route('groups.leave', $group) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button
+                                            type="submit"
+                                            class="flex items-center space-x-1 text-yellow-500 hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10"
+                                            title="Salir del grupo"
+                                            onclick="return confirm('¿Estás seguro de que quieres salir de este grupo?')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            <span class="text-sm"></span>
+                                        </button>
+                                    </form>
+                                @elseif($group->created_by === auth()->id() && $group->users()->count() === 1)
+                                    <form action="{{ route('groups.destroy', $group) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button
+                                            type="submit"
+                                            class="flex items-center space-x-1 text-red-500 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-white/10"
+                                            title="Eliminar grupo"
+                                            onclick="return confirm('¿Estás seguro de que quieres eliminar este grupo?')">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            <span class="text-sm">Eliminar</span>
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </div>
                     </div>

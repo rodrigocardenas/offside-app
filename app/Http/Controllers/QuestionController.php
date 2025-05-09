@@ -8,6 +8,7 @@ use App\Models\Answer;
 use App\Models\Option;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class QuestionController extends Controller
 {
@@ -90,9 +91,12 @@ class QuestionController extends Controller
             'user_id' => auth()->id(),
             'question_id' => $question->id,
             'option_id' => intval($request->option_id),
-            'is_correct' => null,
-            'points_earned' => 0,
+            'is_correct' => $question->type === 'social' ? true : null,
+            'points_earned' => $question->type === 'social' ? 100 : 0,
+            'category' => $question->type,
         ]);
+
+        Log::info('Respuesta guardada: ' . $question->id . ' - ' . $request->option_id);
 
         return redirect()->route('groups.show', $question->group)
             ->with('success', '¡Respuesta enviada exitosamente!');

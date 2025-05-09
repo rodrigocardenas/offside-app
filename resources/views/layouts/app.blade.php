@@ -4,11 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <title>{{ config('app.name', 'Laravel') }}</title>
-
-    <!-- PWA -->
+    <title>{{ config('app.name', 'Offside Club') }}</title>
     <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="theme-color" content="#2d3748">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -21,119 +20,96 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/navigation.js'])
     <script>
-        // Registrar el Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+        $(document).ready(function() {
+            // Variables globales
+            let deferredPrompt;
+
+            // Verificar si la aplicación ya está instalada
+            function checkInstallationStatus() {
+                // Para navegadores móviles
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    console.log('La aplicación ya está instalada');
+                    return true;
+                }
+                // Para Chrome en escritorio
+                if (window.navigator.standalone === true) {
+                    console.log('La aplicación ya está instalada');
+                    return true;
+                }
+                return false;
+            }
+
+            // Mostrar el botón de instalación si es compatible
+            function showInstallPromotion() {
+                // Mostrar el botón en la barra de navegación
+                $('#installButtonContainer').css('display', 'flex');
+                // Mostrar el modal (como respaldo)
+                $('#installModal').removeClass('hidden');
+            }
+
+            // Manejar el evento beforeinstallprompt
+            $(window).on('beforeinstallprompt', function(e) {
+                console.log('Evento beforeinstallprompt activado');
+                e.preventDefault();
+                deferredPrompt = e;
+                showInstallPromotion();
+            });
+
+            // Verificar si el evento beforeinstallprompt no se disparó
+            $(window).on('load', function() {
+                setTimeout(() => {
+                    if (!deferredPrompt && !checkInstallationStatus()) {
+                        console.log('Mostrando botón de instalación manual');
+                        showInstallPromotion();
+                    }
+                }, 3000);
+            });
+
+            // Función para instalar la aplicación
+            function installApp() {
+                if (deferredPrompt) {
+                    console.log('Mostrando prompt de instalación');
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function(choiceResult) {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('Usuario aceptó la instalación');
+                            $('#installButtonContainer').css('display', 'none');
+                        } else {
+                            console.log('Usuario rechazó la instalación');
+                        }
+                        deferredPrompt = null;
+                        closeInstallModal();
+                    });
+                } else {
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                    if (isIOS) {
+                        alert('Para instalar esta aplicación en iOS, toca el botón compartir y luego "Añadir a la pantalla de inicio"');
+                    } else {
+                        alert('Para instalar esta aplicación, por favor usa el menú de opciones de tu navegador.');
+                    }
+                }
+            }
+
+            // Cerrar el modal
+            function closeInstallModal() {
+                $('#installModal').addClass('hidden');
+            }
+
+            // Registrar el Service Worker
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('{{ asset('sw.js') }}')
-                    .then(registration => {
+                    .then(function(registration) {
                         console.log('ServiceWorker registrado con éxito');
-                        // Verificar si la aplicación ya está instalada
                         checkInstallationStatus();
                     })
-                    .catch(error => {
+                    .catch(function(error) {
                         console.log('Error al registrar el ServiceWorker:', error);
                     });
-            });
-        }
-
-        // Verificar si la aplicación ya está instalada
-        function checkInstallationStatus() {
-            // Para navegadores móviles
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                console.log('La aplicación ya está instalada');
-                return true;
             }
-            // Para Chrome en escritorio
-            if (window.navigator.standalone === true) {
-                console.log('La aplicación ya está instalada');
-                return true;
-            }
-            return false;
-        }
 
-        // Variables globales
-        let deferredPrompt;
-        const installButton = document.getElementById('installButton');
-        const installButtonNav = document.getElementById('installButtonNav');
-        const installButtonContainer = document.getElementById('installButtonContainer');
-        const installModal = document.getElementById('installModal');
-
-        // Mostrar el botón de instalación si es compatible
-        function showInstallPromotion() {
-            // Mostrar el botón en la barra de navegación
-            if (installButtonContainer) {
-                installButtonContainer.style.display = 'flex';
-            }
-            // Mostrar el modal (como respaldo)
-            if (installModal) {
-                installModal.classList.remove('hidden');
-            }
-        }
-
-        // Manejar el evento beforeinstallprompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('Evento beforeinstallprompt activado');
-            // Prevenir que el navegador muestre automáticamente el prompt
-            e.preventDefault();
-            // Guardar el evento para usarlo después
-            deferredPrompt = e;
-            // Mostrar el botón de instalación
-            showInstallPromotion();
+            // Eventos de click para los botones de instalación
+            $('#installButton, #installButtonNav').on('click', installApp);
         });
-
-        // Verificar si el evento beforeinstallprompt no se disparó
-        // (algunos navegadores no lo disparan en ciertas condiciones)
-        window.addEventListener('load', () => {
-            // Esperar un momento para dar tiempo a que se dispare el evento beforeinstallprompt
-            setTimeout(() => {
-                if (!deferredPrompt && !checkInstallationStatus()) {
-                    console.log('Mostrando botón de instalación manual');
-                    showInstallPromotion();
-                }
-            }, 3000);
-        });
-
-        // Función para instalar la aplicación
-        function installApp() {
-            if (deferredPrompt) {
-                console.log('Mostrando prompt de instalación');
-                // Mostrar el prompt de instalación
-                deferredPrompt.prompt();
-                // Esperar a que el usuario responda al prompt
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuario aceptó la instalación');
-                        // Ocultar el botón después de la instalación
-                        if (installButtonContainer) {
-                            installButtonContainer.style.display = 'none';
-                        }
-                    } else {
-                        console.log('Usuario rechazó la instalación');
-                    }
-                    // Limpiar el deferredPrompt
-                    deferredPrompt = null;
-                    // Ocultar el modal de instalación
-                    closeInstallModal();
-                });
-            } else {
-                // Si no hay deferredPrompt, redirigir a la documentación de instalación
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                if (isIOS) {
-                    // Instrucciones para iOS
-                    alert('Para instalar esta aplicación en iOS, toca el botón compartir y luego "Añadir a la pantalla de inicio"');
-                } else {
-                    // Instrucciones para Android/otros
-                    alert('Para instalar esta aplicación, por favor usa el menú de opciones de tu navegador.');
-                }
-            }
-        }
-
-        // Cerrar el modal
-        function closeInstallModal() {
-            if (installModal) {
-                installModal.classList.add('hidden');
-            }
-        }
     </script>
     @stack('scripts')
 </head>

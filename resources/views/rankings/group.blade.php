@@ -106,4 +106,6 @@
             </div>
         </div>
     </div>
+<x-feedback-modal />
+
 </x-app-layout>

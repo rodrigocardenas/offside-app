@@ -141,4 +141,7 @@
         });
     </script>
     @endpush
+
+<x-feedback-modal />
+
 </x-app-layout>

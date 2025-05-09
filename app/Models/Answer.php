@@ -15,8 +15,9 @@ class Answer extends Model
         'question_option_id',
         'group_id',
         'is_correct',
-        'points',
-        'option_id'
+        'points_earned',
+        'option_id',
+        'category',
     ];
 
     protected $casts = [
