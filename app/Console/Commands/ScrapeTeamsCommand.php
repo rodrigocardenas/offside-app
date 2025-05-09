@@ -18,11 +18,13 @@ class ScrapeTeamsCommand extends Command
             'name' => 'La Liga',
             'url' => 'https://www.transfermarkt.es/laliga/startseite/wettbewerb/ES1',
             'selector' => '.items tbody tr .no-border-links a',
+            'is_champions' => false
         ],
         'premier' => [
             'name' => 'Premier League',
             'url' => 'https://www.transfermarkt.es/premier-league/startseite/wettbewerb/GB1',
             'selector' => '.items tbody tr .no-border-links a',
+            'is_champions' => false
         ],
         'champions' => [
             'name' => 'Champions League',

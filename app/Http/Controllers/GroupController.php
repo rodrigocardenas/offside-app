@@ -227,10 +227,12 @@ class GroupController extends Controller
         // Verificar respuestas del usuario
         $userAnswers = auth()->user()->answers()
             ->whereIn('question_id', $matchQuestions->pluck('id'))
+            ->where('user_id', auth()->id())
             ->when($socialQuestion, function ($query) use ($socialQuestion) {
-                $query->orWhere('question_id', $socialQuestion->id);
+                $query->orWhere('question_id', $socialQuestion->id)->where('user_id', auth()->id());
             })
             ->pluck('option_id', 'question_id');
+        // dd($userAnswers->user_id);
 
         // Marcar preguntas como disabled según el estado del partido
         $matchQuestions->each(function ($question) {
