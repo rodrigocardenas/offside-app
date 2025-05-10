@@ -56,7 +56,7 @@
                                                     @if($question->is_disabled)
                                                         Pregunta deshabilitada
                                                     @elseif($question->available_until > now())
-                                                        Disponible hasta: {{ $question->available_until->timezone('Europe/Madrid')->format('d/m/Y H:i') }}
+                                                        <!-- Disponible hasta: {{ $question->available_until->timezone('Europe/Madrid')->format('d/m/Y H:i') }} -->
                                                     @else
                                                         Partido finalizado
                                                     @endif
