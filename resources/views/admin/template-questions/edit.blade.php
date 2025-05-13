@@ -15,15 +15,15 @@
                     <form action="{{ route('admin.template-questions.update', $templateQuestion) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="mb-4">
                             <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Tipo de Pregunta
                             </label>
-                            <select name="type" id="type" 
+                            <select name="type" id="type"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     required
-                                    {{ $templateQuestion->type === 'social' ? 'disabled' : '' }}>
+                                    {{ $templateQuestion->type === 'social' ? 'readonly' : '' }}>
                                 <option value="predictive" {{ $templateQuestion->type === 'predictive' ? 'selected' : '' }}>Predictiva</option>
                                 <option value="social" {{ $templateQuestion->type === 'social' ? 'selected' : '' }}>Social</option>
                             </select>
@@ -51,6 +51,24 @@
                         </div>
 
                         <div class="mb-4">
+                            <label for="competition_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Competencia
+                            </label>
+                            <select name="competition_id" id="competition_id"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="" {{ old('competition_id', $templateQuestion->competition_id) == '' ? 'selected' : '' }}>Sin Competencia</option>
+                                @foreach($competitions as $competition)
+                                    <option value="{{ $competition->id }}" {{ old('competition_id', $templateQuestion->competition_id) == $competition->id ? 'selected' : '' }}>
+                                        {{ $competition->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('competition_id')
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Opciones (solo para preguntas predictivas)
                             </label>
@@ -59,13 +77,13 @@
                                     @foreach(old('options', $templateQuestion->options) as $index => $option)
                                         <div class="flex items-center mb-2 option-item">
                                             <input type="hidden" name="options[{{ $index }}][id]" value="{{ $option['id'] ?? '' }}">
-                                            <input type="text" 
-                                                   name="options[{{ $index }}][text]" 
+                                            <input type="text"
+                                                   name="options[{{ $index }}][text]"
                                                    placeholder="usa variables home_team y away_team"
                                                    value="{{ $option['text'] ?? '' }}"
                                                    class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                    required>
-                                            <button type="button" 
+                                            <button type="button"
                                                     class="remove-option ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200">
                                                 <i class="fas fa-times"></i>
                                             </button>
@@ -73,7 +91,7 @@
                                     @endforeach
                                 @endif
                             </div>
-                            <button type="button" 
+                            <button type="button"
                                     id="add-option-btn"
                                     class="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 <i class="fas fa-plus mr-1"></i> Agregar Opción
@@ -94,6 +112,20 @@
                             </div>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                 Las preguntas destacadas se mostrarán de manera especial en la aplicación móvil.
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" name="used_at" id="used_at" value="1"
+                                       class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600"
+                                       {{ $templateQuestion->used_at ? 'checked' : '' }}>
+                                <label for="used_at" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                    ¿Pregunta ya utilizada?
+                                </label>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Marca esta casilla si la pregunta ya ha sido utilizada.
                             </p>
                         </div>
 
@@ -124,63 +156,63 @@
     <script>
         $(document).ready(function() {
             console.log('Edit view script loaded');
-            
+
             const $optionsContainer = $('#options-container');
             const $addButton = $('#add-option-btn');
             const $questionType = $('select[name="type"]');
             const $optionsSection = $optionsContainer.closest('.mb-4');
             let optionCount = {{ $templateQuestion->type === 'predictive' ? count(old('options', $templateQuestion->options)) : 0 }};
-            
+
             // Initialize options visibility based on question type
             function toggleOptionsVisibility() {
                 const isPredictive = $questionType.val() === 'predictive';
                 $optionsSection.toggle(isPredictive);
-                
+
                 // If switching to predictive and no options exist, add one
                 if (isPredictive && $optionsContainer.children().length === 0) {
                     $optionsContainer.append(createOptionElement());
                 }
             }
-            
+
             // Create a new option element
             function createOptionElement() {
                 const optionIndex = optionCount++;
                 const optionHtml = `
                     <div class="flex items-center mb-2 option-item">
-                        <input type="text" 
-                               name="options[${optionIndex}][text]" 
+                        <input type="text"
+                               name="options[${optionIndex}][text]"
                                placeholder="usa variables home_team y away_team"
                                class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                required>
-                        <button type="button" 
+                        <button type="button"
                                 class="remove-option ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                 `;
-                
+
                 const $optionElement = $(optionHtml);
-                
+
                 // Add event listener for the remove button
                 $optionElement.find('.remove-option').on('click', function() {
                     $(this).closest('.option-item').remove();
                 });
-                
+
                 return $optionElement;
             }
-            
+
             // Add new option when button is clicked
             $addButton.on('click', function(e) {
                 e.preventDefault();
                 $optionsContainer.append(createOptionElement());
             });
-            
+
             // Initialize visibility based on current selection
             toggleOptionsVisibility();
-            
+
             // Add event listener for question type change (in case it's not disabled)
             $questionType.on('change', toggleOptionsVisibility);
-            
+
             // Add event listeners for existing remove buttons
             $('.remove-option').on('click', function() {
                 $(this).closest('.option-item').remove();

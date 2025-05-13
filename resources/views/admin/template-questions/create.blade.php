@@ -4,8 +4,8 @@
         .hidden { display: none; }
     </style>
     @endpush
-    
-    
+
+
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -20,12 +20,12 @@
                 <div class="p-6">
                     <form action="{{ route('admin.template-questions.store') }}" method="POST">
                         @csrf
-                        
+
                         <div class="mb-4">
                             <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Tipo de Pregunta
                             </label>
-                            <select name="type" id="type" 
+                            <select name="type" id="type"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     required>
                                 <option value="predictive" {{ old('type') == 'predictive' ? 'selected' : '' }}>Predictiva</option>
@@ -50,13 +50,31 @@
                         </div>
 
                         <div class="mb-4">
+                            <label for="competition_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Competencia
+                            </label>
+                            <select name="competition_id" id="competition_id"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="" {{ old('competition_id') == '' ? 'selected' : '' }}>Sin Competencia</option>
+                                @foreach($competitions as $competition)
+                                    <option value="{{ $competition->id }}" {{ old('competition_id') == $competition->id ? 'selected' : '' }}>
+                                        {{ $competition->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('competition_id')
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Opciones (solo para preguntas predictivas)
                             </label>
                             <div id="options-container">
                                 <!-- Options will be added here by JavaScript -->
                             </div>
-                            <button type="button" 
+                            <button type="button"
                                     id="add-option-btn"
                                     class="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 <i class="fas fa-plus mr-1"></i> Agregar Opción
@@ -101,77 +119,77 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
        console.log('Script loaded');
-       
+
        function initOptions() {
            console.log('Initializing options...');
-           
+
            const $optionsContainer = $('#options-container');
            const $addButton = $('#add-option-btn');
            const $questionType = $('select[name="type"]');
            const $optionsSection = $optionsContainer.closest('.mb-4');
            let optionCount = 0;
-       
+
            if ($optionsContainer.length === 0 || $addButton.length === 0 || $questionType.length === 0) {
                console.error('Required elements not found');
                return;
            }
-       
+
            console.log('Elements found, setting up...');
-       
+
            function toggleOptionsVisibility() {
                const isPredictive = $questionType.val() === 'predictive';
                $optionsSection.toggle(isPredictive);
-               
+
                // If switching to predictive and no options exist, add one
                if (isPredictive && $optionsContainer.children().length === 0) {
                    $optionsContainer.append(createOptionElement());
                }
            }
-       
+
            function createOptionElement() {
                console.log('Creating new option element');
                const optionIndex = optionCount++;
                const optionHtml = `
                    <div class="flex items-center mb-2 option-item">
-                       <input type="text" 
-                              name="options[${optionIndex}][text]" 
+                       <input type="text"
+                              name="options[${optionIndex}][text]"
                               placeholder="usa variables home_team y away_team"
                               class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                               >
-                       <button type="button" 
+                       <button type="button"
                                class="remove-option ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200">
                            <i class="fas fa-times"></i>
                        </button>
                    </div>
                `;
-               
+
                const $optionElement = $(optionHtml);
-               
+
                // Add event listener for the remove button
                $optionElement.find('.remove-option').on('click', function() {
                    console.log('Remove button clicked');
                    $(this).closest('.option-item').remove();
                });
-               
+
                return $optionElement;
            }
-       
+
            // Add event listener for question type change
            $questionType.on('change', toggleOptionsVisibility);
-       
+
            // Add new option when button is clicked
            $addButton.on('click', function(e) {
                console.log('Add button clicked');
                e.preventDefault();
                $optionsContainer.append(createOptionElement());
            });
-       
+
            // Initialize visibility based on current selection
            toggleOptionsVisibility();
-       
+
            console.log('Initialization complete');
        }
-       
+
        // Initialize when document is ready
        $(document).ready(initOptions);
     </script>

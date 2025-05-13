@@ -20,7 +20,7 @@
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                             </svg>
-                            {{ $group->competition->name }} 
+                            {{ $group->competition->name }}
                             @if($group->competition->country)
                                 ({{ $group->competition->country }})
                             @endif
@@ -56,7 +56,7 @@
                                                     @if($question->is_disabled)
                                                         Pregunta deshabilitada
                                                     @elseif($question->available_until > now())
-                                                        <!-- Disponible hasta: {{ $question->available_until->timezone('Europe/Madrid')->format('d/m/Y H:i') }} -->
+                                                        Disponible hasta: {{ $question->available_until->timezone('Europe/Madrid')->format('d/m/Y H:i') }}
                                                     @else
                                                         Partido finalizado
                                                     @endif
@@ -96,7 +96,7 @@
                                                                             $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
                                                                             $color = $colors[array_rand($colors)];
                                                                         @endphp
-                                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm" 
+                                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
                                                                              title="{{ $answer->user->name }}">
                                                                             {{ $initials }}
                                                                         </div>
@@ -109,14 +109,14 @@
                                                 @endif
                                                 <!-- Like/Dislike Buttons -->
                                                 <div class="flex justify-end space-x-4 mt-4">
-                                                    <button type="button" 
+                                                    <button type="button"
                                                             class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
                                                             data-question-id="{{ $question->id }}"
                                                             data-template-question-id="{{ $question->template_question_id }}">
                                                         <i class="fas fa-thumbs-up mr-1"></i>
                                                         <!-- <span class="like-count">{{ $question->templateQuestion->likes ?? 0 }}</span> -->
                                                     </button>
-                                                    <button type="button" 
+                                                    <button type="button"
                                                             class="dislike-btn flex items-center text-red-500 hover:text-red-400 transition-colors"
                                                             data-question-id="{{ $question->id }}"
                                                             data-template-question-id="{{ $question->template_question_id }}">
@@ -198,7 +198,7 @@
                                                                             $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
                                                                             $color = $colors[array_rand($colors)];
                                                                         @endphp
-                                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm" 
+                                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
                                                                              title="{{ $answer->user->name }}">
                                                                             {{ $initials }}
                                                                         </div>
@@ -207,19 +207,19 @@
                                                             </div>
                                                         </div>
                                                     @endforeach
-                                      
+
                                     </div>
                                 @endif
                                  <!-- Like/Dislike Buttons -->
                                  <div class="flex justify-end space-x-4 mt-4">
-                                                    <button type="button" 
+                                                    <button type="button"
                                                             class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
                                                             data-question-id="{{ $question->id }}"
                                                             data-template-question-id="{{ $question->template_question_id }}">
                                                         <i class="fas fa-thumbs-up mr-1"></i>
                                                         <!-- <span class="like-count">{{ $question->templateQuestion->likes ?? 0 }}</span> -->
                                                     </button>
-                                                    <button type="button" 
+                                                    <button type="button"
                                                             class="dislike-btn flex items-center text-red-500 hover:text-red-400 transition-colors"
                                                             data-question-id="{{ $socialQuestion->id }}">
                                                         <i class="fas fa-thumbs-down mr-1"></i>
@@ -262,15 +262,20 @@
                             @endforeach
                         </div>
                         <div class="p-4 border-t border-offside-primary">
-                            <form action="{{ route('chat.store', $group) }}" method="POST" class="flex space-x-2">
+                            <form action="{{ route('chat.store', $group) }}" method="POST" class="flex items-center w-full space-x-2">
                                 @csrf
-                                <input type="text"
-                                    name="message"
-                                    class="flex-1 bg-offside-primary bg-opacity-40 border-0 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-offside-secondary px-4 py-2"
-                                    placeholder="Escribe un mensaje..."
-                                    required>
-                                <button type="submit" class="bg-offside-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
-                                    Enviar
+                                <div class="flex-1">
+                                    <input type="text"
+                                           name="message"
+                                           class="w-full bg-offside-primary bg-opacity-40 border-0 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-offside-secondary px-4 py-2"
+                                           placeholder="Escribe un mensaje..."
+                                           required>
+                                </div>
+                                <button type="submit"
+                                        title="Enviar mensaje"
+                                        class="bg-offside-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center">
+                                    <span class="hidden sm:block">Enviar</span>
+                                    <i class="fas fa-paper-plane sm:hidden"></i>
                                 </button>
                             </form>
                         </div>
@@ -364,7 +369,7 @@
         </div>
     </div>
 
-   
+
 </x-app-layout>
 <style>
                         .hide-scrollbar::-webkit-scrollbar {
@@ -425,11 +430,11 @@
                 const questionId = this.dataset.questionId;
                 const templateQuestionId = this.dataset.templateQuestionId;
                 const isLike = this.classList.contains('like-btn');
-                
+
                 // Animación de pulso
                 button.style.transform = 'scale(1.2)';
                 button.style.transition = 'transform 0.2s ease-out';
-                
+
                 // Restaurar transformación después de la animación
                 setTimeout(() => {
                     button.style.transform = 'scale(1)';
@@ -477,7 +482,7 @@
         // Abrir modal
         $('#openFeedbackModal').on('click', function(e) {
             console.log('Open feedback modal clicked');
-            
+
             e.preventDefault();
             $('#feedbackModal').removeClass('hidden');
         });
@@ -490,7 +495,7 @@
         // Enviar formulario
         $('#feedbackForm').on('submit', function(e) {
             e.preventDefault();
-            
+
             $.ajax({
                 url: '{{ route("feedback.store") }}',
                 method: 'POST',
@@ -503,11 +508,11 @@
                 error: function(xhr) {
                     const errors = xhr.responseJSON.errors;
                     let errorMessage = 'Por favor, corrige los siguientes errores:\n';
-                    
+
                     for (const field in errors) {
                         errorMessage += `- ${errors[field][0]}\n`;
                     }
-                    
+
                     alert(errorMessage);
                 }
             });
@@ -518,7 +523,7 @@
             }, 500);
         });
         console.log('Document ready');
-        
+
         // Handle like button click
         $(document).on('click', '.like-btn', function(e) {
             e.preventDefault();
@@ -539,7 +544,7 @@
         function handleReaction(questionId, templateQuestionId, type) {
             const url = '/questions/' + templateQuestionId + '/react';
             const token = $('meta[name="csrf-token"]').attr('content');
-            
+
             $.ajax({
                 url: url,
                 type: 'POST',

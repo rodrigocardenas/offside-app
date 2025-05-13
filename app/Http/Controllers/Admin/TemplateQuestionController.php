@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\TemplateQuestion;
+use App\Models\Competition;
 use Illuminate\Http\Request;
 
 class TemplateQuestionController extends Controller
@@ -22,7 +23,8 @@ class TemplateQuestionController extends Controller
      */
     public function create()
     {
-        return view('admin.template-questions.create');
+        $competitions = Competition::all(); // Obtener todas las competencias
+        return view('admin.template-questions.create', compact('competitions'));
     }
 
     /**
@@ -36,13 +38,15 @@ class TemplateQuestionController extends Controller
             'is_featured' => 'sometimes|boolean',
             'options' => 'required_if:type,predictive|array|min:2',
             'options.*.text' => 'required_if:type,predictive|string|max:255',
+            'competition_id' => 'nullable|exists:competitions,id', // Validar competencia
         ]);
 
         $templateQuestion = TemplateQuestion::create([
             'type' => $validated['type'],
             'text' => $validated['text'],
             'is_featured' => $validated['is_featured'] ?? false,
-            'options' => $validated['options'] ?? []
+            'options' => $validated['options'] ?? [],
+            'competition_id' => $validated['competition_id'], // Guardar competencia
         ]);
 
         return redirect()->route('admin.template-questions.index')
@@ -54,7 +58,8 @@ class TemplateQuestionController extends Controller
      */
     public function edit(TemplateQuestion $templateQuestion)
     {
-        return view('admin.template-questions.edit', compact('templateQuestion'));
+        $competitions = Competition::all(); // Obtener todas las competencias
+        return view('admin.template-questions.edit', compact('templateQuestion', 'competitions'));
     }
 
     /**
@@ -68,18 +73,17 @@ class TemplateQuestionController extends Controller
             'is_featured' => 'sometimes|boolean',
             'options' => 'required_if:type,predictive|array|min:2',
             'options.*.text' => 'required_if:type,predictive|string|max:255',
+            'competition_id' => 'nullable|exists:competitions,id', // Validar competencia
+            'used_at' => 'sometimes|boolean', // Validar si se marcó como usada
         ]);
-
-        // retornar con mensaje de error si no se valida
-        if ($validated['type'] === 'predictive' && count($validated['options']) < 2) {
-            return redirect()->back()->with('error', 'Debes agregar al menos 2 opciones para la pregunta predictiva');
-        }
 
         $templateQuestion->update([
             'type' => $validated['type'],
             'text' => $validated['text'],
             'is_featured' => $validated['is_featured'] ?? false,
-            'options' => $validated['options'] ?? []
+            'options' => $validated['options'] ?? [],
+            'competition_id' => $validated['competition_id'], // Actualizar competencia
+            'used_at' => $request->has('used_at') ? now() : null, // Marcar como usada o no
         ]);
 
         return redirect()->route('admin.template-questions.index')

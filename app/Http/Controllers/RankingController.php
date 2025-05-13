@@ -13,7 +13,11 @@ class RankingController extends Controller
     public function groupRanking(Group $group)
     {
         $rankings = $group->users()
-            ->withSum('answers as total_points', 'points_earned')
+            ->withSum(['answers as total_points' => function ($query) use ($group) {
+                $query->whereHas('question', function ($questionQuery) use ($group) {
+                    $questionQuery->where('group_id', $group->id);
+                });
+            }], 'points_earned')
             ->orderByDesc('total_points')
             ->get();
 
