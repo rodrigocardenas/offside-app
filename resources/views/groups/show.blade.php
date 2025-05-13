@@ -1,44 +1,46 @@
 <x-app-layout>
+    {{-- setear en el navigation el yield navigation-title: --}}
+    @section('navigation-title', $group->name)
     <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6 pb-24">
+        {{-- AGREGAR una línea horizontal con los 3 primeros usuarios del ranking (fixed y marquee) --}}
+
         <!-- Botón para volver -->
-        <div class="max-w-4xl mx-auto mb-4">
+        {{-- <div class="max-w-4xl mx-auto mb-4">
             <a href="{{ route('groups.index') }}" class="inline-flex items-center text-offside-light hover:text-white transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 Volver a grupos
             </a>
-        </div>
+        </div> --}}
 
         <!-- Encabezado del grupo -->
-        <div class="max-w-4xl mx-auto mb-8">
-            <div class="bg-offside-primary rounded-lg p-4 mb-8">
-                <h1 class="text-2xl font-bold text-center">Grupo "{{ $group->name }}"</h1>
-                @if($group->competition)
-                    <div class="text-center mt-2 text-offside-light">
-                        <span class="inline-flex items-center">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                            </svg>
-                            {{ $group->competition->name }}
-                            @if($group->competition->country)
-                                ({{ $group->competition->country }})
-                            @endif
-                        </span>
-                    </div>
-                @endif
-            </div>
 
+
+        <div class="bg-offside-primary bg-opacity-70 p-1 mb-4 mt-8 fixed top-0 left-0 right-0 w-full" style="z-index: 1000;">
+            <marquee behavior="scroll" direction="left" scrollamount="5">
+                @foreach($group->users->sortByDesc('points')->take(3) as $index => $user)
+                    <span class="font-bold
+                        @if($index === 0) text-yellow-400 @elseif($index === 1) text-gray-300 @elseif($index === 2) text-yellow-500 @endif">
+                        @if($index === 0) 🥇 @elseif($index === 1) 🥈 @elseif($index === 2) 🥉 @endif
+                        {{ $user->name }} ({{ $user->points }} puntos)
+                    </span>
+                    @if(!$loop->last)
+                        <span class="mx-2">|</span>
+                    @endif
+                @endforeach
+            </marquee>
+        </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
 
                     <!-- Preguntas de Partidos -->
-                    <div class="bg-offside-dark rounded-lg p-6">
-                        <h2 class="text-xl font-bold mb-2">
+                    <div class="bg-offside-dark rounded-lg p-6 mt-10">
+                        <h2 class="text-sm font-bold mb-2">
                             @if($currentMatchday)
                                 JORNADA {{ $currentMatchday }}
                             @else
-                                PRÓXIMOS PARTIDOS
+                                PREGUNTAS DE LA JORNADA
                             @endif
                         </h2>
                         {{-- <h3 class="text-lg mb-6">Responde las preguntas de los próximos partidos:</h3> --}}
@@ -56,7 +58,7 @@
                                                     @if($question->is_disabled)
                                                         Pregunta deshabilitada
                                                     @elseif($question->available_until > now())
-                                                        Disponible hasta: {{ $question->available_until->timezone('Europe/Madrid')->format('d/m/Y H:i') }}
+                                                        Finaliza en: <span class="countdown" data-time="{{ $question->available_until->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
                                                     @else
                                                         Partido finalizado
                                                     @endif
@@ -145,19 +147,17 @@
                     <!-- Pregunta Social -->
                     @if($group->users->count() >= 2)
                         @if($socialQuestion)
-                        <div class="bg-offside-dark rounded-lg p-6 mt-8">
+                        <div class="bg-offside-dark rounded-lg p-6 mt-1">
                             <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-xl font-bold">Pregunta del Día</h2>
-                                <span class="text-sm text-offside-light">
-                                    Disponible hasta: {{ $socialQuestion->available_until->format('d/m/Y H:i') }}
-                                </span>
+                                <h2 class="text-sm font-bold">PREGUNTA DEL DÍA</h2>
                             </div>
 
                             <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6">
                                 <div class="mb-4">
                                     <h3 class="text-xl mb-2">{{ $socialQuestion->title }}</h3>
                                     @if($socialQuestion->description)
-                                        <p class="text-sm text-offside-light">{{ $socialQuestion->description }}</p>
+                                        <p class="text-sm text-offside-light">Finaliza en: <span class="countdown" data-time="{{ $question->available_until->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
+                                        </p>
                                     @endif
                                 </div>
 
@@ -244,7 +244,7 @@
 
                 <!-- Chat del Grupo -->
                 <div id="chatSection" class="bg-offside-dark rounded-lg p-6">
-                    <h2 class="text-xl font-bold mb-4">Chat del Grupo</h2>
+                    {{-- <h2 class="text-xl font-bold mb-4">Chat del {{ $group->name }}</h2> --}}
                     <div class="bg-offside-primary bg-opacity-20 rounded-lg h-[300px] flex flex-col">
                         <div class="flex-1 p-4 overflow-y-auto space-y-4">
                             @foreach($group->chatMessages()->with('user')->latest()->get() as $message)
@@ -567,6 +567,36 @@
                 }
             });
         }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const countdownElements = document.querySelectorAll('.countdown');
+
+        countdownElements.forEach(element => {
+            const endTime = new Date(element.dataset.time).getTime();
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const timeLeft = endTime - now;
+
+                if (timeLeft <= 0) {
+                    element.textContent = 'Tiempo agotado';
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                element.textContent = `${days > 0 ? days + 'd ' : ''}${hours}h ${minutes}m ${seconds}s`;
+            }
+
+            // Actualizar cada segundo
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
     });
 </script>
 

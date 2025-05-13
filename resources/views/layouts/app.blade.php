@@ -27,7 +27,7 @@
             // Verificar si la aplicación ya está instalada
             function checkInstallationStatus() {
                 // Para navegadores móviles
-                if (window.matchMedia('(display-mode: standalone)').matches) {
+                if (window.matchMedia('(display-mode: fullscreen)').matches) {
                     console.log('La aplicación ya está instalada');
                     return true;
                 }
@@ -136,9 +136,9 @@
             </div>
         @endauth
         {{ $slot }}
-    
+
     @stack('styles')
-    
+
     <!-- Modal de instalación -->
     <div id="installModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-offside-dark rounded-lg p-6 max-w-md w-full mx-4">
@@ -161,11 +161,11 @@
             </div>
         </div>
     </div>
-    
+
     @stack('modals')
     @livewireScripts
     <script src="{{ asset('sw-update.js') }}"></script>
-    
+
     <script>
         // Manejar clic en el botón de instalación de la barra de navegación
         document.addEventListener('DOMContentLoaded', function() {
@@ -175,7 +175,7 @@
                     installApp();
                 });
             }
-            
+
             // Ocultar el botón si la aplicación ya está instalada
             if (window.matchMedia('(display-mode: standalone)').matches) {
                 const installButtonContainer = document.getElementById('installButtonContainer');
