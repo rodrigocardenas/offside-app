@@ -161,7 +161,8 @@
                                 </div>
 
                                 @php
-                                    $userHasAnswered = isset($userAnswers[$socialQuestion->id]);
+                                    $userHasAnswered = $socialQuestion->answers->where('user_id', auth()->user()->id)->first();
+
                                 @endphp
 
                                 @if(!$userHasAnswered && $socialQuestion->available_until > now())
