@@ -103,11 +103,6 @@ class GroupController extends Controller
 
         $group->users()->attach(auth()->id());
 
-        // Si el grupo tiene una competición asociada, generamos una pregunta predictiva
-        // if ($group->competition) {
-        //     $this->createPredictiveQuestion($group);
-        // }
-
         return redirect()->route('groups.show', $group)
             ->with('success', 'Grupo creado exitosamente.');
     }
@@ -115,10 +110,8 @@ class GroupController extends Controller
     protected function createPredictiveQuestion(Group $group)
     {
         try {
-            // Obtener los próximos partidos de la base de datos
             $matches = FootballMatch::where('league', $group->competition->type)
                 ->where('status', 'Not Started')
-                // dentro de los próximos 7 días
                 ->where('date', '>=', now())
                 ->where('date', '<=', now()->addDays(7))
                 ->orderBy('is_featured', 'desc')
@@ -135,7 +128,6 @@ class GroupController extends Controller
 
             $competitionType = $group->competition->type;
             $matchesData = collect($matches)->map(function($match) use ($competitionType) {
-                // Validar que el partido tenga los datos necesarios
                 if (!isset($match['id']) || !isset($match['home_team']) || !isset($match['away_team'])) {
                     Log::warning('Partido con datos incompletos:', ['match' => $match]);
                     return null;
@@ -169,24 +161,28 @@ class GroupController extends Controller
 
     public function show(Group $group, FootballService $service)
     {
-        // Verificar que el usuario pertenece al grupo
+        $group->load(['competition', 'users' => function ($query) use ($group) {
+            $query->withSum(['answers as total_points' => function ($query) use ($group) {
+                $query->whereHas('question', function ($questionQuery) use ($group) {
+                    $questionQuery->where('group_id', $group->id);
+                });
+            }], 'points_earned');
+        }, 'chatMessages.user']);
+        // dd($group->users->pluck('total_points'));
+
         if (!$group->users()->where('user_id', auth()->id())->exists()) {
             return redirect()->route('dashboard')->with('error', 'No tienes acceso a este grupo.');
         }
 
-        // Obtener una pregunta social aleatoria que esté disponible por 24 horas
         $socialQuestion = Question::where('type', 'social')
             ->where('group_id', $group->id)
             ->where('available_until', '>', now())
-            // ->where('available_until', '<', now()->addDay())
-            ->with(['answers.user', 'options'])
+            ->with(['answers.user', 'answers.option', 'options'])
             ->inRandomOrder()
             ->first();
 
-        // si el grupo tiene solo 2 miembros o menos, volver a generar las opciones
-        if ($group->users()->count() <= 3 && $socialQuestion) {
-            // $socialQuestion->options()->delete();
-            foreach ($group->users()->get() as $user) {
+        if ($group->users->count() <= 4 && $socialQuestion) {
+            foreach ($group->users as $user) {
                 QuestionOption::updateOrCreate([
                     'question_id' => $socialQuestion->id,
                     'text' => $user->name,
@@ -201,14 +197,11 @@ class GroupController extends Controller
         $currentMatchday = null;
 
         if ($group->competition) {
-            // Obtener las preguntas de los partidos
             $matchQuestions = Question::where('type', 'predictive')
                 ->where('group_id', $group->id)
-                // ->where('available_until', '>', now())
                 ->with(['options', 'answers.user', 'answers.option'])
                 ->get();
 
-            // Si no hay preguntas, generar nuevas
             if ($matchQuestions->isEmpty()) {
                 $createdQuestions = $this->createPredictiveQuestion($group);
                 if ($createdQuestions) {
@@ -216,25 +209,17 @@ class GroupController extends Controller
                 }
                 $socialQuestion = $createdQuestions->where('type', 'social')->first();
             }
-
-
         }
 
-        // Asegurar que no hay duplicados y limitar a 5 preguntas
         $matchQuestions = $matchQuestions->unique('id')->take(5);
-        Log::info('Total de preguntas finales:', ['count' => $matchQuestions->count()]);
 
-        // Verificar respuestas del usuario
         $userAnswers = auth()->user()->answers()
             ->whereIn('question_id', $matchQuestions->pluck('id'))
-            ->where('user_id', auth()->id())
             ->when($socialQuestion, function ($query) use ($socialQuestion) {
-                $query->orWhere('question_id', $socialQuestion->id)->where('user_id', auth()->id());
+                $query->orWhere('question_id', $socialQuestion->id);
             })
             ->pluck('option_id', 'question_id');
-        // dd($userAnswers->user_id);
 
-        // Marcar preguntas como disabled según el estado del partido
         $matchQuestions->each(function ($question) {
             if ($question->football_match) {
                 $question->is_disabled = $question->football_match->status !== 'Not Started';
@@ -250,13 +235,11 @@ class GroupController extends Controller
     {
         $questions = collect();
 
-        // Verificar que tenemos los datos necesarios del partido
         if (!isset($match['id']) || !isset($match['home_team']) || !isset($match['away_team'])) {
             Log::error('Datos de partido incompletos:', ['match' => $match]);
             return $questions;
         }
 
-        // Preparar datos del partido para OpenAI
         $matchData = [
             'id' => $match['id'],
             'home_team' => is_array($match['home_team']) ? $match['home_team']['name'] : $match['home_team'],
@@ -283,7 +266,6 @@ class GroupController extends Controller
                     continue;
                 }
 
-                // Asegurarnos de que la fecha sea válida
                 $availableUntil = null;
                 try {
                     if (isset($matchData['date']) && $matchData['date'] !== 'Fecha del partido') {
@@ -337,7 +319,7 @@ class GroupController extends Controller
         }
 
         auth()->user()->groups()->detach($group->id);
-        
+
         return redirect()->route('groups.index')->with('success', 'Has abandonado el grupo exitosamente');
     }
 
@@ -345,13 +327,11 @@ class GroupController extends Controller
     {
         $group = Group::where('code', $code)->firstOrFail();
 
-        // Verificar si el usuario ya está en el grupo
         if ($group->users()->where('user_id', auth()->id())->exists()) {
             return redirect()->route('groups.show', $group)
                 ->with('info', 'Ya eres miembro de este grupo.');
         }
 
-        // Agregar usuario al grupo
         $group->users()->attach(auth()->id());
 
         return redirect()->route('groups.show', $group)
@@ -385,19 +365,13 @@ class GroupController extends Controller
 
     protected function createSocialQuestion(Group $group)
     {
-        // Cargar los usuarios del grupo
         $group->load('users');
 
-        // Verificar que el grupo tenga más de un miembro
         if ($group->users->count() < 2) {
             return null;
         }
 
-        // Buscar una pregunta social que no haya sido respondida por ningún usuario del grupo
         $socialQuestion = Question::where('type', 'social')
-            // ->whereDoesntHave('answers', function($query) use ($group) {
-            //     $query->whereIn('user_id', $group->users->pluck('id'));
-            // })
             ->latest()
             ->first();
 
@@ -405,17 +379,15 @@ class GroupController extends Controller
             return null;
         }
 
-        // Crear una copia de la pregunta específica para este grupo
         $groupQuestion = Question::create([
             'title' => $socialQuestion->title,
             'description' => $socialQuestion->description,
             'type' => 'social',
-            'points' => 0, // Las preguntas sociales no suman puntos
+            'points' => 0,
             'group_id' => $group->id,
             'available_until' => now()->addDay(),
         ]);
 
-        // Crear una opción por cada usuario del grupo
         foreach ($group->users as $user) {
             Option::create([
                 'question_id' => $groupQuestion->id,
@@ -425,7 +397,6 @@ class GroupController extends Controller
             ]);
         }
 
-        // Cargar las relaciones necesarias
         return $groupQuestion->load(['options', 'answers.user']);
     }
 
@@ -469,31 +440,28 @@ class GroupController extends Controller
             'competition' => $group->competition->type,
             'total_matches' => count($matches)
         ]);
-        
-        // Obtener las plantillas disponibles
+
         $predictiveTemplates = \App\Models\TemplateQuestion::where('type', 'predictive')
             ->orderBy('is_featured', 'desc')
             ->orderBy('id')
-            ->take(count($matches)) // Solo necesitamos tantas plantillas como partidos
+            ->take(count($matches))
             ->get();
-            
+
         $socialTemplates = \App\Models\TemplateQuestion::where('type', 'social')
             ->orderBy('is_featured', 'desc')
-            ->first(); // Solo necesitamos una plantilla social
-        
+            ->first();
+
         $questions = collect();
-        
-        // Mezclar los partidos para aleatoriedad, pero mantener los destacados primero
+
         usort($matches, function($a, $b) {
             $aFeatured = $a['is_featured'] ?? false;
             $bFeatured = $b['is_featured'] ?? false;
-            
+
             if ($aFeatured && !$bFeatured) return -1;
             if (!$aFeatured && $bFeatured) return 1;
             return 0;
         });
-        
-        // Asignar una plantilla única a cada partido
+
         foreach ($matches as $index => $match) {
             if (isset($predictiveTemplates[$index])) {
                 $template = $predictiveTemplates[$index];
@@ -503,24 +471,13 @@ class GroupController extends Controller
                 }
             }
         }
-        
-        // Agregar una pregunta social si hay plantillas sociales disponibles
+
         if ($socialTemplates && count($matches) > 0) {
-            // Usar el primer partido para la pregunta social
             $socialQuestion = $this->createQuestionFromTemplate($socialTemplates, $matches[0], $group);
             if ($socialQuestion) {
                 $questions->push($socialQuestion);
             }
         }
-        // Obtener una pregunta social aleatoria
-        // if ($socialTemplates->count() > 0) {
-        //     $socialTemplate = $socialTemplates->random(1);
-        //     // unset this template from the collection
-        //     $question = $this->createQuestionFromTemplate($socialTemplate, $match, $group);
-        //     if ($question) {
-        //         $questions->push($question);
-        //     }
-        // }
 
         return $questions;
     }
@@ -528,7 +485,6 @@ class GroupController extends Controller
     protected function createQuestionFromTemplate($template, $match, $group)
     {
         try {
-            // Verificar que el template sea un objeto
             if (!is_object($template)) {
                 Log::warning('Template no es un objeto:', [
                     'template' => $template,
@@ -537,7 +493,6 @@ class GroupController extends Controller
                 return null;
             }
 
-            // Verificar que el template tenga los campos necesarios
             if (!isset($template->text) || !isset($template->type) || !isset($template->options)) {
                 Log::warning('Template incompleto:', [
                     'template' => $template,
@@ -546,14 +501,12 @@ class GroupController extends Controller
                 return null;
             }
 
-            // Reemplazar placeholders en la pregunta y opciones
             $questionText = str_replace(
                 ['{{home_team}}', '{{away_team}}'],
                 [$match['home_team'], $match['away_team']],
                 $template->text
             );
 
-            // Reemplazar nombres de equipos en las opciones
             $options = collect($template->options)->map(function ($option) use ($match) {
                 if (!isset($option['text'])) {
                     Log::warning('Opción sin texto:', [
@@ -562,7 +515,7 @@ class GroupController extends Controller
                     ]);
                     return null;
                 }
-                
+
                 $optionText = str_replace(
                     ['{{ home_team }}', '{{ away_team }}'],
                     [$match['home_team'], $match['away_team']],
@@ -574,27 +527,24 @@ class GroupController extends Controller
                 ];
             })->filter()->toArray();
 
-            // Si es una pregunta sobre jugadores, obtener la plantilla de ambos equipos
             if (strpos($questionText, 'jugador') !== false) {
                 try {
                     $homeTeamPlayers = $this->footballDataService->getTeamPlayers($match['{{home_team}}']);
                     $awayTeamPlayers = $this->footballDataService->getTeamPlayers($match['{{away_team}}']);
-                    
-                    // Crear opciones con nombres de jugadores aleatorios
+
                     $randomHomeKeys = array_rand($homeTeamPlayers, min(2, count($homeTeamPlayers)));
                     $randomAwayKeys = array_rand($awayTeamPlayers, min(2, count($awayTeamPlayers)));
-                    
+
                     $randomHomeKeys = is_array($randomHomeKeys) ? $randomHomeKeys : [$randomHomeKeys];
                     $randomAwayKeys = is_array($randomAwayKeys) ? $randomAwayKeys : [$randomAwayKeys];
-                    
+
                     $options = [
                         ['text' => $homeTeamPlayers[$randomHomeKeys[0]]['player']['name'] ?? 'Jugador 1', 'is_correct' => false],
                         ['text' => $homeTeamPlayers[$randomHomeKeys[1] ?? $randomHomeKeys[0]]['player']['name'] ?? 'Jugador 2', 'is_correct' => false],
                         ['text' => $awayTeamPlayers[$randomAwayKeys[0]]['player']['name'] ?? 'Jugador 3', 'is_correct' => false],
                         ['text' => $awayTeamPlayers[$randomAwayKeys[1] ?? $randomAwayKeys[0]]['player']['name'] ?? 'Jugador 4', 'is_correct' => false]
                     ];
-                    
-                    // Mezclar las opciones para que no siempre estén en el mismo orden
+
                     shuffle($options);
                 } catch (\Exception $e) {
                     Log::error('Error al obtener jugadores:', [
@@ -604,9 +554,7 @@ class GroupController extends Controller
                     return null;
                 }
             }
-            // dump($competition);
 
-            // Crear la pregunta con las opciones
             $availableUntil = \Carbon\Carbon::parse($match['date'])
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
@@ -624,7 +572,6 @@ class GroupController extends Controller
                 'template_question_id' => $template->id ?? null,
             ];
 
-            // Validar que la pregunta tenga todos los datos necesarios
             if (!isset($questionData['title']) || !isset($questionData['options'])) {
                 Log::warning('Datos de pregunta incompletos:', [
                     'question_data' => $questionData,
@@ -633,8 +580,6 @@ class GroupController extends Controller
                 return null;
             }
 
-            // Crear la pregunta
-            // dump($questionData);
             $question = Question::firstOrCreate([
                 'title' => $questionData['title'],
                 'group_id' => $questionData['group_id'],
@@ -653,7 +598,6 @@ class GroupController extends Controller
             ]);
 
             if ($template->type === 'predictive' && is_array($questionData['options'])) {
-                // Crear las opciones
                 foreach ($questionData['options'] as $option) {
                     QuestionOption::updateOrCreate([
                         'question_id' => $question->id,
@@ -668,9 +612,7 @@ class GroupController extends Controller
             }
 
             if ($template->type === 'social') {
-                // set options with each name of group members
                 $members = $group->users;
-                // dd($members);
                 foreach ($members as $member) {
                     QuestionOption::updateOrCreate([
                         'question_id' => $question->id,
@@ -694,10 +636,9 @@ class GroupController extends Controller
         } catch (\Exception $e) {
             Log::error('Error al crear pregunta desde template:', [
                 'error' => $e->getMessage(),
-                // 'template_id' => $template->id ?? null,
                 'match_id' => $match['id']
             ]);
             return null;
         }
-    }    
+    }
 }

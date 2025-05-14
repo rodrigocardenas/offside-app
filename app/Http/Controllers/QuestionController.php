@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Question;
@@ -53,17 +52,17 @@ class QuestionController extends Controller
         try {
             $reaction = $request->input('reaction');
             $field = $reaction . 's';
-            
+
             // Increment the reaction count
             $question->increment($field);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Reacción guardada correctamente',
                 'likes' => $question->likes,
                 'dislikes' => $question->dislikes
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('Error al guardar la reacción: ' . $e->getMessage());
             return response()->json([
@@ -78,11 +77,11 @@ class QuestionController extends Controller
         if ($question->available_from > Carbon::now() || $question->available_until < Carbon::now()) {
             return back()->with('error', 'No puedes responder a esta pregunta en este momento.');
         }
-        
+
         if ($question->answers()->where('user_id', auth()->id())->exists()) {
             return back()->with('error', 'Ya has respondido a esta pregunta.');
         }
-        
+
         $request->validate([
             'option_id' => 'required',
         ]);
@@ -98,8 +97,7 @@ class QuestionController extends Controller
 
         Log::info('Respuesta guardada: ' . $question->id . ' - ' . $request->option_id);
 
-        return redirect()->route('groups.show', $question->group)
-            ->with('success', '¡Respuesta enviada exitosamente!');
+        return redirect()->route('groups.show', $question->group)->withFragment('question'.$question->id);
     }
 
     public function results(Question $question)

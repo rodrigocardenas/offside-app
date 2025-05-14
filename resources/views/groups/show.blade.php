@@ -20,10 +20,9 @@
         <div class="bg-offside-primary bg-opacity-70 p-1 mb-4 mt-8 fixed top-0 left-0 right-0 w-full" style="z-index: 1000;">
             <marquee behavior="scroll" direction="left" scrollamount="5">
                 @foreach($group->users->sortByDesc('points')->take(3) as $index => $user)
-                    <span class="font-bold
-                        @if($index === 0) text-yellow-400 @elseif($index === 1) text-gray-300 @elseif($index === 2) text-yellow-500 @endif">
+                    <span class="font-bold text-offside-light">
                         @if($index === 0) 🥇 @elseif($index === 1) 🥈 @elseif($index === 2) 🥉 @endif
-                        {{ $user->name }} ({{ $user->points }} puntos)
+                        {{ $user->name }} ({{ $user->total_points ?? 0 }} puntos)
                     </span>
                     @if(!$loop->last)
                         <span class="mx-2">|</span>
@@ -35,7 +34,7 @@
                 <div>
 
                     <!-- Preguntas de Partidos -->
-                    <div class="bg-offside-dark rounded-lg p-6 mt-10">
+                    <div class="bg-offside-dark rounded-lg p-6 mt-16">
                         <h2 class="text-sm font-bold mb-2">
                             @if($currentMatchday)
                                 JORNADA {{ $currentMatchday }}
@@ -48,9 +47,9 @@
                         <!-- Carrusel de preguntas -->
                         <div class="relative">
                             <!-- Contenedor del carrusel con scroll horizontal -->
-                            <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 pb-4">
+                            <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 pb-4" id="predictiveQuestionsCarousel">
                                 @forelse($matchQuestions as $question)
-                                    <div class="snap-center flex-none w-full">
+                                    <div class="snap-center flex-none w-full" id="question{{ $question->id }}">
                                         <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6 {{ $question->is_disabled || $question->available_until < now() ? 'opacity-50' : '' }}">
                                             <div class="mb-4">
                                                 <h4 class="text-xl font-bold mb-2">{{ $question->title }}</h4>
@@ -136,7 +135,7 @@
                             </div>
 
                             <!-- Indicadores de navegación -->
-                            <div class="flex justify-center mt-4 space-x-2">
+                            <div class="flex justify-center mt-1 space-x-2">
                                 @foreach($matchQuestions as $index => $question)
                                     <button class="w-2 h-2 rounded-full bg-offside-light question-indicator" data-index="{{ $index }}"></button>
                                 @endforeach
@@ -212,20 +211,20 @@
                                 @endif
                                  <!-- Like/Dislike Buttons -->
                                  <div class="flex justify-end space-x-4 mt-4">
-                                                    <button type="button"
-                                                            class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
-                                                            data-question-id="{{ $question->id }}"
-                                                            data-template-question-id="{{ $question->template_question_id }}">
-                                                        <i class="fas fa-thumbs-up mr-1"></i>
-                                                        <!-- <span class="like-count">{{ $question->templateQuestion->likes ?? 0 }}</span> -->
-                                                    </button>
-                                                    <button type="button"
-                                                            class="dislike-btn flex items-center text-red-500 hover:text-red-400 transition-colors"
-                                                            data-question-id="{{ $socialQuestion->id }}">
-                                                        <i class="fas fa-thumbs-down mr-1"></i>
-                                                        <!-- <span class="dislike-count">{{ $question->templateQuestion->dislikes ?? 0 }}</span> -->
-                                                    </button>
-                                                </div>
+                                    <button type="button"
+                                            class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
+                                            data-question-id="{{ $question->id }}"
+                                            data-template-question-id="{{ $question->template_question_id }}">
+                                        <i class="fas fa-thumbs-up mr-1"></i>
+                                        <!-- <span class="like-count">{{ $question->templateQuestion->likes ?? 0 }}</span> -->
+                                    </button>
+                                    <button type="button"
+                                            class="dislike-btn flex items-center text-red-500 hover:text-red-400 transition-colors"
+                                            data-question-id="{{ $socialQuestion->id }}">
+                                        <i class="fas fa-thumbs-down mr-1"></i>
+                                        <!-- <span class="dislike-count">{{ $question->templateQuestion->dislikes ?? 0 }}</span> -->
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         @endif
@@ -247,7 +246,7 @@
                     {{-- <h2 class="text-xl font-bold mb-4">Chat del {{ $group->name }}</h2> --}}
                     <div class="bg-offside-primary bg-opacity-20 rounded-lg h-[300px] flex flex-col">
                         <div class="flex-1 p-4 overflow-y-auto space-y-4">
-                            @foreach($group->chatMessages()->with('user')->latest()->get() as $message)
+                            @foreach($group->chatMessages as $message)
                                 <div class="flex items-start space-x-3">
                                     <div class="flex-1">
                                         <div class="bg-offside-primary bg-opacity-40 rounded-lg p-3">

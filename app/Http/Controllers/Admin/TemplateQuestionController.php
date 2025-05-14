@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\TemplateQuestion;
 use App\Models\Competition;
+use App\Models\Question;
 use Illuminate\Http\Request;
 
 class TemplateQuestionController extends Controller
@@ -48,6 +49,13 @@ class TemplateQuestionController extends Controller
             'options' => $validated['options'] ?? [],
             'competition_id' => $validated['competition_id'], // Guardar competencia
         ]);
+
+        // si se agregó la opción con el checkbox "is_correct", se setean los puntos a todas las answers que tengan la pregunta
+        // $questions = Question::where('template_question_id', $templateQuestion->id)->each(function ($question) use ($templateQuestion) {
+        //     $question->answers->update([
+        //         'points' => $validated['is_featured'] ? 400 : 300,
+        //     ]);
+        // });
 
         return redirect()->route('admin.template-questions.index')
             ->with('success', 'Plantilla de pregunta creada correctamente');
