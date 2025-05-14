@@ -20,6 +20,7 @@ class ChatController extends Controller
             'message' => $request->message,
         ]);
 
-        return back()->with('success', 'Mensaje enviado exitosamente.');
+        return back()->withFragment('chatForm');
+
     }
 }

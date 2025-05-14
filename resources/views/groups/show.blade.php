@@ -261,7 +261,7 @@
                             @endforeach
                         </div>
                         <div class="p-4 border-t border-offside-primary">
-                            <form action="{{ route('chat.store', $group) }}" method="POST" class="flex items-center w-full space-x-2">
+                            <form action="{{ route('chat.store', $group) }}" method="POST" class="flex items-center w-full space-x-2" id="chatForm">
                                 @csrf
                                 <div class="flex-1">
                                     <input type="text"
@@ -596,6 +596,13 @@
             updateCountdown();
             setInterval(updateCountdown, 1000);
         });
+
+        const chatContainer = document.querySelector('.overflow-y-auto');
+
+        if (chatContainer) {
+            // Desplazar el contenedor al final
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
     });
 </script>
 
