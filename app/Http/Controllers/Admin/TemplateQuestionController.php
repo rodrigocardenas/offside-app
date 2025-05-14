@@ -47,7 +47,7 @@ class TemplateQuestionController extends Controller
             'text' => $validated['text'],
             'is_featured' => $validated['is_featured'] ?? false,
             'options' => $validated['options'] ?? [],
-            'competition_id' => $validated['competition_id'], // Guardar competencia
+            'competition_id' => $validated['competition_id'] ?? null, // Guardar competencia
         ]);
 
         // si se agregó la opción con el checkbox "is_correct", se setean los puntos a todas las answers que tengan la pregunta
