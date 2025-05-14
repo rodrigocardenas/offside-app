@@ -199,6 +199,7 @@ class GroupController extends Controller
         if ($group->competition) {
             $matchQuestions = Question::where('type', 'predictive')
                 ->where('group_id', $group->id)
+                ->where('available_until', '>', now()->subHours(4))
                 ->with(['options', 'answers.user', 'answers.option'])
                 ->get();
 
@@ -442,12 +443,14 @@ class GroupController extends Controller
         ]);
 
         $predictiveTemplates = \App\Models\TemplateQuestion::where('type', 'predictive')
+            ->whereNull('used_at')
             ->orderBy('is_featured', 'desc')
             ->orderBy('id')
             ->take(count($matches))
             ->get();
 
         $socialTemplates = \App\Models\TemplateQuestion::where('type', 'social')
+            ->whereNull('used_at')
             ->orderBy('is_featured', 'desc')
             ->first();
 
