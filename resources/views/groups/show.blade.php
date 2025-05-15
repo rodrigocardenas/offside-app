@@ -50,21 +50,21 @@
                             <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 pb-4" id="predictiveQuestionsCarousel">
                                 @forelse($matchQuestions as $question)
                                     <div class="snap-center flex-none w-full" id="question{{ $question->id }}">
-                                        <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6 {{ $question->is_disabled || $question->available_until < now() ? 'opacity-50' : '' }}">
+                                        <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6 {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-50' : '' }}">
                                             <div class="mb-4">
                                                 <h4 class="text-xl font-bold mb-2">{{ $question->title }}</h4>
                                                 <p class="text-sm text-offside-light">
                                                     @if($question->is_disabled)
                                                         Pregunta deshabilitada
-                                                    @elseif($question->available_until > now())
-                                                        Finaliza en: <span class="countdown" data-time="{{ $question->available_until->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
+                                                    @elseif($question->available_until->addHours(4) > now())
+                                                        Finaliza en: <span class="countdown" data-time="{{ $question->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
                                                     @else
                                                         Partido finalizado
                                                     @endif
                                                 </p>
                                             </div>
 
-                                            @if(!isset($userAnswers[$question->id]) && $question->available_until > now() && !$question->is_disabled)
+                                            @if(!isset($userAnswers[$question->id]) && $question->available_until->addHours(4) > now() && !$question->is_disabled)
                                                 <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3">
                                                     @csrf
                                                     @foreach($question->options as $option)
@@ -80,7 +80,7 @@
                                                 <div class="space-y-3">
                                                     @foreach($question->options as $option)
                                                         <div class="p-4 rounded-lg {{
-                                                            $question->available_until > now() && !$question->is_disabled
+                                                            $question->available_until->addHours(4) > now() && !$question->is_disabled
                                                                 ? ($userAnswers[$question->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
                                                                 : ($option->is_correct ? 'bg-green-600' : (($userAnswers[$question->id] ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
                                                         }}">
@@ -155,17 +155,16 @@
                                 <div class="mb-4">
                                     <h3 class="text-xl mb-2">{{ $socialQuestion->title }}</h3>
                                     @if($socialQuestion->description)
-                                        <p class="text-sm text-offside-light">Finaliza en: <span class="countdown" data-time="{{ $question->available_until->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
+                                        <p class="text-sm text-offside-light">Finaliza en: <span class="countdown" data-time="{{ $question->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
                                         </p>
                                     @endif
                                 </div>
 
                                 @php
                                     $userHasAnswered = $socialQuestion->answers->where('user_id', auth()->user()->id)->first();
-
                                 @endphp
 
-                                @if(!$userHasAnswered && $socialQuestion->available_until > now())
+                                @if(!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now())
                                     <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="space-y-3">
                                         @csrf
                                         @foreach($socialQuestion->options as $option)
@@ -181,7 +180,7 @@
                                     <div class="space-y-3">
                                     @foreach($socialQuestion->options as $option)
                                                         <div class="p-4 rounded-lg {{
-                                                            $socialQuestion->available_until > now()
+                                                            $socialQuestion->available_until->addHours(4) > now()
                                                                 ? ($userAnswers[$socialQuestion->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
                                                                 : ($option->is_correct ? 'bg-green-600' : (($userAnswers[$socialQuestion->id] ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
                                                         }}">
@@ -211,7 +210,7 @@
                                     </div>
                                 @endif
                                  <!-- Like/Dislike Buttons -->
-                                 <div class="flex justify-end space-x-4 mt-4">
+                                 <div class="flex justify-end space-x-4 mt-1">
                                     <button type="button"
                                             class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
                                             data-question-id="{{ $question->id }}"
