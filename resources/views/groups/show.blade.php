@@ -126,20 +126,20 @@
                                                 </div>
                                                 @endif
                                                 <!-- Like/Dislike Buttons -->
-                                                <div class="flex justify-end space-x-4 mt-4">
+                                                <div class="flex justify-end space-x-4 mt-1">
                                                     <button type="button"
-                                                            class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
+                                                            class="like-btn flex items-center {{ $question->templateQuestion && $question->templateQuestion->getUserReaction(auth()->user()) === 'like' ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
                                                             data-question-id="{{ $question->id }}"
                                                             data-template-question-id="{{ $question->template_question_id }}">
                                                         <i class="fas fa-thumbs-up mr-1"></i>
-                                                        <!-- <span class="like-count">{{ $question->templateQuestion->likes ?? 0 }}</span> -->
+                                                        <span class="like-count">{{ $question->templateQuestion ? $question->templateQuestion->getLikesCount() : 0 }}</span>
                                                     </button>
                                                     <button type="button"
-                                                            class="dislike-btn flex items-center text-red-500 hover:text-red-400 transition-colors"
+                                                            class="dislike-btn flex items-center {{ $question->templateQuestion && $question->templateQuestion->getUserReaction(auth()->user()) === 'dislike' ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
                                                             data-question-id="{{ $question->id }}"
                                                             data-template-question-id="{{ $question->template_question_id }}">
                                                         <i class="fas fa-thumbs-down mr-1"></i>
-                                                        <!-- <span class="dislike-count">{{ $question->templateQuestion->dislikes ?? 0 }}</span> -->
+                                                        <span class="dislike-count">{{ $question->templateQuestion ? $question->templateQuestion->getDislikesCount() : 0 }}</span>
                                                     </button>
                                                 </div>
                                         </div>
@@ -229,17 +229,18 @@
                                  <!-- Like/Dislike Buttons -->
                                  <div class="flex justify-end space-x-4 mt-1">
                                     <button type="button"
-                                            class="like-btn flex items-center text-green-500 hover:text-green-400 transition-colors"
+                                            class="like-btn flex items-center {{ $question->templateQuestion && $question->templateQuestion->getUserReaction(auth()->user()) === 'like' ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
                                             data-question-id="{{ $question->id }}"
                                             data-template-question-id="{{ $question->template_question_id }}">
                                         <i class="fas fa-thumbs-up mr-1"></i>
-                                        <!-- <span class="like-count">{{ $question->templateQuestion->likes ?? 0 }}</span> -->
+                                        <span class="like-count">{{ $question->templateQuestion ? $question->templateQuestion->getLikesCount() : 0 }}</span>
                                     </button>
                                     <button type="button"
-                                            class="dislike-btn flex items-center text-red-500 hover:text-red-400 transition-colors"
-                                            data-question-id="{{ $socialQuestion->id }}">
+                                            class="dislike-btn flex items-center {{ $question->templateQuestion && $question->templateQuestion->getUserReaction(auth()->user()) === 'dislike' ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
+                                            data-question-id="{{ $socialQuestion->id }}"
+                                            data-template-question-id="{{ $question->template_question_id }}">
                                         <i class="fas fa-thumbs-down mr-1"></i>
-                                        <!-- <span class="dislike-count">{{ $question->templateQuestion->dislikes ?? 0 }}</span> -->
+                                        <span class="dislike-count">{{ $question->templateQuestion ? $question->templateQuestion->getDislikesCount() : 0 }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -439,191 +440,6 @@
                     </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Manejar clic en botones de like/dislike
-        document.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const button = this;
-                const questionId = this.dataset.questionId;
-                const templateQuestionId = this.dataset.templateQuestionId;
-                const isLike = this.classList.contains('like-btn');
-
-                // Animación de pulso
-                button.style.transform = 'scale(1.2)';
-                button.style.transition = 'transform 0.2s ease-out';
-
-                // Restaurar transformación después de la animación
-                setTimeout(() => {
-                    button.style.transform = 'scale(1)';
-                }, 200);
-
-                // Cambiar color temporalmente
-                if (isLike) {
-                    button.style.color = '#34D399';
-                } else {
-                    button.style.color = '#EF4444';
-                }
-
-                // Restaurar color después de la animación
-                setTimeout(() => {
-                    button.style.color = '';
-                }, 500);
-
-                // Actualizar el contador de likes/dislikes
-                const countElement = button.querySelector('.like-count, .dislike-count');
-                if (countElement) {
-                    const currentCount = parseInt(countElement.textContent) || 0;
-                    countElement.textContent = currentCount + 1;
-                }
-
-                // Enviar la solicitud al servidor
-                fetch(`/questions/${questionId}/react`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        template_question_id: templateQuestionId,
-                        reaction: isLike ? 'like' : 'dislike'
-                    })
-                })
-                .catch(error => console.error('Error:', error));
-            });
-        });
-    });
-</script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Abrir modal
-        $('#openFeedbackModal').on('click', function(e) {
-            console.log('Open feedback modal clicked');
-
-            e.preventDefault();
-            $('#feedbackModal').removeClass('hidden');
-        });
-
-        // Cerrar modal
-        $('#closeFeedbackModal, #cancelFeedback').on('click', function() {
-            $('#feedbackModal').addClass('hidden');
-        });
-
-        // Enviar formulario
-        $('#feedbackForm').on('submit', function(e) {
-            e.preventDefault();
-
-            $.ajax({
-                url: '{{ route("feedback.store") }}',
-                method: 'POST',
-                data: $(this).serialize(),
-                success: function(response) {
-                    alert(response.message);
-                    $('#feedbackModal').addClass('hidden');
-                    $('#feedbackForm')[0].reset();
-                },
-                error: function(xhr) {
-                    const errors = xhr.responseJSON.errors;
-                    let errorMessage = 'Por favor, corrige los siguientes errores:\n';
-
-                    for (const field in errors) {
-                        errorMessage += `- ${errors[field][0]}\n`;
-                    }
-
-                    alert(errorMessage);
-                }
-            });
-        });
-        $('#chatToggle').on('click', function() {
-            $('html, body').animate({
-                scrollTop: $('#chatSection').offset().top - 20
-            }, 500);
-        });
-        console.log('Document ready');
-
-        // Handle like button click
-        $(document).on('click', '.like-btn', function(e) {
-            e.preventDefault();
-            const questionId = $(this).data('question-id');
-            const templateQuestionId = $(this).data('template-question-id');
-            handleReaction(questionId, templateQuestionId, 'like');
-        });
-
-        // Handle dislike button click
-        $(document).on('click', '.dislike-btn', function(e) {
-            e.preventDefault();
-            const questionId = $(this).data('question-id');
-            const templateQuestionId = $(this).data('template-question-id');
-            handleReaction(questionId, templateQuestionId, 'dislike');
-        });
-
-        // Function to handle reaction (like/dislike)
-        function handleReaction(questionId, templateQuestionId, type) {
-            const url = '/questions/' + templateQuestionId + '/react';
-            const token = $('meta[name="csrf-token"]').attr('content');
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: {
-                    _token: token,
-                    reaction: type
-                },
-                dataType: 'json',
-                success: function(data) {
-                    if (data.success) {
-                        // Update the UI with the new counts for all questions with this template
-                        $('.like-btn[data-template-question-id="' + templateQuestionId + '"] .like-count').text(data.likes);
-                        $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"] .dislike-count').text(data.dislikes);
-                    } else {
-                        console.error('Error:', data.message);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                }
-            });
-        }
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const countdownElements = document.querySelectorAll('.countdown');
-
-        countdownElements.forEach(element => {
-            const endTime = new Date(element.dataset.time).getTime();
-
-            function updateCountdown() {
-                const now = new Date().getTime();
-                const timeLeft = endTime - now;
-
-                if (timeLeft <= 0) {
-                    element.textContent = 'Tiempo agotado';
-                    return;
-                }
-
-                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-                element.textContent = `${days > 0 ? days + 'd ' : ''}${hours}h ${minutes}m ${seconds}s`;
-            }
-
-            // Actualizar cada segundo
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-        });
-
-        const chatContainer = document.querySelector('.overflow-y-auto');
-
-        if (chatContainer) {
-            // Desplazar el contenedor al final
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
         // Función para actualizar el contador de mensajes no leídos
         function updateUnreadCount() {
             fetch(`{{ route('chat.unread-count', $group) }}`)
@@ -687,6 +503,192 @@
 
         // Actualizar el contador inicialmente
         updateUnreadCount();
+
+        // Manejar reacciones (like/dislike)
+        document.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const questionId = this.dataset.questionId;
+                const templateQuestionId = this.dataset.templateQuestionId;
+                const isLike = this.classList.contains('like-btn');
+                const reaction = isLike ? 'like' : 'dislike';
+
+                fetch(`/questions/${templateQuestionId}/react`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ reaction })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Actualizar contadores
+                        const likeCount = this.closest('.flex').querySelector('.like-count');
+                        const dislikeCount = this.closest('.flex').querySelector('.dislike-count');
+                        likeCount.textContent = data.likes;
+                        dislikeCount.textContent = data.dislikes;
+
+                        // Actualizar estilos de los botones
+                        const likeBtn = this.closest('.flex').querySelector('.like-btn');
+                        const dislikeBtn = this.closest('.flex').querySelector('.dislike-btn');
+
+                        if (data.user_reaction === 'like') {
+                            likeBtn.classList.remove('text-gray-400');
+                            likeBtn.classList.add('text-green-500');
+                            dislikeBtn.classList.remove('text-red-500');
+                            dislikeBtn.classList.add('text-gray-400');
+                        } else if (data.user_reaction === 'dislike') {
+                            dislikeBtn.classList.remove('text-gray-400');
+                            dislikeBtn.classList.add('text-red-500');
+                            likeBtn.classList.remove('text-green-500');
+                            likeBtn.classList.add('text-gray-400');
+                        } else {
+                            likeBtn.classList.remove('text-green-500');
+                            likeBtn.classList.add('text-gray-400');
+                            dislikeBtn.classList.remove('text-red-500');
+                            dislikeBtn.classList.add('text-gray-400');
+                        }
+                    }
+                });
+            });
+        });
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Abrir modal
+        $('#openFeedbackModal').on('click', function(e) {
+            console.log('Open feedback modal clicked');
+
+            e.preventDefault();
+            $('#feedbackModal').removeClass('hidden');
+        });
+
+        // Cerrar modal
+        $('#closeFeedbackModal, #cancelFeedback').on('click', function() {
+            $('#feedbackModal').addClass('hidden');
+        });
+
+        // Enviar formulario
+        $('#feedbackForm').on('submit', function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '{{ route("feedback.store") }}',
+                method: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    alert(response.message);
+                    $('#feedbackModal').addClass('hidden');
+                    $('#feedbackForm')[0].reset();
+                },
+                error: function(xhr) {
+                    const errors = xhr.responseJSON.errors;
+                    let errorMessage = 'Por favor, corrige los siguientes errores:\n';
+
+                    for (const field in errors) {
+                        errorMessage += `- ${errors[field][0]}\n`;
+                    }
+
+                    alert(errorMessage);
+                }
+            });
+        });
+        $('#chatToggle').on('click', function() {
+            $('html, body').animate({
+                scrollTop: $('#chatSection').offset().top - 20
+            }, 500);
+        });
+        console.log('Document ready');
+
+        // Handle like button click
+        $(document).on('click', '.like-btn', function(e) {
+            e.preventDefault();
+            const templateQuestionId = $(this).data('template-question-id');
+            handleReaction(templateQuestionId, 'like');
+        });
+
+        // Handle dislike button click
+        $(document).on('click', '.dislike-btn', function(e) {
+            e.preventDefault();
+            const templateQuestionId = $(this).data('template-question-id');
+            handleReaction(templateQuestionId, 'dislike');
+        });
+
+        // Function to handle reaction (like/dislike)
+        function handleReaction(templateQuestionId, type) {
+            const url = '/questions/' + templateQuestionId + '/react';
+            const token = $('meta[name="csrf-token"]').attr('content');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    _token: token,
+                    reaction: type
+                },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.success) {
+                        // Update the UI with the new counts for all questions with this template
+                        $('.like-btn[data-template-question-id="' + templateQuestionId + '"] .like-count').text(data.likes);
+                        $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"] .dislike-count').text(data.dislikes);
+
+                        // Update button styles
+                        $('.like-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-green-500').addClass('text-gray-400');
+                        $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-red-500').addClass('text-gray-400');
+
+                        if (data.user_reaction === 'like') {
+                            $('.like-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-gray-400').addClass('text-green-500');
+                        } else if (data.user_reaction === 'dislike') {
+                            $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-gray-400').addClass('text-red-500');
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const countdownElements = document.querySelectorAll('.countdown');
+
+        countdownElements.forEach(element => {
+            const endTime = new Date(element.dataset.time).getTime();
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const timeLeft = endTime - now;
+
+                if (timeLeft <= 0) {
+                    element.textContent = 'Tiempo agotado';
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                element.textContent = `${days > 0 ? days + 'd ' : ''}${hours}h ${minutes}m ${seconds}s`;
+            }
+
+            // Actualizar cada segundo
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
+
+        const chatContainer = document.querySelector('.overflow-y-auto');
+
+        if (chatContainer) {
+            // Desplazar el contenedor al final
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
     });
 </script>
 

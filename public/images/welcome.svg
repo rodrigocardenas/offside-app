@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fondo decorativo -->
+    <circle cx="200" cy="150" r="120" fill="#FF6B35" fill-opacity="0.1"/>
+
+    <!-- Balón de fútbol estilizado -->
+    <circle cx="200" cy="150" r="80" fill="#FF6B35"/>
+    <path d="M200 70C238.66 70 270 101.34 270 140C270 178.66 238.66 210 200 210C161.34 210 130 178.66 130 140C130 101.34 161.34 70 200 70Z" stroke="white" stroke-width="4"/>
+    <path d="M200 70V210M130 140H270" stroke="white" stroke-width="4"/>
+
+    <!-- Elementos decorativos -->
+    <circle cx="160" cy="120" r="10" fill="white"/>
+    <circle cx="240" cy="120" r="10" fill="white"/>
+    <circle cx="160" cy="160" r="10" fill="white"/>
+    <circle cx="240" cy="160" r="10" fill="white"/>
+
+    <!-- Estrellas decorativas -->
+    <path d="M100 80L105 95L120 95L107.5 105L112.5 120L100 110L87.5 120L92.5 105L80 95L95 95L100 80Z" fill="#FF6B35"/>
+    <path d="M300 200L305 215L320 215L307.5 225L312.5 240L300 230L287.5 240L292.5 225L280 215L295 215L300 200Z" fill="#FF6B35"/>
+</svg>

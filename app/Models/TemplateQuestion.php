@@ -3,28 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-    use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TemplateQuestion extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'type',
         'text',
+        'type',
         'options',
         'is_featured',
-        'likes',
-        'dislikes',
-        'competition_id', // Nueva columna
-        'used_at',        // Nueva columna
+        'competition_id',
+        'home_team_id',
+        'away_team_id',
+        'football_match_id',
     ];
 
     protected $casts = [
         'options' => 'array',
-        'likes' => 'integer',
-        'dislikes' => 'integer',
-        'used_at' => 'datetime', // Cast para el timestamp
+        'is_featured' => 'boolean',
     ];
 
     protected $attributes = [
@@ -55,5 +53,51 @@ class TemplateQuestion extends Model
     public function competition()
     {
         return $this->belongsTo(Competition::class);
+    }
+
+    public function homeTeam()
+    {
+        return $this->belongsTo(Team::class, 'home_team_id');
+    }
+
+    public function awayTeam()
+    {
+        return $this->belongsTo(Team::class, 'away_team_id');
+    }
+
+    public function footballMatch()
+    {
+        return $this->belongsTo(FootballMatch::class);
+    }
+
+    public function userReactions()
+    {
+        return $this->belongsToMany(User::class, 'template_question_user_reaction')
+            ->withPivot('reaction')
+            ->withTimestamps();
+    }
+
+    public function getLikesCount()
+    {
+        return $this->userReactions()->where('template_question_user_reaction.reaction', 'like')->count();
+    }
+
+    public function getDislikesCount()
+    {
+        return $this->userReactions()->where('template_question_user_reaction.reaction', 'dislike')->count();
+    }
+
+    public function hasUserReaction(User $user)
+    {
+        return $this->userReactions()->where('user_id', $user->id)->exists();
+    }
+
+    public function getUserReaction(User $user)
+    {
+        return $this->userReactions()
+            ->where('user_id', $user->id)
+            ->first()
+            ?->pivot
+            ->reaction;
     }
 }

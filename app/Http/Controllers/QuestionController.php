@@ -8,6 +8,7 @@ use App\Models\Option;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
@@ -49,27 +50,37 @@ class QuestionController extends Controller
             'reaction' => 'required|in:like,dislike'
         ]);
 
-        try {
-            $reaction = $request->input('reaction');
-            $field = $reaction . 's';
+        $user = auth()->user();
+        $currentReaction = $question->getUserReaction($user);
 
-            // Increment the reaction count
-            $question->increment($field);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Reacción guardada correctamente',
-                'likes' => $question->likes,
-                'dislikes' => $question->dislikes
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Error al guardar la reacción: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al guardar la reacción: ' . $e->getMessage()
-            ], 500);
+        if ($currentReaction === $request->reaction) {
+            // Si el usuario ya tiene la misma reacción, la eliminamos
+            DB::table('template_question_user_reaction')
+                ->where('user_id', $user->id)
+                ->where('template_question_id', $question->id)
+                ->delete();
+        } else {
+            // Si el usuario tiene una reacción diferente o ninguna, actualizamos o creamos
+            DB::table('template_question_user_reaction')
+                ->updateOrInsert(
+                    [
+                        'user_id' => $user->id,
+                        'template_question_id' => $question->id
+                    ],
+                    [
+                        'reaction' => $request->reaction,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                );
         }
+
+        return response()->json([
+            'success' => true,
+            'likes' => $question->getLikesCount(),
+            'dislikes' => $question->getDislikesCount(),
+            'user_reaction' => $question->getUserReaction($user)
+        ]);
     }
 
     public function answer(Request $request, Question $question)

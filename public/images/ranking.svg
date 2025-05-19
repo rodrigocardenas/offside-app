@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fondo decorativo -->
+    <rect x="50" y="50" width="300" height="200" rx="20" fill="#FF6B35" fill-opacity="0.1"/>
+
+    <!-- Podio -->
+    <rect x="100" y="200" width="60" height="40" fill="#FF6B35"/>
+    <rect x="170" y="180" width="60" height="60" fill="#FF6B35"/>
+    <rect x="240" y="220" width="60" height="20" fill="#FF6B35"/>
+
+    <!-- Medallas -->
+    <circle cx="200" cy="160" r="15" fill="#FFD700"/>
+    <circle cx="170" cy="170" r="12" fill="#C0C0C0"/>
+    <circle cx="230" cy="170" r="10" fill="#CD7F32"/>
+
+    <!-- Estrellas en las medallas -->
+    <path d="M200 150L203 158L211 158L205 163L207 171L200 167L193 171L195 163L189 158L197 158L200 150Z" fill="#FF6B35"/>
+    <path d="M170 164L172 170L178 170L173 174L175 180L170 176L165 180L167 174L162 170L168 170L170 164Z" fill="#FF6B35"/>
+    <path d="M230 165L231 169L235 169L232 172L233 176L230 174L227 176L228 172L225 169L229 169L230 165Z" fill="#FF6B35"/>
+
+    <!-- Líneas de puntos -->
+    <line x1="50" y1="250" x2="350" y2="250" stroke="#FF6B35" stroke-width="2" stroke-dasharray="5,5"/>
+</svg>

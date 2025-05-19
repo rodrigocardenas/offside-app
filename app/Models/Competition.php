@@ -19,4 +19,9 @@ class Competition extends Model
     {
         return $this->hasMany(Group::class);
     }
+
+    public function teams()
+    {
+        return $this->hasMany(Team::class, 'competition_id', 'id');
+    }
 }

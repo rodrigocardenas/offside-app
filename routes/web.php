@@ -10,6 +10,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CompetitionController;
+use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionController;
+use App\Http\Controllers\Admin\TemplateQuestionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,5 +77,12 @@ Route::middleware(['auth'])->group(function () {
 
     // Handle question reactions (like/dislike)
     Route::post('/questions/{question}/react', [QuestionController::class, 'react'])->name('questions.react');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/competitions/{competition}/teams', [AdminCompetitionController::class, 'getTeams'])->name('competitions.teams');
+    Route::get('/competitions/{competition}/matches', [AdminCompetitionController::class, 'getMatches'])->name('competitions.matches');
+    Route::get('/matches/{match}', [AdminCompetitionController::class, 'getMatch'])->name('matches.show');
+    Route::resource('template-questions', TemplateQuestionController::class);
 });
 

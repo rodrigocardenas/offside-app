@@ -65,6 +65,51 @@
                             @error('competition_id')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
+
+                            <!-- Selector de partido (inicialmente oculto) -->
+                            <div id="match_selector" class="mt-4 hidden">
+                                <label for="football_match_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Partido
+                                </label>
+                                <select name="football_match_id" id="football_match_id"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="">Seleccione un partido</option>
+                                </select>
+                                @error('football_match_id')
+                                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Selectores de equipos (inicialmente ocultos) -->
+                            <div id="teams_selectors" class="mt-4 hidden">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="home_team_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Equipo Local
+                                        </label>
+                                        <select name="home_team_id" id="home_team_id"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                            <option value="">Seleccione un equipo</option>
+                                        </select>
+                                        @error('home_team_id')
+                                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="away_team_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Equipo Visitante
+                                        </label>
+                                        <select name="away_team_id" id="away_team_id"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                            <option value="">Seleccione un equipo</option>
+                                        </select>
+                                        @error('away_team_id')
+                                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="mb-4">
@@ -115,81 +160,190 @@
 
 
 </x-app-layout>
-<!-- @push('scripts') -->
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-       console.log('Script loaded');
+    // Script para las opciones de preguntas
+    console.log('Options script loaded');
+    function initOptions() {
+        console.log('Initializing options...');
 
-       function initOptions() {
-           console.log('Initializing options...');
+        const $optionsContainer = $('#options-container');
+        const $addButton = $('#add-option-btn');
+        const $questionType = $('select[name="type"]');
+        const $optionsSection = $optionsContainer.closest('.mb-4');
+        let optionCount = 0;
 
-           const $optionsContainer = $('#options-container');
-           const $addButton = $('#add-option-btn');
-           const $questionType = $('select[name="type"]');
-           const $optionsSection = $optionsContainer.closest('.mb-4');
-           let optionCount = 0;
+        if ($optionsContainer.length === 0 || $addButton.length === 0 || $questionType.length === 0) {
+            console.error('Required elements not found');
+            return;
+        }
 
-           if ($optionsContainer.length === 0 || $addButton.length === 0 || $questionType.length === 0) {
-               console.error('Required elements not found');
-               return;
-           }
+        console.log('Elements found, setting up...');
 
-           console.log('Elements found, setting up...');
+        function toggleOptionsVisibility() {
+            const isPredictive = $questionType.val() === 'predictive';
+            $optionsSection.toggle(isPredictive);
 
-           function toggleOptionsVisibility() {
-               const isPredictive = $questionType.val() === 'predictive';
-               $optionsSection.toggle(isPredictive);
+            // If switching to predictive and no options exist, add one
+            if (isPredictive && $optionsContainer.children().length === 0) {
+                $optionsContainer.append(createOptionElement());
+            }
+        }
 
-               // If switching to predictive and no options exist, add one
-               if (isPredictive && $optionsContainer.children().length === 0) {
-                   $optionsContainer.append(createOptionElement());
-               }
-           }
+        function createOptionElement() {
+            console.log('Creating new option element');
+            const optionIndex = optionCount++;
+            const optionHtml = `
+                <div class="flex items-center mb-2 option-item">
+                    <input type="text"
+                           name="options[${optionIndex}][text]"
+                           placeholder="usa variables home_team y away_team"
+                           class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                           >
+                    <button type="button"
+                            class="remove-option ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
 
-           function createOptionElement() {
-               console.log('Creating new option element');
-               const optionIndex = optionCount++;
-               const optionHtml = `
-                   <div class="flex items-center mb-2 option-item">
-                       <input type="text"
-                              name="options[${optionIndex}][text]"
-                              placeholder="usa variables home_team y away_team"
-                              class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                              >
-                       <button type="button"
-                               class="remove-option ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200">
-                           <i class="fas fa-times"></i>
-                       </button>
-                   </div>
-               `;
+            const $optionElement = $(optionHtml);
 
-               const $optionElement = $(optionHtml);
+            // Add event listener for the remove button
+            $optionElement.find('.remove-option').on('click', function() {
+                console.log('Remove button clicked');
+                $(this).closest('.option-item').remove();
+            });
 
-               // Add event listener for the remove button
-               $optionElement.find('.remove-option').on('click', function() {
-                   console.log('Remove button clicked');
-                   $(this).closest('.option-item').remove();
-               });
+            return $optionElement;
+        }
 
-               return $optionElement;
-           }
+        // Add event listener for question type change
+        $questionType.on('change', toggleOptionsVisibility);
 
-           // Add event listener for question type change
-           $questionType.on('change', toggleOptionsVisibility);
+        // Add new option when button is clicked
+        $addButton.on('click', function(e) {
+            console.log('Add button clicked');
+            e.preventDefault();
+            $optionsContainer.append(createOptionElement());
+        });
 
-           // Add new option when button is clicked
-           $addButton.on('click', function(e) {
-               console.log('Add button clicked');
-               e.preventDefault();
-               $optionsContainer.append(createOptionElement());
-           });
+        // Initialize visibility based on current selection
+        toggleOptionsVisibility();
 
-           // Initialize visibility based on current selection
-           toggleOptionsVisibility();
+        console.log('Initialization complete');
+    }
+    $(document).ready(initOptions);
+</script>
 
-           console.log('Initialization complete');
-       }
+<script>
+    // Script para los selectores de competencia y partidos
+    console.log('Competition script loaded');
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Content Loaded');
+        const competitionSelect = document.getElementById('competition_id');
+        const matchSelector = document.getElementById('match_selector');
+        const matchSelect = document.getElementById('football_match_id');
+        const teamsSelectors = document.getElementById('teams_selectors');
+        const homeTeamSelect = document.getElementById('home_team_id');
+        const awayTeamSelect = document.getElementById('away_team_id');
 
-       // Initialize when document is ready
-       $(document).ready(initOptions);
-    </script>
+        if (!competitionSelect || !matchSelector || !matchSelect || !teamsSelectors || !homeTeamSelect || !awayTeamSelect) {
+            console.error('No se encontraron todos los elementos necesarios');
+            return;
+        }
+
+        competitionSelect.addEventListener('change', function() {
+            console.log('Competition changed:', this.value);
+            const competitionId = this.value;
+
+            if (competitionId) {
+                // Mostrar selector de partido y equipos
+                matchSelector.classList.remove('hidden');
+                teamsSelectors.classList.remove('hidden');
+
+                // Cargar partidos de la competencia
+                fetch(`/admin/competitions/${competitionId}/matches`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar partidos');
+                        }
+                        return response.json();
+                    })
+                    .then(matches => {
+                        console.log('Matches loaded:', matches);
+                        matchSelect.innerHTML = '<option value="">Seleccione un partido</option>';
+                        matches.forEach(match => {
+                            const option = new Option(
+                                `${match.home_team_name} vs ${match.away_team_name} (${match.match_date})`,
+                                match.id
+                            );
+                            matchSelect.add(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading matches:', error);
+                    });
+
+                // Cargar equipos de la competencia
+                fetch(`/admin/competitions/${competitionId}/teams`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar equipos');
+                        }
+                        return response.json();
+                    })
+                    .then(teams => {
+                        console.log('Teams loaded:', teams);
+                        homeTeamSelect.innerHTML = '<option value="">Seleccione un equipo</option>';
+                        awayTeamSelect.innerHTML = '<option value="">Seleccione un equipo</option>';
+                        teams.forEach(team => {
+                            const homeOption = new Option(team.name, team.id);
+                            const awayOption = new Option(team.name, team.id);
+                            homeTeamSelect.add(homeOption);
+                            awayTeamSelect.add(awayOption.cloneNode(true));
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading teams:', error);
+                    });
+            } else {
+                // Ocultar selectores y limpiar opciones
+                matchSelector.classList.add('hidden');
+                teamsSelectors.classList.add('hidden');
+                matchSelect.innerHTML = '<option value="">Seleccione un partido</option>';
+                homeTeamSelect.innerHTML = '<option value="">Seleccione un equipo</option>';
+                awayTeamSelect.innerHTML = '<option value="">Seleccione un equipo</option>';
+            }
+        });
+
+        matchSelect.addEventListener('change', function() {
+            console.log('Match changed:', this.value);
+            const matchId = this.value;
+            if (matchId) {
+                fetch(`/admin/matches/${matchId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al cargar datos del partido');
+                        }
+                        return response.json();
+                    })
+                    .then(match => {
+                        console.log('Match data loaded:', match);
+                        homeTeamSelect.value = match.home_team_id;
+                        awayTeamSelect.value = match.away_team_id;
+                    })
+                    .catch(error => {
+                        console.error('Error loading match data:', error);
+                    });
+            }
+        });
+
+        // Si hay una competencia seleccionada (en caso de error de validación)
+        if (competitionSelect.value) {
+            console.log('Initial competition value:', competitionSelect.value);
+            competitionSelect.dispatchEvent(new Event('change'));
+        }
+    });
+</script>

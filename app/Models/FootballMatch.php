@@ -12,8 +12,8 @@ class FootballMatch extends Model
 
     protected $fillable = [
         'external_id',
-        // 'home_team_id',
-        // 'away_team_id',
+        'home_team_id',
+        'away_team_id',
         'stadium_id',
         'date',
         'status',
@@ -34,8 +34,7 @@ class FootballMatch extends Model
         'away_team',
         'league',
         'competition',
-        'competition_id',
-        'season',
+        'match_date',
     ];
 
     protected $casts = [
@@ -46,7 +45,13 @@ class FootballMatch extends Model
         'away_team_penalties' => 'integer',
         'matchday' => 'integer',
         'is_featured' => 'boolean',
+        'match_date' => 'datetime',
     ];
+
+    public function competition()
+    {
+        return $this->belongsTo(Competition::class);
+    }
 
     public function homeTeam()
     {
@@ -63,11 +68,6 @@ class FootballMatch extends Model
         return $this->belongsTo(Stadium::class);
     }
 
-    public function competition()
-    {
-        return $this->belongsTo(Competition::class);
-    }
-
     public function questions()
     {
         return $this->hasMany(Question::class);
@@ -79,7 +79,7 @@ class FootballMatch extends Model
             return [
                 'home' => $this->home_team_score,
                 'away' => $this->away_team_score,
-                'penalties' => $this->home_team_penalties || $this->away_team_penalties 
+                'penalties' => $this->home_team_penalties || $this->away_team_penalties
                     ? [
                         'home' => $this->home_team_penalties,
                         'away' => $this->away_team_penalties,

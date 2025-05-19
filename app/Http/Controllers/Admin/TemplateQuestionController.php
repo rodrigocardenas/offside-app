@@ -33,18 +33,26 @@ class TemplateQuestionController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all());
         $validated = $request->validate([
-            'type' => 'required',
+            'type' => 'required|in:predictive,social',
             'text' => 'required|string|max:255',
             'is_featured' => 'sometimes|boolean',
+            'competition_id' => 'nullable|exists:competitions,id',
+            'home_team_id' => 'nullable|exists:teams,id',
+            'away_team_id' => 'nullable|exists:teams,id',
+            'football_match_id' => 'nullable|exists:football_matches,id',
             'options' => 'required_if:type,predictive|array|min:2',
             'options.*.text' => 'required_if:type,predictive|string|max:255',
-            'competition_id' => 'nullable|exists:competitions,id', // Validar competencia
         ]);
 
         $templateQuestion = TemplateQuestion::create([
-            'type' => $validated['type'],
             'text' => $validated['text'],
+            'type' => $validated['type'],
+            'competition_id' => $validated['competition_id'],
+            'home_team_id' => $validated['home_team_id'],
+            'away_team_id' => $validated['away_team_id'],
+            'options' => $validated['options'],
             'is_featured' => $validated['is_featured'] ?? false,
             'options' => $validated['options'] ?? [],
             'competition_id' => $validated['competition_id'] ?? null, // Guardar competencia

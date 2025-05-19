@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fondo decorativo -->
+    <circle cx="200" cy="150" r="120" fill="#FF6B35" fill-opacity="0.1"/>
+
+    <!-- Círculo de usuarios -->
+    <circle cx="200" cy="150" r="80" fill="none" stroke="#FF6B35" stroke-width="2"/>
+
+    <!-- Avatares de usuarios -->
+    <circle cx="150" cy="100" r="20" fill="#FF6B35"/>
+    <circle cx="250" cy="100" r="20" fill="#FF6B35"/>
+    <circle cx="200" cy="200" r="20" fill="#FF6B35"/>
+    <circle cx="120" cy="180" r="20" fill="#FF6B35"/>
+    <circle cx="280" cy="180" r="20" fill="#FF6B35"/>
+
+    <!-- Líneas de conexión -->
+    <line x1="150" y1="100" x2="200" y2="200" stroke="#FF6B35" stroke-width="2"/>
+    <line x1="250" y1="100" x2="200" y2="200" stroke="#FF6B35" stroke-width="2"/>
+    <line x1="120" y1="180" x2="200" y2="200" stroke="#FF6B35" stroke-width="2"/>
+    <line x1="280" y1="180" x2="200" y2="200" stroke="#FF6B35" stroke-width="2"/>
+
+    <!-- Burbujas de chat -->
+    <rect x="100" y="60" width="60" height="30" rx="15" fill="#FF6B35"/>
+    <rect x="240" y="60" width="60" height="30" rx="15" fill="#FF6B35"/>
+    <rect x="180" y="240" width="60" height="30" rx="15" fill="#FF6B35"/>
+</svg>
