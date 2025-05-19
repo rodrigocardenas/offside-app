@@ -78,26 +78,27 @@ class QuestionController extends Controller
             return back()->with('error', 'No puedes responder a esta pregunta en este momento.');
         }
 
-        if ($question->answers()->where('user_id', auth()->id())->exists()) {
-            return back()->with('error', 'Ya has respondido a esta pregunta.');
-        }
-
         $request->validate([
-            'option_id' => 'required',
+            'option_id' => 'required|exists:options,id',
         ]);
 
-        Answer::create([
-            'user_id' => auth()->id(),
-            'question_id' => $question->id,
-            'option_id' => intval($request->option_id),
-            'is_correct' => $question->type === 'social' ? true : null,
-            'points_earned' => $question->type === 'social' ? 100 : 0,
-            'category' => $question->type,
-        ]);
+        // Usar updateOrCreate para crear o actualizar la respuesta
+        Answer::updateOrCreate(
+            [
+                'user_id' => auth()->id(),
+                'question_id' => $question->id,
+            ],
+            [
+                'option_id' => intval($request->option_id),
+                'is_correct' => $question->type === 'social' ? true : null,
+                'points_earned' => $question->type === 'social' ? 100 : 0,
+                'category' => $question->type,
+            ]
+        );
 
-        Log::info('Respuesta guardada: ' . $question->id . ' - ' . $request->option_id);
+        Log::info('Respuesta guardada o actualizada: ' . $question->id . ' - ' . $request->option_id);
 
-        return redirect()->route('groups.show', $question->group)->withFragment('question'.$question->id);
+        return redirect()->route('groups.show', $question->group)->withFragment('question' . $question->id);
     }
 
     public function results(Question $question)

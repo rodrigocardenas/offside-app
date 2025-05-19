@@ -39,7 +39,7 @@
                             @if($currentMatchday)
                                 JORNADA {{ $currentMatchday }}
                             @else
-                                PREGUNTAS DE LA JORNADA
+                                {{-- PREGUNTAS DE LA JORNADA --}}
                             @endif
                         </h2>
                         {{-- <h3 class="text-lg mb-6">Responde las preguntas de los próximos partidos:</h3> --}}
@@ -52,6 +52,13 @@
                                     <div class="snap-center flex-none w-full" id="question{{ $question->id }}">
                                         <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6 {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-50' : '' }}">
                                             <div class="mb-4">
+                                                <p class="text-sm text-offside-light">
+                                                    @if($question->football_match)
+                                                        {{ $question->football_match->home_team }} vs {{ $question->football_match->away_team }}
+                                                    @else
+                                                        {{ $question->title }}
+                                                    @endif
+                                                </p>
                                                 <h4 class="text-xl font-bold mb-2">{{ $question->title }}</h4>
                                                 <p class="text-sm text-offside-light">
                                                     @if($question->is_disabled)
@@ -63,26 +70,47 @@
                                                     @endif
                                                 </p>
                                             </div>
+                                            @php
+                                                $userHasAnswered = $userAnswers->where('question_id', $question->id)->first();
+                                            @endphp
 
-                                            @if(!isset($userAnswers[$question->id]) && $question->available_until->addHours(4) > now() && !$question->is_disabled)
+                                            @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now() && !$question->is_disabled) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
                                                 <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3">
                                                     @csrf
                                                     @foreach($question->options as $option)
-                                                        <button type="submit"
-                                                                name="option_id"
-                                                                value="{{ $option->id }}"
-                                                                class="w-full text-left bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg">
-                                                            {{ $option->text }}
-                                                        </button>
-                                                    @endforeach
+    <button type="submit"
+            name="option_id"
+            value="{{ $option->id }}"
+            class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg">
+        <span>{{ $option->text }}</span>
+        {{-- Agrega el avatar (en círculo) de los votos de la opción --}}
+        <div class="flex items-center space-x-2">
+            @foreach($question->answers->where('option_id', $option->id) as $answer)
+                @php
+                    $initials = '';
+                    $nameParts = explode(' ', $answer->user->name);
+                    foreach($nameParts as $part) {
+                        $initials .= strtoupper(substr($part, 0, 1));
+                    }
+                    $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                    $color = $colors[array_rand($colors)];
+                @endphp
+                <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
+                     title="{{ $answer->user->name }}">
+                    {{ $initials }}
+                </div>
+            @endforeach
+        </div>
+    </button>
+@endforeach
                                                 </form>
                                             @else
                                                 <div class="space-y-3">
                                                     @foreach($question->options as $option)
                                                         <div class="p-4 rounded-lg {{
                                                             $question->available_until->addHours(4) > now() && !$question->is_disabled
-                                                                ? ($userAnswers[$question->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
-                                                                : ($option->is_correct ? 'bg-green-600' : (($userAnswers[$question->id] ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
+                                                                ? ($userHasAnswered->id == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
+                                                                : ($option->is_correct ? 'bg-green-600' : (($userHasAnswered->id ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
                                                         }}">
                                                             <div class="flex justify-between items-center">
                                                                 <span>{{ $option->text }}</span>
@@ -164,7 +192,7 @@
                                     $userHasAnswered = $socialQuestion->answers->where('user_id', auth()->user()->id)->first();
                                 @endphp
 
-                                @if(!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now())
+                                @if((!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now()) || ($userHasAnswered && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
                                     <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="space-y-3">
                                         @csrf
                                         @foreach($socialQuestion->options as $option)
@@ -179,33 +207,33 @@
                                 @else
                                     <div class="space-y-3">
                                     @foreach($socialQuestion->options as $option)
-                                                        <div class="p-4 rounded-lg {{
-                                                            $socialQuestion->available_until->addHours(4) > now()
-                                                                ? ($userAnswers[$socialQuestion->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
-                                                                : ($option->is_correct ? 'bg-green-600' : (($userAnswers[$socialQuestion->id] ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
-                                                        }}">
-                                                            <div class="flex justify-between items-center">
-                                                                <span>{{ $option->text }}</span>
-                                                                <div class="text-sm">
-                                                                    @foreach($socialQuestion->answers->where('option_id', $option->id) as $answer)
-                                                                        @php
-                                                                            $initials = '';
-                                                                            $nameParts = explode(' ', $answer->user->name);
-                                                                            foreach($nameParts as $part) {
-                                                                                $initials .= strtoupper(substr($part, 0, 1));
-                                                                            }
-                                                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
-                                                                            $color = $colors[array_rand($colors)];
-                                                                        @endphp
-                                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
-                                                                             title="{{ $answer->user->name }}">
-                                                                            {{ $initials }}
-                                                                        </div>
-                                                                    @endforeach
-                                                                </div>
-                                                            </div>
+                                        <div class="p-4 rounded-lg {{
+                                            $socialQuestion->available_until->addHours(4) > now()
+                                                ? ($userAnswers[$socialQuestion->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
+                                                : ($option->is_correct ? 'bg-green-600' : (($userAnswers[$socialQuestion->id] ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
+                                        }}">
+                                            <div class="flex justify-between items-center">
+                                                <span>{{ $option->text }}</span>
+                                                <div class="text-sm">
+                                                    @foreach($socialQuestion->answers->where('option_id', $option->id) as $answer)
+                                                        @php
+                                                            $initials = '';
+                                                            $nameParts = explode(' ', $answer->user->name);
+                                                            foreach($nameParts as $part) {
+                                                                $initials .= strtoupper(substr($part, 0, 1));
+                                                            }
+                                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                                            $color = $colors[array_rand($colors)];
+                                                        @endphp
+                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
+                                                                title="{{ $answer->user->name }}">
+                                                            {{ $initials }}
                                                         </div>
                                                     @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
 
                                     </div>
                                 @endif

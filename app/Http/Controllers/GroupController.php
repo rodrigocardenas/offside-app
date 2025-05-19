@@ -112,8 +112,7 @@ class GroupController extends Controller
         try {
             $matches = FootballMatch::where('league', $group->competition->type)
                 ->where('status', 'Not Started')
-                ->where('date', '>=', now())
-                ->where('date', '<=', now()->addDays(7))
+                ->where('date', '<=', now()->addDays(5))
                 ->orderBy('is_featured', 'desc')
                 ->orderBy('date')
                 ->limit(5)
@@ -219,7 +218,7 @@ class GroupController extends Controller
             ->when($socialQuestion, function ($query) use ($socialQuestion) {
                 $query->orWhere('question_id', $socialQuestion->id);
             })
-            ->pluck('option_id', 'question_id');
+            ->get(['option_id', 'question_id', 'updated_at']);
 
         $matchQuestions->each(function ($question) {
             if ($question->football_match) {
@@ -444,6 +443,10 @@ class GroupController extends Controller
 
         $predictiveTemplates = \App\Models\TemplateQuestion::where('type', 'predictive')
             ->whereNull('used_at')
+            ->where(function ($query) use ($group) {
+                $query->where('competition_id', $group->competition_id)
+                    ->orWhere('competition_id', null);
+            })
             ->orderBy('is_featured', 'desc')
             ->orderBy('id')
             ->take(count($matches))

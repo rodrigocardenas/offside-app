@@ -51,7 +51,7 @@ class Question extends Model
 
     public function football_match()
     {
-        return $this->belongsTo(FootballMatch::class);
+        return $this->belongsTo(FootballMatch::class, 'match_id');
     }
 
     public function templateQuestion()
