@@ -2,17 +2,6 @@
     {{-- setear en el navigation el yield navigation-title: --}}
     @section('navigation-title', $group->name)
     <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6 pb-24">
-        {{-- AGREGAR una línea horizontal con los 3 primeros usuarios del ranking (fixed y marquee) --}}
-
-        <!-- Botón para volver -->
-        {{-- <div class="max-w-4xl mx-auto mb-4">
-            <a href="{{ route('groups.index') }}" class="inline-flex items-center text-offside-light hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Volver a grupos
-            </a>
-        </div> --}}
 
         <!-- Encabezado del grupo -->
 
@@ -631,6 +620,73 @@
             // Desplazar el contenedor al final
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Función para actualizar el contador de mensajes no leídos
+        function updateUnreadCount() {
+            fetch(`{{ route('chat.unread-count', $group) }}`)
+                .then(response => response.json())
+                .then(data => {
+                    const unreadCount = document.getElementById('unreadCount');
+                    if (data.unread_count > 0) {
+                        unreadCount.textContent = data.unread_count;
+                        unreadCount.classList.remove('hidden');
+                    } else {
+                        unreadCount.classList.add('hidden');
+                    }
+                });
+        }
+
+        // Actualizar el contador cada 30 segundos
+        setInterval(updateUnreadCount, 30000);
+
+        // Marcar mensajes como leídos cuando se hace clic en el botón del chat
+        document.getElementById('chatToggle').addEventListener('click', function() {
+            fetch(`{{ route('chat.mark-as-read', $group) }}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('unreadCount').classList.add('hidden');
+                }
+            });
+        });
+
+        // Marcar mensajes como leídos cuando se hace scroll al chat
+        const chatSection = document.getElementById('chatSection');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    fetch(`{{ route('chat.mark-as-read', $group) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('unreadCount').classList.add('hidden');
+                        }
+                    });
+                }
+            });
+        });
+
+        if (chatSection) {
+            observer.observe(chatSection);
+        }
+
+        // Actualizar el contador inicialmente
+        updateUnreadCount();
     });
 </script>
 

@@ -53,7 +53,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('feedback', [\App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
 
     // Chat
-    Route::post('groups/{group}/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::post('/groups/{group}/chat', [ChatController::class, 'store'])->name('chat.store');
+    Route::post('/groups/{group}/chat/mark-as-read', [ChatController::class, 'markAsRead'])->name('chat.mark-as-read');
+    Route::get('/groups/{group}/chat/unread-count', [ChatController::class, 'getUnreadCount'])->name('chat.unread-count');
 
     // Rankings
     Route::get('groups/{group}/ranking', [RankingController::class, 'groupRanking'])->name('rankings.group');
@@ -70,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/groups/invite/{code}', [GroupController::class, 'joinByInvite'])->name('groups.invite');
 
     Route::get('/test-questions', [GroupController::class, 'testGenerateQuestions'])->middleware(['auth']);
-    
+
     // Handle question reactions (like/dislike)
     Route::post('/questions/{question}/react', [QuestionController::class, 'react'])->name('questions.react');
 });

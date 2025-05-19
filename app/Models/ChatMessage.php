@@ -30,4 +30,28 @@ class ChatMessage extends Model
     {
         return $this->belongsTo(Question::class);
     }
+
+    public function seenBy()
+    {
+        return $this->belongsToMany(User::class, 'chat_message_user')
+            ->withPivot('is_read', 'read_at')
+            ->withTimestamps();
+    }
+
+    public function markAsRead(User $user)
+    {
+        $this->seenBy()->syncWithoutDetaching([
+            $user->id => [
+                'is_read' => true,
+                'read_at' => now()
+            ]
+        ]);
+    }
+
+    public function getUnreadCount(User $user)
+    {
+        return $this->whereDoesntHave('seenBy', function($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->count();
+    }
 }
