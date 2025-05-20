@@ -85,25 +85,32 @@
     </div>
 
     <script>
+        // Variables globales
+        let deferredPrompt;
+        const pwaInstallModal = document.getElementById('pwaInstallModal');
+        const installPwaButton = document.getElementById('installPwaButton');
+        const androidInstructions = document.getElementById('androidInstructions');
+        const iosInstructions = document.getElementById('iosInstructions');
+        const otherInstructions = document.getElementById('otherInstructions');
+
         // Función global para cerrar el modal
         function closePwaModal() {
             console.log('Cerrando modal PWA');
-            const pwaInstallModal = document.getElementById('pwaInstallModal');
             if (pwaInstallModal) {
                 pwaInstallModal.classList.add('hidden');
             }
             localStorage.setItem('pwaInstallShown', 'true');
         }
 
+        // Escuchar el evento beforeinstallprompt antes de mostrar el modal
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('Evento beforeinstallprompt capturado');
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
         window.addEventListener('load', function() {
             console.log('Página cargada, inicializando PWA...');
-
-            let deferredPrompt;
-            const pwaInstallModal = document.getElementById('pwaInstallModal');
-            const installPwaButton = document.getElementById('installPwaButton');
-            const androidInstructions = document.getElementById('androidInstructions');
-            const iosInstructions = document.getElementById('iosInstructions');
-            const otherInstructions = document.getElementById('otherInstructions');
 
             // Detectar el dispositivo y mostrar las instrucciones correspondientes
             function showDeviceInstructions() {
@@ -129,13 +136,6 @@
                     pwaInstallModal.classList.remove('hidden');
                     showDeviceInstructions();
                 }
-
-                // Escuchar el evento beforeinstallprompt para la instalación real
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    console.log('Evento beforeinstallprompt capturado');
-                    e.preventDefault();
-                    deferredPrompt = e;
-                });
             }
 
             // Manejar la instalación
@@ -143,12 +143,18 @@
                 installPwaButton.addEventListener('click', async () => {
                     console.log('Botón de instalación clickeado');
                     if (deferredPrompt) {
+                        console.log('Mostrando prompt de instalación');
                         deferredPrompt.prompt();
                         const { outcome } = await deferredPrompt.userChoice;
+                        console.log('Resultado de la instalación:', outcome);
                         if (outcome === 'accepted') {
                             console.log('Usuario aceptó la instalación');
+                        } else {
+                            console.log('Usuario rechazó la instalación');
                         }
                         deferredPrompt = null;
+                    } else {
+                        console.log('No hay prompt de instalación disponible');
                     }
                     closePwaModal();
                 });
