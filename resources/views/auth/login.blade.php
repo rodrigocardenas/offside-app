@@ -128,7 +128,7 @@
                 iosInstructions.classList.remove('hidden');
                 androidInstructions.classList.add('hidden');
                 otherInstructions.classList.add('hidden');
-            } else if (isAndroid && deferredPrompt) {
+            } else if (isAndroid ) {
                 androidInstructions.classList.remove('hidden');
                 iosInstructions.classList.add('hidden');
                 otherInstructions.classList.add('hidden');
