@@ -7,7 +7,8 @@ const ASSETS_TO_CACHE = [
   '/images/logo-offside-192x192.png',
   '/images/logo-offside-512x512.png',
   '/manifest.json',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/offline.html'
 ];
 
 // Instalación del Service Worker
@@ -46,46 +47,56 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
-// Interceptar peticiones de red
+// Estrategia de red con caché
 self.addEventListener('fetch', (event) => {
-  if (!(event.request.url.indexOf('http') === 0)) return;
-  
+  // No procesar peticiones que no sean HTTP/HTTPS
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
-        // Devuelve la respuesta en caché si existe
+        // Si la respuesta está en caché, la devolvemos
         if (response) {
           return response;
         }
-        
-        // Si no está en caché, haz la petición a la red
+
+        // Si no está en caché, hacemos la petición a la red
         return fetch(event.request)
           .then((response) => {
-            // No guardamos en caché respuestas que no sean exitosas
+            // No cacheamos respuestas que no sean exitosas o que no sean del mismo origen
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
-            
+
             // Clonamos la respuesta para guardarla en caché
             const responseToCache = response.clone();
-            
+
             caches.open(CACHE_NAME)
               .then((cache) => {
                 cache.put(event.request, responseToCache);
+              })
+              .catch(error => {
+                console.error('Error al guardar en caché:', error);
               });
-              
-            return response;
-          });
-      })
-  );
-});
 
-// Estrategia de red con caché
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        return response || fetch(event.request);
+            return response;
+          })
+          .catch(error => {
+            console.error('Error en la petición:', error);
+            // Si estamos offline, intentamos servir offline.html
+            if (event.request.mode === 'navigate') {
+              return caches.match('/offline.html');
+            }
+            return new Response('Error de conexión', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: new Headers({
+                'Content-Type': 'text/plain'
+              })
+            });
+          });
       })
   );
 });

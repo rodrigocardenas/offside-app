@@ -2,11 +2,13 @@
   "name": "Offside Club",
   "short_name": "Offside",
   "description": "Predicciones de fútbol y competición con amigos",
+  "id": "/",
   "start_url": "/?source=pwa",
   "scope": "/",
-  "display": "fullscreen",
+  "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "lang": "es-ES",
+  "dir": "ltr",
   "background_color": "#1a202c",
   "theme_color": "#2d3748",
   "orientation": "portrait",
@@ -16,13 +18,29 @@
       "src": "/images/logo-offside-192x192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any",
+      "platform": "any"
+    },
+    {
+      "src": "/images/logo-offside-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable",
+      "platform": "any"
     },
     {
       "src": "/images/logo-offside-512x512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any",
+      "platform": "any"
+    },
+    {
+      "src": "/images/logo-offside-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable",
+      "platform": "any"
     }
   ],
   "screenshots": [
@@ -39,13 +57,15 @@
       "name": "Ver predicciones",
       "short_name": "Predicciones",
       "description": "Ver y hacer predicciones de partidos",
-      "url": "/predictions"
+      "url": "/predictions",
+      "icons": [{ "src": "/images/logo-offside-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Ver ranking",
       "short_name": "Ranking",
       "description": "Ver el ranking de jugadores",
-      "url": "/ranking"
+      "url": "/ranking",
+      "icons": [{ "src": "/images/logo-offside-192x192.png", "sizes": "192x192" }]
     }
   ]
 }
