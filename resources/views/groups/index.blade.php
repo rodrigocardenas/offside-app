@@ -110,7 +110,7 @@
                         <!-- Paso 1: Bienvenida -->
                         <div class="wizard-step" data-step="1">
                             <div class="text-center">
-                                <img src="{{ asset('images/welcome.svg') }}" alt="Bienvenida" class="mx-auto mb-8 h-48 md:h-64">
+                                <img src="{{ asset('images/logo_white_bg.png') }}" alt="Bienvenida" class="mx-auto mb-8 h-48 md:h-64 rounded-lg shadow-lg">
                                 <h3 class="text-2xl font-bold text-gray-900 mb-4">¡Bienvenido a Offside Club!</h3>
                                 <p class="text-gray-600 mb-8">Tu plataforma para predecir resultados de fútbol y competir con amigos.</p>
                             </div>
@@ -119,7 +119,7 @@
                         <!-- Paso 2: Preguntas Predictivas -->
                         <div class="wizard-step hidden" data-step="2">
                             <div class="text-center">
-                                <img src="{{ asset('images/match-questions.svg') }}" alt="Preguntas Predictivas" class="mx-auto mb-8 h-48 md:h-64">
+                                <img src="{{ asset('images/wizard_1.png') }}" alt="Preguntas Predictivas" class="mx-auto mb-8 h-48 md:h-64 rounded-lg shadow-lg">
                                 <h3 class="text-2xl font-bold text-gray-900 mb-4">Preguntas Predictivas</h3>
                                 <div class="space-y-4 text-left">
                                     <p class="text-gray-600">• Predice resultados de partidos y gana puntos</p>
@@ -133,7 +133,7 @@
                         <!-- Paso 3: Preguntas Sociales -->
                         <div class="wizard-step hidden" data-step="3">
                             <div class="text-center">
-                                <img src="{{ asset('images/social-questions.svg') }}" alt="Preguntas Sociales" class="mx-auto mb-8 h-48 md:h-64">
+                                <img src="{{ asset('images/preguntas_sociales_icon.png') }}" alt="Preguntas Sociales" class="mx-auto mb-8 h-48 md:h-64">
                                 <h3 class="text-2xl font-bold text-gray-900 mb-4">Preguntas Sociales</h3>
                                 <div class="space-y-4 text-left">
                                     <p class="text-gray-600">• Comparte tu opinión con otros usuarios</p>
@@ -390,6 +390,23 @@
                         closeWizard();
                     }
                 });
+            }
+        });
+
+        function showJoinGroupModal() {
+            document.getElementById('joinGroupModal').classList.remove('hidden');
+            document.getElementById('welcomeWizard').classList.add('hidden');
+        }
+
+        // Cerrar modal de unirse a grupo
+        document.getElementById('closeJoinModal').addEventListener('click', function() {
+            document.getElementById('joinGroupModal').classList.add('hidden');
+        });
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('joinGroupModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
             }
         });
     </script>
