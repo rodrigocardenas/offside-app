@@ -5,13 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Offside Club') }}</title>
-    <link rel="manifest" href="{{ asset('manifest.json') }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2d3748">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo-offside-192x192.png') }}">
+    <meta name="apple-mobile-web-app-title" content="Offside Club">
+    <link rel="apple-touch-icon" href="/images/logo-offside-192x192.png">
+    <link rel="icon" type="image/png" href="/images/logo-offside-192x192.png">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

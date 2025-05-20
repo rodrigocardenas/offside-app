@@ -3,7 +3,7 @@
   "short_name": "Offside",
   "description": "Predicciones de fútbol y competición con amigos",
   "id": "/",
-  "start_url": "/?source=pwa",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
@@ -18,29 +18,25 @@
       "src": "/images/logo-offside-192x192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any",
-      "platform": "any"
+      "purpose": "any"
     },
     {
       "src": "/images/logo-offside-192x192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "maskable",
-      "platform": "any"
+      "purpose": "maskable"
     },
     {
       "src": "/images/logo-offside-512x512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any",
-      "platform": "any"
+      "purpose": "any"
     },
     {
       "src": "/images/logo-offside-512x512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "maskable",
-      "platform": "any"
+      "purpose": "maskable"
     }
   ],
   "screenshots": [
@@ -67,5 +63,9 @@
       "url": "/ranking",
       "icons": [{ "src": "/images/logo-offside-192x192.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "related_applications": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }

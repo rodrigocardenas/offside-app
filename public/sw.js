@@ -1,6 +1,7 @@
 const CACHE_NAME = 'offside-club-v1.0.0';
 const ASSETS_TO_CACHE = [
   '/',
+  '/login',
   '/css/app.css',
   '/js/app.js',
   '/js/navigation.js',
@@ -54,6 +55,35 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Para peticiones de navegación, usar la estrategia network-first
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Guardar la respuesta en caché
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          return response;
+        })
+        .catch(() => {
+          // Si falla la red, intentar servir desde caché
+          return caches.match(event.request)
+            .then(response => {
+              if (response) {
+                return response;
+              }
+              // Si no está en caché, mostrar página offline
+              return caches.match('/offline.html');
+            });
+        })
+    );
+    return;
+  }
+
+  // Para otros recursos, usar la estrategia cache-first
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -65,8 +95,8 @@ self.addEventListener('fetch', (event) => {
         // Si no está en caché, hacemos la petición a la red
         return fetch(event.request)
           .then((response) => {
-            // No cacheamos respuestas que no sean exitosas o que no sean del mismo origen
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+            // No cacheamos respuestas que no sean exitosas
+            if (!response || response.status !== 200) {
               return response;
             }
 
@@ -85,10 +115,6 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(error => {
             console.error('Error en la petición:', error);
-            // Si estamos offline, intentamos servir offline.html
-            if (event.request.mode === 'navigate') {
-              return caches.match('/offline.html');
-            }
             return new Response('Error de conexión', {
               status: 503,
               statusText: 'Service Unavailable',

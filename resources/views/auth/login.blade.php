@@ -164,7 +164,7 @@
             if (installPwaButton) {
                 installPwaButton.addEventListener('click', async () => {
                     console.log('Botón de instalación clickeado');
-                    if (!deferredPrompt) {
+                    if (deferredPrompt) {
                         console.log('Mostrando prompt de instalación');
                         try {
                             deferredPrompt.prompt();
@@ -172,15 +172,10 @@
                             console.log('Resultado de la instalación:', outcome);
                             if (outcome === 'accepted') {
                                 console.log('Usuario aceptó la instalación');
-                                // Esperar a que la instalación se complete
-                                setTimeout(() => {
-                                    if (isPWAInstalled()) {
-                                        console.log('PWA instalada correctamente');
-                                    }
-                                }, 1000);
                             } else {
                                 console.log('Usuario rechazó la instalación');
                             }
+
                         } catch (error) {
                             console.error('Error durante la instalación:', error);
                         }
