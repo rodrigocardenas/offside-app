@@ -12,14 +12,7 @@
             <div class="flex items-center mr-2" id="installButtonContainer">
                 @yield('navigation-title', '')
             </div>
-            <!-- Botón de Instalación -->
-            <div class="flex items-center mr-2" id="installButtonContainer" style="display: none;">
-                <button id="installButtonNav" class="p-1 rounded-full bg-offside-dark hover:bg-offside-primary transition-colors" title="Instalar aplicación">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-offside-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                </button>
-            </div>
+
 
             <!-- User Dropdown -->
             @if(Auth::check())

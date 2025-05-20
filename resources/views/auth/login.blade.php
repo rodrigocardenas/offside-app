@@ -11,8 +11,8 @@
                 <h2 class="text-2xl font-bold text-center text-offside-light mb-6">Iniciar sesión</h2>
 
                 <!-- Modal de instalación PWA -->
-                <div id="pwaInstallModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4 mt-14" style="margin-top: 100px;">
-                    <div class="bg-white rounded-2xl w-full max-w-md p-6 relative">
+                <div id="pwaInstallModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4" style="margin-top: 100px;">
+                    <div class="bg-white rounded-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
                         <button onclick="closePwaModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -20,21 +20,21 @@
                         </button>
 
                         <div class="text-center">
-                            <img src="{{ asset('images/logo_white_bg.png') }}" alt="Offside Club" class="mx-auto mb-6 h-24 rounded-lg shadow-lg">
-                            <h3 class="text-xl font-bold text-gray-900 mb-4">¡Instala Offside Club!</h3>
+                            <img src="{{ asset('images/logo_white_bg.png') }}" alt="Offside Club" class="mx-auto mb-4 h-10 rounded-lg shadow-lg">
+                            <h3 class="text-xl font-bold text-gray-900 mb-3">¡Instala Offside Club!</h3>
 
                             <!-- Instrucciones para Android -->
                             <div id="androidInstructions" class="hidden">
-                                <p class="text-gray-600 mb-6">Instala la aplicación directamente en tu dispositivo Android para una mejor experiencia.</p>
-                                <button id="installPwaButton" class="w-full bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF6B35]/90 transition-colors">
+                                <p class="text-gray-600 mb-4">Instala la aplicación directamente en tu dispositivo Android para una mejor experiencia.</p>
+                                <button id="installPwaButton" class="w-full bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF6B35]/90 transition-colors mb-4">
                                     Instalar App
                                 </button>
                             </div>
 
                             <!-- Instrucciones para iOS -->
                             <div id="iosInstructions" class="hidden">
-                                <p class="text-gray-600 mb-6">Para instalar en tu iPhone o iPad:</p>
-                                <ol class="text-left text-gray-600 mb-6 space-y-2">
+                                <p class="text-gray-600 mb-4">Para instalar en tu iPhone o iPad:</p>
+                                <ol class="text-left text-gray-600 mb-4 space-y-2">
                                     <li>1. Toca el botón <span class="font-semibold">Compartir</span> en Safari</li>
                                     <li>2. Desplázate y selecciona <span class="font-semibold">Añadir a la pantalla de inicio</span></li>
                                     <li>3. Toca <span class="font-semibold">Añadir</span> para confirmar</li>
@@ -43,15 +43,15 @@
 
                             <!-- Instrucciones para otros dispositivos -->
                             <div id="otherInstructions" class="hidden">
-                                <p class="text-gray-600 mb-6">Para instalar la aplicación:</p>
-                                <ol class="text-left text-gray-600 mb-6 space-y-2">
+                                <p class="text-gray-600 mb-4">Para instalar la aplicación:</p>
+                                <ol class="text-left text-gray-600 mb-4 space-y-2">
                                     <li>1. Abre el menú de opciones de tu navegador</li>
                                     <li>2. Busca la opción "Instalar" o "Añadir a aplicaciones"</li>
                                     <li>3. Sigue las instrucciones en pantalla</li>
                                 </ol>
                             </div>
 
-                            <button onclick="closePwaModal()" class="w-full text-gray-600 hover:text-gray-800 mt-4">
+                            <button onclick="closePwaModal()" class="w-full text-gray-600 hover:text-gray-800 mt-2">
                                 Más tarde
                             </button>
                         </div>
