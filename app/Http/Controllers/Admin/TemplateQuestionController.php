@@ -7,6 +7,7 @@ use App\Models\TemplateQuestion;
 use App\Models\Competition;
 use App\Models\Question;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TemplateQuestionController extends Controller
 {
@@ -33,40 +34,57 @@ class TemplateQuestionController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        $validated = $request->validate([
-            'type' => 'required|in:predictive,social',
-            'text' => 'required|string|max:255',
-            'is_featured' => 'sometimes|boolean',
-            'competition_id' => 'nullable|exists:competitions,id',
-            'home_team_id' => 'nullable|exists:teams,id',
-            'away_team_id' => 'nullable|exists:teams,id',
-            'football_match_id' => 'nullable|exists:football_matches,id',
-            'options' => 'required_if:type,predictive|array|min:2',
-            'options.*.text' => 'required_if:type,predictive|string|max:255',
-        ]);
+        try {
+            $validated = $request->validate([
+                'type' => 'required|in:predictive,social',
+                'text' => 'required|string|max:255',
+                'is_featured' => 'sometimes|boolean',
+                'competition_id' => 'nullable|exists:competitions,id|required_if:type,predictive',
+                'home_team_id' => 'nullable|exists:teams,id|required_if:type,predictive',
+                'away_team_id' => 'nullable|exists:teams,id|required_if:type,predictive',
+                'football_match_id' => 'nullable|exists:football_matches,id',
+                'options' => 'required_if:type,predictive|array|min:2',
+                'options.*.text' => 'required_if:type,predictive|string|max:255',
+            ]);
 
-        $templateQuestion = TemplateQuestion::create([
-            'text' => $validated['text'],
-            'type' => $validated['type'],
-            'competition_id' => $validated['competition_id'],
-            'home_team_id' => $validated['home_team_id'],
-            'away_team_id' => $validated['away_team_id'],
-            'options' => $validated['options'],
-            'is_featured' => $validated['is_featured'] ?? false,
-            'options' => $validated['options'] ?? [],
-            'competition_id' => $validated['competition_id'] ?? null, // Guardar competencia
-        ]);
+            // Log de los datos validados
+            \Log::info('Datos validados:', $validated);
 
-        // si se agregó la opción con el checkbox "is_correct", se setean los puntos a todas las answers que tengan la pregunta
-        // $questions = Question::where('template_question_id', $templateQuestion->id)->each(function ($question) use ($templateQuestion) {
-        //     $question->answers->update([
-        //         'points' => $validated['is_featured'] ? 400 : 300,
-        //     ]);
-        // });
+            $templateQuestion = TemplateQuestion::create($validated);
 
-        return redirect()->route('admin.template-questions.index')
-            ->with('success', 'Plantilla de pregunta creada correctamente');
+            if ($request->has('options')) {
+                foreach ($request->options as $option) {
+                    $templateQuestion->options()->create([
+                        'text' => $option['text'],
+                        'is_correct' => $option['is_correct'] ?? false
+                    ]);
+                }
+            }
+
+            return redirect()->route('admin.template-questions.index')
+                ->with('success', 'Pregunta creada exitosamente.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Log de los errores de validación
+            \Log::error('Errores de validación:', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+
+            return back()
+                ->withErrors($e->errors())
+                ->withInput();
+        } catch (\Exception $e) {
+            // Log de otros errores
+            \Log::error('Error al crear pregunta:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+
+            return back()
+                ->with('error', 'Error al crear la pregunta: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**

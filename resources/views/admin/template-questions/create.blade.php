@@ -21,6 +21,16 @@
                     <form action="{{ route('admin.template-questions.store') }}" method="POST">
                         @csrf
 
+                        @if ($errors->any())
+                            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <div class="mb-4">
                             <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Tipo de Pregunta
