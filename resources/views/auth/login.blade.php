@@ -164,7 +164,7 @@
             if (installPwaButton) {
                 installPwaButton.addEventListener('click', async () => {
                     console.log('Botón de instalación clickeado');
-                    if (deferredPrompt) {
+                    if (!deferredPrompt) {
                         console.log('Mostrando prompt de instalación');
                         try {
                             deferredPrompt.prompt();
