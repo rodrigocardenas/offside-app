@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('template_questions', function (Blueprint $table) {
-            //
+            $table->foreignId('home_team_id')->nullable()->constrained('teams')->nullOnDelete();
+            $table->foreignId('away_team_id')->nullable()->constrained('teams')->nullOnDelete();
         });
     }
 
@@ -22,7 +23,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('template_questions', function (Blueprint $table) {
-            //
+            $table->dropForeign(['home_team_id']);
+            $table->dropForeign(['away_team_id']);
+            $table->dropColumn('home_team_id');
+            $table->dropColumn('away_team_id');
         });
     }
 };
