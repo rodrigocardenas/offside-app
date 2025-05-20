@@ -102,12 +102,32 @@
             localStorage.setItem('pwaInstallShown', 'true');
         }
 
+        // Función para verificar si la PWA ya está instalada
+        function isPWAInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true;
+        }
+
         // Escuchar el evento beforeinstallprompt antes de mostrar el modal
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('Evento beforeinstallprompt capturado');
             e.preventDefault();
             deferredPrompt = e;
+
+            // Si no es la primera visita y no está instalada, mostrar el modal
+            if (!localStorage.getItem('pwaInstallShown') && !isPWAInstalled()) {
+                showInstallModal();
+            }
         });
+
+        // Función para mostrar el modal de instalación
+        function showInstallModal() {
+            if (pwaInstallModal) {
+                console.log('Mostrando modal PWA');
+                pwaInstallModal.classList.remove('hidden');
+                showDeviceInstructions();
+            }
+        }
 
         window.addEventListener('load', function() {
             console.log('Página cargada, inicializando PWA...');
@@ -126,16 +146,10 @@
                 }
             }
 
-            // Verificar si es la primera visita
-            if (!localStorage.getItem('pwaInstallShown')) {
-                console.log('Primera visita detectada');
-
-                // Mostrar el modal inmediatamente
-                if (pwaInstallModal) {
-                    console.log('Mostrando modal PWA');
-                    pwaInstallModal.classList.remove('hidden');
-                    showDeviceInstructions();
-                }
+            // Verificar si es la primera visita y no está instalada
+            if (!localStorage.getItem('pwaInstallShown') && !isPWAInstalled()) {
+                console.log('Primera visita detectada y PWA no instalada');
+                showInstallModal();
             }
 
             // Manejar la instalación
@@ -144,17 +158,29 @@
                     console.log('Botón de instalación clickeado');
                     if (deferredPrompt) {
                         console.log('Mostrando prompt de instalación');
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        console.log('Resultado de la instalación:', outcome);
-                        if (outcome === 'accepted') {
-                            console.log('Usuario aceptó la instalación');
-                        } else {
-                            console.log('Usuario rechazó la instalación');
+                        try {
+                            deferredPrompt.prompt();
+                            const { outcome } = await deferredPrompt.userChoice;
+                            console.log('Resultado de la instalación:', outcome);
+                            if (outcome === 'accepted') {
+                                console.log('Usuario aceptó la instalación');
+                                // Esperar a que la instalación se complete
+                                setTimeout(() => {
+                                    if (isPWAInstalled()) {
+                                        console.log('PWA instalada correctamente');
+                                    }
+                                }, 1000);
+                            } else {
+                                console.log('Usuario rechazó la instalación');
+                            }
+                        } catch (error) {
+                            console.error('Error durante la instalación:', error);
                         }
                         deferredPrompt = null;
                     } else {
                         console.log('No hay prompt de instalación disponible');
+                        // Mostrar instrucciones alternativas
+                        alert('Para instalar la aplicación, por favor usa el menú de opciones de tu navegador.');
                     }
                     closePwaModal();
                 });
@@ -176,7 +202,7 @@
                         console.log('ServiceWorker registrado con éxito:', registration);
                     })
                     .catch(function(error) {
-                        console.log('Error al registrar el ServiceWorker:', error);
+                        console.error('Error al registrar el ServiceWorker:', error);
                     });
             }
         });
