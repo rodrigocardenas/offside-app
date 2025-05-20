@@ -128,18 +128,30 @@
                                                 <!-- Like/Dislike Buttons -->
                                                 <div class="flex justify-end space-x-4 mt-1">
                                                     <button type="button"
-                                                            class="like-btn flex items-center {{ $question->templateQuestion && $question->templateQuestion->getUserReaction(auth()->user()) === 'like' ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
+                                                            class="like-btn flex items-center {{ isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('reaction', 'like')->isNotEmpty() ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
                                                             data-question-id="{{ $question->id }}"
                                                             data-template-question-id="{{ $question->template_question_id }}">
                                                         <i class="fas fa-thumbs-up mr-1"></i>
-                                                        <span class="like-count">{{ $question->templateQuestion ? $question->templateQuestion->getLikesCount() : 0 }}</span>
+                                                        <span class="like-count">
+                                                            @if(isset($question->templateQuestion) && isset($question->templateQuestion->reactions))
+                                                                {{ $question->templateQuestion->reactions->where('reaction', 'like')->sum('count') }}
+                                                            @else
+                                                                0
+                                                            @endif
+                                                        </span>
                                                     </button>
                                                     <button type="button"
-                                                            class="dislike-btn flex items-center {{ $question->templateQuestion && $question->templateQuestion->getUserReaction(auth()->user()) === 'dislike' ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
+                                                            class="dislike-btn flex items-center {{ isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('reaction', 'dislike')->isNotEmpty() ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
                                                             data-question-id="{{ $question->id }}"
                                                             data-template-question-id="{{ $question->template_question_id }}">
                                                         <i class="fas fa-thumbs-down mr-1"></i>
-                                                        <span class="dislike-count">{{ $question->templateQuestion ? $question->templateQuestion->getDislikesCount() : 0 }}</span>
+                                                        <span class="dislike-count">
+                                                            @if(isset($question->templateQuestion) && isset($question->templateQuestion->reactions))
+                                                                {{ $question->templateQuestion->reactions->where('reaction', 'dislike')->sum('count') }}
+                                                            @else
+                                                                0
+                                                            @endif
+                                                        </span>
                                                     </button>
                                                 </div>
                                         </div>
@@ -229,18 +241,30 @@
                                  <!-- Like/Dislike Buttons -->
                                  <div class="flex justify-end space-x-4 mt-1">
                                     <button type="button"
-                                            class="like-btn flex items-center {{ $question->templateQuestion && $question->templateQuestion->getUserReaction(auth()->user()) === 'like' ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
-                                            data-question-id="{{ $question->id }}"
-                                            data-template-question-id="{{ $question->template_question_id }}">
+                                            class="like-btn flex items-center {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('reaction', 'like')->isNotEmpty() ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
+                                            data-question-id="{{ $socialQuestion->id }}"
+                                            data-template-question-id="{{ $socialQuestion->template_question_id }}">
                                         <i class="fas fa-thumbs-up mr-1"></i>
-                                        <span class="like-count">{{ $question->templateQuestion ? $question->templateQuestion->getLikesCount() : 0 }}</span>
+                                        <span class="like-count">
+                                            @if(isset($socialQuestion->templateQuestion) && isset($socialQuestion->templateQuestion->reactions))
+                                                {{ $socialQuestion->templateQuestion->reactions->where('reaction', 'like')->sum('count') }}
+                                            @else
+                                                0
+                                            @endif
+                                        </span>
                                     </button>
                                     <button type="button"
-                                            class="dislike-btn flex items-center {{ $question->templateQuestion && $question->templateQuestion->getUserReaction(auth()->user()) === 'dislike' ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
+                                            class="dislike-btn flex items-center {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('reaction', 'dislike')->isNotEmpty() ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
                                             data-question-id="{{ $socialQuestion->id }}"
-                                            data-template-question-id="{{ $question->template_question_id }}">
+                                            data-template-question-id="{{ $socialQuestion->template_question_id }}">
                                         <i class="fas fa-thumbs-down mr-1"></i>
-                                        <span class="dislike-count">{{ $question->templateQuestion ? $question->templateQuestion->getDislikesCount() : 0 }}</span>
+                                        <span class="dislike-count">
+                                            @if(isset($socialQuestion->templateQuestion) && isset($socialQuestion->templateQuestion->reactions))
+                                                {{ $socialQuestion->templateQuestion->reactions->where('reaction', 'dislike')->sum('count') }}
+                                            @else
+                                                0
+                                            @endif
+                                        </span>
                                     </button>
                                 </div>
                             </div>

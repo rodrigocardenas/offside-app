@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Services\FootballService;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class GroupController extends Controller
 {
@@ -77,7 +78,9 @@ class GroupController extends Controller
 
     public function index()
     {
-        $groups = auth()->user()->groups()->with('creator', 'competition')->get();
+        $groups = auth()->user()->groups()
+            ->with(['creator', 'competition', 'users.roles'])
+            ->get();
         return view('groups.index', compact('groups'));
     }
 
@@ -160,75 +163,172 @@ class GroupController extends Controller
 
     public function show(Group $group, FootballService $service)
     {
-        $group->load(['competition', 'users' => function ($query) use ($group) {
-            $query->withSum(['answers as total_points' => function ($query) use ($group) {
-                $query->whereHas('question', function ($questionQuery) use ($group) {
-                    $questionQuery->where('group_id', $group->id);
-                });
-            }], 'points_earned');
-        }, 'chatMessages.user']);
-        // dd($group->users->pluck('total_points'));
+        // Cache key para el grupo
+        $cacheKey = "group_{$group->id}_show_data";
 
-        if (!$group->users()->where('user_id', auth()->id())->exists()) {
+        // Intentar obtener datos del caché
+        $cachedData = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($group) {
+            // Precargar roles para todos los usuarios
+            $rolesCacheKey = "group_{$group->id}_roles";
+            $roles = Cache::remember($rolesCacheKey, now()->addHours(24), function () use ($group) {
+                return DB::table('roles')
+                    ->join('role_user', 'roles.id', '=', 'role_user.role_id')
+                    ->whereIn('role_user.user_id', $group->users->pluck('id'))
+                    ->select('roles.*', 'role_user.user_id')
+                    ->get()
+                    ->groupBy('user_id');
+            });
+
+            $group->load([
+                'competition',
+                'users' => function ($query) use ($group) {
+                    $query->with([
+                        'answers' => function ($query) use ($group) {
+                            $query->whereHas('question', function ($questionQuery) use ($group) {
+                                $questionQuery->where('group_id', $group->id);
+                            });
+                        }
+                    ])->withSum(['answers as total_points' => function ($query) use ($group) {
+                        $query->whereHas('question', function ($questionQuery) use ($group) {
+                            $questionQuery->where('group_id', $group->id);
+                        });
+                    }], 'points_earned');
+                },
+                'chatMessages.user'
+            ]);
+
+            // Asignar roles desde el caché
+            foreach ($group->users as $user) {
+                $user->setRelation('roles', collect($roles[$user->id] ?? []));
+            }
+
+            // Cache key para preguntas sociales
+            $socialQuestionCacheKey = "group_{$group->id}_social_question";
+            $socialQuestion = Cache::remember($socialQuestionCacheKey, now()->addMinutes(5), function () use ($group, $roles) {
+                $question = Question::where('type', 'social')
+                    ->where('group_id', $group->id)
+                    ->where('available_until', '>', now())
+                    ->with([
+                        'answers.user',
+                        'answers.option',
+                        'options',
+                        'templateQuestion' => function ($query) {
+                            $query->with([
+                                'userReactions' => function ($query) {
+                                    $query->where('user_id', auth()->id());
+                                },
+                                'reactions' => function ($query) {
+                                    $query->select('template_question_id', 'reaction', DB::raw('count(*) as count'))
+                                        ->groupBy('template_question_id', 'reaction');
+                                }
+                            ]);
+                        }
+                    ])
+                    ->inRandomOrder()
+                    ->first();
+
+                if ($question) {
+                    // Asignar roles desde el caché para los usuarios en las respuestas
+                    foreach ($question->answers as $answer) {
+                        $answer->user->setRelation('roles', collect($roles[$answer->user->id] ?? []));
+                    }
+                }
+
+                return $question;
+            });
+
+            if ($group->users->count() <= 4 && $socialQuestion) {
+                foreach ($group->users as $user) {
+                    QuestionOption::updateOrCreate([
+                        'question_id' => $socialQuestion->id,
+                        'text' => $user->name,
+                    ], [
+                        'is_correct' => true
+                    ]);
+                }
+                $socialQuestion->refresh();
+                Cache::forget($socialQuestionCacheKey);
+            }
+
+            // Cache key para preguntas de partidos
+            $matchQuestionsCacheKey = "group_{$group->id}_match_questions";
+            $matchQuestions = Cache::remember($matchQuestionsCacheKey, now()->addMinutes(5), function () use ($group, $roles) {
+                if (!$group->competition) {
+                    return collect();
+                }
+
+                $questions = Question::where('type', 'predictive')
+                    ->where('group_id', $group->id)
+                    ->where('available_until', '>', now()->subHours(4))
+                    ->with([
+                        'options',
+                        'answers.user',
+                        'answers.option',
+                        'football_match',
+                        'templateQuestion' => function ($query) {
+                            $query->with([
+                                'userReactions' => function ($query) {
+                                    $query->where('user_id', auth()->id());
+                                },
+                                'reactions' => function ($query) {
+                                    $query->select('template_question_id', 'reaction', DB::raw('count(*) as count'))
+                                        ->groupBy('template_question_id', 'reaction');
+                                }
+                            ]);
+                        }
+                    ])
+                    ->get();
+
+                // Asignar roles desde el caché para los usuarios en las respuestas
+                foreach ($questions as $question) {
+                    foreach ($question->answers as $answer) {
+                        $answer->user->setRelation('roles', collect($roles[$answer->user->id] ?? []));
+                    }
+                }
+
+                if ($questions->isEmpty()) {
+                    $createdQuestions = $this->createPredictiveQuestion($group);
+                    if ($createdQuestions) {
+                        $questions = $questions->merge($createdQuestions);
+                    }
+                }
+
+                return $questions->unique('id')->take(5);
+            });
+
+            // Cache key para respuestas del usuario
+            $userAnswersCacheKey = "user_{$group->id}_answers";
+            $userAnswers = Cache::remember($userAnswersCacheKey, now()->addMinutes(5), function () use ($group, $matchQuestions, $socialQuestion) {
+                return auth()->user()->answers()
+                    ->whereIn('question_id', $matchQuestions->pluck('id'))
+                    ->when($socialQuestion, function ($query) use ($socialQuestion) {
+                        $query->orWhere('question_id', $socialQuestion->id);
+                    })
+                    ->with(['option', 'question'])
+                    ->get(['option_id', 'question_id', 'updated_at']);
+            });
+
+            $matchQuestions->each(function ($question) {
+                if ($question->football_match) {
+                    $question->is_disabled = $question->football_match->status !== 'Not Started';
+                } else {
+                    $question->is_disabled = $question->available_until->isPast();
+                }
+            });
+
+            return [
+                'group' => $group,
+                'matchQuestions' => $matchQuestions,
+                'userAnswers' => $userAnswers,
+                'socialQuestion' => $socialQuestion
+            ];
+        });
+
+        if (!$cachedData['group']->users->contains('id', auth()->id())) {
             return redirect()->route('dashboard')->with('error', 'No tienes acceso a este grupo.');
         }
 
-        $socialQuestion = Question::where('type', 'social')
-            ->where('group_id', $group->id)
-            ->where('available_until', '>', now())
-            ->with(['answers.user', 'answers.option', 'options'])
-            ->inRandomOrder()
-            ->first();
-
-        if ($group->users->count() <= 4 && $socialQuestion) {
-            foreach ($group->users as $user) {
-                QuestionOption::updateOrCreate([
-                    'question_id' => $socialQuestion->id,
-                    'text' => $user->name,
-                ], [
-                    'is_correct' => true
-                ]);
-            }
-            $socialQuestion->refresh();
-        }
-
-        $matchQuestions = collect();
-        $currentMatchday = null;
-
-        if ($group->competition) {
-            $matchQuestions = Question::where('type', 'predictive')
-                ->where('group_id', $group->id)
-                ->where('available_until', '>', now()->subHours(4))
-                ->with(['options', 'answers.user', 'answers.option'])
-                ->get();
-
-            if ($matchQuestions->isEmpty()) {
-                $createdQuestions = $this->createPredictiveQuestion($group);
-                if ($createdQuestions) {
-                    $matchQuestions = $matchQuestions->merge($createdQuestions);
-                }
-                $socialQuestion = $createdQuestions->where('type', 'social')->first();
-            }
-        }
-
-        $matchQuestions = $matchQuestions->unique('id')->take(5);
-
-        $userAnswers = auth()->user()->answers()
-            ->whereIn('question_id', $matchQuestions->pluck('id'))
-            ->when($socialQuestion, function ($query) use ($socialQuestion) {
-                $query->orWhere('question_id', $socialQuestion->id);
-            })
-            ->get(['option_id', 'question_id', 'updated_at']);
-
-        $matchQuestions->each(function ($question) {
-            if ($question->football_match) {
-                $question->is_disabled = $question->football_match->status !== 'Not Started';
-            } else {
-                $question->is_disabled = $question->available_until->isPast();
-            }
-        });
-
-        return view('groups.show', compact('group', 'matchQuestions', 'userAnswers', 'currentMatchday', 'socialQuestion'));
+        return view('groups.show', array_merge($cachedData, ['currentMatchday' => null]));
     }
 
     protected function generateMatchQuestions($match, $group)
