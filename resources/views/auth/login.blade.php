@@ -108,18 +108,6 @@
                    window.navigator.standalone === true;
         }
 
-        // Escuchar el evento beforeinstallprompt antes de mostrar el modal
-        window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('Evento beforeinstallprompt capturado');
-            e.preventDefault();
-            deferredPrompt = e;
-
-            // Si no es la primera visita y no está instalada, mostrar el modal
-            if (!localStorage.getItem('pwaInstallShown') && !isPWAInstalled()) {
-                showInstallModal();
-            }
-        });
-
         // Función para mostrar el modal de instalación
         function showInstallModal() {
             if (pwaInstallModal) {
@@ -129,22 +117,42 @@
             }
         }
 
+        // Detectar el dispositivo y mostrar las instrucciones correspondientes
+        function showDeviceInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isAndroid = /Android/.test(navigator.userAgent);
+
+            console.log('Detectando dispositivo:', { isIOS, isAndroid, deferredPrompt });
+
+            if (isIOS) {
+                iosInstructions.classList.remove('hidden');
+                androidInstructions.classList.add('hidden');
+                otherInstructions.classList.add('hidden');
+            } else if (isAndroid && deferredPrompt) {
+                androidInstructions.classList.remove('hidden');
+                iosInstructions.classList.add('hidden');
+                otherInstructions.classList.add('hidden');
+            } else {
+                otherInstructions.classList.remove('hidden');
+                androidInstructions.classList.add('hidden');
+                iosInstructions.classList.add('hidden');
+            }
+        }
+
+        // Escuchar el evento beforeinstallprompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('Evento beforeinstallprompt capturado');
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Actualizar las instrucciones si el modal está visible
+            if (!pwaInstallModal.classList.contains('hidden')) {
+                showDeviceInstructions();
+            }
+        });
+
         window.addEventListener('load', function() {
             console.log('Página cargada, inicializando PWA...');
-
-            // Detectar el dispositivo y mostrar las instrucciones correspondientes
-            function showDeviceInstructions() {
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                const isAndroid = /Android/.test(navigator.userAgent);
-
-                if (isIOS) {
-                    iosInstructions.classList.remove('hidden');
-                } else if (isAndroid) {
-                    androidInstructions.classList.remove('hidden');
-                } else {
-                    otherInstructions.classList.remove('hidden');
-                }
-            }
 
             // Verificar si es la primera visita y no está instalada
             if (!localStorage.getItem('pwaInstallShown') && !isPWAInstalled()) {
