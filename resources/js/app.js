@@ -13,9 +13,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const inputField = chatForm.querySelector('input[name="message"]');
         let isSubmitting = false;
 
-        chatForm.addEventListener('submit', function(e) {
+        chatForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevenir el envío por defecto
+
             if (isSubmitting) {
-                e.preventDefault();
                 return;
             }
 
@@ -23,12 +24,31 @@ document.addEventListener('DOMContentLoaded', function() {
             submitButton.disabled = true;
             submitButton.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // Restaurar el botón después de 5 segundos en caso de error
-            setTimeout(() => {
+            try {
+                const formData = new FormData(chatForm);
+                const response = await fetch(chatForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (response.ok) {
+                    // Limpiar el campo de mensaje
+                    inputField.value = '';
+                    // Recargar la página para mostrar el nuevo mensaje
+                    window.location.reload();
+                } else {
+                    throw new Error('Error al enviar el mensaje');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                // Restaurar el botón en caso de error
                 isSubmitting = false;
                 submitButton.disabled = false;
                 submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-            }, 5000);
+            }
         });
 
         // Prevenir envío con Enter múltiple

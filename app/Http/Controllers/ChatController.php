@@ -23,6 +23,17 @@ class ChatController extends Controller
         // Marcar el mensaje como leído por el remitente
         $message->markAsRead(auth()->user());
 
+        // Limpiar la caché del grupo
+        cache()->forget('group.' . $group->id . '.chat_messages');
+        cache()->forget('group.' . $group->id . '.unread_messages');
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+        }
+
         return back()->withFragment('chatForm');
     }
 
@@ -37,6 +48,10 @@ class ChatController extends Controller
         foreach ($unreadMessages as $message) {
             $message->markAsRead(auth()->user());
         }
+
+        // Limpiar la caché del grupo
+        cache()->forget('group.' . $group->id . '.chat_messages');
+        cache()->forget('group.' . $group->id . '.unread_messages');
 
         return response()->json([
             'success' => true,
