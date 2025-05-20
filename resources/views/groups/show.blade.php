@@ -6,7 +6,7 @@
         <!-- Encabezado del grupo -->
 
 
-        <div class="bg-offside-primary bg-opacity-70 p-1 mb-4 mt-8 fixed top-0 left-0 right-0 w-full" style="z-index: 1000;">
+        <div class="bg-offside-primary bg-opacity-90 p-1 mb-4 mt-8 fixed top-16 left-0 right-0 w-full" style="z-index: 1000; margin-top: 1rem !important;">
             <marquee behavior="scroll" direction="left" scrollamount="5">
                 @foreach($group->users->sortByDesc('points')->take(3) as $index => $user)
                     <span class="font-bold text-offside-light">

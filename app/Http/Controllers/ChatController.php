@@ -23,9 +23,18 @@ class ChatController extends Controller
         // Marcar el mensaje como leído por el remitente
         $message->markAsRead(auth()->user());
 
-        // Limpiar la caché del grupo
-        cache()->forget('group.' . $group->id . '.chat_messages');
-        cache()->forget('group.' . $group->id . '.unread_messages');
+        // Limpiar todas las claves de caché relacionadas con el grupo
+        $cacheKeys = [
+            "group_{$group->id}_show_data",
+            "group_{$group->id}_roles",
+            "group_{$group->id}_social_question",
+            "group.{$group->id}.chat_messages",
+            "group.{$group->id}.unread_messages"
+        ];
+
+        foreach ($cacheKeys as $key) {
+            cache()->forget($key);
+        }
 
         if ($request->ajax()) {
             return response()->json([
@@ -49,9 +58,18 @@ class ChatController extends Controller
             $message->markAsRead(auth()->user());
         }
 
-        // Limpiar la caché del grupo
-        cache()->forget('group.' . $group->id . '.chat_messages');
-        cache()->forget('group.' . $group->id . '.unread_messages');
+        // Limpiar todas las claves de caché relacionadas con el grupo
+        $cacheKeys = [
+            "group_{$group->id}_show_data",
+            "group_{$group->id}_roles",
+            "group_{$group->id}_social_question",
+            "group.{$group->id}.chat_messages",
+            "group.{$group->id}.unread_messages"
+        ];
+
+        foreach ($cacheKeys as $key) {
+            cache()->forget($key);
+        }
 
         return response()->json([
             'success' => true,
