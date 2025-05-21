@@ -50,16 +50,7 @@ class TemplateQuestionController extends Controller
             // Log de los datos validados
             \Log::info('Datos validados:', $validated);
 
-            $templateQuestion = TemplateQuestion::create($validated);
-
-            if ($request->has('options')) {
-                foreach ($request->options as $option) {
-                    $templateQuestion->options()->create([
-                        'text' => $option['text'],
-                        'is_correct' => $option['is_correct'] ?? false
-                    ]);
-                }
-            }
+            TemplateQuestion::create($validated);
 
             return redirect()->route('admin.template-questions.index')
                 ->with('success', 'Pregunta creada exitosamente.');

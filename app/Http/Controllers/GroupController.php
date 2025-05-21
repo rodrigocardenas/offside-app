@@ -114,7 +114,8 @@ class GroupController extends Controller
     {
         try {
             $matches = FootballMatch::where('league', $group->competition->type)
-                ->where('status', 'Not Started')
+                // ->where('status', 'Not Started')
+                ->where('date', '>=', now())
                 ->where('date', '<=', now()->addDays(5))
                 ->orderBy('is_featured', 'desc')
                 ->orderBy('date')
