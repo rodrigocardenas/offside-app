@@ -218,10 +218,10 @@ class GroupController extends Controller
                                 'userReactions' => function ($query) {
                                     $query->where('user_id', auth()->id());
                                 },
-                                'reactions' => function ($query) {
-                                    $query->select('template_question_id', 'reaction', DB::raw('count(*) as count'))
-                                        ->groupBy('template_question_id', 'reaction');
-                                }
+                                // 'reactions' => function ($query) {
+                                //     $query->select('template_question_id', 'reaction', DB::raw('count(*) as count'))
+                                //         ->groupBy('template_question_id', 'reaction');
+                                // }
                             ]);
                         }
                     ])
