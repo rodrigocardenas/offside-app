@@ -43,7 +43,12 @@
                                             <div class="mb-4">
                                                 <p class="text-sm text-offside-light">
                                                     @if($question->football_match)
-                                                        {{ $question->football_match->home_team }} vs {{ $question->football_match->away_team }}
+                                                    {{-- if question template has home_team: use this home_team name: --}}
+                                                        @if($question->templateQuestion->home_team)
+                                                            {{ $question->templateQuestion->home_team->name }} vs {{ $question->templateQuestion->away_team->name }}
+                                                        @else
+                                                            {{ $question->football_match->home_team }} vs {{ $question->football_match->away_team }}
+                                                        @endif
                                                     @else
                                                         {{ $question->title }}
                                                     @endif
