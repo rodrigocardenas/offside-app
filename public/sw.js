@@ -49,80 +49,38 @@ self.addEventListener('activate', (event) => {
 });
 
 // Estrategia de red con caché
-self.addEventListener('fetch', (event) => {
-  // No procesar peticiones que no sean HTTP/HTTPS
-  if (!event.request.url.startsWith('http')) {
-    return;
-  }
-
-  // Para peticiones de navegación, usar la estrategia network-first
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // Guardar la respuesta en caché
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          return response;
-        })
-        .catch(() => {
-          // Si falla la red, intentar servir desde caché
-          return caches.match(event.request)
-            .then(response => {
-              if (response) {
-                return response;
-              }
-              // Si no está en caché, mostrar página offline
-              return caches.match('/offline.html');
-            });
-        })
-    );
-    return;
-  }
-
-  // Para otros recursos, usar la estrategia cache-first
+self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request)
-      .then((response) => {
-        // Si la respuesta está en caché, la devolvemos
+      .then(function(response) {
+        // Cache hit - return response
         if (response) {
           return response;
         }
 
-        // Si no está en caché, hacemos la petición a la red
-        return fetch(event.request)
-          .then((response) => {
-            // No cacheamos respuestas que no sean exitosas
-            if (!response || response.status !== 200) {
+        // Solo cachear solicitudes GET
+        if (event.request.method !== 'GET') {
+          return fetch(event.request);
+        }
+
+        return fetch(event.request).then(
+          function(response) {
+            // Verificar si la respuesta es válida
+            if(!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
 
-            // Clonamos la respuesta para guardarla en caché
-            const responseToCache = response.clone();
+            // Clonar la respuesta
+            var responseToCache = response.clone();
 
             caches.open(CACHE_NAME)
-              .then((cache) => {
+              .then(function(cache) {
                 cache.put(event.request, responseToCache);
-              })
-              .catch(error => {
-                console.error('Error al guardar en caché:', error);
               });
 
             return response;
-          })
-          .catch(error => {
-            console.error('Error en la petición:', error);
-            return new Response('Error de conexión', {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: new Headers({
-                'Content-Type': 'text/plain'
-              })
-            });
-          });
+          }
+        );
       })
-  );
+    );
 });
