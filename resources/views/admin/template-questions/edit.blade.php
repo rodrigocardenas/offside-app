@@ -30,11 +30,11 @@
                             @error('type')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
-                            @if($templateQuestion->type !== 'multiple_choice')
+                            {{-- @if($templateQuestion->type !== 'multiple_choice')
                                 <p class="mt-1 text-sm text-yellow-600 dark:text-yellow-400">
                                     No se puede cambiar el tipo de pregunta una vez creada para mantener la integridad de los datos.
                                 </p>
-                            @endif
+                            @endif --}}
                         </div>
 
                         <div class="mb-4">

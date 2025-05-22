@@ -77,7 +77,7 @@
                             @enderror
 
                             <!-- Selector de partido (inicialmente oculto) -->
-                            <div id="match_selector" class="mt-4 hidden">
+                            {{-- <div id="match_selector" class="mt-4 hidden">
                                 <label for="football_match_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Partido
                                 </label>
@@ -88,6 +88,14 @@
                                 @error('football_match_id')
                                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                                 @enderror
+                            </div> --}}
+                            <div class="mb-4" id="match_date_container" style="display: none;">
+                                <label for="match_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Fecha del Partido
+                                </label>
+                                <input type="datetime-local" name="match_date" id="match_date"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                       value="{{ old('match_date') }}">
                             </div>
 
                             <!-- Selectores de equipos (inicialmente ocultos) -->
@@ -258,8 +266,10 @@
         const teamsSelectors = document.getElementById('teams_selectors');
         const homeTeamSelect = document.getElementById('home_team_id');
         const awayTeamSelect = document.getElementById('away_team_id');
+        const matchDateContainer = document.getElementById('match_date_container');
+        const matchDateInput = document.getElementById('match_date');
 
-        if (!competitionSelect || !matchSelector || !matchSelect || !teamsSelectors || !homeTeamSelect || !awayTeamSelect) {
+        if (!competitionSelect || !matchSelector || !matchSelect || !teamsSelectors || !homeTeamSelect || !awayTeamSelect || !matchDateContainer || !matchDateInput) {
             console.error('No se encontraron todos los elementos necesarios');
             return;
         }
@@ -272,6 +282,8 @@
                 // Mostrar selector de partido y equipos
                 matchSelector.classList.remove('hidden');
                 teamsSelectors.classList.remove('hidden');
+                matchDateContainer.style.display = 'block';
+                matchDateInput.required = true;
 
                 // Cargar partidos de la competencia
                 fetch(`/admin/competitions/${competitionId}/matches`)
@@ -322,6 +334,8 @@
                 // Ocultar selectores y limpiar opciones
                 matchSelector.classList.add('hidden');
                 teamsSelectors.classList.add('hidden');
+                matchDateContainer.style.display = 'none';
+                matchDateInput.required = false;
                 matchSelect.innerHTML = '<option value="">Seleccione un partido</option>';
                 homeTeamSelect.innerHTML = '<option value="">Seleccione un equipo</option>';
                 awayTeamSelect.innerHTML = '<option value="">Seleccione un equipo</option>';
