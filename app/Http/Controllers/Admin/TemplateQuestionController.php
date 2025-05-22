@@ -94,47 +94,71 @@ class TemplateQuestionController extends Controller
      */
     public function update(Request $request, TemplateQuestion $templateQuestion)
     {
-        // dd($request->all());
-        $validated = $request->validate([
-            'type' => 'required',
-            'text' => 'required|string|max:255',
-            'is_featured' => 'sometimes|boolean',
-            'options' => 'required_if:type,predictive|array|min:2',
-            'options.*.text' => 'required_if:type,predictive|string|max:255',
-            'options.*.is_correct' => 'sometimes',
-            'competition_id' => 'nullable|exists:competitions,id',
-            'used_at' => 'sometimes|boolean',
-        ]);
+        try {
+            $validated = $request->validate([
+                'type' => 'required',
+                'text' => 'required|string|max:255',
+                'is_featured' => 'sometimes|boolean',
+                'options' => 'required_if:type,predictive|array|min:2',
+                'options.*.text' => 'required_if:type,predictive|string|max:255',
+                'options.*.is_correct' => 'sometimes',
+                'competition_id' => 'nullable|exists:competitions,id',
+                'used_at' => 'sometimes|boolean',
+            ]);
 
-        $oldOptions = $templateQuestion->options;
-        $hasNewCorrectOption = false;
+            $oldOptions = $templateQuestion->options;
+            $hasNewCorrectOption = false;
 
-        // Verificar si hay una nueva opción correcta
-        if (isset($validated['options'])) {
-            foreach ($validated['options'] as $option) {
-                if (isset($option['is_correct']) && $option['is_correct']) {
-                    $hasNewCorrectOption = true;
-                    break;
+            // Verificar si hay una nueva opción correcta
+            if (isset($validated['options'])) {
+                foreach ($validated['options'] as $option) {
+                    if (isset($option['is_correct']) && $option['is_correct']) {
+                        $hasNewCorrectOption = true;
+                        break;
+                    }
                 }
             }
+
+            $templateQuestion->update([
+                'type' => $validated['type'],
+                'text' => $validated['text'],
+                'is_featured' => $validated['is_featured'] ?? false,
+                'options' => $validated['options'] ?? [],
+                'competition_id' => $validated['competition_id'],
+                'used_at' => $request->has('used_at') ? now() : null,
+            ]);
+
+            // Si hay una nueva opción correcta, despachar el job
+            if ($hasNewCorrectOption) {
+                UpdateAnswersPoints::dispatch($templateQuestion);
+            }
+
+            return redirect()->route('admin.template-questions.index')
+                ->with('success', 'Plantilla de pregunta actualizada correctamente');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Error de validación al actualizar plantilla', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all(),
+                'template_question_id' => $templateQuestion->id
+            ]);
+
+            return back()
+                ->withErrors($e->errors())
+                ->withInput();
+
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar plantilla', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all(),
+                'template_question_id' => $templateQuestion->id
+            ]);
+
+            return back()
+                ->with('error', 'Error al actualizar la plantilla: ' . $e->getMessage())
+                ->withInput();
         }
-
-        $templateQuestion->update([
-            'type' => $validated['type'],
-            'text' => $validated['text'],
-            'is_featured' => $validated['is_featured'] ?? false,
-            'options' => $validated['options'] ?? [],
-            'competition_id' => $validated['competition_id'],
-            'used_at' => $request->has('used_at') ? now() : null,
-        ]);
-
-        // Si hay una nueva opción correcta, despachar el job
-        if ($hasNewCorrectOption) {
-            UpdateAnswersPoints::dispatch($templateQuestion);
-        }
-
-        return redirect()->route('admin.template-questions.index')
-            ->with('success', 'Plantilla de pregunta actualizada correctamente');
     }
 
     /**
