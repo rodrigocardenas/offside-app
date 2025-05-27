@@ -65,7 +65,7 @@ class QuestionAdminController extends Controller
                 ]);
             }
         }
-        
+
         return redirect()->route('admin.questions.index')
             ->with('success', 'Pregunta creada exitosamente');
     }
@@ -103,8 +103,11 @@ class QuestionAdminController extends Controller
         ]);
 
         if ($validated['type'] === 'multiple_choice') {
-            $existingOptionIds = [];
-            
+            $existingOptionIds = collect($validated['options'])
+                ->pluck('id')
+                ->filter()
+                ->toArray();
+
             foreach ($validated['options'] as $optionData) {
                 if (isset($optionData['id'])) {
                     $option = $question->options()->find($optionData['id']);
@@ -113,7 +116,6 @@ class QuestionAdminController extends Controller
                             'text' => $optionData['text'],
                             'is_correct' => $optionData['is_correct'] ?? false,
                         ]);
-                        $existingOptionIds[] = $option->id;
                     }
                 } else {
                     $newOption = $question->options()->create([
@@ -123,11 +125,9 @@ class QuestionAdminController extends Controller
                     $existingOptionIds[] = $newOption->id;
                 }
             }
-            
-            // Eliminar opciones que no están en el formulario
+
             $question->options()->whereNotIn('id', $existingOptionIds)->delete();
         } else {
-            // Si el tipo no es de opción múltiple, eliminar todas las opciones
             $question->options()->delete();
         }
 

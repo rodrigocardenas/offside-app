@@ -17,14 +17,12 @@ class Player extends Model
         'first_name',
         'last_name',
         'position',
-        'birth_date',
         'nationality',
         'shirt_number',
         'market_value',
     ];
 
     protected $casts = [
-        'birth_date' => 'date',
         'date_of_birth' => 'date',
         'shirt_number' => 'integer',
         'is_active' => 'boolean',

@@ -22,7 +22,7 @@ return new class extends Migration
             // $table->boolean('is_featured')->default(false);
             // $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             // $table->foreignId('template_question_id')->nullable()->constrained('template_questions')->onDelete('set null');
-            // $table->foreignId('competition_id')->nullable()->constrained('competitions')->onDelete('cascade');
+            $table->foreignId('competition_id')->nullable()->constrained('competitions')->onDelete('cascade');
         });
     }
 
@@ -41,7 +41,7 @@ return new class extends Migration
             $table->dropColumn('template_question_id');
             $table->dropForeign(['competition_id']);
             $table->dropColumn('competition_id');
-            
+
             // Revertir el cambio en la columna category
             $table->string('category')->nullable(false)->change();
         });

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Group;
 use App\Models\Competition;
 use App\Models\Question;
-use App\Models\Option;
 use App\Models\QuestionOption;
 use App\Models\User;
 use App\Models\FootballMatch;
@@ -19,11 +18,16 @@ use Carbon\Carbon;
 use App\Services\FootballService;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use App\Traits\HandlesQuestions;
+use App\Services\GroupRoleService;
 
 class GroupController extends Controller
 {
+    use HandlesQuestions;
+
     protected $footballDataService;
     protected $openAIService;
+    protected $groupRoleService;
     protected $competitionMapping = [
         'champions' => 2001,  // UEFA Champions League
         'laliga' => 2014,    // La Liga
@@ -70,10 +74,14 @@ class GroupController extends Controller
         ]
     ];
 
-    public function __construct(FootballDataService $footballDataService, OpenAIService $openAIService)
-    {
+    public function __construct(
+        FootballDataService $footballDataService,
+        OpenAIService $openAIService,
+        GroupRoleService $groupRoleService
+    ) {
         $this->footballDataService = $footballDataService;
         $this->openAIService = $openAIService;
+        $this->groupRoleService = $groupRoleService;
     }
 
     public function index()
@@ -81,7 +89,11 @@ class GroupController extends Controller
         $groups = auth()->user()->groups()
             ->with(['creator', 'competition', 'users.roles'])
             ->get();
-        return view('groups.index', compact('groups'));
+
+        $officialGroups = $groups->where('category', 'official');
+        $amateurGroups = $groups->where('category', 'amateur');
+
+        return view('groups.index', compact('officialGroups', 'amateurGroups'));
     }
 
     public function create()
@@ -95,6 +107,7 @@ class GroupController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'competition_id' => 'nullable|exists:competitions,id',
+            'category' => 'required|in:official,amateur',
         ]);
 
         $group = Group::create([
@@ -102,6 +115,7 @@ class GroupController extends Controller
             'code' => Str::random(6),
             'created_by' => auth()->id(),
             'competition_id' => $request->competition_id,
+            'category' => $request->category,
         ]);
 
         $group->users()->attach(auth()->id());
@@ -113,8 +127,8 @@ class GroupController extends Controller
     protected function createPredictiveQuestion(Group $group)
     {
         try {
-            $matches = FootballMatch::where('league', $group->competition->type)
-                // ->where('status', 'Not Started')
+            $matches = FootballMatch::where('competition_id', $group->competition_id)
+                ->where('status', 'Not Started')
                 ->where('date', '>=', now())
                 ->where('date', '<=', now()->addDays(5))
                 ->orderBy('is_featured', 'desc')
@@ -169,17 +183,10 @@ class GroupController extends Controller
 
         // Intentar obtener datos del caché
         $cachedData = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($group) {
-            // Precargar roles para todos los usuarios
-            $rolesCacheKey = "group_{$group->id}_roles";
-            $roles = Cache::remember($rolesCacheKey, now()->addHours(24), function () use ($group) {
-                return DB::table('roles')
-                    ->join('role_user', 'roles.id', '=', 'role_user.role_id')
-                    ->whereIn('role_user.user_id', $group->users->pluck('id'))
-                    ->select('roles.*', 'role_user.user_id')
-                    ->get()
-                    ->groupBy('user_id');
-            });
+            // Obtener roles
+            $roles = $this->groupRoleService->getGroupRoles($group);
 
+            // Cargar relaciones del grupo
             $group->load([
                 'competition',
                 'users' => function ($query) use ($group) {
@@ -198,124 +205,13 @@ class GroupController extends Controller
                 'chatMessages.user'
             ]);
 
-            // Asignar roles desde el caché
-            foreach ($group->users as $user) {
-                $user->setRelation('roles', collect($roles[$user->id] ?? []));
-            }
+            // Asignar roles
+            $this->groupRoleService->assignRolesToUsers($group, $roles);
 
-            // Cache key para preguntas sociales
-            $socialQuestionCacheKey = "group_{$group->id}_social_question";
-            $socialQuestion = Cache::remember($socialQuestionCacheKey, now()->addMinutes(5), function () use ($group, $roles) {
-                $question = Question::where('type', 'social')
-                    ->where('group_id', $group->id)
-                    ->where('available_until', '>', now())
-                    ->with([
-                        'answers.user',
-                        'answers.option',
-                        'options',
-                        'templateQuestion' => function ($query) {
-                            $query->with([
-                                'userReactions' => function ($query) {
-                                    $query->where('user_id', auth()->id());
-                                },
-                                // 'reactions' => function ($query) {
-                                //     $query->select('template_question_id', 'reaction', DB::raw('count(*) as count'))
-                                //         ->groupBy('template_question_id', 'reaction');
-                                // }
-                            ]);
-                        }
-                    ])
-                    ->inRandomOrder()
-                    ->first();
-
-                if ($question) {
-                    // Asignar roles desde el caché para los usuarios en las respuestas
-                    foreach ($question->answers as $answer) {
-                        $answer->user->setRelation('roles', collect($roles[$answer->user->id] ?? []));
-                    }
-                }
-
-                return $question;
-            });
-
-            if ($group->users->count() <= 4 && $socialQuestion) {
-                foreach ($group->users as $user) {
-                    QuestionOption::updateOrCreate([
-                        'question_id' => $socialQuestion->id,
-                        'text' => $user->name,
-                    ], [
-                        'is_correct' => true
-                    ]);
-                }
-                $socialQuestion->refresh();
-                Cache::forget($socialQuestionCacheKey);
-            }
-
-            // Cache key para preguntas de partidos
-            $matchQuestionsCacheKey = "group_{$group->id}_match_questions";
-            $matchQuestions = Cache::remember($matchQuestionsCacheKey, now()->addMinutes(5), function () use ($group, $roles) {
-                if (!$group->competition) {
-                    return collect();
-                }
-
-                $questions = Question::where('type', 'predictive')
-                    ->where('group_id', $group->id)
-                    ->where('available_until', '>', now()->subHours(4))
-                    ->with([
-                        'options',
-                        'answers.user',
-                        'answers.option',
-                        'football_match',
-                        'templateQuestion' => function ($query) {
-                            $query->with([
-                                'userReactions' => function ($query) {
-                                    $query->where('user_id', auth()->id());
-                                },
-                                // 'reactions' => function ($query) {
-                                //     $query->select('template_question_id', 'reaction', DB::raw('count(*) as count'))
-                                //         ->groupBy('template_question_id', 'reaction');
-                                // }
-                            ]);
-                        }
-                    ])
-                    ->get();
-
-                // Asignar roles desde el caché para los usuarios en las respuestas
-                foreach ($questions as $question) {
-                    foreach ($question->answers as $answer) {
-                        $answer->user->setRelation('roles', collect($roles[$answer->user->id] ?? []));
-                    }
-                }
-
-                if ($questions->isEmpty()) {
-                    $createdQuestions = $this->createPredictiveQuestion($group);
-                    if ($createdQuestions) {
-                        $questions = $questions->merge($createdQuestions);
-                    }
-                }
-
-                return $questions->unique('id')->take(5);
-            });
-
-            // Cache key para respuestas del usuario
-            $userAnswersCacheKey = "user_{$group->id}_answers";
-            $userAnswers = Cache::remember($userAnswersCacheKey, now()->addMinutes(5), function () use ($group, $matchQuestions, $socialQuestion) {
-                return auth()->user()->answers()
-                    ->whereIn('question_id', $matchQuestions->pluck('id'))
-                    ->when($socialQuestion, function ($query) use ($socialQuestion) {
-                        $query->orWhere('question_id', $socialQuestion->id);
-                    })
-                    ->with(['option', 'question'])
-                    ->get(['option_id', 'question_id', 'updated_at']);
-            });
-
-            $matchQuestions->each(function ($question) {
-                if ($question->football_match) {
-                    $question->is_disabled = $question->football_match->status !== 'Not Started';
-                } else {
-                    $question->is_disabled = $question->available_until->isPast();
-                }
-            });
+            // Obtener preguntas y respuestas
+            $matchQuestions = $this->getMatchQuestions($group, $roles);
+            $socialQuestion = $this->getSocialQuestion($group, $roles);
+            $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
             return [
                 'group' => $group,
@@ -332,79 +228,97 @@ class GroupController extends Controller
         return view('groups.show', array_merge($cachedData, ['currentMatchday' => null]));
     }
 
-    protected function generateMatchQuestions($match, $group)
+    protected function generateMatchQuestions($matches, $group)
     {
+        Log::info('Generando preguntas para partidos:', [
+            'competition' => $group->competition->type,
+            'total_matches' => count($matches)
+        ]);
+
         $questions = collect();
 
-        if (!isset($match['id']) || !isset($match['home_team']) || !isset($match['away_team'])) {
-            Log::error('Datos de partido incompletos:', ['match' => $match]);
-            return $questions;
-        }
-
-        $matchData = [
-            'id' => $match['id'],
-            'home_team' => is_array($match['home_team']) ? $match['home_team']['name'] : $match['home_team'],
-            'away_team' => is_array($match['away_team']) ? $match['away_team']['name'] : $match['away_team'],
-            'date' => $match['date'] ?? now(),
-            'competition' => $group->competition->type
-        ];
-
-        try {
-            $generatedQuestions = $this->openAIService->generateMatchQuestions(
-                [$matchData],
-                2,
-                $group->competition->type
-            );
-
-            if (empty($generatedQuestions)) {
-                Log::warning('No se generaron preguntas para el partido:', ['match' => $matchData]);
-                return $questions;
-            }
-
-            foreach ($generatedQuestions as $questionData) {
-                if (!isset($questionData['title']) || !isset($questionData['options'])) {
-                    Log::warning('Datos de pregunta incompletos:', ['question' => $questionData]);
-                    continue;
-                }
-
-                $availableUntil = null;
-                try {
-                    if (isset($matchData['date']) && $matchData['date'] !== 'Fecha del partido') {
-                        $availableUntil = Carbon::parse($matchData['date']);
-                    } else {
-                        $availableUntil = now()->addDay();
-                    }
-                } catch (\Exception $e) {
-                    Log::warning('Error al parsear fecha del partido, usando fecha por defecto', [
-                        'date' => $matchData['date'],
-                        'error' => $e->getMessage()
-                    ]);
+        foreach ($matches as $match) {
+            $availableUntil = null;
+            try {
+                if (isset($match['date']) && $match['date'] !== 'Fecha del partido') {
+                    $availableUntil = Carbon::parse($match['date']);
+                } else {
                     $availableUntil = now()->addDay();
                 }
-
-                $questions->push($question->load('options'));
+            } catch (\Exception $e) {
+                Log::warning('Error al parsear fecha del partido, usando fecha por defecto', [
+                    'date' => $match['date'],
+                    'error' => $e->getMessage()
+                ]);
+                $availableUntil = now()->addDay();
             }
 
-            return $questions;
-        } catch (\Exception $e) {
-            Log::error('Error al generar preguntas: ' . $e->getMessage(), [
-                'match' => $matchData,
-                'trace' => $e->getTraceAsString()
+            $questionData = [
+                'title' => $this->generateQuestionText($match),
+                'description' => $this->generateQuestionText($match),
+                'type' => 'predictive',
+                'points' => 300,
+                'group_id' => $group->id,
+                'match_id' => $match['id'],
+                'available_until' => $availableUntil,
+            ];
+
+            $question = Question::create([
+                'title' => $questionData['title'],
+                'description' => $questionData['description'],
+                'type' => 'predictive',
+                'points' => $questionData['points'],
+                'group_id' => $questionData['group_id'],
+                'match_id' => $questionData['match_id'],
+                'available_until' => $questionData['available_until'],
             ]);
-            return $questions;
+
+            foreach ($this->generateOptions($match) as $option) {
+                QuestionOption::create([
+                    'question_id' => $question->id,
+                    'text' => $option['text'],
+                    'is_correct' => $option['is_correct'] ?? false
+                ]);
+            }
+
+            $questions->push($question->load('options'));
         }
+
+        return $questions;
+    }
+
+    protected function generateQuestionText($match)
+    {
+        $template = $this->questionTemplates[rand(0, count($this->questionTemplates) - 1)];
+        return str_replace(
+            ['{{home_team}}', '{{away_team}}'],
+            [$match['home_team'], $match['away_team']],
+            $template['template']
+        );
+    }
+
+    protected function generateOptions($match)
+    {
+        $template = $this->questionTemplates[rand(0, count($this->questionTemplates) - 1)];
+        return collect($template['options'])->map(function ($option) use ($match) {
+            return [
+                'text' => str_replace(
+                    ['{{home_team}}', '{{away_team}}'],
+                    [$match['home_team'], $match['away_team']],
+                    $option
+                ),
+                'is_correct' => $option === $match['home_team'] || $option === $match['away_team']
+            ];
+        })->toArray();
     }
 
     public function join(Request $request)
     {
-        $request->validate([
-            'code' => 'required|string|exists:groups,code',
-        ]);
-
         $group = Group::where('code', $request->code)->firstOrFail();
 
-        if ($group->users()->where('user_id', auth()->id())->exists()) {
-            return back()->with('error', 'Ya eres miembro de este grupo.');
+        if ($group->users->contains(auth()->id())) {
+            return redirect()->route('groups.show', $group)
+                ->with('error', 'Ya eres miembro de este grupo.');
         }
 
         $group->users()->attach(auth()->id());
@@ -413,30 +327,32 @@ class GroupController extends Controller
             ->with('success', 'Te has unido al grupo exitosamente.');
     }
 
-    public function leaveGroup(Group $group)
+    public function leave(Group $group)
     {
-        if ($group->created_by === auth()->id() && $group->users()->count() === 1) {
-            abort(403, 'No puedes abandonar un grupo que has creado');
+        if ($group->user_id === auth()->id()) {
+            return redirect()->route('groups.index')
+                ->with('error', 'No puedes abandonar un grupo que has creado.');
         }
 
-        auth()->user()->groups()->detach($group->id);
+        $group->users()->detach(auth()->id());
 
-        return redirect()->route('groups.index')->with('success', 'Has abandonado el grupo exitosamente');
+        return redirect()->route('groups.index')
+            ->with('success', 'Has abandonado el grupo exitosamente.');
     }
 
     public function joinByInvite($code)
     {
-        $group = Group::where('code', $code)->firstOrFail();
+        $group = Group::where('invite_code', $code)->firstOrFail();
 
-        if ($group->users()->where('user_id', auth()->id())->exists()) {
+        if ($group->users->contains(auth()->id())) {
             return redirect()->route('groups.show', $group)
-                ->with('info', 'Ya eres miembro de este grupo.');
+                ->with('error', 'Ya eres miembro de este grupo.');
         }
 
         $group->users()->attach(auth()->id());
 
         return redirect()->route('groups.show', $group)
-            ->with('success', '¡Te has unido al grupo exitosamente!');
+            ->with('success', 'Te has unido al grupo exitosamente.');
     }
 
     protected function getNextMatchdayMatches($competition)
@@ -473,66 +389,54 @@ class GroupController extends Controller
         }
 
         $socialQuestion = Question::where('type', 'social')
-            ->latest()
+            ->where('group_id', $group->id)
+            ->where('available_until', '>', now())
             ->first();
 
         if (!$socialQuestion) {
-            return null;
-        }
-
-        $groupQuestion = Question::create([
-            'title' => $socialQuestion->title,
-            'description' => $socialQuestion->description,
-            'type' => 'social',
-            'points' => 0,
-            'group_id' => $group->id,
-            'available_until' => now()->addDay(),
-        ]);
-
-        foreach ($group->users as $user) {
-            Option::create([
-                'question_id' => $groupQuestion->id,
-                'text' => $user->name,
-                'is_correct' => false,
-                'user_id' => $user->id,
+            $socialQuestion = Question::create([
+                'title' => '¿Quién será el MVP del grupo hoy?',
+                'description' => 'Vota por el miembro que crees que tendrá el mejor desempeño hoy',
+                'type' => 'social',
+                'points' => 100,
+                'group_id' => $group->id,
+                'available_until' => now()->addDay(),
             ]);
+
+            foreach ($group->users as $user) {
+                QuestionOption::create([
+                    'question_id' => $socialQuestion->id,
+                    'text' => $user->name,
+                    'is_correct' => false,
+                    'user_id' => $user->id,
+                ]);
+            }
+        } else {
+            // Actualizar opciones si hay nuevos usuarios
+            $existingOptions = $socialQuestion->options->pluck('text')->toArray();
+            $newUsers = $group->users->filter(function($user) use ($existingOptions) {
+                return !in_array($user->name, $existingOptions);
+            });
+
+            foreach ($newUsers as $user) {
+                QuestionOption::create([
+                    'question_id' => $socialQuestion->id,
+                    'text' => $user->name,
+                    'is_correct' => false,
+                    'user_id' => $user->id,
+                ]);
+            }
         }
 
-        return $groupQuestion->load(['options', 'answers.user']);
+        return $socialQuestion->load(['options', 'answers.user']);
     }
 
     public function testGenerateQuestions()
     {
-        $matches = [
-            [
-                'home_team' => 'Real Madrid',
-                'away_team' => 'Barcelona',
-                'date' => '2024-05-01 20:00:00'
-            ],
-            [
-                'home_team' => 'Atlético Madrid',
-                'away_team' => 'Sevilla',
-                'date' => '2024-05-01 18:00:00'
-            ],
-            [
-                'home_team' => 'Athletic Bilbao',
-                'away_team' => 'Real Sociedad',
-                'date' => '2024-05-02 21:00:00'
-            ]
-        ];
-
-        try {
-            $questions = $this->openAIService->generateMatchQuestions($matches, 2, 'La Liga');
-            return response()->json([
-                'success' => true,
-                'questions' => $questions
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $group = Group::first();
+        $matches = $this->footballDataService->getMatches($group->competition->type);
+        $questions = $this->generateMatchQuestions($matches, $group);
+        return response()->json($questions);
     }
 
     protected function generateQuestionsForMatches($matches, $group)
@@ -550,7 +454,7 @@ class GroupController extends Controller
             })
             ->orderBy('is_featured', 'desc')
             ->orderBy('id')
-            ->take(count($matches))
+            ->take(5)
             ->get();
 
         $socialTemplates = \App\Models\TemplateQuestion::where('type', 'social')
@@ -560,21 +464,39 @@ class GroupController extends Controller
 
         $questions = collect();
 
-        usort($matches, function($a, $b) {
-            $aFeatured = $a['is_featured'] ?? false;
-            $bFeatured = $b['is_featured'] ?? false;
-
-            if ($aFeatured && !$bFeatured) return -1;
-            if (!$aFeatured && $bFeatured) return 1;
-            return 0;
-        });
-
-        foreach ($matches as $index => $match) {
-            if (isset($predictiveTemplates[$index])) {
-                $template = $predictiveTemplates[$index];
+        // Si solo hay un partido, usaremos ese partido para todas las preguntas
+        if (count($matches) === 1) {
+            $match = $matches[0];
+            foreach ($predictiveTemplates as $template) {
                 $question = $this->createQuestionFromTemplate($template, $match, $group);
                 if ($question) {
                     $questions->push($question);
+                }
+            }
+        } else {
+            usort($matches, function($a, $b) {
+                $aFeatured = $a['is_featured'] ?? false;
+                $bFeatured = $b['is_featured'] ?? false;
+
+                if ($aFeatured && !$bFeatured) return -1;
+                if (!$aFeatured && $bFeatured) return 1;
+                return 0;
+            });
+
+            // Si hay menos de 5 partidos, generar más preguntas sobre el partido destacado
+            $remainingQuestions = 5;
+            $templateIndex = 0;
+
+            foreach ($matches as $match) {
+                $questionsForMatch = $match['is_featured'] ? min(3, $remainingQuestions) : 1;
+
+                for ($i = 0; $i < $questionsForMatch && $templateIndex < count($predictiveTemplates); $i++) {
+                    $template = $predictiveTemplates[$templateIndex++];
+                    $question = $this->createQuestionFromTemplate($template, $match, $group);
+                    if ($question) {
+                        $questions->push($question);
+                        $remainingQuestions--;
+                    }
                 }
             }
         }

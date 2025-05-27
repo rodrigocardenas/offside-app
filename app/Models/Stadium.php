@@ -12,12 +12,12 @@ class Stadium extends Model
 
     protected $fillable = [
         'name',
+        'address',
         'city',
         'country',
         'capacity',
         'surface',
         'image',
-        'address',
         'external_id',
     ];
 

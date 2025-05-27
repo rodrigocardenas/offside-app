@@ -29,7 +29,7 @@
                                 <div class="mt-2 space-y-4">
                                     @foreach($question->options as $option)
                                         <div class="flex items-center">
-                                            <input type="radio" name="option_id" value="{{ $option->id }}"
+                                            <input type="radio" name="question_option_id" value="{{ $option->id }}"
                                                 class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                                                 required>
                                             <label class="ml-3 block text-sm font-medium text-gray-700">

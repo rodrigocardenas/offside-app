@@ -16,7 +16,6 @@ class Answer extends Model
         'group_id',
         'is_correct',
         'points_earned',
-        'option_id',
         'category',
     ];
 
@@ -42,10 +41,5 @@ class Answer extends Model
     public function group()
     {
         return $this->belongsTo(Group::class);
-    }
-
-    public function option()
-    {
-        return $this->belongsTo(Option::class);
     }
 }

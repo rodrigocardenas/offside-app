@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 use App\Models\Question;
 use App\Models\TemplateQuestion;
 use App\Models\Answer;
-use App\Models\Option;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class QuestionController extends Controller
 {
@@ -90,7 +90,7 @@ class QuestionController extends Controller
         }
 
         $request->validate([
-            'option_id' => 'required|exists:options,id',
+            'question_option_id' => 'required|exists:question_options,id',
         ]);
 
         // Usar updateOrCreate para crear o actualizar la respuesta
@@ -100,14 +100,20 @@ class QuestionController extends Controller
                 'question_id' => $question->id,
             ],
             [
-                'option_id' => intval($request->option_id),
+                'question_option_id' => intval($request->question_option_id),
                 'is_correct' => $question->type === 'social' ? true : null,
                 'points_earned' => $question->type === 'social' ? 100 : 0,
                 'category' => $question->type,
             ]
         );
 
-        Log::info('Respuesta guardada o actualizada: ' . $question->id . ' - ' . $request->option_id);
+        // limpiar cache de respuestas en ese grupo
+        Cache::forget('user_answers_' . $question->group_id);
+        Cache::forget("group_{$question->group_id}_match_questions");
+        Cache::forget("group_{$question->group_id}_user_answers");
+        Cache::forget("group_{$question->group_id}_show_data");
+
+        Log::info('Respuesta guardada o actualizada: ' . $question->id . ' - ' . $request->question_option_id);
 
         return redirect()->route('groups.show', $question->group)->withFragment('question' . $question->id);
     }

@@ -53,4 +53,9 @@ class Team extends Model
     {
         return $this->homeMatches->merge($this->awayMatches);
     }
+
+    public function competition()
+    {
+        return $this->belongsTo(Competition::class);
+    }
 }

@@ -3,6 +3,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class FootballService
 {
@@ -56,6 +57,34 @@ class FootballService
                 'estado' => $match['fixture']['status']['long'],
                 'estadio' => $match['fixture']['venue']['name'],
             ];
+        });
+    }
+
+    public function getMatches($competitionId)
+    {
+        $cacheKey = "matches_{$competitionId}";
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($competitionId) {
+            $response = Http::withHeaders([
+                'X-Auth-Token' => config('services.football_data.api_key'),
+            ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches");
+
+            if ($response->successful()) {
+                return collect($response->json()['matches'])->map(function ($match) {
+                    return [
+                        'id' => $match['id'],
+                        'home_team' => $match['homeTeam']['name'],
+                        'away_team' => $match['awayTeam']['name'],
+                        'date' => $match['utcDate'],
+                        'status' => $match['status'],
+                        'score' => [
+                            'home' => $match['score']['fullTime']['home'] ?? null,
+                            'away' => $match['score']['fullTime']['away'] ?? null,
+                        ],
+                    ];
+                });
+            }
+
+            return collect();
         });
     }
 }

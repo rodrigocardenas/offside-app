@@ -7,31 +7,31 @@ use Illuminate\Database\Seeder;
 
 class CompetitionSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $competitions = [
             [
-                'name' => 'UEFA Champions League',
-                'type' => 'champions-league',
-                'country' => 'Europa'
-            ],
-            [
                 'name' => 'La Liga',
-                'type' => 'la-liga',
-                'country' => 'España'
+                'type' => 'laliga',
+                'description' => 'Liga española de fútbol'
             ],
             [
                 'name' => 'Premier League',
-                'type' => 'premier-league',
-                'country' => 'Inglaterra'
+                'type' => 'premier',
+                'description' => 'Liga inglesa de fútbol'
+            ],
+            [
+                'name' => 'Champions League',
+                'type' => 'champions',
+                'description' => 'Liga de campeones de Europa'
             ]
         ];
 
         foreach ($competitions as $competition) {
-            Competition::updateOrCreate(
-                ['name' => $competition['name']],
-                $competition
-            );
+            Competition::create($competition);
         }
     }
 }

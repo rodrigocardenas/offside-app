@@ -13,7 +13,8 @@ class Group extends Model
         'name',
         'code',
         'created_by',
-        'competition_id'
+        'competition_id',
+        'category'
     ];
 
     public function creator()
@@ -39,5 +40,20 @@ class Group extends Model
     public function competition()
     {
         return $this->belongsTo(Competition::class);
+    }
+
+    public function groupRoles()
+    {
+        return $this->hasMany(GroupRole::class);
+    }
+
+    public function answers()
+    {
+        return $this->hasMany(Answer::class);
+    }
+
+    public function templateQuestions()
+    {
+        return $this->hasMany(TemplateQuestion::class);
     }
 }

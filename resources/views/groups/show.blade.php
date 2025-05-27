@@ -63,23 +63,34 @@
                                                         Partido finalizado
                                                     @endif
                                                 </p>
+                                                @if($question->can_modify && $userAnswers->where('question_id', $question->id)->first())
+                                                    <div class="mt-2 text-sm text-blue-600">
+                                                        @php
+                                                            $remainingTime = $userAnswers->where('question_id', $question->id)->first()->updated_at->addMinutes(5)->diffInSeconds(now());
+                                                            $minutes = floor($remainingTime / 60);
+                                                            $seconds = $remainingTime % 60;
+                                                        @endphp
+                                                        Tiempo restante para modificar: {{ $minutes }}m {{ $seconds }}s
+                                                    </div>
+                                                @elseif($question->is_disabled)
+                                                    <div class="mt-2 text-sm text-red-600">
+                                                        Esta pregunta ya no está disponible para responder
+                                                    </div>
+                                                @endif
                                             </div>
-                                            @php
-                                                $userHasAnswered = $userAnswers->where('question_id', $question->id)->first();
-                                            @endphp
+
 
                                             @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now() && !$question->is_disabled) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
                                                 <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3">
                                                     @csrf
                                                     @foreach($question->options as $option)
                                                     <button type="submit"
-                                                            name="option_id"
+                                                            name="question_option_id"
                                                             value="{{ $option->id }}"
                                                             class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg">
                                                         <span>{{ $option->text }}</span>
-                                                        {{-- Agrega el avatar (en círculo) de los votos de la opción --}}
                                                         <div class="flex items-center space-x-2">
-                                                            @foreach($question->answers->where('option_id', $option->id) as $answer)
+                                                            @foreach($question->answers->where('question_option_id', $option->id) as $answer)
                                                                 @php
                                                                     $initials = '';
                                                                     $nameParts = explode(' ', $answer->user->name);
@@ -109,7 +120,7 @@
                                                             <div class="flex justify-between items-center">
                                                                 <span>{{ $option->text }}</span>
                                                                 <div class="text-sm">
-                                                                    @foreach($question->answers->where('option_id', $option->id) as $answer)
+                                                                    @foreach($question->answers->where('question_option_id', $option->id) as $answer)
                                                                         @php
                                                                             $initials = '';
                                                                             $nameParts = explode(' ', $answer->user->name);
@@ -122,6 +133,9 @@
                                                                         <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
                                                                              title="{{ $answer->user->name }}">
                                                                             {{ $initials }}
+                                                                        </div>
+                                                                        <div class="text-xs text-gray-400">
+                                                                            Tiempo restante: {{ $answer->updated_at->addMinutes(5)->diffForHumans() }}
                                                                         </div>
                                                                     @endforeach
                                                                 </div>
@@ -199,14 +213,34 @@
                                 @endphp
 
                                 @if((!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now()) || ($userHasAnswered && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
+                                    @dump($userHasAnswered)
                                     <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="space-y-3">
                                         @csrf
                                         @foreach($socialQuestion->options as $option)
                                             <button type="submit"
-                                                    name="option_id"
+                                                    name="question_option_id"
                                                     value="{{ $option->id }}"
                                                     class="w-full text-left bg-offside-primary hover:bg-offside-primary transition-colors p-4 rounded-lg">
-                                                {{ $option->text }}
+                                                <div class="flex justify-between items-center">
+                                                    <span>{{ $option->text }}</span>
+                                                    <div class="flex items-center space-x-2">
+                                                        @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
+                                                            @php
+                                                                $initials = '';
+                                                                $nameParts = explode(' ', $answer->user->name);
+                                                                foreach($nameParts as $part) {
+                                                                    $initials .= strtoupper(substr($part, 0, 1));
+                                                                }
+                                                                $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                                                $color = $colors[array_rand($colors)];
+                                                            @endphp
+                                                            <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
+                                                                 title="{{ $answer->user->name }}">
+                                                                {{ $initials }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
                                             </button>
                                         @endforeach
                                     </form>
@@ -215,13 +249,13 @@
                                     @foreach($socialQuestion->options as $option)
                                         <div class="p-4 rounded-lg {{
                                             $socialQuestion->available_until->addHours(4) > now()
-                                                ? ($userAnswers[$socialQuestion->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
-                                                : ($option->is_correct ? 'bg-green-600' : (($userAnswers[$socialQuestion->id] ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
+                                                ? (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
+                                                : ($option->is_correct ? 'bg-green-600' : (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
                                         }}">
                                             <div class="flex justify-between items-center">
                                                 <span>{{ $option->text }}</span>
-                                                <div class="text-sm">
-                                                    @foreach($socialQuestion->answers->where('option_id', $option->id) as $answer)
+                                                <div class="flex items-center space-x-2">
+                                                    @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
                                                         @php
                                                             $initials = '';
                                                             $nameParts = explode(' ', $answer->user->name);

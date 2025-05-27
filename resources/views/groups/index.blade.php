@@ -12,70 +12,129 @@
 
             <!-- Lista de grupos -->
             <div class="space-y-4">
-                @foreach($groups as $group)
-                    <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-15 transition-all">
-                        <div class="flex items-center justify-between">
-                            <a href="{{ route('groups.show', $group) }}" class="flex-1">
-                                <div class="flex items-center space-x-3">
-                                    <div class="flex -space-x-2">
-                                        @foreach($group->users->take(4) as $user)
-                                            <div class="w-8 h-8 rounded-full bg-offside-primary flex items-center justify-center text-xs font-bold ring-2 ring-offside-dark">
-                                                {{ substr($user->name, 0, 1) }}
+                <!-- Pestañas -->
+                <div class="flex space-x-4 mb-6">
+                    <button onclick="showTab('official')" class="tab-button active px-4 py-2 rounded-lg bg-offside-primary text-white" data-tab="official">
+                        Competiciones Oficiales
+                    </button>
+                    <button onclick="showTab('amateur')" class="tab-button px-4 py-2 rounded-lg bg-white/10 text-gray-400 hover:text-white" data-tab="amateur">
+                        Mis Competiciones
+                    </button>
+                </div>
+
+                <!-- Grupos Oficiales -->
+                <div id="official-tab" class="tab-content">
+                    @if($officialGroups->isEmpty())
+                        <div class="text-center py-8 text-gray-400">
+                            <p>No tienes grupos de competiciones oficiales.</p>
+                        </div>
+                    @else
+                        @foreach($officialGroups as $group)
+                            <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-15 transition-all mb-4">
+                                <div class="flex items-center justify-between">
+                                    <a href="{{ route('groups.show', $group) }}" class="flex-1">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="flex -space-x-2">
+                                                @foreach($group->users->take(4) as $user)
+                                                    <div class="w-8 h-8 rounded-full bg-offside-primary flex items-center justify-center text-xs font-bold ring-2 ring-offside-dark">
+                                                        {{ substr($user->name, 0, 1) }}
+                                                    </div>
+                                                @endforeach
                                             </div>
-                                        @endforeach
-                                    </div>
-                                    <div>
-                                        <h3 class="font-semibold">{{ $group->name }}</h3>
-                                        <p class="text-sm text-gray-400">hace {{ $group->created_at->diffForHumans() }}</p>
+                                            <div>
+                                                <h3 class="font-semibold">{{ $group->name }}</h3>
+                                                <p class="text-sm text-gray-400">hace {{ $group->created_at->diffForHumans() }}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <div class="flex space-x-2 ml-4">
+                                        <button
+                                            type="button"
+                                            onclick="showInviteModal('{{ $group->name }}', '{{ route('groups.invite', $group->code) }}')"
+                                            class="flex items-center space-x-1 text-offside-light hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+                                            title="Compartir grupo">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                        </button>
+                                        @if($group->users()->where('user_id', auth()->id())->exists())
+                                            <form action="{{ route('groups.leave', $group) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    type="submit"
+                                                    class="flex items-center space-x-1 text-yellow-500 hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10"
+                                                    title="Salir del grupo"
+                                                    onclick="return confirm('¿Estás seguro de que quieres salir de este grupo?')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </div>
-                            </a>
-                            <div class="flex space-x-2 ml-4">
-                                <button
-                                    type="button"
-                                    onclick="showInviteModal('{{ $group->name }}', '{{ route('groups.invite', $group->code) }}')"
-                                    class="flex items-center space-x-1 text-offside-light hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
-                                    title="Compartir grupo">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                    </svg>
-                                    <span class="text-sm"></span>
-                                </button>
-                                @if($group->users()->where('user_id', auth()->id())->exists())
-                                    <form action="{{ route('groups.leave', $group) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            type="submit"
-                                            class="flex items-center space-x-1 text-yellow-500 hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10"
-                                            title="Salir del grupo"
-                                            onclick="return confirm('¿Estás seguro de que quieres salir de este grupo?')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                            </svg>
-                                            <span class="text-sm"></span>
-                                        </button>
-                                    </form>
-                                @elseif($group->created_by === auth()->id() && $group->users()->count() === 1)
-                                    <form action="{{ route('groups.destroy', $group) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            type="submit"
-                                            class="flex items-center space-x-1 text-red-500 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-white/10"
-                                            title="Eliminar grupo"
-                                            onclick="return confirm('¿Estás seguro de que quieres eliminar este grupo?')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            <span class="text-sm">Eliminar</span>
-                                        </button>
-                                    </form>
-                                @endif
                             </div>
+                        @endforeach
+                    @endif
+                </div>
+
+                <!-- Grupos Amateurs -->
+                <div id="amateur-tab" class="tab-content hidden">
+                    @if($amateurGroups->isEmpty())
+                        <div class="text-center py-8 text-gray-400">
+                            <p>No tienes grupos de competiciones amateurs.</p>
                         </div>
-                    </div>
-                @endforeach
+                    @else
+                        @foreach($amateurGroups as $group)
+                            <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-15 transition-all mb-4">
+                                <div class="flex items-center justify-between">
+                                    <a href="{{ route('groups.show', $group) }}" class="flex-1">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="flex -space-x-2">
+                                                @foreach($group->users->take(4) as $user)
+                                                    <div class="w-8 h-8 rounded-full bg-offside-primary flex items-center justify-center text-xs font-bold ring-2 ring-offside-dark">
+                                                        {{ substr($user->name, 0, 1) }}
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                            <div>
+                                                <h3 class="font-semibold">{{ $group->name }}</h3>
+                                                <p class="text-sm text-gray-400">hace {{ $group->created_at->diffForHumans() }}</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <div class="flex space-x-2 ml-4">
+                                        <button
+                                            type="button"
+                                            onclick="showInviteModal('{{ $group->name }}', '{{ route('groups.invite', $group->code) }}')"
+                                            class="flex items-center space-x-1 text-offside-light hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+                                            title="Compartir grupo">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                        </button>
+                                        @if($group->users()->where('user_id', auth()->id())->exists())
+                                            <form action="{{ route('groups.leave', $group) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    type="submit"
+                                                    class="flex items-center space-x-1 text-yellow-500 hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10"
+                                                    title="Salir del grupo"
+                                                    onclick="return confirm('¿Estás seguro de que quieres salir de este grupo?')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
             </div>
 
             <!-- Botón Crear Grupo -->
@@ -409,6 +468,28 @@
                 this.classList.add('hidden');
             }
         });
+
+        // Script para las pestañas
+        function showTab(tabName) {
+            // Ocultar todos los contenidos de pestañas
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Desactivar todos los botones de pestañas
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active', 'bg-offside-primary', 'text-white');
+                button.classList.add('bg-white/10', 'text-gray-400');
+            });
+
+            // Mostrar el contenido de la pestaña seleccionada
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+            // Activar el botón de la pestaña seleccionada
+            const activeButton = document.querySelector(`[data-tab="${tabName}"]`);
+            activeButton.classList.add('active', 'bg-offside-primary', 'text-white');
+            activeButton.classList.remove('bg-white/10', 'text-gray-400');
+        }
     </script>
 
     <style>

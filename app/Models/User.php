@@ -59,7 +59,7 @@ class User extends Authenticatable
         if ($this->avatar) {
             return asset('storage/avatars/' . $this->avatar);
         }
-        
+
         // Retornar un avatar por defecto basado en el nombre del usuario
         $name = urlencode($this->name);
         return "https://ui-avatars.com/api/?name={$name}&background=random";
@@ -67,7 +67,7 @@ class User extends Authenticatable
 
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'role_user');
+        return $this->belongsToMany(Role::class);
     }
 
     public function hasRole($role)
@@ -130,5 +130,25 @@ class User extends Authenticatable
     public function chatMessages()
     {
         return $this->hasMany(ChatMessage::class);
+    }
+
+    public function userReactions()
+    {
+        return $this->hasMany(UserReaction::class);
+    }
+
+    public function groupRoles()
+    {
+        return $this->hasMany(GroupRole::class);
+    }
+
+    public function feedback()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
     }
 }

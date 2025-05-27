@@ -32,72 +32,42 @@ class UpdateAnswersPoints implements ShouldQueue
     public function handle(): void
     {
         try {
-            // Obtener todas las preguntas basadas en esta plantilla
-            $questions = Question::where('template_question_id', $this->templateQuestion->id)->get();
+            $correctOption = collect($this->templateQuestion->options)
+                ->first(function ($option) {
+                    return $option['is_correct'] ?? false;
+                });
+
+            if (!$correctOption) {
+                Log::warning('No se encontró una opción correcta para la pregunta', [
+                    'template_question_id' => $this->templateQuestion->id
+                ]);
+                return;
+            }
+
+            $questions = Question::where('template_question_id', $this->templateQuestion->id)
+                ->with(['answers.questionOption'])
+                ->get();
 
             foreach ($questions as $question) {
-                try {
-                    // Obtener la opción correcta de la plantilla
-                    $correctOption = collect($this->templateQuestion->options)
-                        ->firstWhere('is_correct', true);
-
-                    if (!$correctOption) {
-                        Log::warning('No se encontró opción correcta para la plantilla', [
-                            'template_question_id' => $this->templateQuestion->id,
-                            'question_id' => $question->id
+                foreach ($question->answers as $answer) {
+                    if ($answer->questionOption && $answer->questionOption->text === $correctOption['text']) {
+                        $answer->update([
+                            'is_correct' => true,
+                            'points_earned' => $question->points,
                         ]);
-                        continue;
+                    } else {
+                        $answer->update([
+                            'is_correct' => false,
+                            'points_earned' => 0,
+                        ]);
                     }
-
-                    // Calcular los puntos base
-                    $basePoints = 300;
-                    $points = $this->templateQuestion->is_featured ? $basePoints * 2 : $basePoints;
-
-                    // Actualizar los puntos de las respuestas correctas
-                    DB::transaction(function () use ($question, $correctOption, $points) {
-                        // Actualizar respuestas correctas
-                        $question->answers()
-                            ->where('category', 'predictive')
-                            ->update(['points_earned' => $points]);
-
-                        // Actualizar puntos de los usuarios en la tabla pivote
-                        $question->answers()
-                            ->where('category', 'predictive')
-                            ->each(function ($answer) use ($points, $question) {
-                                try {
-                                    // Actualizar puntos totales del usuario
-                                    $answer->user()->increment('points', $points);
-
-                                    // Actualizar puntos del usuario en el grupo
-                                    DB::table('group_user')
-                                        ->where('group_id', $question->group_id)
-                                        ->where('user_id', $answer->user_id)
-                                        ->increment('points', $points);
-                                } catch (\Exception $e) {
-                                    Log::error('Error al actualizar puntos del usuario', [
-                                        'error' => $e->getMessage(),
-                                        'user_id' => $answer->user_id,
-                                        'group_id' => $question->group_id,
-                                        'points' => $points
-                                    ]);
-                                }
-                            });
-                    });
-
-                    Log::info('Puntos actualizados exitosamente', [
-                        'question_id' => $question->id,
-                        'template_question_id' => $this->templateQuestion->id,
-                        'points' => $points
-                    ]);
-
-                } catch (\Exception $e) {
-                    Log::error('Error al procesar pregunta', [
-                        'error' => $e->getMessage(),
-                        'question_id' => $question->id,
-                        'template_question_id' => $this->templateQuestion->id
-                    ]);
                 }
             }
+
+            Log::info('Puntos actualizados exitosamente', [
+                'template_question_id' => $this->templateQuestion->id,
+            ]);
+
         } catch (\Exception $e) {
             Log::error('Error general en UpdateAnswersPoints', [
                 'error' => $e->getMessage(),

@@ -18,13 +18,15 @@ class TemplateQuestion extends Model
         'home_team_id',
         'away_team_id',
         'football_match_id',
-        'match_date'
+        'match_date',
+        'used_at'
     ];
 
     protected $casts = [
         'options' => 'array',
         'is_featured' => 'boolean',
-        'match_date' => 'datetime'
+        'match_date' => 'datetime',
+        'used_at' => 'datetime'
     ];
 
     protected $attributes = [

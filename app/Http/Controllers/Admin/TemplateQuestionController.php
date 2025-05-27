@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\TemplateQuestion;
 use App\Models\Competition;
-use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\UpdateAnswersPoints;
+use Illuminate\Validation\Rule;
 
 class TemplateQuestionController extends Controller
 {
@@ -17,7 +17,7 @@ class TemplateQuestionController extends Controller
      */
     public function index()
     {
-        $templateQuestions = TemplateQuestion::latest()->paginate(10);
+        $templateQuestions = TemplateQuestion::with('competition')->get();
         return view('admin.template-questions.index', compact('templateQuestions'));
     }
 
@@ -26,7 +26,7 @@ class TemplateQuestionController extends Controller
      */
     public function create()
     {
-        $competitions = Competition::all(); // Obtener todas las competencias
+        $competitions = Competition::all();
         return view('admin.template-questions.create', compact('competitions'));
     }
 
@@ -35,49 +35,27 @@ class TemplateQuestionController extends Controller
      */
     public function store(Request $request)
     {
-        try {
-            $validated = $request->validate([
-                'type' => 'required|in:predictive,social',
-                'text' => 'required|string|max:255',
-                'is_featured' => 'sometimes|boolean',
-                'competition_id' => 'nullable|exists:competitions,id|required_if:type,predictive',
-                'home_team_id' => 'nullable|exists:teams,id',
-                'away_team_id' => 'nullable|exists:teams,id',
-                'football_match_id' => 'nullable|exists:football_matches,id',
-                'options' => 'required_if:type,predictive|array|min:2',
-                'options.*.text' => 'required_if:type,predictive|string|max:255',
-                'match_date' => 'nullable|date'
-            ]);
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'type' => ['required', Rule::in(['predictive', 'social'])],
+            'options' => 'required_if:type,predictive|array|min:2',
+            'options.*.text' => 'required_if:type,predictive|string|max:255',
+            'options.*.is_correct' => 'sometimes',
+            'competition_id' => 'required|exists:competitions,id',
+        ]);
 
-            // Log de los datos validados
-            \Log::info('Datos validados:', $validated);
+        $templateQuestion = TemplateQuestion::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'type' => $validated['type'],
+            'options' => $validated['options'] ?? [],
+            'competition_id' => $validated['competition_id'],
+            'user_id' => auth()->id(),
+        ]);
 
-            TemplateQuestion::create($validated);
-
-            return redirect()->route('admin.template-questions.index')
-                ->with('success', 'Pregunta creada exitosamente.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Log de los errores de validación
-            \Log::error('Errores de validación:', [
-                'errors' => $e->errors(),
-                'request_data' => $request->all()
-            ]);
-
-            return back()
-                ->withErrors($e->errors())
-                ->withInput();
-        } catch (\Exception $e) {
-            // Log de otros errores
-            \Log::error('Error al crear pregunta:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all()
-            ]);
-
-            return back()
-                ->with('error', 'Error al crear la pregunta: ' . $e->getMessage())
-                ->withInput();
-        }
+        return redirect()->route('admin.template-questions.index')
+            ->with('success', 'Plantilla de pregunta creada exitosamente');
     }
 
     /**
@@ -85,7 +63,7 @@ class TemplateQuestionController extends Controller
      */
     public function edit(TemplateQuestion $templateQuestion)
     {
-        $competitions = Competition::all(); // Obtener todas las competencias
+        $competitions = Competition::all();
         return view('admin.template-questions.edit', compact('templateQuestion', 'competitions'));
     }
 
@@ -96,68 +74,36 @@ class TemplateQuestionController extends Controller
     {
         try {
             $validated = $request->validate([
-                'type' => 'required',
-                'text' => 'required|string|max:255',
-                'is_featured' => 'sometimes|boolean',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'type' => ['required', Rule::in(['predictive', 'social'])],
                 'options' => 'required_if:type,predictive|array|min:2',
                 'options.*.text' => 'required_if:type,predictive|string|max:255',
                 'options.*.is_correct' => 'sometimes',
-                'competition_id' => 'nullable|exists:competitions,id',
-                'used_at' => 'sometimes|boolean',
+                'competition_id' => 'required|exists:competitions,id',
             ]);
 
             $oldOptions = $templateQuestion->options;
-            $hasNewCorrectOption = false;
-
-            // Verificar si hay una nueva opción correcta
-            if (isset($validated['options'])) {
-                foreach ($validated['options'] as $option) {
-                    if (isset($option['is_correct']) && $option['is_correct']) {
-                        $hasNewCorrectOption = true;
-                        break;
-                    }
-                }
-            }
 
             $templateQuestion->update([
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
                 'type' => $validated['type'],
-                'text' => $validated['text'],
-                'is_featured' => $validated['is_featured'] ?? false,
-                'options' => $validated['options'] ?? [],
                 'competition_id' => $validated['competition_id'],
-                'used_at' => $request->has('used_at') ? now() : null,
             ]);
 
-            // Si hay una nueva opción correcta, despachar el job
-            if ($hasNewCorrectOption) {
-                UpdateAnswersPoints::dispatch($templateQuestion);
+            if (isset($validated['options'])) {
+                foreach ($validated['options'] as $option) {
+                    $templateQuestion->options = array_merge($templateQuestion->options ?? [], [$option]);
+                }
+                $templateQuestion->save();
             }
 
             return redirect()->route('admin.template-questions.index')
-                ->with('success', 'Plantilla de pregunta actualizada correctamente');
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Error de validación al actualizar plantilla', [
-                'errors' => $e->errors(),
-                'request_data' => $request->all(),
-                'template_question_id' => $templateQuestion->id
-            ]);
-
-            return back()
-                ->withErrors($e->errors())
-                ->withInput();
-
+                ->with('success', 'Plantilla de pregunta actualizada exitosamente');
         } catch (\Exception $e) {
-            Log::error('Error al actualizar plantilla', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all(),
-                'template_question_id' => $templateQuestion->id
-            ]);
-
-            return back()
-                ->with('error', 'Error al actualizar la plantilla: ' . $e->getMessage())
-                ->withInput();
+            Log::error('Error al actualizar la plantilla de pregunta: ' . $e->getMessage());
+            return back()->with('error', 'Error al actualizar la plantilla de pregunta');
         }
     }
 
@@ -166,8 +112,13 @@ class TemplateQuestionController extends Controller
      */
     public function destroy(TemplateQuestion $templateQuestion)
     {
-        $templateQuestion->delete();
-        return redirect()->route('admin.template-questions.index')
-            ->with('success', 'Plantilla de pregunta eliminada correctamente');
+        try {
+            $templateQuestion->delete();
+            return redirect()->route('admin.template-questions.index')
+                ->with('success', 'Plantilla de pregunta eliminada exitosamente');
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar la plantilla de pregunta: ' . $e->getMessage());
+            return back()->with('error', 'Error al eliminar la plantilla de pregunta');
+        }
     }
 }

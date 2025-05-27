@@ -5,6 +5,7 @@ namespace App\Services;
 use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class OpenAIService
 {
@@ -106,5 +107,78 @@ class OpenAIService
         $results = json_decode($content, true);
 
         return collect($results['respuestas'] ?? []);
+    }
+
+    public function generateQuestion($match)
+    {
+        $prompt = "Genera una pregunta predictiva para el partido de fútbol entre {$match['home_team']} y {$match['away_team']}. La pregunta debe ser clara y concisa, y debe tener opciones de respuesta específicas.";
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . config('services.openai.api_key'),
+            'Content-Type' => 'application/json',
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'Eres un experto en fútbol que genera preguntas predictivas para partidos.',
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $prompt,
+                ],
+            ],
+            'temperature' => 0.7,
+            'max_tokens' => 150,
+        ]);
+
+        if ($response->successful()) {
+            $content = $response->json()['choices'][0]['message']['content'];
+            return [
+                'title' => $content,
+                'options' => $this->generateOptions($content),
+            ];
+        }
+
+        return null;
+    }
+
+    protected function generateOptions($question)
+    {
+        $prompt = "Genera 3 opciones de respuesta para la siguiente pregunta: {$question}";
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . config('services.openai.api_key'),
+            'Content-Type' => 'application/json',
+        ])->post('https://api.openai.com/v1/chat/completions', [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'Eres un experto en fútbol que genera opciones de respuesta para preguntas predictivas.',
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $prompt,
+                ],
+            ],
+            'temperature' => 0.7,
+            'max_tokens' => 150,
+        ]);
+
+        if ($response->successful()) {
+            $content = $response->json()['choices'][0]['message']['content'];
+            return collect(explode("\n", $content))
+                ->filter()
+                ->map(function ($option) {
+                    return [
+                        'text' => trim($option),
+                        'is_correct' => false,
+                    ];
+                })
+                ->toArray();
+        }
+
+        return [];
     }
 }
