@@ -213,7 +213,6 @@
                                 @endphp
 
                                 @if((!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now()) || ($userHasAnswered && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
-                                    @dump($userHasAnswered)
                                     <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="space-y-3">
                                         @csrf
                                         @foreach($socialQuestion->options as $option)
