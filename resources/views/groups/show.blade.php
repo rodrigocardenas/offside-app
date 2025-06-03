@@ -203,7 +203,7 @@
                                 <div class="mb-4">
                                     <h3 class="text-xl mb-2">{{ $socialQuestion->title }}</h3>
                                     @if($socialQuestion->description)
-                                        <p class="text-sm text-offside-light">Finaliza en: <span class="countdown" data-time="{{ $question->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
+                                        <p class="text-sm text-offside-light">Finaliza en: <span class="countdown" data-time="{{ $socialQuestion->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
                                         </p>
                                     @endif
                                 </div>
