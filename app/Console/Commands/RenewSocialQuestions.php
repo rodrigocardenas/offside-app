@@ -14,7 +14,7 @@ class RenewSocialQuestions extends Command
 
     public function handle()
     {
-        $groups = Group::where('is_active', true)->get();
+        $groups = Group::all();
 
         foreach ($groups as $group) {
             // Eliminar preguntas sociales antiguas

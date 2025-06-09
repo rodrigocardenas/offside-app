@@ -25,6 +25,7 @@ class FootballService
             'bundesliga' => 78,
             'ligue-1' => 61,
             'champions-league' => 2,
+            'world-club-championship' => 15,
         ];
     }
 
@@ -41,7 +42,7 @@ class FootballService
             'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
         ])->get($this->baseUrl . 'fixtures', [
             'league' => $leagueId,
-            'season' => 2024,
+            'season' => 2025,
             'next' => $limit,
         ]);
 

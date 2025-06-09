@@ -38,6 +38,8 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
             'champions-league', // Champions League
             'premier-league', // Premier League
             'la-liga',       // La Liga
+            // Mundial de Clubes:
+            'world-club-championship', // Mundial de Clubes
             // 'serie-a',       // Serie A
             // 'bundesliga',    // Bundesliga
             // 'ligue-1'        // Ligue 1
@@ -49,7 +51,7 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
                 // dump('Obteniendo partidos para la liga ' . $league);
                 $matches = $footballService->getNextMatches($league, 20);
                 Log::info('Se obtuvieron ' . count($matches) . ' partidos para la liga ' . $league);
-                
+
                 // Guardar los partidos en la base de datos
                 foreach ($matches as $match) {
                     Log::info('Guardando partido: ' . json_encode($match));
@@ -65,10 +67,10 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
                         ]
                     );
                 }
-                
+
                 // Actualizar partidos destacados para esta liga
                 $featuredMatchService->updateFeaturedMatches();
-                
+
             } catch (\Exception $e) {
                 Log::error('Error al obtener partidos para la liga ' . $league, [
                     'error' => $e->getMessage(),
@@ -83,6 +85,7 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
             'champions-league', // Champions League
             'premier-league', // Premier League
             'la-liga',       // La Liga
+            'world-club-championship',
             // 'serie-a',       // Serie A
             // 'bundesliga',    // Bundesliga
             // 'ligue-1'        // Ligue 1
@@ -91,7 +94,7 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
         foreach ($leagues as $league) {
             try {
                 $matches = $footballService->getNextMatches($league, 20);
-                
+
                 // Guardar los partidos en la base de datos
                 foreach ($matches as $match) {
                     FootballMatch::updateOrCreate(
