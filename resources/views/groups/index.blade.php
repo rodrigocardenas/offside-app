@@ -569,7 +569,6 @@
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json',
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Authorization': 'Bearer {{ auth()->user()->currentAccessToken?->plainTextToken ?? '' }}'
                                 },
                                 body: JSON.stringify({
                                     endpoint: '',
