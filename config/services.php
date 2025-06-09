@@ -38,4 +38,8 @@ return [
         'key' => env('FOOTBALL_API_KEY'),
     ],
 
+    'fcm' => [
+        'server_key' => env('FCM_SERVER_KEY'),
+    ],
+
 ];

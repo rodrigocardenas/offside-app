@@ -44,7 +44,7 @@ Route::middleware(['auth'])->group(function () {
     // Grupos
     Route::resource('groups', GroupController::class);
     Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
-    Route::delete('groups/{group}/leave', [GroupController::class, 'leaveGroup'])->name('groups.leave');
+    Route::delete('groups/{group}/leave', [GroupController::class, 'leave'])->name('groups.leave');
 
     // Preguntas
     Route::resource('questions', QuestionController::class);

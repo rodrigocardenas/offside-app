@@ -18,6 +18,10 @@ class Kernel extends ConsoleKernel
             ->onFailure(function () {
                 Log::error('Error en la actualización diaria de datos de fútbol');
             });
+
+        $schedule->command('social-questions:renew')
+            ->dailyAt('15:00')
+            ->timezone('America/Mexico_City');
     }
 
     /**

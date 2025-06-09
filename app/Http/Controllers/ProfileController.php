@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
+use App\Models\Competition;
+use App\Models\Team;
 
 class ProfileController extends Controller
 {
@@ -15,8 +16,19 @@ class ProfileController extends Controller
      */
     public function edit()
     {
-        $user = Auth::user();
-        return view('profile.edit', compact('user'));
+        $user = auth()->user();
+        $competitions = Competition::all();
+
+        // Si el usuario tiene una competencia favorita, solo mostramos los clubes de esa competencia
+        if ($user->favorite_competition_id) {
+            $clubs = Team::where('type', 'club')->get();
+        } else {
+            $clubs = collect(); // Lista vacía si no hay competencia seleccionada
+        }
+
+        $nationalTeams = Team::where('type', 'national')->get();
+
+        return view('profile.edit', compact('user', 'competitions', 'clubs', 'nationalTeams'));
     }
 
     /**
@@ -24,102 +36,31 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $user = Auth::user();
-        
-        $request->validate([
+        $user = auth()->user();
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'favorite_competition_id' => 'nullable|exists:competitions,id',
+            'favorite_club_id' => 'nullable|exists:teams,id',
+            'favorite_national_team_id' => 'nullable|exists:teams,id',
         ]);
 
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-        ];
-
-        // Procesar la imagen de avatar si se subió
+        // Actualizar avatar si se proporciona uno nuevo
         if ($request->hasFile('avatar')) {
-            // Crear el directorio si no existe
-            if (!Storage::exists('public/avatars')) {
-                Storage::makeDirectory('public/avatars');
-            }
-
-
-            // Eliminar el avatar anterior si existe
+            // Eliminar avatar anterior si existe
             if ($user->avatar) {
                 Storage::delete('public/avatars/' . $user->avatar);
             }
 
-
-            $image = $request->file('avatar');
-            $filename = Str::uuid() . '.' . $image->getClientOriginalExtension();
-            $destinationPath = storage_path('app/public/avatars/');
-            
-            // Crear directorio si no existe
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0777, true);
-            }
-            
-            // Mover el archivo a la ubicación temporal
-            $tempPath = $image->getRealPath();
-            if (empty($tempPath)) {
-                $tempPath = tempnam(sys_get_temp_dir(), 'img_');
-                file_put_contents($tempPath, file_get_contents($image->getPathname()));
-            }
-            
-            // Obtener las dimensiones de la imagen original
-            list($width, $height) = getimagesize($tempPath);
-            
-            // Calcular nuevas dimensiones manteniendo la relación de aspecto
-            $newWidth = 200;
-            $newHeight = (int) (200 * $height / $width);
-            
-            // Crear una nueva imagen con las dimensiones deseadas
-            $thumb = imagecreatetruecolor($newWidth, $newHeight);
-            
-            // Cargar la imagen según su tipo
-            $source = null;
-            $ext = strtolower($image->getClientOriginalExtension());
-            
-            if ($ext == 'jpg' || $ext == 'jpeg') {
-                $source = imagecreatefromjpeg($tempPath);
-            } elseif ($ext == 'png') {
-                $source = imagecreatefrompng($tempPath);
-                // Preservar la transparencia
-                imagealphablending($source, false);
-                imagesavealpha($source, true);
-            } elseif ($ext == 'gif') {
-                $source = imagecreatefromgif($tempPath);
-            }
-            
-            if ($source) {
-                // Redimensionar la imagen
-                imagecopyresized($thumb, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-                
-                // Guardar la imagen
-                $fullPath = $destinationPath . $filename;
-                if ($ext == 'jpg' || $ext == 'jpeg') {
-                    imagejpeg($thumb, $fullPath, 90);
-                } elseif ($ext == 'png') {
-                    // Configurar la transparencia para PNG
-                    imagealphablending($thumb, false);
-                    imagesavealpha($thumb, true);
-                    imagepng($thumb, $fullPath, 9);
-                } elseif ($ext == 'gif') {
-                    imagegif($thumb, $fullPath);
-                }
-                
-                // Liberar memoria
-                imagedestroy($source);
-                imagedestroy($thumb);
-            }
-
-            $data['avatar'] = $filename;
+            $avatarName = time() . '.' . $request->avatar->extension();
+            $request->avatar->storeAs('public/avatars', $avatarName);
+            $validated['avatar'] = $avatarName;
         }
 
-        $user->update($data);
+        $user->update($validated);
 
-        return redirect()->route('profile.edit')
-            ->with('success', 'Perfil actualizado exitosamente.');
+        return redirect()->route('profile.edit')->with('success', 'Perfil actualizado correctamente');
     }
 }

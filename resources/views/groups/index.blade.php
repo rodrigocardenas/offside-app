@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6">
+    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6 pb-28">
         <div class="max-w-4xl mx-auto mt-16">
             {{-- welcome wizard --}}
             <!-- Título de la sección -->
@@ -8,6 +8,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 <h2 class="text-xl font-semibold text-offside-light">Tus grupos</h2>
+                <button id="activar-notificaciones" class="ml-4 px-3 py-1 bg-offside-primary text-white rounded hover:bg-orange-600" style="display:none;">
+                    🔔 Activar notificaciones
+                </button>
             </div>
 
             <!-- Lista de grupos -->
@@ -42,8 +45,12 @@
                                                 @endforeach
                                             </div>
                                             <div>
-                                                <h3 class="font-semibold">{{ $group->name }}</h3>
-                                                <p class="text-sm text-gray-400">hace {{ $group->created_at->diffForHumans() }}</p>
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="bg-white rounded-full p-1">
+                                                        <img src="{{ asset("images/competitions/".$group->competition?->crest_url) }}" alt="{{ $group->competition?->name }}" class="w-4 h-4">
+                                                    </div>
+                                                    <h3 class="font-semibold">{{ $group->name }}</h3>
+                                                </div>
                                             </div>
                                         </div>
                                     </a>
@@ -99,8 +106,13 @@
                                                 @endforeach
                                             </div>
                                             <div>
-                                                <h3 class="font-semibold">{{ $group->name }}</h3>
-                                                <p class="text-sm text-gray-400">hace {{ $group->created_at->diffForHumans() }}</p>
+                                                <div class="flex items-center space-x-2">
+                                                    {{-- div con diseño de budge que contiene el logo de la competicion --}}
+                                                    <div class="bg-offside-primary rounded-full p-1">
+                                                        <img src="{{ asset("images/competitions/".$group->competition?->crest_url) }}" alt="{{ $group->competition?->name }}" class="w-4 h-4">
+                                                    </div>
+                                                    <h3 class="font-semibold">{{ $group->name }}</h3>
+                                                </div>
                                             </div>
                                         </div>
                                     </a>
@@ -138,7 +150,7 @@
             </div>
 
             <!-- Botón Crear Grupo -->
-            <div class="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4">
+            <div class=" bottom-2   w-full  px-4">
                 <a href="{{ route('groups.create') }}" class="block w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white text-center py-4 rounded-full font-semibold hover:from-orange-600 hover:to-orange-500 transition-all">
                     + Crear grupo
                 </a>
@@ -305,8 +317,44 @@
                 </div>
             </div>
         </div>
+
+        <!-- Menú inferior fijo -->
+        <div class="fixed bottom-0 left-0 right-0 bg-offside-dark border-t border-offside-primary mt-16">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-around items-center py-3">
+                    <a href="{{ route('groups.index') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="text-xs mt-1">Grupos</span>
+                    </a>
+                    <button disabled class="flex flex-col items-center text-gray-500 cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-xs mt-1">Comunidades</span>
+                    </button>
+                    <a href="#" id="openFeedbackModal" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span class="text-xs mt-1">Tu opinión</span>
+                    </a>
+                    <a href="{{ route('profile.edit') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span class="text-xs mt-1">Perfil</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <x-feedback-modal />
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
     <script>
         let currentInviteLink = '';
         let currentGroupName = '';
@@ -490,6 +538,60 @@
             activeButton.classList.add('active', 'bg-offside-primary', 'text-white');
             activeButton.classList.remove('bg-white/10', 'text-gray-400');
         }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCTXfOTcgYozlv2E6pjV_QD0QZJ47aYN8",
+            authDomain: "offside-dd226.firebaseapp.com",
+            projectId: "offside-dd226",
+            storageBucket: "offside-dd226.appspot.com",
+            messagingSenderId: "249528682190",
+            appId: "1:249528682190:web:c2be461351ccc44474f29f",
+            measurementId: "G-EZ0VLLBGZN"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+        const vapidKey = 'BFT3Sbs3FnMmNK-qRAKD-VsrPEpuX_mQHdEhLeJs_2CQ8uPGhuXZlGfNeNzm9kzwwWN0llK2FcYEP-hMq5_KN2M	'; // Reemplaza por tu clave pública VAPID
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if ('Notification' in window && 'serviceWorker' in navigator && Notification.permission !== 'granted') {
+                document.getElementById('activar-notificaciones').style.display = 'inline-block';
+            }
+        });
+
+        document.getElementById('activar-notificaciones').addEventListener('click', function() {
+            Notification.requestPermission().then(function(permission) {
+                if (permission === 'granted') {
+                    messaging.getToken({vapidKey: vapidKey}).then(function(currentToken) {
+                        if (currentToken) {
+                            fetch('/api/push-subscriptions', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Authorization': 'Bearer {{ auth()->user()->currentAccessToken?->plainTextToken ?? '' }}'
+                                },
+                                body: JSON.stringify({
+                                    endpoint: '',
+                                    public_key: '',
+                                    auth_token: '',
+                                    device_token: currentToken
+                                })
+                            }).then(res => res.json()).then(data => {
+                                showNotification('¡Notificaciones activadas!');
+                                document.getElementById('activar-notificaciones').style.display = 'none';
+                            });
+                        } else {
+                            showNotification('No se pudo obtener el token de notificación', 'error');
+                        }
+                    }).catch(function(err) {
+                        showNotification('Error al obtener el token: ' + err, 'error');
+                    });
+                } else {
+                    showNotification('Permiso de notificaciones denegado', 'error');
+                }
+            });
+        });
     </script>
 
     <style>

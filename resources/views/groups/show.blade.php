@@ -45,7 +45,7 @@
                                                     @if($question->football_match)
                                                     {{-- if question template has home_team: use this home_team name: --}}
                                                         @if($question->templateQuestion->homeTeam)
-                                                            {{ $question->templateQuestion->homeTeam->name }} vs {{ $question->templateQuestion->awayTeam->name }}
+                                                            <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->crest_url }}" class="w-6 h-6 mr-2"> vs {{ $question->templateQuestion->awayTeam->crest_url }}
                                                         @else
                                                             {{ $question->football_match->home_team }} vs {{ $question->football_match->away_team }}
                                                         @endif

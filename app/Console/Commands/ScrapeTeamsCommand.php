@@ -31,6 +31,13 @@ class ScrapeTeamsCommand extends Command
             'url' => 'https://www.transfermarkt.es/uefa-champions-league/gesamtspielplan/pokalwettbewerb/CL/saison_id/2024',
             'selector' => '.items tbody tr .no-border-links a',
             'is_champions' => true
+        ],
+        'club_world_cup' => [
+            'name' => 'Mundial de Clubes',
+            'url' => 'https://www.transfermarkt.es/fifa-klub-wm/startseite/pokalwettbewerb/KLUB',
+            'selector' => '.items tbody tr .no-border-links a',
+            'is_champions' => false,
+            'competition_id' => 4
         ]
     ];
 
@@ -60,19 +67,19 @@ class ScrapeTeamsCommand extends Command
     protected function processCompetition($client, $key, $competition)
     {
         $this->info("Processing {$competition['name']}...");
-        
+
         try {
             $crawler = $client->request('GET', $competition['url']);
-            
+
             $teams = [];
             $crawler->filter($competition['is_champions'] ? '.items tbody tr' : $competition['selector'])->each(function ($node) use (&$teams, $competition) {
                 if ($competition['is_champions'] ?? false) {
                     $link = $node->filter('.no-border-links a');
                     if ($link->count() === 0) return;
-                    
+
                     $href = $link->attr('href');
                     if (!str_contains($href, '/verein/')) return;
-                    
+
                     $teamId = $this->extractTeamId($href);
                     $teams[$teamId] = [
                         'name' => trim($link->text()),
@@ -93,7 +100,7 @@ class ScrapeTeamsCommand extends Command
             });
 
             $this->info("Found " . count($teams) . " teams in {$competition['name']}:");
-            
+
             $this->table(
                 ['ID', 'Name', 'URL'],
                 array_map(function($team) {
@@ -109,17 +116,17 @@ class ScrapeTeamsCommand extends Command
             $filename = storage_path("teams_{$key}_" . now()->format('Y-m-d') . '.json');
             file_put_contents($filename, json_encode(array_values($teams), JSON_PRETTY_PRINT));
             $this->info("Team data saved to: " . $filename);
-            
+
             // Ask if user wants to import these teams
             if ($this->confirm('Do you want to import these teams to the database?', true)) {
-                $this->importTeams($teams);
+                $this->importTeams($teams, $competition);
             }
-            
+
         } catch (\Exception $e) {
             $this->error("Error processing {$competition['name']}: " . $e->getMessage());
         }
     }
-    
+
     protected function extractTeamId($url)
     {
         if (preg_match('/verein\/(\d+)/', $url, $matches)) {
@@ -127,28 +134,35 @@ class ScrapeTeamsCommand extends Command
         }
         return null;
     }
-    
-    protected function importTeams($teams)
+
+    protected function importTeams($teams, $competition)
     {
         $teamModel = app(\App\Models\Team::class);
         $imported = 0;
-        
+
         foreach ($teams as $team) {
             try {
-                $teamModel->updateOrCreate(
+                $createdTeam = $teamModel->updateOrCreate(
                     ['external_id' => $team['external_id']],
                     [
                         'name' => $team['name'],
                         'short_name' => strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $team['name']), 0, 3)),
                         'country' => 'Spain', // You might want to extract this from the data
+                        'type' => 'club'
                     ]
                 );
+
+                // Asociar el equipo a la competencia si se especifica
+                if (isset($competition['competition_id'])) {
+                    $createdTeam->competitions()->syncWithoutDetaching([$competition['competition_id']]);
+                }
+
                 $imported++;
             } catch (\Exception $e) {
                 $this->error("Error importing team {$team['name']}: " . $e->getMessage());
             }
         }
-        
+
         $this->info("Successfully imported/updated {$imported} teams.");
     }
 }

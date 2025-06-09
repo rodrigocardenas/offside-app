@@ -329,10 +329,10 @@ class GroupController extends Controller
 
     public function leave(Group $group)
     {
-        if ($group->user_id === auth()->id()) {
-            return redirect()->route('groups.index')
-                ->with('error', 'No puedes abandonar un grupo que has creado.');
-        }
+        // if ($group->user_id === auth()->id()) {
+        //     return redirect()->route('groups.index')
+        //         ->with('error', 'No puedes abandonar un grupo que has creado.');
+        // }
 
         $group->users()->detach(auth()->id());
 

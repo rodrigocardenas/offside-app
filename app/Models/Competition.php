@@ -14,6 +14,7 @@ class Competition extends Model
         'name',
         'type',
         'country',
+        'crest_url',
     ];
 
     public function groups()
@@ -33,6 +34,6 @@ class Competition extends Model
 
     public function teams()
     {
-        return $this->hasMany(Team::class, 'competition_id', 'id');
+        return $this->belongsToMany(Team::class);
     }
 }

@@ -26,6 +26,9 @@ class User extends Authenticatable
         'unique_id',
         'is_admin',
         'avatar',
+        'favorite_competition_id',
+        'favorite_club_id',
+        'favorite_national_team_id',
     ];
 
     /**
@@ -150,5 +153,20 @@ class User extends Authenticatable
     public function questions()
     {
         return $this->hasMany(Question::class);
+    }
+
+    public function favoriteCompetition()
+    {
+        return $this->belongsTo(Competition::class, 'favorite_competition_id');
+    }
+
+    public function favoriteClub()
+    {
+        return $this->belongsTo(Team::class, 'favorite_club_id');
+    }
+
+    public function favoriteNationalTeam()
+    {
+        return $this->belongsTo(Team::class, 'favorite_national_team_id');
     }
 }

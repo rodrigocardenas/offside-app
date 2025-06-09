@@ -23,8 +23,8 @@
                     <div class="mb-6 flex flex-col items-center">
                         <div class="relative mb-4">
                             @if($user->avatar)
-                                <img src="{{ asset('storage/avatars/' . $user->avatar) }}" 
-                                     alt="{{ $user->name }}" 
+                                <img src="{{ asset('storage/avatars/' . $user->avatar) }}"
+                                     alt="{{ $user->name }}"
                                      class="w-32 h-32 rounded-full object-cover border-2 border-offside-primary">
                             @else
                                 <div class="w-32 h-32 rounded-full bg-offside-primary flex items-center justify-center">
@@ -45,8 +45,8 @@
                     <!-- Nombre -->
                     <div class="mb-4">
                         <label for="name" class="block text-sm font-medium mb-2">Nombre</label>
-                        <input type="text" id="name" name="name" 
-                               value="{{ old('name', $user->name) }}" 
+                        <input type="text" id="name" name="name"
+                               value="{{ old('name', $user->name) }}"
                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
                         @error('name')
                             <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
@@ -56,10 +56,61 @@
                     <!-- Email -->
                     <div class="mb-6">
                         <label for="email" class="block text-sm font-medium mb-2">Correo electrónico</label>
-                        <input type="email" id="email" name="email" 
-                               value="{{ old('email', $user->email) }}" 
+                        <input type="email" id="email" name="email"
+                               value="{{ old('email', $user->email) }}"
                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
                         @error('email')
+                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Competencia Favorita -->
+                    <div class="mb-6">
+                        <label for="favorite_competition_id" class="block text-sm font-medium mb-2">Competencia Favorita</label>
+                        <select id="favorite_competition_id" name="favorite_competition_id"
+                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
+                            <option value="">Selecciona una competencia</option>
+                            @foreach($competitions as $competition)
+                                <option value="{{ $competition->id }}" {{ old('favorite_competition_id', $user->favorite_competition_id) == $competition->id ? 'selected' : '' }}>
+                                    {{ $competition->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('favorite_competition_id')
+                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Club Favorito -->
+                    <div class="mb-6">
+                        <label for="favorite_club_id" class="block text-sm font-medium mb-2">Club Favorito</label>
+                        <select id="favorite_club_id" name="favorite_club_id"
+                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
+                            <option value="">Selecciona un club</option>
+                            @foreach($clubs as $club)
+                                <option value="{{ $club->id }}" {{ old('favorite_club_id', $user->favorite_club_id) == $club->id ? 'selected' : '' }}>
+                                    {{ $club->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('favorite_club_id')
+                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Selección Nacional Favorita -->
+                    <div class="mb-6">
+                        <label for="favorite_national_team_id" class="block text-sm font-medium mb-2">Selección Nacional Favorita</label>
+                        <select id="favorite_national_team_id" name="favorite_national_team_id"
+                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
+                            <option value="">Selecciona una selección</option>
+                            @foreach($nationalTeams as $team)
+                                <option value="{{ $team->id }}" {{ old('favorite_national_team_id', $user->favorite_national_team_id) == $team->id ? 'selected' : '' }}>
+                                    {{ $team->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('favorite_national_team_id')
                             <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
                         @enderror
                     </div>
@@ -112,11 +163,10 @@
                 </div>
             </div>
             <!-- Botón flotante del chat -->
-        
+
     </div>
 
 
-    @push('scripts')
     <script>
         // Mostrar vista previa de la imagen seleccionada
         document.getElementById('avatar').addEventListener('change', function(e) {
@@ -127,7 +177,7 @@
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.className = 'w-32 h-32 rounded-full object-cover border-2 border-offside-primary';
-                    
+
                     const avatarContainer = document.querySelector('.relative.mb-4');
                     const existingImg = avatarContainer.querySelector('img, div');
                     if (existingImg) {
@@ -139,8 +189,31 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        // Actualizar clubes cuando cambie la competencia
+        document.getElementById('favorite_competition_id').addEventListener('change', function(e) {
+            const competitionId = e.target.value;
+            const clubSelect = document.getElementById('favorite_club_id');
+
+            // Limpiar el selector de clubes
+            clubSelect.innerHTML = '<option value="">Selecciona un club</option>';
+
+            if (competitionId) {
+                // Hacer la petición AJAX para obtener los clubes de la competencia
+                fetch(`/api/competitions/${competitionId}/teams`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(team => {
+                            const option = document.createElement('option');
+                            option.value = team.id;
+                            option.textContent = team.name;
+                            clubSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
     </script>
-    @endpush
 
 <x-feedback-modal />
 

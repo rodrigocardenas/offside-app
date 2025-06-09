@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             GroupSeeder::class,
             SocialQuestionsSeeder::class,
             TemplateQuestionSeeder::class,
+            NationalTeamsSeeder::class,
         ]);
     }
 }
