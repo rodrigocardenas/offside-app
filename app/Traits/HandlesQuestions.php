@@ -112,7 +112,10 @@ trait HandlesQuestions
 
     private function checkIfAllMatchesFinished($group)
     {
-        return \App\Models\FootballMatch::where('league', $group->competition->type)
+        return \App\Models\FootballMatch::where(function($query) use ($group) {
+                $query->where('league', $group->competition->type)
+                    ->orWhere('league', 4); // Mundial de Clubes
+            })
             ->where('date', '>=', now()->subDays(5))
             ->where('date', '<=', now())
             ->where('status', '!=', 'FINISHED')

@@ -32,6 +32,7 @@ class GroupController extends Controller
         'champions' => 2001,  // UEFA Champions League
         'laliga' => 2014,    // La Liga
         'premier' => 2021,   // Premier League
+        'world-club-championship' => 15,
     ];
     protected $questionTemplates = [
         [
@@ -127,7 +128,10 @@ class GroupController extends Controller
     protected function createPredictiveQuestion(Group $group)
     {
         try {
-            $matches = FootballMatch::where('competition_id', $group->competition_id)
+            $matches = FootballMatch::where(function($query) use ($group) {
+                    $query->where('competition_id', $group->competition_id)
+                        ->orWhere('competition_id', 4); // Mundial de Clubes
+                })
                 ->where('status', 'Not Started')
                 ->where('date', '>=', now())
                 ->where('date', '<=', now()->addDays(5))
