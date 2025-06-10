@@ -9,6 +9,7 @@
         "doctrine/dbal": "^3.9",
         "fabpot/goutte": "^4.0",
         "guzzlehttp/guzzle": "^7.2",
+        "illuminate/notifications": "*",
         "intervention/image": "*",
         "intervention/image-laravel": "*",
         "laravel-notification-channels/webpush": "^9.0",

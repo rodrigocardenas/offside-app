@@ -22,7 +22,7 @@ class NewSocialQuestionAvailable extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast', 'web-push'];
+        return ['database', 'broadcast'];
     }
 
     public function toArray($notifiable)

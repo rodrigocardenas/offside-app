@@ -169,6 +169,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\TelescopeServiceProvider::class,
+        NotificationChannels\WebPush\WebPushServiceProvider::class,
     ])->toArray(),
 
     /*
