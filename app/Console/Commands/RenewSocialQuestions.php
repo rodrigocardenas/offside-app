@@ -45,13 +45,42 @@ class RenewSocialQuestions extends Command
             return null;
         }
 
-        return \App\Models\Question::create([
-            'title' => '¿Quién será el MVP del grupo hoy?',
-            'description' => 'Vota por el miembro que crees que tendrá el mejor desempeño hoy',
+        // Obtener una pregunta social aleatoria que no haya sido usada hoy
+        $templateQuestion = \App\Models\TemplateQuestion::where('type', 'social')
+            ->where(function ($query) {
+                $query->whereNull('used_at')
+                    ->orWhere('used_at', '<', now()->startOfDay());
+            })
+            ->inRandomOrder()
+            ->first();
+
+        if (!$templateQuestion) {
+            return null;
+        }
+
+        // Crear la pregunta basada en la plantilla
+        $question = \App\Models\Question::create([
+            'title' => $templateQuestion->text,
+            'description' => $templateQuestion->text,
             'type' => 'social',
             'points' => 100,
             'group_id' => $group->id,
             'available_until' => now()->addDay(),
+            'template_question_id' => $templateQuestion->id
         ]);
+
+        // Crear opciones basadas en los usuarios del grupo
+        foreach ($group->users as $user) {
+            \App\Models\QuestionOption::create([
+                'question_id' => $question->id,
+                'text' => $user->name,
+                'is_correct' => false
+            ]);
+        }
+
+        // Marcar la plantilla como usada
+        $templateQuestion->update(['used_at' => now()]);
+
+        return $question;
     }
 }
