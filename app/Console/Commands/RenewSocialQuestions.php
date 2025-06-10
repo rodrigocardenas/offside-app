@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Group;
 use App\Notifications\NewSocialQuestionAvailable;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RenewSocialQuestions extends Command
 {
@@ -45,11 +46,16 @@ class RenewSocialQuestions extends Command
             return null;
         }
 
-        // Obtener una pregunta social aleatoria que no haya sido usada hoy
+        // Obtener una pregunta social aleatoria que no haya sido usada en este grupo
         $templateQuestion = \App\Models\TemplateQuestion::where('type', 'social')
-            ->where(function ($query) {
+            ->where(function ($query) use ($group) {
                 $query->whereNull('used_at')
-                    ->orWhere('used_at', '<', now()->startOfDay());
+                    ->orWhereNotExists(function ($subquery) use ($group) {
+                        $subquery->select(\DB::raw(1))
+                            ->from('questions')
+                            ->whereColumn('questions.template_question_id', 'template_questions.id')
+                            ->where('questions.group_id', $group->id);
+                    });
             })
             ->inRandomOrder()
             ->first();
@@ -79,7 +85,7 @@ class RenewSocialQuestions extends Command
         }
 
         // Marcar la plantilla como usada
-        $templateQuestion->update(['used_at' => now()]);
+        // $templateQuestion->update(['used_at' => now()]);
 
         return $question;
     }
