@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6">
-        <div class="max-w-2xl mx-auto">
+        <div class="max-w-2xl mx-auto" style="margin-top: 60px;">
             <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-offside-light">Crear nuevo grupo</h2>
