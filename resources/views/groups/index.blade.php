@@ -233,7 +233,11 @@
                         <div class="wizard-step hidden" data-step="5">
                             <div class="text-center">
                                 <h3 class="text-2xl font-bold text-gray-900 mb-4">¡Comienza a Jugar!</h3>
-                                <p class="text-gray-600 mb-8">Únete a un grupo existente o crea uno nuevo para empezar a competir.</p>
+                                <p class="text-gray-600 mb-4">Para una experiencia más personalizada, completa tu perfil primero.</p>
+                                <a href="{{ route('profile.edit') }}" class="inline-flex justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#FF6B35] hover:bg-[#FF6B35]/90 mb-6">
+                                    Completar Perfil
+                                </a>
+                                <p class="text-gray-600 mb-8">O si prefieres, puedes unirte a un grupo existente o crear uno nuevo para empezar a competir.</p>
                                 <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                                     <a href="{{ route('groups.create') }}" class="inline-flex justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#FF6B35] hover:bg-[#FF6B35]/90">
                                         Crear Grupo
