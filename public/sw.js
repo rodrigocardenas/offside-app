@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offside-club-v1.0.1';
+const CACHE_NAME = 'offside-club-v1.0.2';
 const ASSETS_TO_CACHE = [
   '/',
   '/login',
@@ -59,6 +59,13 @@ self.addEventListener('activate', (event) => {
 
 // Estrategia de red con caché
 self.addEventListener('fetch', function(event) {
+  // No cachear rutas dinámicas
+  if (event.request.url.includes('/groups') ||
+      event.request.url.includes('/predictions') ||
+      event.request.url.includes('/ranking')) {
+    return fetch(event.request);
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
