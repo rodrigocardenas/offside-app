@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offside-club-v1.0.0';
+const CACHE_NAME = 'offside-club-v1.0.1';
 const ASSETS_TO_CACHE = [
   '/',
   '/login',
@@ -46,6 +46,15 @@ self.addEventListener('activate', (event) => {
   );
   // Toma el control de los clientes inmediatamente
   event.waitUntil(clients.claim());
+
+  // Notificar a los clientes que hay una nueva versión
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then(clientsArr => {
+      clientsArr.forEach(client => {
+        client.postMessage({ type: 'NEW_VERSION_AVAILABLE' });
+      });
+    })
+  );
 });
 
 // Estrategia de red con caché
@@ -83,4 +92,11 @@ self.addEventListener('fetch', function(event) {
         );
       })
     );
+});
+
+// Permitir que el frontend fuerce la activación del nuevo SW
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

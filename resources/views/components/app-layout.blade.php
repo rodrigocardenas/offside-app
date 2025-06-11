@@ -199,6 +199,44 @@
                 e.target.classList.add('hidden');
             }
         });
+
+        // Banner de nueva versión disponible
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'NEW_VERSION_AVAILABLE') {
+                    mostrarBannerNuevaVersion();
+                }
+            });
+        }
+
+        function mostrarBannerNuevaVersion() {
+            if (document.getElementById('update-banner')) return;
+            const banner = document.createElement('div');
+            banner.id = 'update-banner';
+            banner.style.position = 'fixed';
+            banner.style.bottom = '0';
+            banner.style.left = '0';
+            banner.style.right = '0';
+            banner.style.background = '#e0850c';
+            banner.style.color = '#fff';
+            banner.style.padding = '16px';
+            banner.style.textAlign = 'center';
+            banner.style.zIndex = '9999';
+            banner.innerHTML = `
+                ¡Nueva versión disponible!
+                <button id="reload-btn" style="margin-left:16px;padding:8px 16px;background:#fff;color:#e0850c;border:none;border-radius:4px;cursor:pointer;font-weight:bold;">
+                    Actualizar ahora
+                </button>
+            `;
+            document.body.appendChild(banner);
+
+            document.getElementById('reload-btn').onclick = function() {
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+                }
+                window.location.reload();
+            };
+        }
     </script>
 </body>
 </html>

@@ -224,6 +224,15 @@
         });
     </script>
 
+    @if(session('status') === 'profile-updated')
+        <script>
+            // Recarga la página después de 1 segundo para aplicar el nuevo tema
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        </script>
+    @endif
+
 <x-feedback-modal />
 
 </x-app-layout>
