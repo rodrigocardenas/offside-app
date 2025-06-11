@@ -25,98 +25,6 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/navigation.js'])
-    <script>
-        $(document).ready(function() {
-            // Variables globales
-            let deferredPrompt;
-
-            // Verificar si la aplicación ya está instalada
-            function checkInstallationStatus() {
-                // Para navegadores móviles
-                if (window.matchMedia('(display-mode: fullscreen)').matches) {
-                    console.log('La aplicación ya está instalada');
-                    return true;
-                }
-                // Para Chrome en escritorio
-                if (window.navigator.standalone === true) {
-                    console.log('La aplicación ya está instalada');
-                    return true;
-                }
-                return false;
-            }
-
-            // Mostrar el botón de instalación si es compatible
-            function showInstallPromotion() {
-                // Mostrar el botón en la barra de navegación
-                $('#installButtonContainer').css('display', 'flex');
-                // Mostrar el modal (como respaldo)
-                $('#installModal').removeClass('hidden');
-            }
-
-            // Manejar el evento beforeinstallprompt
-            $(window).on('beforeinstallprompt', function(e) {
-                console.log('Evento beforeinstallprompt activado');
-                e.preventDefault();
-                deferredPrompt = e;
-                showInstallPromotion();
-            });
-
-            // Verificar si el evento beforeinstallprompt no se disparó
-            $(window).on('load', function() {
-                setTimeout(() => {
-                    if (!deferredPrompt && !checkInstallationStatus()) {
-                        console.log('Mostrando botón de instalación manual');
-                        showInstallPromotion();
-                    }
-                }, 3000);
-            });
-
-            // Función para instalar la aplicación
-            function installApp() {
-                if (deferredPrompt) {
-                    console.log('Mostrando prompt de instalación');
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then(function(choiceResult) {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('Usuario aceptó la instalación');
-                            $('#installButtonContainer').css('display', 'none');
-                        } else {
-                            console.log('Usuario rechazó la instalación');
-                        }
-                        deferredPrompt = null;
-                        closeInstallModal();
-                    });
-                } else {
-                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                    if (isIOS) {
-                        alert('Para instalar esta aplicación en iOS, toca el botón compartir y luego "Añadir a la pantalla de inicio"');
-                    } else {
-                        alert('Para instalar esta aplicación, por favor usa el menú de opciones de tu navegador.');
-                    }
-                }
-            }
-
-            // Cerrar el modal
-            function closeInstallModal() {
-                $('#installModal').addClass('hidden');
-            }
-
-            // Registrar el Service Worker
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('{{ asset('sw.js') }}')
-                    .then(function(registration) {
-                        console.log('ServiceWorker registrado con éxito');
-                        checkInstallationStatus();
-                    })
-                    .catch(function(error) {
-                        console.log('Error al registrar el ServiceWorker:', error);
-                    });
-            }
-
-            // Eventos de click para los botones de instalación
-            $('#installButton, #installButtonNav').on('click', installApp);
-        });
-    </script>
     @stack('scripts')
 </head>
 <body class="h-full font-sans antialiased bg-black text-white">
@@ -171,25 +79,5 @@
     @stack('modals')
     @livewireScripts
     <script src="{{ asset('sw-update.js') }}"></script>
-
-    <script>
-        // Manejar clic en el botón de instalación de la barra de navegación
-        document.addEventListener('DOMContentLoaded', function() {
-            const installButtonNav = document.getElementById('installButtonNav');
-            if (installButtonNav) {
-                installButtonNav.addEventListener('click', function() {
-                    installApp();
-                });
-            }
-
-            // Ocultar el botón si la aplicación ya está instalada
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                const installButtonContainer = document.getElementById('installButtonContainer');
-                if (installButtonContainer) {
-                    installButtonContainer.style.display = 'none';
-                }
-            }
-        });
-    </script>
 </body>
 </html>

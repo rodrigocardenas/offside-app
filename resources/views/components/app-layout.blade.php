@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $userTheme === 'light' ? 'light-theme' : 'dark-theme' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,6 +16,152 @@
 
     <!-- Scripts and Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* Estilos para el tema claro */
+        .light-theme {
+            --bg-primary: #ffffff;
+            --bg-secondary: #dbfef8;
+            --text-primary: #1a1a1a;
+            --text-secondary: #003b2f;
+            --border-color: #dce2e1;
+            --hover-bg: #f3f4f6;
+            --accent: #e0850c;
+            --green-main: #69bfb6;
+            --green-dark: #003b2f;
+            --gray-secondary: #dce2e1;
+            --card-bg: rgba(255,255,255,0.85);
+            --modal-bg: rgba(255,255,255,0.95);
+        }
+
+        /* Estilos para el tema oscuro (default) */
+        .dark-theme {
+            --bg-primary: rgb(0 46 44 / var(--tw-bg-opacity, 1));
+            --bg-secondary: rgb(0 46 44 / var(--tw-bg-opacity, 2));
+            --text-primary: #ffffff;
+            --text-secondary: #e2e2e2;
+            --border-color: #404040;
+            --hover-bg: #333333;
+            --bg-offside-dark: rgb(0 46 44 / var(--tw-bg-opacity, 1));
+        }
+
+        /* Aplicar variables CSS */
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .bg-offside-dark {
+            background-color: var(--bg-primary);
+        }
+
+        .text-offside-light {
+            color: var(--text-secondary);
+        }
+
+        .border-offside-primary {
+            border-color: var(--border-color);
+        }
+
+        .hover\:bg-white\/10:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .bg-white\/10 {
+            background-color: var(--bg-secondary);
+        }
+
+        /* Ajustes específicos para el tema claro */
+        .light-theme .bg-offside-primary {
+            background-color: var(--green-main) !important;
+        }
+
+        .light-theme .text-offside-primary {
+            color: var(--green-main) !important;
+        }
+
+        .light-theme .border-offside-primary {
+            border-color: var(--green-main) !important;
+        }
+
+        .light-theme .hover\:bg-offside-primary\/90:hover {
+            background-color: #FF6B35;
+            opacity: 0.9;
+        }
+
+        .light-theme .bg-offside-dark {
+            background-color: var(--card-bg) !important;
+        }
+
+        .light-theme .text-accent, .light-theme .bg-accent {
+            color: var(--accent) !important;
+            background-color: var(--accent) !important;
+        }
+
+        .light-theme .bg-gray-100, .light-theme .bg-gray-200 {
+            background-color: var(--gray-secondary) !important;
+        }
+
+        .light-theme .text-white {
+            color: var(--text-primary);
+        }
+
+        .light-theme .text-gray-400 {
+            color: var(--text-secondary);
+        }
+
+        .light-theme .bg-black {
+            background-color: var(--bg-primary);
+        }
+
+        .light-theme .bg-gray-900 {
+            background-color: var(--bg-secondary);
+        }
+
+        .light-theme .border-gray-700 {
+            border-color: var(--border-color);
+        }
+
+        .light-theme .hover\:bg-gray-700:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .light-theme .hover\:text-gray-300:hover {
+            color: var(--text-primary);
+        }
+
+        /* Tarjetas, formularios y modales claros */
+        .light-theme .bg-offside-dark,
+        .light-theme .card,
+        .light-theme .form {
+            background-color: #fff !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+        }
+        .light-theme .modal {
+            background-color: var(--modal-bg) !important;
+        }
+
+        /* Inputs y selects en tema claro */
+        .light-theme input,
+        .light-theme select,
+        .light-theme textarea {
+            background-color: #fff !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        .light-theme input:focus,
+        .light-theme select:focus,
+        .light-theme textarea:focus {
+            border-color: var(--green-main) !important;
+            box-shadow: 0 0 0 2px rgba(4,178,160,0.15);
+        }
+        /* Header navegación sólido */
+        .light-theme .navigation-header, .light-theme nav, .light-theme .navbar {
+            background-color: #fff !important;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+        }
+    </style>
 </head>
 <body class="h-full font-sans antialiased">
     <div class="min-h-screen bg-offside-dark">

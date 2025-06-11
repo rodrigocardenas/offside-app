@@ -2,13 +2,13 @@
     <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6">
         <div class="max-w-4xl mx-auto">
             <!-- Encabezado -->
-            <div class="mb-8">
+            <div class="mb-8 mt-12">
                 <h1 class="text-2xl font-bold mb-2">Editar Perfil</h1>
                 <p class="text-offside-light">Actualiza tu información personal y preferencias.</p>
             </div>
 
             <!-- Formulario -->
-            <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6">
+            <div class="card rounded-lg p-6" style="margin-bottom: 90px;">
                 @if(session('success'))
                     <div class="mb-4 p-4 bg-green-600 rounded-md">
                         {{ session('success') }}
@@ -113,6 +113,15 @@
                         @error('favorite_national_team_id')
                             <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
                         @enderror
+                    </div>
+                    {{-- theme selector --}}
+                    <div class="mb-6">
+                        <label for="theme" class="block text-sm font-medium mb-2">Tema</label>
+                        <select id="theme" name="theme"
+                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
+                            <option value="light" {{ $user->theme === 'light' ? 'selected' : '' }}>Claro</option>
+                            <option value="dark" {{ $user->theme === 'dark' ? 'selected' : '' }}>Oscuro</option>
+                        </select>
                     </div>
 
                     <!-- Botones -->

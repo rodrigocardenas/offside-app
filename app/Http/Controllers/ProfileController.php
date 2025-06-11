@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Competition;
 use App\Models\Team;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Redirect;
+use App\Http\Requests\ProfileUpdateRequest;
 
 class ProfileController extends Controller
 {
@@ -34,33 +37,16 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(Request $request)
+    public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = auth()->user();
+        $request->user()->fill($request->validated());
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'favorite_competition_id' => 'nullable|exists:competitions,id',
-            'favorite_club_id' => 'nullable|exists:teams,id',
-            'favorite_national_team_id' => 'nullable|exists:teams,id',
-        ]);
-
-        // Actualizar avatar si se proporciona uno nuevo
-        if ($request->hasFile('avatar')) {
-            // Eliminar avatar anterior si existe
-            if ($user->avatar) {
-                Storage::delete('public/avatars/' . $user->avatar);
-            }
-
-            $avatarName = time() . '.' . $request->avatar->extension();
-            $request->avatar->storeAs('public/avatars', $avatarName);
-            $validated['avatar'] = $avatarName;
+        if ($request->user()->isDirty('email')) {
+            $request->user()->email_verified_at = null;
         }
 
-        $user->update($validated);
+        $request->user()->save();
 
-        return redirect()->route('profile.edit')->with('success', 'Perfil actualizado correctamente');
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 }
