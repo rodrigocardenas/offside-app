@@ -62,6 +62,7 @@ self.addEventListener('fetch', function(event) {
   // No cachear rutas dinámicas
   if (event.request.url.includes('/groups') ||
       event.request.url.includes('/predictions') ||
+      event.request.url.includes('/profile') ||
       event.request.url.includes('/ranking')) {
     return fetch(event.request);
   }

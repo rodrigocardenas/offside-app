@@ -503,7 +503,7 @@ class GroupController extends Controller
             $templateIndex = 0;
 
             foreach ($matches as $match) {
-                $questionsForMatch = $match['is_featured'] ? min(3, $remainingQuestions) : 1;
+                $questionsForMatch = ($match['is_featured'] ?? false) ? min(3, $remainingQuestions) : 1;
 
                 for ($i = 0; $i < $questionsForMatch && $templateIndex < count($predictiveTemplates); $i++) {
                     $template = $predictiveTemplates[$templateIndex++];
@@ -561,7 +561,7 @@ class GroupController extends Controller
                 }
 
                 $optionText = str_replace(
-                    ['{{ home_team }}', '{{ away_team }}'],
+                    ['{{home_team}}', '{{away_team}}'],
                     [$match['home_team'], $match['away_team']],
                     $option['text']
                 );
@@ -646,11 +646,11 @@ class GroupController extends Controller
                     QuestionOption::updateOrCreate([
                         'question_id' => $question->id,
                         'text' => $option['text'],
-                        'is_correct' => $option['is_correct']
+                        'is_correct' => 0
                     ], [
                         'question_id' => $question->id,
                         'text' => $option['text'],
-                        'is_correct' => $option['is_correct']
+                        'is_correct' => 0
                     ]);
                 }
             }

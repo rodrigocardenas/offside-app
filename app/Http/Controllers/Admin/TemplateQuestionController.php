@@ -17,7 +17,7 @@ class TemplateQuestionController extends Controller
      */
     public function index()
     {
-        $templateQuestions = TemplateQuestion::with('competition')->get();
+        $templateQuestions = TemplateQuestion::with('competition')->paginate(10);
         return view('admin.template-questions.index', compact('templateQuestions'));
     }
 

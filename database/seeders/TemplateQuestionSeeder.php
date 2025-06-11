@@ -15,102 +15,110 @@ class TemplateQuestionSeeder extends Seeder
         // Preguntas predictivas
         TemplateQuestion::create([
             'type' => 'predictive',
-            'text' => '¿Cuál será el resultado del partido entre {{home_team}} y {{away_team}}?',
+            'text' => '¿Cuál será el resultado del partido?',
             'options' => [
-                ['text' => 'Victoria local', 'is_correct' => false],
-                ['text' => 'Victoria visitante', 'is_correct' => false],
+                ['text' => 'Victoria {{home_team}}', 'is_correct' => false],
+                ['text' => 'Victoria {{away_team}}', 'is_correct' => false],
                 ['text' => 'Empate', 'is_correct' => false]
             ]
         ]);
 
         TemplateQuestion::create([
             'type' => 'predictive',
-            'text' => '¿Cuál equipo tendrá más posesión en el partido entre {{home_team}} y {{away_team}}?',
+            'text' => '¿Cuál equipo tendrá más posesión en el partido?',
             'options' => [
-                ['text' => 'Equipo local', 'is_correct' => false],
-                ['text' => 'Equipo visitante', 'is_correct' => false]
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false]
             ]
         ]);
 
         TemplateQuestion::create([
             'type' => 'predictive',
-            'text' => '¿Cuál equipo anotará el primer gol en el partido entre {{home_team}} y {{away_team}}?',
+            'text' => '¿Cuál equipo anotará el primer gol en el partido?',
             'options' => [
-                ['text' => 'Equipo local', 'is_correct' => false],
-                ['text' => 'Equipo visitante', 'is_correct' => false]
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
             ]
         ]);
 
         TemplateQuestion::create([
             'type' => 'predictive',
-            'text' => '¿Cuál equipo recibirá más faltas en el partido entre {{home_team}} y {{away_team}}?',
+            'text' => '¿Cuál equipo recibirá más faltas en el partido?',
             'options' => [
-                ['text' => 'Equipo local', 'is_correct' => false],
-                ['text' => 'Equipo visitante', 'is_correct' => false]
-            ]
-        ]);
-
-        // Preguntas sobre jugadores
-        TemplateQuestion::create([
-            'type' => 'predictive',
-            'text' => '¿Cuál jugador anotará el primer gol en el partido entre {{home_team}} y {{away_team}}?',
-            'options' => [
-                ['text' => 'Jugador local 1', 'is_correct' => false],
-                ['text' => 'Jugador local 2', 'is_correct' => false],
-                ['text' => 'Jugador visitante 1', 'is_correct' => false],
-                ['text' => 'Jugador visitante 2', 'is_correct' => false]
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
             ]
         ]);
 
         TemplateQuestion::create([
             'type' => 'predictive',
-            'text' => '¿Cuál jugador recibirá más faltas en el partido entre {{home_team}} y {{away_team}}?',
+            'text' => '¿Cuál equipo recibirá más tarjetas amarillas en el partido?',
             'options' => [
-                ['text' => 'Jugador local 1', 'is_correct' => false],
-                ['text' => 'Jugador local 2', 'is_correct' => false],
-                ['text' => 'Jugador visitante 1', 'is_correct' => false],
-                ['text' => 'Jugador visitante 2', 'is_correct' => false]
-            ]
-        ]);
-
-        // Preguntas sociales
-        TemplateQuestion::create([
-            'type' => 'social',
-            'text' => '¿Qué jugador del {{away_team}} marcará el próximo gol?',
-            'options' => [
-                ['text' => 'Jugador 1', 'is_correct' => false],
-                ['text' => 'Jugador 2', 'is_correct' => false],
-                ['text' => 'Jugador 3', 'is_correct' => false]
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
             ]
         ]);
 
         TemplateQuestion::create([
-            'type' => 'social',
-            'text' => '¿Qué jugador será el hombre del partido en el encuentro entre {{home_team}} y {{away_team}}?',
+            'type' => 'predictive',
+            'text' => '¿Cuál equipo recibirá más tarjetas rojas en el partido?',
             'options' => [
-                ['text' => 'Jugador 1', 'is_correct' => false],
-                ['text' => 'Jugador 2', 'is_correct' => false],
-                ['text' => 'Jugador 3', 'is_correct' => false]
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
             ]
         ]);
 
         TemplateQuestion::create([
-            'type' => 'social',
-            'text' => '¿Qué jugador recibirá la próxima tarjeta amarilla en el partido entre {{home_team}} y {{away_team}}?',
+            'type' => 'predictive',
+            'text' => '¿Cuál equipo anotará un autogol?',
             'options' => [
-                ['text' => 'Jugador 1', 'is_correct' => false],
-                ['text' => 'Jugador 2', 'is_correct' => false],
-                ['text' => 'Jugador 3', 'is_correct' => false]
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
             ]
         ]);
 
         TemplateQuestion::create([
-            'type' => 'social',
-            'text' => '¿Qué jugador del {{away_team}} hará el próximo pase de gol?',
+            'type' => 'predictive',
+            'text' => '¿Cuál equipo anotará un gol de penal?',
             'options' => [
-                ['text' => 'Jugador 1', 'is_correct' => false],
-                ['text' => 'Jugador 2', 'is_correct' => false],
-                ['text' => 'Jugador 3', 'is_correct' => false]
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
+            ]
+        ]);
+
+        TemplateQuestion::create([
+            'type' => 'predictive',
+            'text' => '¿Cuál equipo anotará un gol de tiro libre?',
+            'options' => [
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
+            ]
+        ]);
+
+        TemplateQuestion::create([
+            'type' => 'predictive',
+            'text' => '¿Cuál equipo anotará un gol de tiro de esquina?',
+            'options' => [
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
+            ]
+        ]);
+
+        TemplateQuestion::create([
+            'type' => 'predictive',
+            'text' => '¿Cuál equipo anotará el último gol del partido?',
+            'options' => [
+                ['text' => '{{home_team}}', 'is_correct' => false],
+                ['text' => '{{away_team}}', 'is_correct' => false],
+                ['text' => 'Ninguno', 'is_correct' => false]
             ]
         ]);
     }
