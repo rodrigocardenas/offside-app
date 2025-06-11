@@ -105,6 +105,17 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
+        // Verificar si ya existe un grupo con el mismo nombre creado por el mismo usuario en los últimos 5 segundos
+        $recentGroup = Group::where('name', $request->name)
+            ->where('created_by', auth()->id())
+            ->where('created_at', '>=', now()->subSeconds(5))
+            ->first();
+
+        if ($recentGroup) {
+            return redirect()->route('groups.show', $recentGroup)
+                ->with('success', 'Grupo creado exitosamente.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'competition_id' => 'nullable|exists:competitions,id',

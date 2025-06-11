@@ -9,8 +9,9 @@
                     </svg>
                 </div>
 
-                <form method="POST" action="{{ route('groups.store') }}" class="space-y-6">
+                <form method="POST" action="{{ route('groups.store') }}" class="space-y-6" id="createGroupForm">
                     @csrf
+                    <input type="hidden" name="form_submitted" value="1">
 
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-400 mb-2">Nombre del grupo</label>
@@ -53,11 +54,23 @@
                             Cancelar
                         </a>
                         <button type="submit"
-                                class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all">
+                                class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all"
+                                onclick="this.disabled=true;this.form.submit();">
                             Crear grupo
                         </button>
                     </div>
                 </form>
+
+                <script>
+                    // Prevenir envíos duplicados
+                    document.getElementById('createGroupForm').addEventListener('submit', function(e) {
+                        if (this.submitted) {
+                            e.preventDefault();
+                            return false;
+                        }
+                        this.submitted = true;
+                    });
+                </script>
             </div>
         </div>
     </div>
