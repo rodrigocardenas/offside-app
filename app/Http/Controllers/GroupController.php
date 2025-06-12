@@ -357,7 +357,7 @@ class GroupController extends Controller
 
     public function joinByInvite($code)
     {
-        $group = Group::where('invite_code', $code)->firstOrFail();
+        $group = Group::where('code', $code)->firstOrFail();
 
         if ($group->users->contains(auth()->id())) {
             return redirect()->route('groups.show', $group)
