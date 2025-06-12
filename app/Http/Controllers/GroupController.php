@@ -306,8 +306,8 @@ class GroupController extends Controller
     {
         $template = $this->questionTemplates[rand(0, count($this->questionTemplates) - 1)];
         return str_replace(
-            ['{{home_team}}', '{{away_team}}'],
-            [$match['home_team'], $match['away_team']],
+            ['{{home_team}}', '{{away_team}}', '{{ home_team }}', '{{ away_team }}'],
+            [$match['home_team'], $match['away_team'], $match['home_team'], $match['away_team']],
             $template['template']
         );
     }
@@ -318,8 +318,8 @@ class GroupController extends Controller
         return collect($template['options'])->map(function ($option) use ($match) {
             return [
                 'text' => str_replace(
-                    ['{{home_team}}', '{{away_team}}'],
-                    [$match['home_team'], $match['away_team']],
+                    ['{{home_team}}', '{{away_team}}', '{{ home_team }}', '{{ away_team }}'],
+                    [$match['home_team'], $match['away_team'], $match['home_team'], $match['away_team']],
                     $option
                 ),
                 'is_correct' => $option === $match['home_team'] || $option === $match['away_team']
