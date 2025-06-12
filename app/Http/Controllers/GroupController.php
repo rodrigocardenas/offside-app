@@ -546,8 +546,8 @@ class GroupController extends Controller
             }
 
             $questionText = str_replace(
-                ['{{home_team}}', '{{away_team}}'],
-                [$match['home_team'], $match['away_team']],
+                ['{{home_team}}', '{{away_team}}', '{{ home_team }}', '{{ away_team }}'],
+                [$match['home_team'], $match['away_team'], $match['home_team'], $match['away_team']],
                 $template->text
             );
 
@@ -561,8 +561,8 @@ class GroupController extends Controller
                 }
 
                 $optionText = str_replace(
-                    ['{{home_team}}', '{{away_team}}'],
-                    [$match['home_team'], $match['away_team']],
+                    ['{{home_team}}', '{{away_team}}', '{{ home_team }}', '{{ away_team }}'],
+                    [$match['home_team'], $match['away_team'], $match['home_team'], $match['away_team']],
                     $option['text']
                 );
                 return [
