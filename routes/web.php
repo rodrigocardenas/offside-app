@@ -86,3 +86,30 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('template-questions', TemplateQuestionController::class);
 });
 
+Route::get('/test-match-verification', function() {
+    $service = new \App\Services\OpenAIService();
+    $result = $service->testRealMatchVerification();
+    return response()->json($result);
+});
+
+Route::get('/test-goles-partido', function() {
+    $service = app(\App\Services\FootballService::class);
+    $fixtureId = $service->buscarFixtureId('premier-league', 2024, 'Manchester United', 'Liverpool');
+    if ($fixtureId) {
+        $goles = $service->obtenerGolesPartido($fixtureId);
+        return response()->json($goles);
+    } else {
+        return response()->json(['error' => 'No se encontró el partido.'], 404);
+    }
+});
+
+Route::get('/test-actualizar-partido/{id}', function($id) {
+    $service = app(\App\Services\FootballService::class);
+    $match = $service->updateMatchFromApi($id);
+    if ($match) {
+        return response()->json($match);
+    } else {
+        return response()->json(['error' => 'No se pudo actualizar el partido.'], 404);
+    }
+});
+

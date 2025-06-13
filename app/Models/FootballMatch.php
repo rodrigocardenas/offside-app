@@ -35,6 +35,8 @@ class FootballMatch extends Model
         'league',
         'competition',
         'match_date',
+        'events',
+        'score',
     ];
 
     protected $casts = [

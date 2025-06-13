@@ -120,14 +120,21 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
         // 2. Verificar resultados de las preguntas
         $pendingQuestions = Question::whereNull('result_verified_at')
             ->whereHas('football_match', function($query) {
-                $query->where('status', '=', 'FINISHED');
+                $query->where('status', '=', 'Match Finished');
+                $query->orWhere('date', '>=', now()->subDays(1));
             })
             ->get();
 
+        // para los partidos pendientes, actualizar el registro de partido, buscar el partido en la api y actualizar los datos
+        // dd($matches);
+
         foreach ($pendingQuestions as $question) {
             try {
+                $matches = $footballService->getMatch($question->football_match->id);
+                dd($matches);
                 $match = $question->football_match;
                 $answers = $question->answers;
+                // dd($answers, $question);
 
                 // Verificar resultados usando OpenAI
                 $correctAnswers = $openAIService->verifyMatchResults(
@@ -147,8 +154,8 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
 
                 // Actualizar las respuestas correctas
                 foreach ($answers as $answer) {
-                    $answer->is_correct = in_array($answer->option_id, $correctAnswers);
-                    $answer->points_earned = $answer->is_correct ? 10 : 0;
+                    $answer->is_correct = in_array($answer->option_id, $correctAnswers->toArray());
+                    $answer->points_earned = $answer->is_correct ? 300 : 0;
                     $answer->save();
                 }
 

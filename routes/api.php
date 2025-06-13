@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/competitions/{competition}/teams', function (App\Models\Competition $competition) {
     return $competition->teams()
-        ->select('id', 'name')
+        ->select('teams.id', 'teams.name')
         ->get();
 });
 

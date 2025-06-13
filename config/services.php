@@ -22,7 +22,7 @@ return [
     ],
 
     'football_data' => [
-        'api_token' => env('FOOTBALL_DATA_API_TOKEN'),
+        'api_token' => env('FOOTBALL_API_KEY'),
     ],
 
     'postmark' => [

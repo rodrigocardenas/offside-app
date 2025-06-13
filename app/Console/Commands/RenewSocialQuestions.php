@@ -77,11 +77,15 @@ class RenewSocialQuestions extends Command
 
         // Crear opciones basadas en los usuarios del grupo
         foreach ($group->users as $user) {
-            \App\Models\QuestionOption::create([
-                'question_id' => $question->id,
-                'text' => $user->name,
-                'is_correct' => false
-            ]);
+            \App\Models\QuestionOption::updateOrCreate(
+                [
+                    'question_id' => $question->id,
+                    'text' => $user->name
+                ],
+                [
+                    'is_correct' => false
+                ]
+            );
         }
 
         // Marcar la plantilla como usada

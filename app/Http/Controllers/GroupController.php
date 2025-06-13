@@ -289,11 +289,15 @@ class GroupController extends Controller
             ]);
 
             foreach ($this->generateOptions($match) as $option) {
-                QuestionOption::create([
-                    'question_id' => $question->id,
-                    'text' => $option['text'],
-                    'is_correct' => $option['is_correct'] ?? false
-                ]);
+                QuestionOption::updateOrCreate(
+                    [
+                        'question_id' => $question->id,
+                        'text' => $option['text']
+                    ],
+                    [
+                        'is_correct' => $option['is_correct'] ?? false
+                    ]
+                );
             }
 
             $questions->push($question->load('options'));
@@ -643,30 +647,30 @@ class GroupController extends Controller
 
             if ($template->type === 'predictive' && is_array($questionData['options'])) {
                 foreach ($questionData['options'] as $option) {
-                    QuestionOption::updateOrCreate([
-                        'question_id' => $question->id,
-                        'text' => $option['text'],
-                        'is_correct' => 0
-                    ], [
-                        'question_id' => $question->id,
-                        'text' => $option['text'],
-                        'is_correct' => 0
-                    ]);
+                    QuestionOption::updateOrCreate(
+                        [
+                            'question_id' => $question->id,
+                            'text' => $option['text']
+                        ],
+                        [
+                            'is_correct' => $option['is_correct'] ?? false
+                        ]
+                    );
                 }
             }
 
             if ($template->type === 'social') {
                 $members = $group->users;
                 foreach ($members as $member) {
-                    QuestionOption::updateOrCreate([
-                        'question_id' => $question->id,
-                        'text' => $member->name,
-                        'is_correct' => false
-                    ], [
-                        'question_id' => $question->id,
-                        'text' => $member->name,
-                        'is_correct' => false
-                    ]);
+                    QuestionOption::updateOrCreate(
+                        [
+                            'question_id' => $question->id,
+                            'text' => $member->name
+                        ],
+                        [
+                            'is_correct' => false
+                        ]
+                    );
                 }
             }
 

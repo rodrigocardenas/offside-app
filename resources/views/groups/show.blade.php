@@ -8,7 +8,7 @@
 
         <div class="bg-offside-primary bg-opacity-99 p-1 mb-4 fixed  left-0 right-0 w-full" style="z-index: 1000; margin-top: 2.2rem;">
             <marquee behavior="scroll" direction="left" scrollamount="5">
-                @foreach($group->users->sortByDesc('points')->take(3) as $index => $user)
+                @foreach($group->users->sortByDesc('total_points')->take(3) as $index => $user)
                     <span class="font-bold text-offside-light">
                         @if($index === 0) 🥇 @elseif($index === 1) 🥈 @elseif($index === 2) 🥉 @endif
                         {{ $user->name }} ({{ $user->total_points ?? 0 }} puntos)
@@ -145,7 +145,7 @@
                                                 </div>
                                                 @endif
                                                 <!-- Like/Dislike Buttons -->
-                                                <div class="flex justify-end space-x-4 mt-2">
+                                                <div class="flex justify-end space-x-4 mt-4">
                                                     <button type="button"
                                                             class="like-btn flex items-center {{ isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('reaction', 'like')->isNotEmpty() ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
                                                             data-question-id="{{ $question->id }}"
@@ -265,7 +265,7 @@
                                     </div>
                                 @endif
                                  <!-- Like/Dislike Buttons -->
-                                 <div class="flex justify-end space-x-4 mt-3">
+                                 <div class="flex justify-end space-x-4 mt-4">
                                     <button type="button"
                                             class="like-btn flex items-center {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('reaction', 'like')->isNotEmpty() ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
                                             data-question-id="{{ $socialQuestion->id }}"

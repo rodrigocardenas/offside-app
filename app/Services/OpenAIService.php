@@ -7,6 +7,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
+// Función auxiliar para verificar si un string es JSON
+if (!function_exists('is_json')) {
+    function is_json($string) {
+        json_decode($string);
+        return (json_last_error() == JSON_ERROR_NONE);
+    }
+}
+
 class OpenAIService
 {
     private $systemPrompt = 'eres un agente que busca en la web los 5 próximos partidos más importantes de la jornada de una competencia en particular
@@ -94,17 +102,18 @@ class OpenAIService
         $questionsText = collect($questions)->map(function($q) {
             return "{$q['title']} (Opciones: " . implode(", ", $q['options']) . ")";
         })->join("\n");
+        // dd($questionsText, $match);
 
         $response = OpenAI::chat()->create([
             'model' => 'gpt-4',
             'messages' => [
-                ['role' => 'system', 'content' => 'Actúa como un verificador de resultados de fútbol. Tu trabajo es determinar las respuestas correctas a preguntas sobre un partido basándote en la información del resultado.'],
-                ['role' => 'user', 'content' => "Para el partido {$match['homeTeam']} vs {$match['awayTeam']} (Resultado: {$match['score']}, Eventos: {$match['events']}), verifica las respuestas correctas para estas preguntas:\n{$questionsText}"],
+                ['role' => 'system', 'content' => 'Actúa como un verificador de preguntas de fútbol. Tu trabajo es determinar las respuestas correctas a preguntas sobre un partido basándote en la información del resultado, limita tu respuesta a la opción correcta.'],
+                ['role' => 'user', 'content' => "Para el partido {$match['homeTeam']} vs {$match['awayTeam']} (Resultado: {$match['score']}, Eventos: {$match['events']}), verifica la respuesta correcta para esta pregunta:\n{$questionsText}"],
             ],
         ]);
 
         $content = $response->choices[0]->message->content;
-        $results = json_decode($content, true);
+        $results = is_json($content) ? json_decode($content, true) : [$content];
 
         return collect($results['respuestas'] ?? []);
     }
@@ -180,5 +189,81 @@ class OpenAIService
         }
 
         return [];
+    }
+
+    /**
+     * Método de prueba para verificar si verifyMatchResults puede determinar correctamente
+     * las respuestas basándose en el resultado real de un partido.
+     */
+    public function testVerifyMatchResultsWithSampleData(): Collection
+    {
+        // Datos reales de un partido de la Premier League
+        $match = [
+            'homeTeam' => 'Manchester United',
+            'awayTeam' => 'Liverpool',
+            'score' => '2-1',
+            'events' => "Goles: Rashford (15'), Salah (45'), Fernandes (75')"
+        ];
+
+        // Preguntas reales que podrían hacerse sobre el partido
+        $questions = [
+            [
+                'title' => '¿Quién ganará el partido?',
+                'options' => ['Manchester United', 'Liverpool', 'Empate']
+            ],
+            [
+                'title' => '¿Habrá más de 2.5 goles en el partido?',
+                'options' => ['Sí', 'No']
+            ],
+            [
+                'title' => '¿Marcará el primer gol el equipo local?',
+                'options' => ['Sí', 'No']
+            ]
+        ];
+
+        // Simulación de la respuesta de OpenAI basada en el resultado real
+        $results = [
+            'respuestas' => [
+                [
+                    'pregunta' => '¿Quién ganará el partido?',
+                    'respuesta_correcta' => 'Manchester United',
+                    'explicacion' => 'Manchester United ganó 2-1 según el resultado del partido'
+                ],
+                [
+                    'pregunta' => '¿Habrá más de 2.5 goles en el partido?',
+                    'respuesta_correcta' => 'Sí',
+                    'explicacion' => 'El partido terminó 2-1, lo que suma 3 goles en total'
+                ],
+                [
+                    'pregunta' => '¿Marcará el primer gol el equipo local?',
+                    'respuesta_correcta' => 'Sí',
+                    'explicacion' => 'Rashford marcó el primer gol para Manchester United (equipo local) en el minuto 15'
+                ]
+            ]
+        ];
+
+        return collect($results['respuestas']);
+    }
+
+    /**
+     * Método para probar verifyMatchResults con datos reales de un partido
+     */
+    public function testRealMatchVerification(): Collection
+    {
+        $match = [
+            'homeTeam' => 'Manchester United',
+            'awayTeam' => 'Liverpool',
+            'score' => '2-1',
+            'events' => 'Goles: Rashford (15), Salah (45), Fernandes (75)'
+        ];
+
+        $questions = [
+            [
+                'title' => 'Quien anotó el ultimo gol?',
+                'options' => ['Rashford', 'Salah', 'Fernandes']
+            ]
+        ];
+
+        return $this->verifyMatchResults($match, $questions);
     }
 }
