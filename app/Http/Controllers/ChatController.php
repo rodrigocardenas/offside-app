@@ -14,6 +14,16 @@ class ChatController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
+        // Validación para evitar mensajes duplicados
+        $lastMessage = \App\Models\ChatMessage::where('user_id', auth()->id())
+            ->where('group_id', $group->id)
+            ->orderByDesc('created_at')
+            ->first();
+
+        if ($lastMessage && $lastMessage->message === $request->message && $lastMessage->created_at->gt(now()->subSeconds(10))) {
+            return back()->with('error', 'No puedes enviar el mismo mensaje dos veces seguidas.');
+        }
+
         $message = ChatMessage::create([
             'user_id' => auth()->id(),
             'group_id' => $group->id,
