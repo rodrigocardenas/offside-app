@@ -14,21 +14,24 @@ class ChatController extends Controller
             'message' => 'required|string|max:1000',
         ]);
 
-        // Validación para evitar mensajes duplicados
-        $lastMessage = \App\Models\ChatMessage::where('user_id', auth()->id())
+        // Buscar mensaje igual en los últimos 10 segundos
+        $existingMessage = \App\Models\ChatMessage::where('user_id', auth()->id())
             ->where('group_id', $group->id)
-            ->orderByDesc('created_at')
+            ->where('message', $request->message)
+            ->where('created_at', '>=', now()->subSeconds(10))
             ->first();
 
-        if ($lastMessage && $lastMessage->message === $request->message && $lastMessage->created_at->gt(now()->subSeconds(10))) {
-            return back()->with('error', 'No puedes enviar el mismo mensaje dos veces seguidas.');
+        if ($existingMessage) {
+            // Actualizar el timestamp
+            $existingMessage->touch();
+            $message = $existingMessage;
+        } else {
+            $message = ChatMessage::create([
+                'user_id' => auth()->id(),
+                'group_id' => $group->id,
+                'message' => $request->message,
+            ]);
         }
-
-        $message = ChatMessage::create([
-            'user_id' => auth()->id(),
-            'group_id' => $group->id,
-            'message' => $request->message,
-        ]);
 
         // Marcar el mensaje como leído por el remitente
         $message->markAsRead(auth()->user());
