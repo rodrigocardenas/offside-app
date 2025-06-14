@@ -170,7 +170,7 @@ class GroupController extends Controller
                     'home_team' => is_array($match['home_team']) ? $match['home_team']['name'] : $match['home_team'],
                     'away_team' => is_array($match['away_team']) ? $match['away_team']['name'] : $match['away_team'],
                     'date' => $match['date'] ?? now(),
-                    'competition' => $competitionType
+                    'competition' => $match['competition_id'] ?? $competitionType
                 ];
             })->filter()->values()->toArray();
 
@@ -180,7 +180,6 @@ class GroupController extends Controller
             }
 
             $questions = $this->generateQuestionsForMatches($matchesData, $group);
-
             return $questions;
         } catch (\Exception $e) {
             Log::error('Error al crear pregunta predictiva:', [
@@ -413,18 +412,34 @@ class GroupController extends Controller
             ->first();
 
         if (!$socialQuestion) {
-            $socialQuestion = Question::create([
-                'title' => '¿Quién será el MVP del grupo hoy?',
-                'description' => 'Vota por el miembro que crees que tendrá el mejor desempeño hoy',
+            // Obtener una pregunta social aleatoria que no haya sido usada en este grupo
+            $socialQuestion = \App\Models\TemplateQuestion::where('type', 'social')
+            ->where(function ($query) use ($group) {
+                $query->whereNull('used_at')
+                    ->orWhereNotExists(function ($subquery) use ($group) {
+                        $subquery->select(DB::raw(1))
+                            ->from('questions')
+                            ->whereColumn('questions.template_question_id', 'template_questions.id')
+                            ->where('questions.group_id', $group->id);
+                    });
+            })
+            ->inRandomOrder()
+            ->first();
+
+            // crear la pregunta
+            $question = Question::create([
+                'title' => $socialQuestion->text,
+                'description' => $socialQuestion->text,
                 'type' => 'social',
                 'points' => 100,
                 'group_id' => $group->id,
                 'available_until' => now()->addDay(),
+                'template_question_id' => $socialQuestion->id,
             ]);
 
             foreach ($group->users as $user) {
-                QuestionOption::create([
-                    'question_id' => $socialQuestion->id,
+                $questionOption = QuestionOption::create([
+                    'question_id' => $question->id,
                     'text' => $user->name,
                     'is_correct' => false,
                     'user_id' => $user->id,
@@ -447,7 +462,7 @@ class GroupController extends Controller
             }
         }
 
-        return $socialQuestion->load(['options', 'answers.user']);
+        return $question->load(['options', 'answers.user']);
     }
 
     public function testGenerateQuestions()

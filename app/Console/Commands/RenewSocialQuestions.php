@@ -18,11 +18,11 @@ class RenewSocialQuestions extends Command
         $groups = Group::all();
 
         foreach ($groups as $group) {
-            // Eliminar preguntas sociales antiguas
+            // setear como verificadas las preguntas sociales antiguas
             $group->questions()
                 ->where('type', 'social')
                 ->where('available_until', '<', now())
-                ->delete();
+                ->update(['verified_at' => now()]);
 
             // Crear nueva pregunta social
             $socialQuestion = $this->createSocialQuestion($group);
