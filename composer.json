@@ -12,6 +12,7 @@
         "illuminate/notifications": "*",
         "intervention/image": "*",
         "intervention/image-laravel": "*",
+        "kreait/firebase-php": "^7.18",
         "laravel-notification-channels/webpush": "^9.0",
         "laravel/framework": "^10.10",
         "laravel/horizon": "^5.32",
