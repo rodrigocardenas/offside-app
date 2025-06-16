@@ -11,29 +11,32 @@ class ChatController extends Controller
 {
     public function store(Request $request, Group $group)
     {
-        // dd($request->all());
         $request->validate([
             'message' => 'required|string|max:1000',
         ]);
 
-        // Buscar mensaje igual en los últimos 10 segundos
-        $existingMessage = \App\Models\ChatMessage::where('user_id', auth()->id())
+        // Buscar mensaje igual en los últimos 5 segundos
+        $existingMessage = ChatMessage::where('user_id', auth()->id())
             ->where('group_id', $group->id)
             ->where('message', $request->message)
-            ->where('created_at', '>=', now()->subSeconds(10))
+            ->where('created_at', '>=', now()->subSeconds(5))
             ->first();
 
         if ($existingMessage) {
-            // Actualizar el timestamp
-            $existingMessage->touch();
-            $message = $existingMessage;
-        } else {
-            $message = ChatMessage::create([
-                'user_id' => auth()->id(),
-                'group_id' => $group->id,
-                'message' => $request->message,
-            ]);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Por favor, espera antes de enviar el mismo mensaje nuevamente.'
+                ], 429);
+            }
+            return back()->with('error', 'Por favor, espera antes de enviar el mismo mensaje nuevamente.');
         }
+
+        $message = ChatMessage::create([
+            'user_id' => auth()->id(),
+            'group_id' => $group->id,
+            'message' => $request->message,
+        ]);
 
         // Marcar el mensaje como leído por el remitente
         $message->markAsRead(auth()->user());
@@ -51,14 +54,14 @@ class ChatController extends Controller
             cache()->forget($key);
         }
 
-        // enviar notificacion push
-        // $message->sendPushNotification();
+        // Enviar notificación push
         SendChatPushNotification::dispatch($message->id);
 
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => $message
+                'message' => $message,
+                'html' => view('partials.chat-message', ['message' => $message])->render()
             ]);
         }
 

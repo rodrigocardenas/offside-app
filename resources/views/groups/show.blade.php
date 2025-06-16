@@ -322,11 +322,13 @@
                                 <div class="flex-1">
                                     <input type="text"
                                            name="message"
+                                           id="chatMessage"
                                            class="w-full bg-offside-primary bg-opacity-40 border-0 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-offside-secondary px-4 py-2"
                                            placeholder="Escribe un mensaje..."
                                            required>
                                 </div>
                                 <button type="submit"
+                                        id="sendMessageBtn"
                                         title="Enviar mensaje"
                                         class="bg-offside-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center">
                                     <span class="hidden sm:block">Enviar</span>
@@ -727,6 +729,66 @@
             // Desplazar el contenedor al final
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatForm = document.getElementById('chatForm');
+        const sendMessageBtn = document.getElementById('sendMessageBtn');
+        const chatMessage = document.getElementById('chatMessage');
+        const chatContainer = document.querySelector('.overflow-y-auto');
+        let isSubmitting = false;
+
+        // Función para mostrar mensaje de error
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'bg-red-500 text-white p-3 rounded-lg mb-4';
+            errorDiv.textContent = message;
+            chatContainer.insertBefore(errorDiv, chatContainer.firstChild);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (isSubmitting) return;
+
+            isSubmitting = true;
+            sendMessageBtn.disabled = true;
+            sendMessageBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const formData = new FormData(chatForm);
+
+            fetch(chatForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    chatMessage.value = '';
+                    // Agregar el nuevo mensaje al contenedor
+                    chatContainer.insertAdjacentHTML('beforeend', data.html);
+                    // Desplazar al final
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                } else {
+                    showError(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Ha ocurrido un error al enviar el mensaje. Por favor, intenta nuevamente.');
+            })
+            .finally(() => {
+                isSubmitting = false;
+                sendMessageBtn.disabled = false;
+                sendMessageBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+        });
     });
 </script>
 
