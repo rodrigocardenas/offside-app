@@ -42,7 +42,7 @@ class SendChatPushNotification implements ShouldQueue
         $messaging = $factory->createMessaging();
 
         foreach ($groupUsers as $user) {
-            foreach ($user->pushSubscriptions as $subscription) {
+            foreach ($user->pushSubscriptions ?? [] as $subscription) {
                 $message = [
                     'notification' => [
                         'title' => 'Nuevo mensaje en el grupo ' . $chatMessage->group->name,

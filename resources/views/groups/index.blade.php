@@ -554,7 +554,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging();
-        const vapidKey = 'BFT3Sbs3FnMmNK-qRAKD-VsrPEpuX_mQHdEhLeJs_2CQ8uPGhuXZlGfNeNzm9kzwwWN0llK2FcYEP-hMq5_KN2M	'; // Reemplaza por tu clave pública VAPID
+        const vapidKey = 'BFT3Sbs3FnMmNK-qRAKD-VsrPEpuX_mQHdEhLeJs_2CQ8uPGhuXZlGfNeNzm9kzwwWN0llK2FcYEP-hMq5_KN2M'; // Reemplaza por tu clave pública VAPID
 
         document.addEventListener('DOMContentLoaded', function() {
             if ('Notification' in window && 'serviceWorker' in navigator && Notification.permission !== 'granted') {
