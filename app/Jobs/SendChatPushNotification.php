@@ -60,6 +60,7 @@ class SendChatPushNotification implements ShouldQueue
 
                 try {
                     $messaging->send($message);
+                    Log::info('Notificación enviada a ' . $user->name, ['message' => $message]);
                 } catch (\Throwable $e) {
                     Log::error('Error enviando notificación FCM: ' . $e->getMessage());
                 }
