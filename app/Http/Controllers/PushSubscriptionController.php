@@ -10,12 +10,12 @@ class PushSubscriptionController extends Controller
 {
     public function store(Request $request)
     {
-        $this->validate($request, [
-            'endpoint' => 'required',
-            'public_key' => 'required',
-            'auth_token' => 'required',
-            'device_token' => 'required'
-        ]);
+        // $this->validate($request, [
+        //     'endpoint' => 'required',
+        //     'public_key' => 'required',
+        //     'auth_token' => 'required',
+        //     'device_token' => 'required'
+        // ]);
 
         $subscription = PushSubscription::updateOrCreate(
             ['endpoint' => $request->endpoint],
@@ -26,6 +26,8 @@ class PushSubscriptionController extends Controller
                 'device_token' => $request->device_token
             ]
         );
+
+        Log::info('Suscripción guardada exitosamente', ['subscription' => $subscription]);
 
         return response()->json(['message' => 'Suscripción guardada exitosamente']);
     }

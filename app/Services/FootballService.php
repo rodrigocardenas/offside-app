@@ -15,7 +15,7 @@ class FootballService
     public function __construct()
     {
         $this->apiKey = config('services.football_data.api_token');
-        Log::info('API key configurada:', ['key' => $this->apiKey]);
+        // Log::info('API key configurada:', ['key' => $this->apiKey]);
         $this->baseUrl = 'https://api-football-v1.p.rapidapi.com/v3/';
 
         // Puedes extender este arreglo con más ligas
