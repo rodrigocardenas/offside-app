@@ -36,10 +36,12 @@ class SendChatPushNotification implements ShouldQueue
             return;
         }
         $credentials_path = base_path("storage/app/offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json");
+        Log::info('Credenciales', ['credentials_path' => $credentials_path]);
 
         $groupUsers = $chatMessage->group->users()->where('users.id', '!=', $chatMessage->user_id)->get();
         $factory = (new Factory)->withServiceAccount($credentials_path);
         $messaging = $factory->createMessaging();
+        Log::info('Usuarios notificados', ['groupUsers' => $groupUsers]);
 
         foreach ($groupUsers as $user) {
             foreach ($user->pushSubscriptions ?? [] as $subscription) {
