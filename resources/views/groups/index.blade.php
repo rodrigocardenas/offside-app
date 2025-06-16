@@ -563,26 +563,41 @@
         });
 
         document.getElementById('activar-notificaciones').addEventListener('click', function() {
+            console.log('click');
             Notification.requestPermission().then(function(permission) {
                 if (permission === 'granted') {
                     messaging.getToken({vapidKey: vapidKey}).then(function(currentToken) {
                         if (currentToken) {
-                            fetch('/api/push-subscriptions', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                },
-                                body: JSON.stringify({
-                                    endpoint: '',
-                                    public_key: '',
-                                    auth_token: '',
-                                    device_token: currentToken
-                                })
-                            }).then(res => res.json()).then(data => {
-                                showNotification('¡Notificaciones activadas!');
-                                document.getElementById('activar-notificaciones').style.display = 'none';
+                            navigator.serviceWorker.ready.then(function(registration) {
+                                registration.pushManager.getSubscription().then(function(subscription) {
+                                    let endpoint = '';
+                                    let public_key = '';
+                                    let auth_token = '';
+                                    if (subscription) {
+                                        const rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
+                                        const rawAuthSecret = subscription.getKey ? subscription.getKey('auth') : '';
+                                        public_key = rawKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))) : '';
+                                        auth_token = rawAuthSecret ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawAuthSecret))) : '';
+                                        endpoint = subscription.endpoint;
+                                    }
+                                    fetch('/api/push-subscriptions', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        },
+                                        body: JSON.stringify({
+                                            endpoint: endpoint,
+                                            public_key: public_key,
+                                            auth_token: auth_token,
+                                            device_token: currentToken
+                                        })
+                                    }).then(res => res.json()).then(data => {
+                                        showNotification('¡Notificaciones activadas!');
+                                        document.getElementById('activar-notificaciones').style.display = 'none';
+                                    });
+                                });
                             });
                         } else {
                             showNotification('No se pudo obtener el token de notificación', 'error');
