@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\ChatMessage;
 use App\Models\Group;
 use Illuminate\Http\Request;
+use App\Jobs\SendChatPushNotification;
 
 class ChatController extends Controller
 {
     public function store(Request $request, Group $group)
     {
+        // dd($request->all());
         $request->validate([
             'message' => 'required|string|max:1000',
         ]);
@@ -48,6 +50,10 @@ class ChatController extends Controller
         foreach ($cacheKeys as $key) {
             cache()->forget($key);
         }
+
+        // enviar notificacion push
+        // $message->sendPushNotification();
+        SendChatPushNotification::dispatch($message->id);
 
         if ($request->ajax()) {
             return response()->json([

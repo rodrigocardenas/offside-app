@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Kreait\Firebase\Factory;
+use Illuminate\Support\Facades\Log;
+use App\Jobs\SendChatPushNotification;
 
 class ChatMessage extends Model
 {
@@ -58,35 +60,6 @@ class ChatMessage extends Model
 
     public function sendPushNotification()
     {
-        $groupUsers = $this->group->users()->where('id', '!=', $this->user_id)->get();
-
-        // Instancia de Firebase Messaging
-        $factory = (new Factory)->withServiceAccount(config('firebase.credentials') ?? base_path(env('FIREBASE_CREDENTIALS')));
-        $messaging = $factory->createMessaging();
-
-        foreach ($groupUsers as $user) {
-            foreach ($user->pushSubscriptions as $subscription) {
-                $message = [
-                    'notification' => [
-                        'title' => 'Nuevo mensaje en el grupo ' . $this->group->name,
-                        'body' => $this->user->name . ': ' . $this->message,
-                        'icon' => '/icon-192x192.png',
-                        'click_action' => url('/groups/' . $this->group->id . '#chatSection'),
-                    ],
-                    'webpush' => [
-                        'fcm_options' => [
-                            'link' => url('/groups/' . $this->group->id . '#chatSection'),
-                        ],
-                    ],
-                    'token' => $subscription->device_token,
-                ];
-
-                try {
-                    $messaging->send($message);
-                } catch (\Throwable $e) {
-                    \Log::error('Error enviando notificación FCM: ' . $e->getMessage());
-                }
-            }
-        }
+        SendChatPushNotification::dispatch($this->id);
     }
 }
