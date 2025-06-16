@@ -571,48 +571,20 @@
                             navigator.serviceWorker.ready.then(function(registration) {
                                 registration.pushManager.getSubscription().then(function(subscription) {
                                     if (!subscription) {
-                                        showNotification('No se pudo obtener la suscripción del navegador', 'error');
-                                        console.error('No subscription object');
-                                        return;
+                                        // Suscribir al usuario
+                                        registration.pushManager.subscribe({
+                                            userVisibleOnly: true,
+                                            applicationServerKey: urlBase64ToUint8Array(vapidKey)
+                                        }).then(function(newSubscription) {
+                                            sendPushSubscription(newSubscription, currentToken);
+                                        }).catch(function(err) {
+                                            showNotification('No se pudo suscribir al push manager', 'error');
+                                            console.error('Error al suscribir:', err);
+                                        });
+                                    } else {
+                                        // Ya existe la suscripción
+                                        sendPushSubscription(subscription, currentToken);
                                     }
-                                    const rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
-                                    const rawAuthSecret = subscription.getKey ? subscription.getKey('auth') : '';
-                                    const public_key = rawKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))) : '';
-                                    const auth_token = rawAuthSecret ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawAuthSecret))) : '';
-                                    const endpoint = subscription.endpoint;
-
-                                    if (!endpoint || !public_key || !auth_token || !currentToken) {
-                                        showNotification('Faltan datos para guardar la suscripción push', 'error');
-                                        console.error('Datos incompletos:', { endpoint, public_key, auth_token, device_token: currentToken });
-                                        return;
-                                    }
-
-                                    const data = {
-                                        endpoint: endpoint,
-                                        public_key: public_key,
-                                        auth_token: auth_token,
-                                        device_token: currentToken
-                                    };
-                                    console.log('Enviando datos de suscripción push:', data);
-                                    fetch('/api/push-subscriptions', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Accept': 'application/json',
-                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        },
-                                        body: JSON.stringify(data)
-                                    })
-                                    .then(res => res.json())
-                                    .then(response => {
-                                        console.log('Respuesta backend:', response);
-                                        showNotification('¡Notificaciones activadas!');
-                                        document.getElementById('activar-notificaciones').style.display = 'none';
-                                    })
-                                    .catch(err => {
-                                        showNotification('Error al guardar la suscripción push', 'error');
-                                        console.error('Error al guardar la suscripción push:', err);
-                                    });
                                 });
                             });
                         } else {
@@ -626,6 +598,62 @@
                 }
             });
         });
+
+        // Función para enviar la suscripción al backend
+        function sendPushSubscription(subscription, currentToken) {
+            const rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
+            const rawAuthSecret = subscription.getKey ? subscription.getKey('auth') : '';
+            const public_key = rawKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))) : '';
+            const auth_token = rawAuthSecret ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawAuthSecret))) : '';
+            const endpoint = subscription.endpoint;
+
+            if (!endpoint || !public_key || !auth_token || !currentToken) {
+                showNotification('Faltan datos para guardar la suscripción push', 'error');
+                console.error('Datos incompletos:', { endpoint, public_key, auth_token, device_token: currentToken });
+                return;
+            }
+
+            const data = {
+                endpoint: endpoint,
+                public_key: public_key,
+                auth_token: auth_token,
+                device_token: currentToken
+            };
+            console.log('Enviando datos de suscripción push:', data);
+            fetch('/api/push-subscriptions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(response => {
+                console.log('Respuesta backend:', response);
+                showNotification('¡Notificaciones activadas!');
+                document.getElementById('activar-notificaciones').style.display = 'none';
+            })
+            .catch(err => {
+                showNotification('Error al guardar la suscripción push', 'error');
+                console.error('Error al guardar la suscripción push:', err);
+            });
+        }
+
+        // Utilidad para convertir la VAPID key a Uint8Array
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
     </script>
 
     <style>
