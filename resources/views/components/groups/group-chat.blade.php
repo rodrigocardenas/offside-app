@@ -16,7 +16,7 @@
             @endforeach
         </div>
         <div class="p-4 border-t border-offside-primary">
-            <form action="{{ route('chat.store', $group) }}" method="POST" class="flex items-center w-full space-x-2" id="chatForm" onsubmit="return false;">
+            <form action="{{ route('chat.store', $group) }}" method="POST" class="flex items-center w-full space-x-2" id="chatForm">
                 @csrf
                 <div class="flex-1">
                     <input type="text"
@@ -34,6 +34,67 @@
                     <i class="fas fa-paper-plane sm:hidden"></i>
                 </button>
             </form>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const chatForm = document.getElementById('chatForm');
+                    const sendButton = document.getElementById('sendMessageBtn');
+                    const messageInput = document.getElementById('chatMessage');
+                    let isSubmitting = false;
+
+                    chatForm.addEventListener('submit', async function(e) {
+                        e.preventDefault();
+
+                        if (isSubmitting) {
+                            return;
+                        }
+
+                        isSubmitting = true;
+                        sendButton.disabled = true;
+                        sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+                        try {
+                            const formData = new FormData(chatForm);
+                            const response = await fetch(chatForm.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                }
+                            });
+
+                            if (response.status === 429) {
+                                const data = await response.json();
+                                console.log('Mensaje duplicado detectado');
+                                return;
+                            }
+
+                            if (response.ok) {
+                                messageInput.value = '';
+                                window.location.reload();
+                            } else {
+                                throw new Error('Error al enviar el mensaje');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                        } finally {
+                            setTimeout(() => {
+                                isSubmitting = false;
+                                sendButton.disabled = false;
+                                sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }, 1000);
+                        }
+                    });
+
+                    // Prevenir envío con Enter múltiple
+                    messageInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' && isSubmitting) {
+                            e.preventDefault();
+                        }
+                    });
+                });
+            </script>
         </div>
     </div>
 </div>
