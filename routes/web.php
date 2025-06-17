@@ -77,6 +77,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Handle question reactions (like/dislike)
     Route::post('/questions/{question}/react', [QuestionController::class, 'react'])->name('questions.react');
+
+    // Update reward or penalty
+    Route::post('/groups/{group}/reward-or-penalty', [\App\Http\Controllers\GroupController::class, 'updateRewardOrPenalty'])->name('groups.updateRewardOrPenalty');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

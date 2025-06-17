@@ -122,7 +122,7 @@ class GroupController extends Controller
             'category' => 'required|in:official,amateur',
         ]);
 
-        $group = Group::create([
+        $group = Group::updateOrCreate([
             'name' => $request->name,
             'code' => Str::random(6),
             'created_by' => auth()->id(),
@@ -130,7 +130,9 @@ class GroupController extends Controller
             'category' => $request->category,
         ]);
 
-        $group->users()->attach(auth()->id());
+        if (!$group->users()->where('user_id', auth()->id())->exists()) {
+            $group->users()->attach(auth()->id());
+        }
 
         return redirect()->route('groups.show', $group)
             ->with('success', 'Grupo creado exitosamente.');
@@ -703,5 +705,26 @@ class GroupController extends Controller
             ]);
             return null;
         }
+    }
+
+    /**
+     * Actualiza el campo reward_or_penalty del grupo
+     */
+    public function updateRewardOrPenalty(Request $request, Group $group)
+    {
+        $request->validate([
+            'reward_or_penalty' => 'required|string|max:1000',
+        ]);
+
+        $group->reward_or_penalty = $request->reward_or_penalty;
+        $group->save();
+
+        // Limpiar caché relevante
+        Cache::forget("group_{$group->id}_show_data");
+
+        return response()->json([
+            'success' => true,
+            'reward_or_penalty' => $group->reward_or_penalty
+        ]);
     }
 }

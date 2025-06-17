@@ -14,7 +14,8 @@ class Group extends Model
         'code',
         'created_by',
         'competition_id',
-        'category'
+        'category',
+        'reward_or_penalty'
     ];
 
     public function creator()

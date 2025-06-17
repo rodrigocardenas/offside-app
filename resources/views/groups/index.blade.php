@@ -21,7 +21,7 @@
                         Competiciones Oficiales
                     </button>
                     <button onclick="showTab('amateur')" class="tab-button px-4 py-2 rounded-lg bg-white/10 text-gray-400 hover:text-white" data-tab="amateur">
-                        Mis Competiciones
+                        Mis Partidos
                     </button>
                 </div>
 

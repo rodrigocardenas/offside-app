@@ -32,7 +32,7 @@ class ChatController extends Controller
             return back()->with('error', 'Por favor, espera antes de enviar el mismo mensaje nuevamente.');
         }
 
-        $message = ChatMessage::create([
+        $message = ChatMessage::updateOrCreate([
             'user_id' => auth()->id(),
             'group_id' => $group->id,
             'message' => $request->message,

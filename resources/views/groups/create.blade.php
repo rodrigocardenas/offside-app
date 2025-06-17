@@ -22,6 +22,15 @@
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+                    {{-- category --}}
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-400 mb-2">Categoría</label>
+                        <select id="category" name="category" required readonly
+                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('category') border-red-500 @enderror">
+                            <option value="official" selected>Oficial</option>
+                            <option value="aficionado">Mis partidos</option>
+                        </select>
+                    </div>
 
                     <div>
                         <label for="competition_id" class="block text-sm font-medium text-gray-400 mb-2">Competición</label>
@@ -38,14 +47,12 @@
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
-                    {{-- category --}}
+                    {{-- recompensa o penalización --}}
                     <div>
-                        <label for="category" class="block text-sm font-medium text-gray-400 mb-2">Categoría</label>
-                        <select id="category" name="category" required readonly
-                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('category') border-red-500 @enderror">
-                            <option value="official" selected>Oficial</option>
-                            <option value="amateur" disabled>Amateur</option>
-                        </select>
+                        <label for="reward_or_penalty" class="block text-sm font-medium text-gray-400 mb-2">Recompensa o penalización</label>
+                        <input id="reward_or_penalty" type="number" name="reward_or_penalty" value="{{ old('reward_or_penalty') }}" required
+                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('reward_or_penalty') border-red-500 @enderror"
+                            placeholder="Ej: 100">
                     </div>
 
                     <div class="flex items-center justify-between">
