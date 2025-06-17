@@ -170,4 +170,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Team::class, 'favorite_national_team_id');
     }
+
+    public function pushSubscriptions()
+    {
+        return $this->hasMany(PushSubscription::class, 'user_id');
+    }
 }
