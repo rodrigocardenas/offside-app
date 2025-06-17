@@ -5,8 +5,40 @@ import '@fortawesome/fontawesome-free/js/all';
 window.Alpine = Alpine;
 Alpine.start();
 
+// Función global para prevenir envíos duplicados
+function preventDuplicateSubmissions() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        let isSubmitting = false;
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        if (submitButton) {
+            form.addEventListener('submit', function(e) {
+                if (isSubmitting) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                isSubmitting = true;
+                submitButton.disabled = true;
+
+                // Restaurar el botón después de 5 segundos si no hay respuesta
+                setTimeout(() => {
+                    if (isSubmitting) {
+                        isSubmitting = false;
+                        submitButton.disabled = false;
+                    }
+                }, 5000);
+            });
+        }
+    });
+}
+
 // Prevenir envíos múltiples del formulario de chat
 document.addEventListener('DOMContentLoaded', function() {
+    // Aplicar prevención de duplicados a todos los formularios
+    preventDuplicateSubmissions();
+
     const chatForm = document.getElementById('chatForm');
     if (chatForm) {
         const submitButton = chatForm.querySelector('button[type="submit"]');
