@@ -61,22 +61,56 @@
                             Cancelar
                         </a>
                         <button type="submit"
-                                class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all"
+                                class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all relative"
                                 id="submitButton">
-                            Crear grupo
+                            <span id="buttonText">Crear grupo</span>
+                            <span id="loadingSpinner" class="hidden">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
                         </button>
                     </div>
                 </form>
 
                 <script>
-                    // Prevenir envíos duplicados
-                    document.getElementById('createGroupForm').addEventListener('submit', function(e) {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const form = document.getElementById('createGroupForm');
                         const submitButton = document.getElementById('submitButton');
-                        if (submitButton.disabled) {
-                            e.preventDefault();
-                            return false;
-                        }
-                        submitButton.disabled = true;
+                        const buttonText = document.getElementById('buttonText');
+                        const loadingSpinner = document.getElementById('loadingSpinner');
+                        let isSubmitting = false;
+
+                        // Generar un token único para este formulario
+                        const formToken = Math.random().toString(36).substring(2);
+                        const tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = 'form_token';
+                        tokenInput.value = formToken;
+                        form.appendChild(tokenInput);
+
+                        form.addEventListener('submit', function(e) {
+                            if (isSubmitting) {
+                                e.preventDefault();
+                                return false;
+                            }
+
+                            isSubmitting = true;
+                            submitButton.disabled = true;
+                            buttonText.textContent = 'Creando...';
+                            loadingSpinner.classList.remove('hidden');
+
+                            // Deshabilitar el botón después de 5 segundos si no hay respuesta
+                            setTimeout(() => {
+                                if (isSubmitting) {
+                                    isSubmitting = false;
+                                    submitButton.disabled = false;
+                                    buttonText.textContent = 'Crear grupo';
+                                    loadingSpinner.classList.add('hidden');
+                                }
+                            }, 5000);
+                        });
                     });
                 </script>
             </div>

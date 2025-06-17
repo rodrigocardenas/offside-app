@@ -99,7 +99,7 @@ class GroupController extends Controller
 
     public function create()
     {
-        $competitions = Competition::all();
+        $competitions = Competition::where('type', 'world-club-championship')->get();
         return view('groups.create', compact('competitions'));
     }
 
@@ -130,6 +130,7 @@ class GroupController extends Controller
         ],
         [
             'code' => Str::random(6),
+            'reward_or_penalty' => $request->reward_or_penalty,
         ]
     );
 
