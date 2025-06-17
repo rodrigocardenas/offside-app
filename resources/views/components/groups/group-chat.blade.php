@@ -35,25 +35,32 @@
                 </button>
             </form>
         </div>
-        @if($group->created_by === auth()->id())
-            <div class="flex justify-center mt-2 mb-2">
-                <button id="openRewardPenaltyModal" class="flex items-center px-4 py-2 bg-offside-primary text-white rounded-lg hover:bg-offside-secondary transition-colors focus:outline-none">
-                    @if($group->reward_or_penalty)
-                        <span class="truncate max-w-xs">{{ $group->reward_or_penalty }}</span>
-                        <i class="fa-solid fa-edit ml-2"></i>
-                    @else
-                        <i class="fa-solid fa-plus"></i>
-                        Agregar recompensa/penitencia
-                    @endif
-                </button>
-            </div>
-        @elseif($group->reward_or_penalty)
-            <div class="flex justify-center mt-2 mb-2">
-                <div class="px-4 py-2 bg-offside-primary text-white rounded-lg text-center">
-                    <span class="font-bold text-offside-secondary">Recompensa/Penitencia:</span><br>
-                    <span>{{ $group->reward_or_penalty }}</span>
-                </div>
-            </div>
-        @endif
     </div>
 </div>
+@if($group->created_by === auth()->id())
+    <div class="flex justify-center mb-2">
+        @if($group->reward_or_penalty)
+        <div class="flex justify-center mt-2 mb-2">
+            <div class="px-4 py-1 bg-offside-primary bg-opacity-40 text-white rounded-lg text-center">
+                <span class="font-bold text-offside-secondary">Recompensa/Penitencia:</span><br>
+                <span>{{ $group->reward_or_penalty }} <button id="openRewardPenaltyModal" class=" text-white rounded-lg hover:bg-offside-secondary transition-colors focus:outline-none">
+                        <i class="fa-solid fa-edit ml-2"></i>
+                    </button>
+                </span>
+            </div>
+        </div>
+        @else
+            <button id="openRewardPenaltyModal" class="flex items-center px-4 py-2 bg-offside-primary text-white rounded-lg hover:bg-offside-secondary transition-colors focus:outline-none">
+                <i class="fa-solid fa-plus"></i>
+                Agregar recompensa/penitencia
+            </button>
+        @endif
+    </div>
+@elseif($group->reward_or_penalty)
+    <div class="flex justify-center mt-2 mb-2">
+        <div class="px-4 py-2 bg-offside-primary text-white rounded-lg text-center">
+            <span class="font-bold text-offside-secondary">Recompensa/Penitencia:</span><br>
+            <span>{{ $group->reward_or_penalty }}</span>
+        </div>
+    </div>
+@endif
