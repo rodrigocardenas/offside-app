@@ -10,10 +10,10 @@
     <div class="relative">
         <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 pb-4" id="predictiveQuestionsCarousel">
             @forelse($matchQuestions as $question)
-                <div class="snap-center flex-none w-full" id="question{{ $question->id }}">
+                <div class="snap-center flex-none w-full text-center" id="question{{ $question->id }}">
                     <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6 {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-50' : '' }}">
                         <div class="mb-4">
-                            <p class="text-sm text-offside-light flex items-center">
+                            <p class="text-xl text-offside-light flex items-center justify-center">
                                 @if($question->football_match)
                                     @if($question->templateQuestion->homeTeam)
                                         <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->crest_url }}" class="w-6 h-6 mr-2"> vs <img src="{{ $question->templateQuestion->awayTeam->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->crest_url }}" class="w-6 h-6 mr-2">
@@ -57,7 +57,7 @@
                                             name="question_option_id"
                                             value="{{ $option->id }}"
                                             class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg">
-                                        <span>{{ $option->text }}</span>
+                                        <span class="flex-1 text-center">{{ $option->text }}</span>
                                         <div class="flex items-center space-x-2">
                                             @foreach($question->answers->where('question_option_id', $option->id) as $answer)
                                                 @php
