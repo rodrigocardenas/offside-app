@@ -40,16 +40,38 @@
                     const chatForm = document.getElementById('chatForm');
                     const sendButton = document.getElementById('sendMessageBtn');
                     const messageInput = document.getElementById('chatMessage');
+                    const chatContainer = document.querySelector('.overflow-y-auto');
                     let isSubmitting = false;
+                    let lastMessageTime = 0;
+
+                    async function appendMessage(message) {
+                        const messageHtml = `
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-1">
+                                    <div class="bg-offside-primary bg-opacity-40 rounded-lg p-3">
+                                        <div class="font-medium text-sm">${message.user.name}</div>
+                                        <div class="text-white">${message.message}</div>
+                                        <div class="text-xs text-gray-400 mt-1">
+                                            ${new Date(message.created_at).toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        chatContainer.insertAdjacentHTML('beforeend', messageHtml);
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }
 
                     chatForm.addEventListener('submit', async function(e) {
                         e.preventDefault();
 
-                        if (isSubmitting) {
+                        const now = Date.now();
+                        if (isSubmitting || (now - lastMessageTime < 2000)) {
                             return;
                         }
 
                         isSubmitting = true;
+                        lastMessageTime = now;
                         sendButton.disabled = true;
                         sendButton.classList.add('opacity-50', 'cursor-not-allowed');
 
@@ -65,14 +87,14 @@
                             });
 
                             if (response.status === 429) {
-                                const data = await response.json();
                                 console.log('Mensaje duplicado detectado');
                                 return;
                             }
 
                             if (response.ok) {
+                                const data = await response.json();
                                 messageInput.value = '';
-                                window.location.reload();
+                                await appendMessage(data.message);
                             } else {
                                 throw new Error('Error al enviar el mensaje');
                             }
