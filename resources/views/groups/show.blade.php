@@ -1,7 +1,7 @@
 <x-app-layout>
     {{-- setear en el navigation el yield navigation-title: --}}
     @section('navigation-title', $group->name)
-    <div class="min-h-screen bg-offside-dark text-white p-2 md:p-6 pb-24">
+    <div class="min-h-screen bg-offside-dark text-white p-1 md:p-6 pb-24">
 
         <!-- Encabezado del grupo -->
         <x-groups.group-header :group="$group" />
