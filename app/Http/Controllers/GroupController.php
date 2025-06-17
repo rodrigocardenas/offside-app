@@ -124,11 +124,14 @@ class GroupController extends Controller
 
         $group = Group::updateOrCreate([
             'name' => $request->name,
-            'code' => Str::random(6),
             'created_by' => auth()->id(),
             'competition_id' => $request->competition_id,
             'category' => $request->category,
-        ]);
+        ],
+        [
+            'code' => Str::random(6),
+        ]
+    );
 
         if (!$group->users()->where('user_id', auth()->id())->exists()) {
             $group->users()->attach(auth()->id());

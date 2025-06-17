@@ -62,7 +62,7 @@
                         </a>
                         <button type="submit"
                                 class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all"
-                                onclick="this.disabled=true;this.form.submit();">
+                                id="submitButton">
                             Crear grupo
                         </button>
                     </div>
@@ -71,11 +71,12 @@
                 <script>
                     // Prevenir envíos duplicados
                     document.getElementById('createGroupForm').addEventListener('submit', function(e) {
-                        if (this.submitted) {
+                        const submitButton = document.getElementById('submitButton');
+                        if (submitButton.disabled) {
                             e.preventDefault();
                             return false;
                         }
-                        this.submitted = true;
+                        submitButton.disabled = true;
                     });
                 </script>
             </div>
