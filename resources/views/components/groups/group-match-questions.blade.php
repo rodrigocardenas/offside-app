@@ -16,9 +16,9 @@
                             <p class="text-xl text-offside-light flex items-center justify-center">
                                 @if($question->football_match)
                                     @if($question->templateQuestion->homeTeam)
-                                        <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->crest_url }}" class="w-6 h-6 mr-2"> vs <img src="{{ $question->templateQuestion->awayTeam->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->crest_url }}" class="w-6 h-6 mr-2">
+                                        <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->crest_url }}" class="w-6 h-6 mr-2"> vs <img src="{{ $question->templateQuestion->awayTeam->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->crest_url }}" class="w-6 h-6 ml-2">
                                     @else
-                                        <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-6 h-6 mr-2"> vs <img src="{{ $question->football_match->awayTeam?->crest_url }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-6 h-6 mr-2">
+                                        <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-6 h-6 mr-2"> vs <img src="{{ $question->football_match->awayTeam?->crest_url }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-6 h-6 ml-2">
                                     @endif
                                 @else
                                     {{ $question->title }}
