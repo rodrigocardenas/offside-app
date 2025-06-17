@@ -105,6 +105,11 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
+        // Verificar el token CSRF
+        if (!$request->hasValidSignature()) {
+            return redirect()->back()->with('error', 'La sesión ha expirado. Por favor, intenta de nuevo.');
+        }
+
         // Verificar si ya existe un grupo con el mismo nombre creado por el mismo usuario en los últimos 5 segundos
         $recentGroup = Group::where('name', $request->name)
             ->where('created_by', auth()->id())
@@ -136,9 +141,14 @@ class GroupController extends Controller
                     ->with('success', 'Grupo creado exitosamente.');
             }
 
+            // Generar un código único
+            do {
+                $code = Str::random(6);
+            } while (Group::where('code', $code)->exists());
+
             $group = Group::create([
                 'name' => $request->name,
-                'code' => Str::random(6),
+                'code' => $code,
                 'created_by' => auth()->id(),
                 'competition_id' => $request->competition_id,
                 'category' => $request->category,
@@ -148,6 +158,9 @@ class GroupController extends Controller
             if (!$group->users()->where('user_id', auth()->id())->exists()) {
                 $group->users()->attach(auth()->id());
             }
+
+            // Limpiar cualquier caché relacionada
+            Cache::tags(['groups', 'user_' . auth()->id()])->flush();
 
             return redirect()->route('groups.show', $group)
                 ->with('success', 'Grupo creado exitosamente.');

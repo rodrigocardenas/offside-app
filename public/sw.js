@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offside-club-v1.0.2';
+const CACHE_NAME = 'offside-club-v1.0.3';
 const ASSETS_TO_CACHE = [
   '/',
   '/login',
@@ -57,8 +57,54 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Sistema de bloqueo de solicitudes duplicadas
+const pendingRequests = new Map();
+
 // Estrategia de red con caché
 self.addEventListener('fetch', function(event) {
+  // Manejar solicitudes POST
+  if (event.request.method === 'POST') {
+    const requestId = event.request.url + event.request.headers.get('X-CSRF-TOKEN');
+
+    // Si hay una solicitud pendiente con el mismo ID, bloquearla
+    if (pendingRequests.has(requestId)) {
+      console.log('[Service Worker] Bloqueando solicitud POST duplicada:', requestId);
+      event.respondWith(
+        new Response(JSON.stringify({
+          error: 'Solicitud duplicada detectada'
+        }), {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+      );
+      return;
+    }
+
+    // Marcar la solicitud como pendiente
+    pendingRequests.set(requestId, true);
+
+    // Limpiar después de 5 segundos
+    setTimeout(() => {
+      pendingRequests.delete(requestId);
+    }, 5000);
+
+    // Continuar con la solicitud original
+    event.respondWith(
+      fetch(event.request.clone())
+        .then(response => {
+          pendingRequests.delete(requestId);
+          return response;
+        })
+        .catch(error => {
+          pendingRequests.delete(requestId);
+          throw error;
+        })
+    );
+    return;
+  }
+
   // No cachear rutas dinámicas
   if (event.request.url.includes('/groups') ||
       event.request.url.includes('/predictions') ||
