@@ -122,24 +122,36 @@ class GroupController extends Controller
             'category' => 'required|in:official,amateur',
         ]);
 
-        $group = Group::updateOrCreate([
-            'name' => $request->name,
-            'created_by' => auth()->id(),
-            'competition_id' => $request->competition_id,
-            'category' => $request->category,
-        ],
-        [
-            'code' => Str::random(6),
-            'reward_or_penalty' => $request->reward_or_penalty,
-        ]
-    );
+        // Usar una transacción para asegurar la atomicidad
+        return DB::transaction(function () use ($request) {
+            // Verificar si ya existe un grupo idéntico
+            $existingGroup = Group::where('name', $request->name)
+                ->where('created_by', auth()->id())
+                ->where('competition_id', $request->competition_id)
+                ->where('category', $request->category)
+                ->first();
 
-        if (!$group->users()->where('user_id', auth()->id())->exists()) {
-            $group->users()->attach(auth()->id());
-        }
+            if ($existingGroup) {
+                return redirect()->route('groups.show', $existingGroup)
+                    ->with('success', 'Grupo creado exitosamente.');
+            }
 
-        return redirect()->route('groups.show', $group)
-            ->with('success', 'Grupo creado exitosamente.');
+            $group = Group::create([
+                'name' => $request->name,
+                'code' => Str::random(6),
+                'created_by' => auth()->id(),
+                'competition_id' => $request->competition_id,
+                'category' => $request->category,
+                'reward_or_penalty' => $request->reward_or_penalty,
+            ]);
+
+            if (!$group->users()->where('user_id', auth()->id())->exists()) {
+                $group->users()->attach(auth()->id());
+            }
+
+            return redirect()->route('groups.show', $group)
+                ->with('success', 'Grupo creado exitosamente.');
+        });
     }
 
     protected function createPredictiveQuestion(Group $group)
