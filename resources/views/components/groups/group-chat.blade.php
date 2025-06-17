@@ -41,36 +41,17 @@
                     const sendButton = document.getElementById('sendMessageBtn');
                     const messageInput = document.getElementById('chatMessage');
                     const chatContainer = document.querySelector('.overflow-y-auto');
-                    let isSubmitting = false;
                     let lastMessageTime = 0;
-
-                    async function appendMessage(message) {
-                        const messageHtml = `
-                            <div class="flex items-start space-x-3">
-                                <div class="flex-1">
-                                    <div class="bg-offside-primary bg-opacity-40 rounded-lg p-3">
-                                        <div class="font-medium text-sm">${message.user.name}</div>
-                                        <div class="text-white">${message.message}</div>
-                                        <div class="text-xs text-gray-400 mt-1">
-                                            ${new Date(message.created_at).toLocaleString()}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        chatContainer.insertAdjacentHTML('beforeend', messageHtml);
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                    }
 
                     chatForm.addEventListener('submit', async function(e) {
                         e.preventDefault();
 
                         const now = Date.now();
-                        if (isSubmitting || (now - lastMessageTime < 2000)) {
+                        if (formSubmissionTracker.isSubmitting('chatForm') || (now - lastMessageTime < 2000)) {
                             return;
                         }
 
-                        isSubmitting = true;
+                        formSubmissionTracker.startSubmission('chatForm');
                         lastMessageTime = now;
                         sendButton.disabled = true;
                         sendButton.classList.add('opacity-50', 'cursor-not-allowed');
@@ -94,7 +75,21 @@
                             if (response.ok) {
                                 const data = await response.json();
                                 messageInput.value = '';
-                                await appendMessage(data.message);
+                                const messageHtml = `
+                                    <div class="flex items-start space-x-3">
+                                        <div class="flex-1">
+                                            <div class="bg-offside-primary bg-opacity-40 rounded-lg p-3">
+                                                <div class="font-medium text-sm">${data.message.user.name}</div>
+                                                <div class="text-white">${data.message.message}</div>
+                                                <div class="text-xs text-gray-400 mt-1">
+                                                    ${new Date(data.message.created_at).toLocaleString()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                chatContainer.insertAdjacentHTML('beforeend', messageHtml);
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
                             } else {
                                 throw new Error('Error al enviar el mensaje');
                             }
@@ -102,7 +97,7 @@
                             console.error('Error:', error);
                         } finally {
                             setTimeout(() => {
-                                isSubmitting = false;
+                                formSubmissionTracker.endSubmission('chatForm');
                                 sendButton.disabled = false;
                                 sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
                             }, 1000);
@@ -111,7 +106,7 @@
 
                     // Prevenir envío con Enter múltiple
                     messageInput.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter' && isSubmitting) {
+                        if (e.key === 'Enter' && formSubmissionTracker.isSubmitting('chatForm')) {
                             e.preventDefault();
                         }
                     });
