@@ -50,9 +50,9 @@
                     {{-- recompensa o penalización --}}
                     <div>
                         <label for="reward_or_penalty" class="block text-sm font-medium text-gray-400 mb-2">Recompensa o penalización</label>
-                        <input id="reward_or_penalty" type="number" name="reward_or_penalty" value="{{ old('reward_or_penalty') }}" required
+                        <textarea id="reward_or_penalty" name="reward_or_penalty" rows="4" required
                             class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('reward_or_penalty') border-red-500 @enderror"
-                            placeholder="Ej: 100">
+                            placeholder="Escribe el premio para el ganador o la penitencia para el perdedor">{{ old('reward_or_penalty') }}</textarea>
                     </div>
 
                     <div class="flex items-center justify-between">
