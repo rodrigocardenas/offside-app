@@ -105,11 +105,6 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
-        // Verificar el token CSRF
-        if (!$request->hasValidSignature()) {
-            return redirect()->back()->with('error', 'La sesión ha expirado. Por favor, intenta de nuevo.');
-        }
-
         // Verificar si ya existe un grupo con el mismo nombre creado por el mismo usuario en los últimos 5 segundos
         $recentGroup = Group::where('name', $request->name)
             ->where('created_by', auth()->id())
