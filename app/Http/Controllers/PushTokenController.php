@@ -16,7 +16,7 @@ class PushTokenController extends Controller
         $user = Auth::user();
 
         // Guardar o actualizar el token en la relación pushSubscriptions
-        $user->pushSubscriptions()->updateOrCreate(
+        $user->pushSubscriptions()->first()->updateOrCreate(
             [
                 'user_id' => $user->id,
                 'device_token' => $request->token
