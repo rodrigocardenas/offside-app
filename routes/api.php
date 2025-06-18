@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\PushTokenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,4 +29,5 @@ Route::get('/competitions/{competition}/teams', function (App\Models\Competition
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store']);
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);
+    Route::post('/actualizar-token', [PushTokenController::class, 'update']);
 });

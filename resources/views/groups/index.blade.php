@@ -654,6 +654,29 @@
             }
             return outputArray;
         }
+
+        // --- ACTUALIZACIÓN AUTOMÁTICA DEL TOKEN PUSH AL CARGAR LA PÁGINA ---
+        document.addEventListener('DOMContentLoaded', function() {
+            messaging.getToken({ vapidKey: vapidKey })
+                .then(function(currentToken) {
+                    if (currentToken) {
+                        fetch('/api/actualizar-token', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify({ token: currentToken })
+                        });
+                    } else {
+                        console.log('No se pudo obtener el token. ¿Permisos concedidos?');
+                    }
+                })
+                .catch(function(err) {
+                    console.log('Error al obtener el token:', err);
+                });
+        });
     </script>
 
     <style>

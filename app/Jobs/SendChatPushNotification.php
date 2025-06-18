@@ -36,11 +36,21 @@ class SendChatPushNotification implements ShouldQueue
             return;
         }
         $credentials_path = base_path("storage/app/offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json");
-        Log::info('Credenciales', ['credentials_path' => $credentials_path]);
+
+        if (!file_exists($credentials_path)) {
+            Log::error('Archivo de credenciales de Firebase no encontrado en: ' . $credentials_path);
+            return;
+        }
+
+        try {
+            $factory = (new Factory)->withServiceAccount($credentials_path);
+            $messaging = $factory->createMessaging();
+        } catch (\Throwable $e) {
+            Log::error('Error al inicializar Firebase: ' . $e->getMessage());
+            return;
+        }
 
         $groupUsers = $chatMessage->group->users()->where('users.id', '!=', $chatMessage->user_id)->get();
-        $factory = (new Factory)->withServiceAccount($credentials_path);
-        $messaging = $factory->createMessaging();
         Log::info('Usuarios notificados', ['groupUsers' => $groupUsers]);
 
         foreach ($groupUsers as $user) {
@@ -49,15 +59,20 @@ class SendChatPushNotification implements ShouldQueue
                     'notification' => [
                         'title' => 'Nuevo mensaje en el grupo ' . $chatMessage->group->name,
                         'body' => $chatMessage->user->name . ': ' . $chatMessage->message,
-                        'icon' => '/icon-192x192.png',
-                        'click_action' => url('/groups/' . $chatMessage->group->id . '#chatSection'),
                     ],
                     'webpush' => [
+                        'headers' => [
+                            'Urgency' => 'high',
+                        ],
+                        'notification' => [
+                            'icon' => '/icon-192x192.png',
+                            'click_action' => url('/groups/' . $chatMessage->group->id . '#chatSection'),
+                        ],
                         'fcm_options' => [
                             'link' => url('/groups/' . $chatMessage->group->id . '#chatSection'),
                         ],
                     ],
-                    'token' => $subscription->device_token,
+                    'token' => $subscription->first()->device_token,
                 ];
 
                 try {
