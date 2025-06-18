@@ -27,7 +27,7 @@ Route::get('/competitions/{competition}/teams', function (App\Models\Competition
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store']);
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);
-    Route::post('/actualizar-token', [PushTokenController::class, 'update']);
 });
+Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store']);
+Route::post('/actualizar-token', [PushTokenController::class, 'update']);
