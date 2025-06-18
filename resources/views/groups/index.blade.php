@@ -657,6 +657,8 @@
 
         // --- ACTUALIZACIÓN AUTOMÁTICA DEL TOKEN PUSH AL CARGAR LA PÁGINA ---
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded aaah');
+
             messaging.getToken({ vapidKey: vapidKey })
                 .then(function(currentToken) {
                     if (currentToken) {
@@ -667,6 +669,7 @@
                                 'Accept': 'application/json',
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                             },
+                            credentials: 'same-origin',
                             body: JSON.stringify({ token: currentToken })
                         });
                     } else {
