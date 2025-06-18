@@ -54,7 +54,7 @@ class SendChatPushNotification implements ShouldQueue
         Log::info('Usuarios notificados', ['groupUsers' => $groupUsers]);
 
         foreach ($groupUsers as $user) {
-            foreach ($user->pushSubscriptions ?? [] as $subscription) {
+            foreach ($user->pushSubscriptions as $subscription) {
                 $message = [
                     'notification' => [
                         'title' => 'Nuevo mensaje en el grupo ' . $chatMessage->group->name,
@@ -72,7 +72,7 @@ class SendChatPushNotification implements ShouldQueue
                             'link' => url('/groups/' . $chatMessage->group->id . '#chatSection'),
                         ],
                     ],
-                    'token' => $subscription->first()->device_token,
+                    'token' => $subscription->device_token,
                 ];
 
                 try {

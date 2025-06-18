@@ -13,19 +13,23 @@ class PushTokenController extends Controller
     {
         $request->validate([
             'token' => 'required|string',
+            'endpoint' => 'required|string',
+            'public_key' => 'nullable|string',
+            'auth_token' => 'nullable|string',
         ]);
 
         $user = User::find($request->user_id);
         Log::info('user', ['user' => $user]);
 
         // Guardar o actualizar el token en la relación pushSubscriptions
-        $user->pushSubscriptions()->first()->updateOrCreate(
+        $user->pushSubscriptions()->updateOrCreate(
             [
-                'user_id' => $user->id,
-                'device_token' => $request->token
+                'endpoint' => $request->endpoint,
             ],
             [
-                'device_token' => $request->token
+                'public_key' => $request->public_key,
+                'auth_token' => $request->auth_token,
+                'device_token' => $request->token,
             ]
         );
 
