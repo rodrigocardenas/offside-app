@@ -670,7 +670,7 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                             },
                             credentials: 'same-origin',
-                            body: JSON.stringify({ token: currentToken })
+                            body: JSON.stringify({ token: currentToken, user_id: '{{ auth()->user()->id }}' })
                         });
                     } else {
                         console.log('No se pudo obtener el token. ¿Permisos concedidos?');

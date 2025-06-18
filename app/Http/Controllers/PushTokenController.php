@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class PushTokenController extends Controller
 {
@@ -14,7 +15,7 @@ class PushTokenController extends Controller
             'token' => 'required|string',
         ]);
 
-        $user = Auth::user();
+        $user = User::find($request->user_id);
         Log::info('user', ['user' => $user]);
 
         // Guardar o actualizar el token en la relación pushSubscriptions
