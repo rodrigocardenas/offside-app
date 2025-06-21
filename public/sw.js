@@ -190,7 +190,7 @@ const messaging = firebase.messaging();
 
 // Manejar mensajes de Firebase
 messaging.onBackgroundMessage(function(payload) {
-    console.log('Mensaje de Firebase recibido en background:', payload);
+    console.log('Mensaje de Firebase recibido en background (SW principal):', payload);
 
     const notificationTitle = payload.notification?.title || 'Offside Club';
     const notificationOptions = {
@@ -200,6 +200,7 @@ messaging.onBackgroundMessage(function(payload) {
         vibrate: [100, 50, 100],
         data: payload.data || {},
         requireInteraction: true,
+        tag: 'offside-notification', // Evita duplicados
         actions: [
             {
                 action: 'explore',

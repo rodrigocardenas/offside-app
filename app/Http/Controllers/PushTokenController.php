@@ -24,10 +24,10 @@ class PushTokenController extends Controller
         // Guardar o actualizar el token en la relación pushSubscriptions
         $user->pushSubscriptions()->updateOrCreate(
             [
-                'endpoint' => $request->endpoint,
                 'device_token' => $request->token,
             ],
             [
+                'endpoint' => $request->endpoint,
                 'public_key' => $request->public_key,
                 'auth_token' => $request->auth_token,
             ]
