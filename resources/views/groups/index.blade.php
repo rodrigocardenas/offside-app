@@ -552,6 +552,18 @@
             appId: "1:249528682190:web:c2be461351ccc44474f29f",
             measurementId: "G-EZ0VLLBGZN"
         };
+
+        // Registrar el Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('Service Worker registrado exitosamente:', registration);
+                })
+                .catch(function(error) {
+                    console.log('Error al registrar Service Worker:', error);
+                });
+        }
+
         firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging();
         const vapidKey = 'BFT3Sbs3FnMmNK-qRAKD-VsrPEpuX_mQHdEhLeJs_2CQ8uPGhuXZlGfNeNzm9kzwwWN0llK2FcYEP-hMq5_KN2M'; // Reemplaza por tu clave pública VAPID
@@ -659,22 +671,37 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOMContentLoaded aaah');
 
-            messaging.getToken({ vapidKey: vapidKey })
-                .then(function(currentToken) {
-                    console.log('currentToken', currentToken);
-                    console.log('vapidKey', vapidKey);
-                    console.log('aqui');
+            // Esperar a que el Service Worker esté listo
+            navigator.serviceWorker.ready.then(function(registration) {
+                console.log('Service Worker listo:', registration);
 
-                    if (currentToken) {
-                        // Obtener la suscripción push existente para incluir los datos requeridos
-                        navigator.serviceWorker.ready.then(function(registration) {
+                messaging.getToken({ vapidKey: vapidKey })
+                    .then(function(currentToken) {
+                        console.log('currentToken', currentToken);
+                        console.log('vapidKey', vapidKey);
+                        console.log('aqui');
+
+                        if (currentToken) {
+                            // Obtener la suscripción push existente para incluir los datos requeridos
                             registration.pushManager.getSubscription().then(function(subscription) {
+                                console.log('Suscripción obtenida:', subscription);
+
                                 if (subscription) {
                                     const rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
                                     const rawAuthSecret = subscription.getKey ? subscription.getKey('auth') : '';
                                     const public_key = rawKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))) : '';
                                     const auth_token = rawAuthSecret ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawAuthSecret))) : '';
                                     const endpoint = subscription.endpoint;
+
+                                    const dataToSend = {
+                                        token: currentToken,
+                                        user_id: '{{ auth()->user()->id }}',
+                                        endpoint: endpoint,
+                                        public_key: public_key,
+                                        auth_token: auth_token
+                                    };
+
+                                    console.log('Datos a enviar:', dataToSend);
 
                                     fetch('/api/actualizar-token', {
                                         method: 'POST',
@@ -684,33 +711,31 @@
                                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                                         },
                                         credentials: 'same-origin',
-                                        body: JSON.stringify({
-                                            token: currentToken,
-                                            user_id: '{{ auth()->user()->id }}',
-                                            endpoint: endpoint,
-                                            public_key: public_key,
-                                            auth_token: auth_token
-                                        })
-                                    });
-                                    console.log({
-                                        token: currentToken,
-                                        user_id: '{{ auth()->user()->id }}',
-                                        endpoint: endpoint,
-                                        public_key: public_key,
-                                        auth_token: auth_token
+                                        body: JSON.stringify(dataToSend)
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        console.log('Respuesta del servidor:', data);
+                                    })
+                                    .catch(error => {
+                                        console.error('Error al enviar datos:', error);
                                     });
                                 } else {
                                     console.log('No hay suscripción push activa');
                                 }
+                            }).catch(function(error) {
+                                console.error('Error al obtener suscripción:', error);
                             });
-                        });
-                    } else {
-                        console.log('No se pudo obtener el token. ¿Permisos concedidos?');
-                    }
-                })
-                .catch(function(err) {
-                    console.log('Error al obtener el token:', err);
-                });
+                        } else {
+                            console.log('No se pudo obtener el token. ¿Permisos concedidos?');
+                        }
+                    })
+                    .catch(function(err) {
+                        console.log('Error al obtener el token:', err);
+                    });
+            }).catch(function(error) {
+                console.error('Error al obtener Service Worker:', error);
+            });
         });
     </script>
 
