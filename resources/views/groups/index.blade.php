@@ -692,6 +692,13 @@
                                             auth_token: auth_token
                                         })
                                     });
+                                    console.log({
+                                        token: currentToken,
+                                        user_id: '{{ auth()->user()->id }}',
+                                        endpoint: endpoint,
+                                        public_key: public_key,
+                                        auth_token: auth_token
+                                    });
                                 } else {
                                     console.log('No hay suscripción push activa');
                                 }
