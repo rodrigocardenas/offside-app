@@ -23,6 +23,7 @@ class Question extends Model
         'user_id',
         'template_question_id',
         'competition_id',
+        'result_verified_at',
     ];
 
     protected $casts = [

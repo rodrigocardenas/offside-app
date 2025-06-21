@@ -22,7 +22,7 @@ class RenewSocialQuestions extends Command
             $group->questions()
                 ->where('type', 'social')
                 ->where('available_until', '<', now())
-                ->update(['verified_at' => now()]);
+                ->update(['result_verified_at' => now()]);
 
             // Crear nueva pregunta social
             $socialQuestion = $this->createSocialQuestion($group);
