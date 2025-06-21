@@ -661,6 +661,10 @@
 
             messaging.getToken({ vapidKey: vapidKey })
                 .then(function(currentToken) {
+                    console.log('currentToken', currentToken);
+                    console.log('vapidKey', vapidKey);
+                    console.log('aqui');
+
                     if (currentToken) {
                         // Obtener la suscripción push existente para incluir los datos requeridos
                         navigator.serviceWorker.ready.then(function(registration) {
