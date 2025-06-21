@@ -28,6 +28,7 @@ messaging.onBackgroundMessage(function(payload) {
         badge: '/images/logo_white_bg.png',
         vibrate: [100, 50, 100],
         data: payload.data || {},
+        requireInteraction: true,
         actions: [
             {
                 action: 'explore',
@@ -47,7 +48,7 @@ messaging.onBackgroundMessage(function(payload) {
 
 // Manejar clics en notificaciones
 self.addEventListener('notificationclick', function(event) {
-    console.log('Notificación clickeada:', event);
+    console.log('Notificación clickeada (Firebase):', event);
 
     event.notification.close();
 
@@ -55,18 +56,29 @@ self.addEventListener('notificationclick', function(event) {
     const notificationData = event.notification.data || {};
     const link = notificationData.link || '/';
 
-    if (event.action === 'explore') {
-        // Abrir la aplicación en el enlace específico
-        event.waitUntil(
-            clients.openWindow(link)
-        );
-    } else if (event.action === 'close') {
-        // Solo cerrar la notificación
-        event.notification.close();
-    } else {
-        // Clic en la notificación principal - abrir el enlace específico
-        event.waitUntil(
-            clients.openWindow(link)
-        );
-    }
+    console.log('Enlace a abrir:', link);
+
+    event.waitUntil(
+        // Primero verificar si ya hay una ventana abierta
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+            // Buscar si ya hay una ventana con la URL
+            for (let i = 0; i < clientList.length; i++) {
+                const client = clientList[i];
+                if (client.url.includes(link) && 'focus' in client) {
+                    console.log('Enfocando ventana existente:', client.url);
+                    return client.focus();
+                }
+            }
+
+            // Si no hay ventana existente, abrir una nueva
+            if (clients.openWindow) {
+                console.log('Abriendo nueva ventana:', link);
+                return clients.openWindow(link);
+            }
+        }).catch(function(error) {
+            console.error('Error al manejar clic en notificación:', error);
+            // Fallback: intentar abrir en nueva ventana
+            return clients.openWindow(link);
+        })
+    );
 });
