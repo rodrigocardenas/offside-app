@@ -1,15 +1,7 @@
 const CACHE_NAME = 'offside-club-v1.0.3';
 const ASSETS_TO_CACHE = [
   '/',
-  '/login',
-  '/css/app.css',
-  '/js/app.js',
-  '/js/navigation.js',
-  '/images/logo-offside-192x192.png',
-  '/images/logo-offside-512x512.png',
-  '/manifest.json',
-  '/favicon.ico',
-  '/offline.html'
+  '/login'
 ];
 
 // Instalación del Service Worker
@@ -19,10 +11,18 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Caching app shell');
-        return cache.addAll(ASSETS_TO_CACHE);
+        // Cachear recursos uno por uno para manejar errores individualmente
+        return Promise.allSettled(
+          ASSETS_TO_CACHE.map(url =>
+            cache.add(url).catch(error => {
+              console.warn(`[Service Worker] Error al cachear ${url}:`, error);
+              return null; // Continuar con otros recursos
+            })
+          )
+        );
       })
       .catch(error => {
-        console.error('Error al cachear recursos:', error);
+        console.error('[Service Worker] Error general al cachear recursos:', error);
       })
   );
   // Activa el service worker inmediatamente
@@ -133,17 +133,31 @@ self.addEventListener('fetch', function(event) {
               return response;
             }
 
+            // Solo cachear URLs válidas (no chrome-extension, data:, etc.)
+            const url = new URL(event.request.url);
+            if (url.protocol === 'chrome-extension:' || url.protocol === 'data:' || url.protocol === 'blob:') {
+              return response;
+            }
+
             // Clonar la respuesta
             var responseToCache = response.clone();
 
             caches.open(CACHE_NAME)
               .then(function(cache) {
-                cache.put(event.request, responseToCache);
+                cache.put(event.request, responseToCache).catch(error => {
+                  console.warn('[Service Worker] Error al cachear respuesta:', error);
+                });
+              })
+              .catch(error => {
+                console.warn('[Service Worker] Error al abrir cache:', error);
               });
 
             return response;
           }
-        );
+        ).catch(error => {
+          console.warn('[Service Worker] Error en fetch:', error);
+          return new Response('Error de red', { status: 503 });
+        });
       })
     );
 });
@@ -153,4 +167,121 @@ self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+});
+
+// Manejar notificaciones push
+self.addEventListener('push', function(event) {
+    console.log('Push recibido:', event);
+
+    let options = {
+        body: 'Tienes una nueva notificación de Offside Club',
+        icon: '/images/logo_white_bg.png',
+        badge: '/images/logo_white_bg.png',
+        vibrate: [100, 50, 100],
+        data: {
+            dateOfArrival: Date.now(),
+            primaryKey: 1
+        },
+        actions: [
+            {
+                action: 'explore',
+                title: 'Ver',
+                icon: '/images/logo_white_bg.png'
+            },
+            {
+                action: 'close',
+                title: 'Cerrar',
+                icon: '/images/logo_white_bg.png'
+            }
+        ]
+    };
+
+    if (event.data) {
+        try {
+            const data = event.data.json();
+            options.body = data.body || options.body;
+            options.title = data.title || 'Offside Club';
+            options.data = { ...options.data, ...data };
+        } catch (e) {
+            console.log('Error al parsear datos de notificación:', e);
+        }
+    }
+
+    event.waitUntil(
+        self.registration.showNotification('Offside Club', options)
+    );
+});
+
+// Manejar clics en notificaciones
+self.addEventListener('notificationclick', function(event) {
+    console.log('Notificación clickeada:', event);
+
+    event.notification.close();
+
+    if (event.action === 'explore') {
+        // Abrir la aplicación
+        event.waitUntil(
+            clients.openWindow('/')
+        );
+    } else if (event.action === 'close') {
+        // Solo cerrar la notificación
+        event.notification.close();
+    } else {
+        // Clic en la notificación principal
+        event.waitUntil(
+            clients.openWindow('/')
+        );
+    }
+});
+
+// Manejar notificaciones cerradas
+self.addEventListener('notificationclose', function(event) {
+    console.log('Notificación cerrada:', event);
+});
+
+// Importar Firebase Messaging Service Worker
+importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
+
+// Configuración de Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDCTXfOTcgYozlv2E6pjV_QD0QZJ47aYN8",
+    authDomain: "offside-dd226.firebaseapp.com",
+    projectId: "offside-dd226",
+    storageBucket: "offside-dd226.appspot.com",
+    messagingSenderId: "249528682190",
+    appId: "1:249528682190:web:c2be461351ccc44474f29f",
+    measurementId: "G-EZ0VLLBGZN"
+};
+
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+// Manejar mensajes de Firebase
+messaging.onBackgroundMessage(function(payload) {
+    console.log('Mensaje de Firebase recibido en background:', payload);
+
+    const notificationTitle = payload.notification?.title || 'Offside Club';
+    const notificationOptions = {
+        body: payload.notification?.body || 'Tienes una nueva notificación',
+        icon: '/images/logo_white_bg.png',
+        badge: '/images/logo_white_bg.png',
+        vibrate: [100, 50, 100],
+        data: payload.data || {},
+        actions: [
+            {
+                action: 'explore',
+                title: 'Ver',
+                icon: '/images/logo_white_bg.png'
+            },
+            {
+                action: 'close',
+                title: 'Cerrar',
+                icon: '/images/logo_white_bg.png'
+            }
+        ]
+    };
+
+    return self.registration.showNotification(notificationTitle, notificationOptions);
 });
