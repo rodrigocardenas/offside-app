@@ -662,15 +662,36 @@
             messaging.getToken({ vapidKey: vapidKey })
                 .then(function(currentToken) {
                     if (currentToken) {
-                        fetch('/api/actualizar-token', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            },
-                            credentials: 'same-origin',
-                            body: JSON.stringify({ token: currentToken, user_id: '{{ auth()->user()->id }}' })
+                        // Obtener la suscripción push existente para incluir los datos requeridos
+                        navigator.serviceWorker.ready.then(function(registration) {
+                            registration.pushManager.getSubscription().then(function(subscription) {
+                                if (subscription) {
+                                    const rawKey = subscription.getKey ? subscription.getKey('p256dh') : '';
+                                    const rawAuthSecret = subscription.getKey ? subscription.getKey('auth') : '';
+                                    const public_key = rawKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))) : '';
+                                    const auth_token = rawAuthSecret ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawAuthSecret))) : '';
+                                    const endpoint = subscription.endpoint;
+
+                                    fetch('/api/actualizar-token', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'Accept': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        },
+                                        credentials: 'same-origin',
+                                        body: JSON.stringify({
+                                            token: currentToken,
+                                            user_id: '{{ auth()->user()->id }}',
+                                            endpoint: endpoint,
+                                            public_key: public_key,
+                                            auth_token: auth_token
+                                        })
+                                    });
+                                } else {
+                                    console.log('No hay suscripción push activa');
+                                }
+                            });
                         });
                     } else {
                         console.log('No se pudo obtener el token. ¿Permisos concedidos?');
