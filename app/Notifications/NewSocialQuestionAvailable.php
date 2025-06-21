@@ -6,8 +6,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
-use NotificationChannels\WebPush\WebPushMessage;
 use App\Models\Question;
+use App\Jobs\SendSocialQuestionPushNotification;
 
 class NewSocialQuestionAvailable extends Notification implements ShouldQueue
 {
@@ -18,11 +18,6 @@ class NewSocialQuestionAvailable extends Notification implements ShouldQueue
     public function __construct(Question $question)
     {
         $this->question = $question;
-    }
-
-    public function via($notifiable)
-    {
-        return ['database', 'broadcast'];
     }
 
     public function toArray($notifiable)
@@ -45,15 +40,23 @@ class NewSocialQuestionAvailable extends Notification implements ShouldQueue
         ]);
     }
 
-    public function toWebPush($notifiable, $notification)
+    /**
+     * Enviar notificación push usando Firebase FCM
+     */
+    public function toFirebase($notifiable)
     {
-        return (new WebPushMessage)
-            ->title('Nueva pregunta social disponible')
-            ->body('Hay una nueva pregunta social disponible en tu grupo: ' . $this->question->title)
-            ->data([
-                'question_id' => $this->question->id,
-                'group_id' => $this->question->group_id,
-                'url' => '/questions/' . $this->question->id
-            ]);
+        // Despachar job para enviar notificación push
+        SendSocialQuestionPushNotification::dispatch($this->question->id);
+    }
+
+    /**
+     * Determinar qué canales usar para la notificación
+     */
+    public function via($notifiable)
+    {
+        // Enviar notificación push usando Firebase
+        $this->toFirebase($notifiable);
+
+        return ['database', 'broadcast'];
     }
 }
