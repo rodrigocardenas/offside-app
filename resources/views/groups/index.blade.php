@@ -721,7 +721,51 @@
                                         console.error('Error al enviar datos:', error);
                                     });
                                 } else {
-                                    console.log('No hay suscripción push activa');
+                                    console.log('No hay suscripción push activa, creando una nueva...');
+
+                                    // Crear nueva suscripción push
+                                    registration.pushManager.subscribe({
+                                        userVisibleOnly: true,
+                                        applicationServerKey: urlBase64ToUint8Array(vapidKey)
+                                    }).then(function(newSubscription) {
+                                        console.log('Nueva suscripción creada:', newSubscription);
+
+                                        const rawKey = newSubscription.getKey ? newSubscription.getKey('p256dh') : '';
+                                        const rawAuthSecret = newSubscription.getKey ? newSubscription.getKey('auth') : '';
+                                        const public_key = rawKey ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawKey))) : '';
+                                        const auth_token = rawAuthSecret ? btoa(String.fromCharCode.apply(null, new Uint8Array(rawAuthSecret))) : '';
+                                        const endpoint = newSubscription.endpoint;
+
+                                        const dataToSend = {
+                                            token: currentToken,
+                                            user_id: '{{ auth()->user()->id }}',
+                                            endpoint: endpoint,
+                                            public_key: public_key,
+                                            auth_token: auth_token
+                                        };
+
+                                        console.log('Datos de nueva suscripción a enviar:', dataToSend);
+
+                                        fetch('/api/actualizar-token', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Accept': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            },
+                                            credentials: 'same-origin',
+                                            body: JSON.stringify(dataToSend)
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            console.log('Respuesta del servidor (nueva suscripción):', data);
+                                        })
+                                        .catch(error => {
+                                            console.error('Error al enviar datos de nueva suscripción:', error);
+                                        });
+                                    }).catch(function(err) {
+                                        console.error('Error al crear suscripción push:', err);
+                                    });
                                 }
                             }).catch(function(error) {
                                 console.error('Error al obtener suscripción:', error);
