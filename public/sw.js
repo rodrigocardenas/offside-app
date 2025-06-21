@@ -218,18 +218,22 @@ self.addEventListener('notificationclick', function(event) {
 
     event.notification.close();
 
+    // Obtener el enlace específico de los datos de la notificación
+    const notificationData = event.notification.data || {};
+    const link = notificationData.link || '/';
+
     if (event.action === 'explore') {
-        // Abrir la aplicación
+        // Abrir la aplicación en el enlace específico
         event.waitUntil(
-            clients.openWindow('/')
+            clients.openWindow(link)
         );
     } else if (event.action === 'close') {
         // Solo cerrar la notificación
         event.notification.close();
     } else {
-        // Clic en la notificación principal
+        // Clic en la notificación principal - abrir el enlace específico
         event.waitUntil(
-            clients.openWindow('/')
+            clients.openWindow(link)
         );
     }
 });

@@ -60,6 +60,11 @@ class SendChatPushNotification implements ShouldQueue
                         'title' => 'Nuevo mensaje en el grupo ' . $chatMessage->group->name,
                         'body' => $chatMessage->user->name . ': ' . $chatMessage->message,
                     ],
+                    'data' => [
+                        'link' => url('/groups/' . $chatMessage->group->id . '#chatSection'),
+                        'group_id' => $chatMessage->group->id,
+                        'message_id' => $chatMessage->id,
+                    ],
                     'webpush' => [
                         'headers' => [
                             'Urgency' => 'high',
