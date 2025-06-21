@@ -62,8 +62,8 @@ class SendChatPushNotification implements ShouldQueue
                     ],
                     'data' => [
                         'link' => url('/groups/' . $chatMessage->group->id . '#chatSection'),
-                        'group_id' => $chatMessage->group->id,
-                        'message_id' => $chatMessage->id,
+                        'group_id' => (string) $chatMessage->group->id,
+                        'message_id' => (string) $chatMessage->id,
                     ],
                     'webpush' => [
                         'headers' => [
