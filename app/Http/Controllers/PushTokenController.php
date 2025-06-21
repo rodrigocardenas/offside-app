@@ -25,11 +25,11 @@ class PushTokenController extends Controller
         $user->pushSubscriptions()->updateOrCreate(
             [
                 'endpoint' => $request->endpoint,
+                'device_token' => $request->token,
             ],
             [
                 'public_key' => $request->public_key,
                 'auth_token' => $request->auth_token,
-                'device_token' => $request->token,
             ]
         );
 
