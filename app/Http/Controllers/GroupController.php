@@ -169,7 +169,8 @@ class GroupController extends Controller
         try {
             $matches = FootballMatch::where(function($query) use ($group) {
                     $query->where('competition_id', $group->competition_id)
-                        ->orWhere('competition_id', 4); // Mundial de Clubes
+                        ->orWhere('competition_id', 4) // Mundial de Clubes
+                        ->orWhere('league', 'world-club-championship');
                 })
                 ->where('status', 'Not Started')
                 ->where('date', '>=', now())
