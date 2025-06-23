@@ -42,7 +42,7 @@ class FootballService
             'X-RapidAPI-Key' => '2ea32fefbamsh0dade5dedb8c255p1f80f9jsn59b5e00f47a5',
             'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
         ])->get($this->baseUrl . 'fixtures', [
-            'league' => $leagueId,
+            'league' => 15,
             'season' => 2025,
             'next' => $limit,
         ]);
