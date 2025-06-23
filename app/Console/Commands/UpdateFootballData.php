@@ -6,9 +6,13 @@ use Illuminate\Console\Command;
 use App\Services\FootballService;
 use App\Services\OpenAIService;
 use App\Jobs\UpdateMatchesAndVerifyResults;
+use App\Models\Group;
+use App\Traits\HandlesQuestions;
 
 class UpdateFootballData extends Command
 {
+    use HandlesQuestions;
+
     /**
      * The name and signature of the console command.
      *

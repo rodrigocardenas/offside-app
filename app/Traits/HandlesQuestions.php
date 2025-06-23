@@ -187,4 +187,82 @@ trait HandlesQuestions
             Cache::forget("group_{$group->id}_social_question");
         }
     }
+
+    /**
+     * Rellena las preguntas predictivas de un grupo hasta tener 5 vigentes.
+     * Si no hay suficientes partidos, repite con el partido destacado.
+     * Solo crea preguntas si hay menos de 5 vigentes.
+     */
+    public function fillGroupPredictiveQuestions($group)
+    {
+        // 1. Obtener preguntas predictivas vigentes
+        $vigentes = \App\Models\Question::where('type', 'predictive')
+            ->where('group_id', $group->id)
+            ->where('available_until', '>', now())
+            ->get();
+
+        $faltantes = 5 - $vigentes->count();
+        if ($faltantes <= 0) {
+            return $vigentes;
+        }
+
+        // 2. Buscar partidos próximos de la competición del grupo
+        $matches = \App\Models\FootballMatch::where(function($q) use ($group) {
+                $q->where('league', $group->competition->type)
+                  ->orWhere('competition_id', $group->competition_id);
+            })
+            ->where('status', 'Not Started')
+            ->where('date', '>=', now())
+            ->orderBy('date')
+            ->get();
+
+        // 3. Filtrar partidos que ya tengan pregunta vigente en el grupo
+        $matchesSinPregunta = $matches->filter(function($match) use ($group) {
+            return !\App\Models\Question::where('type', 'predictive')
+                ->where('group_id', $group->id)
+                ->where('match_id', $match->id)
+                ->where('available_until', '>', now())
+                ->exists();
+        });
+
+        // 4. Obtener plantillas predictivas
+        $plantillas = \App\Models\TemplateQuestion::where('type', 'predictive')
+            ->orderBy('is_featured', 'desc')
+            ->orderBy('id')
+            ->get();
+        $plantillaIndex = 0;
+
+        $nuevas = collect();
+        // 5. Crear preguntas para partidos próximos sin pregunta
+        foreach ($matchesSinPregunta as $match) {
+            if ($faltantes <= 0) break;
+            $plantilla = $plantillas[$plantillaIndex % $plantillas->count()];
+            $plantillaIndex++;
+            $pregunta = $this->createQuestionFromTemplate($plantilla, $match, $group);
+            if ($pregunta) {
+                $nuevas->push($pregunta);
+                $faltantes--;
+            }
+        }
+
+        // 6. Si aún faltan, usar el partido destacado
+        if ($faltantes > 0) {
+            $destacado = $matches->where('is_featured', true)->sortBy('date')->first();
+            if ($destacado) {
+                while ($faltantes > 0) {
+                    $plantilla = $plantillas[$plantillaIndex % $plantillas->count()];
+                    $plantillaIndex++;
+                    $pregunta = $this->createQuestionFromTemplate($plantilla, $destacado, $group);
+                    if ($pregunta) {
+                        $nuevas->push($pregunta);
+                        $faltantes--;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $vigentes->merge($nuevas)->take(5);
+    }
 }

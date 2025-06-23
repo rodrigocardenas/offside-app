@@ -13,10 +13,12 @@ use App\Models\FootballMatch;
 use App\Models\Question;
 use App\Services\Features\FeaturedMatchService;
 use Illuminate\Support\Facades\Log;
+use App\Models\Group;
+use App\Traits\HandlesQuestions;
 
 class UpdateMatchesAndVerifyResults implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, HandlesQuestions;
 
     /**
      * Create a new job instance.
@@ -170,6 +172,12 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
                 ]);
                 continue;
             }
+        }
+
+        // 3. Rellenar preguntas predictivas en todos los grupos
+        $grupos = Group::with('competition')->get();
+        foreach ($grupos as $grupo) {
+            $this->fillGroupPredictiveQuestions($grupo);
         }
     }
 }
