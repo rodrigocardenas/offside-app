@@ -199,6 +199,7 @@ trait HandlesQuestions
         $vigentes = \App\Models\Question::where('type', 'predictive')
             ->where('group_id', $group->id)
             ->where('available_until', '>', now())
+            ->whereNotNull('competition_id')
             ->get();
 
         $faltantes = 5 - $vigentes->count();
