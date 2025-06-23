@@ -131,7 +131,6 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
         foreach ($pendingQuestions as $question) {
             try {
                 $matches = $footballService->getMatch($question->football_match->id);
-                dd($matches);
                 $match = $question->football_match;
                 $answers = $question->answers;
                 // dd($answers, $question);

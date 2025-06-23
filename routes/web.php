@@ -45,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('groups', GroupController::class);
     Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
     Route::delete('groups/{group}/leave', [GroupController::class, 'leave'])->name('groups.leave');
+    Route::get('groups/{group}/predictive-results', [GroupController::class, 'showPredictiveResults'])->name('groups.predictive-results');
 
     // Preguntas
     Route::resource('questions', QuestionController::class);

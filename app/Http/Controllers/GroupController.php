@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\HandlesQuestions;
 use App\Services\GroupRoleService;
+use App\Models\Answer;
+use App\Notifications\NewPredictiveQuestionsAvailable;
 
 class GroupController extends Controller
 {
@@ -206,6 +208,14 @@ class GroupController extends Controller
             }
 
             $questions = $this->generateQuestionsForMatches($matchesData, $group);
+
+            // Enviar notificación de nuevas preguntas si se generaron
+            if ($questions->count() > 0) {
+                foreach ($group->users as $user) {
+                    $user->notify(new NewPredictiveQuestionsAvailable($group, $questions->count()));
+                }
+            }
+
             return $questions;
         } catch (\Exception $e) {
             Log::error('Error al crear pregunta predictiva:', [
@@ -750,5 +760,51 @@ class GroupController extends Controller
             'success' => true,
             'reward_or_penalty' => $group->reward_or_penalty
         ]);
+    }
+
+    /**
+     * Muestra los resultados de las últimas respuestas predictivas del usuario en el grupo
+     */
+    public function showPredictiveResults(Group $group)
+    {
+        // Verificar que el usuario sea miembro del grupo
+        if (!$group->users->contains('id', auth()->id())) {
+            return redirect()->route('dashboard')->with('error', 'No tienes acceso a este grupo.');
+        }
+
+        // Obtener las últimas respuestas predictivas del usuario en este grupo
+        $predictiveAnswers = Answer::where('user_id', auth()->id())
+            ->whereHas('question', function ($query) use ($group) {
+                $query->where('group_id', $group->id)
+                    ->where('type', 'predictive')
+                    ->where('result_verified_at', '!=', null); // Solo preguntas con resultados verificados
+            })
+            ->with([
+                'question' => function ($query) {
+                    $query->with(['football_match', 'options']);
+                },
+                'questionOption'
+            ])
+            ->orderBy('created_at', 'desc')
+            ->limit(20) // Últimas 20 respuestas
+            ->get();
+
+        // Agrupar por fecha para mejor organización
+        $groupedAnswers = $predictiveAnswers->groupBy(function ($answer) {
+            return $answer->question->football_match ?
+                $answer->question->football_match->date->format('Y-m-d') :
+                $answer->created_at->format('Y-m-d');
+        });
+
+        // Calcular estadísticas
+        $stats = [
+            'total_answers' => $predictiveAnswers->count(),
+            'correct_answers' => $predictiveAnswers->where('is_correct', true)->count(),
+            'total_points' => $predictiveAnswers->sum('points_earned'),
+            'accuracy_percentage' => $predictiveAnswers->count() > 0 ?
+                round(($predictiveAnswers->where('is_correct', true)->count() / $predictiveAnswers->count()) * 100, 1) : 0
+        ];
+
+        return view('groups.predictive-results', compact('group', 'groupedAnswers', 'stats'));
     }
 }
