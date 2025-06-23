@@ -208,8 +208,8 @@ trait HandlesQuestions
 
         // 2. Buscar partidos próximos de la competición del grupo
         $matches = \App\Models\FootballMatch::where(function($q) use ($group) {
-                $q->where('league', $group->competition->type)
-                  ->orWhere('competition_id', $group->competition_id);
+                $q->where('competition_id', $group->competition_id ?? 4)
+                  ->orWhere('competition_id', 4);
             })
             ->where('status', 'Not Started')
             ->where('date', '>=', now())
