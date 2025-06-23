@@ -51,6 +51,7 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
                 // dump('Obteniendo partidos para la liga ' . $league);
                 $matches = $footballService->getNextMatches($league, 20);
                 Log::info('Se obtuvieron ' . count($matches) . ' partidos para la liga ' . $league);
+                Log::info('Partidos: ' . json_encode($matches));
 
                 // Guardar los partidos en la base de datos
                 foreach ($matches as $match) {
@@ -76,7 +77,6 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
-                dump($e);
                 continue;
             }
         }
@@ -94,6 +94,8 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
         foreach ($leagues as $league) {
             try {
                 $matches = $footballService->getNextMatches($league, 20);
+                Log::info('Se obtuvieron ' . count($matches) . ' partidos para la liga ' . $league);
+                Log::info('Partidos: ' . json_encode($matches));
 
                 // Guardar los partidos en la base de datos
                 foreach ($matches as $match) {
