@@ -175,7 +175,9 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
         }
 
         // 3. Rellenar preguntas predictivas en todos los grupos
-        $grupos = Group::with('competition')->get();
+        $grupos = Group::with('competition')
+            ->whereNotNull('competition_id')
+            ->get();
         foreach ($grupos as $grupo) {
             $this->fillGroupPredictiveQuestions($grupo);
         }
