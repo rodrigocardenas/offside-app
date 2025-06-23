@@ -244,56 +244,6 @@
 
         // Actualizar el contador inicialmente
         updateUnreadCount();
-
-        // Manejar reacciones (like/dislike)
-        document.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const questionId = this.dataset.questionId;
-                const templateQuestionId = this.dataset.templateQuestionId;
-                const isLike = this.classList.contains('like-btn');
-                const reaction = isLike ? 'like' : 'dislike';
-
-                fetch(`/questions/${templateQuestionId}/react`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ reaction })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Actualizar contadores
-                        const likeCount = this.closest('.flex').querySelector('.like-count');
-                        const dislikeCount = this.closest('.flex').querySelector('.dislike-count');
-                        likeCount.textContent = data.likes;
-                        dislikeCount.textContent = data.dislikes;
-
-                        // Actualizar estilos de los botones
-                        const likeBtn = this.closest('.flex').querySelector('.like-btn');
-                        const dislikeBtn = this.closest('.flex').querySelector('.dislike-btn');
-
-                        if (data.user_reaction === 'like') {
-                            likeBtn.classList.remove('text-gray-400');
-                            likeBtn.classList.add('text-green-500');
-                            dislikeBtn.classList.remove('text-red-500');
-                            dislikeBtn.classList.add('text-gray-400');
-                        } else if (data.user_reaction === 'dislike') {
-                            dislikeBtn.classList.remove('text-gray-400');
-                            dislikeBtn.classList.add('text-red-500');
-                            likeBtn.classList.remove('text-green-500');
-                            likeBtn.classList.add('text-gray-400');
-                        } else {
-                            likeBtn.classList.remove('text-green-500');
-                            likeBtn.classList.add('text-gray-400');
-                            dislikeBtn.classList.remove('text-red-500');
-                            dislikeBtn.classList.add('text-gray-400');
-                        }
-                    }
-                });
-            });
-        });
     });
 </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -373,11 +323,7 @@
                 dataType: 'json',
                 success: function(data) {
                     if (data.success) {
-                        // Update the UI with the new counts for all questions with this template
-                        $('.like-btn[data-template-question-id="' + templateQuestionId + '"] .like-count').text(data.likes);
-                        $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"] .dislike-count').text(data.dislikes);
-
-                        // Update button styles
+                        // Update button styles for all questions with this template
                         $('.like-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-green-500').addClass('text-gray-400');
                         $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-red-500').addClass('text-gray-400');
 
@@ -545,6 +491,24 @@
                 .finally(() => { btn.disabled = false; });
             });
         }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Capturar el envío de formularios de preguntas para debugging
+        document.querySelectorAll('form[action*="questions.answer"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const formData = new FormData(this);
+                const questionOptionId = formData.get('question_option_id');
+                console.log('Formulario enviado:', {
+                    action: this.action,
+                    questionOptionId: questionOptionId,
+                    formData: Object.fromEntries(formData)
+                });
+
+                // No prevenir el envío, solo loggear para debugging
+            });
+        });
     });
 </script>
 
