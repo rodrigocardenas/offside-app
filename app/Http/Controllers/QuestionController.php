@@ -85,9 +85,9 @@ class QuestionController extends Controller
 
     public function answer(Request $request, Question $question)
     {
-        if ($question->available_from > Carbon::now() || $question->available_until < Carbon::now()) {
-            return back()->with('error', 'No puedes responder a esta pregunta en este momento.');
-        }
+        // if ($question->available_from > Carbon::now() || $question->available_until < Carbon::now()) {
+        //     return back()->with('error', 'No puedes responder a esta pregunta en este momento.');
+        // }
 
         $request->validate([
             'question_option_id' => 'required|exists:question_options,id',
