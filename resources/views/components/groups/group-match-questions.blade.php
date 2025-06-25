@@ -50,33 +50,41 @@
                             @endif
                         </div>
                         @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now() && !$question->is_disabled) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
-                            <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3">
+                            <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3 group-question-form">
                                 @csrf
-                                @foreach($question->options as $option)
-                                    <label class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg cursor-pointer">
-                                        <input type="radio" name="question_option_id" value="{{ $option->id }}" class="mr-2" required>
-                                        <span class="flex-1 text-center">{{ $option->text }}</span>
-                                        <div class="flex items-center space-x-2">
-                                            @foreach($question->answers->where('question_option_id', $option->id) as $answer)
-                                                @php
-                                                    $initials = '';
-                                                    $nameParts = explode(' ', $answer->user->name);
-                                                    foreach($nameParts as $part) {
-                                                        $initials .= strtoupper(substr($part, 0, 1));
-                                                    }
-                                                    $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
-                                                    $color = $colors[array_rand($colors)];
-                                                @endphp
-                                                <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
-                                                    title="{{ $answer->user->name }}">
-                                                    {{ $initials }}
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </label>
-                                @endforeach
-                                <button type="submit" class="w-full mt-2 bg-offside-secondary hover:bg-offside-primary transition-colors p-3 rounded-lg font-bold">Responder</button>
+                                <div class="flex flex-col gap-2">
+                                    @foreach($question->options as $option)
+                                        <label class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg cursor-pointer option-btn" style="user-select:none;">
+                                            <input type="radio" name="question_option_id" value="{{ $option->id }}" class="hidden" required>
+                                            <span class="flex-1 text-center">{{ $option->text }}</span>
+                                            <div class="flex items-center space-x-2">
+                                                @foreach($question->answers->where('question_option_id', $option->id) as $answer)
+                                                    @php
+                                                        $initials = '';
+                                                        $nameParts = explode(' ', $answer->user->name);
+                                                        foreach($nameParts as $part) {
+                                                            $initials .= strtoupper(substr($part, 0, 1));
+                                                        }
+                                                        $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                                        $color = $colors[array_rand($colors)];
+                                                    @endphp
+                                                    <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
+                                                        title="{{ $answer->user->name }}">
+                                                        {{ $initials }}
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
                             </form>
+                            <script>
+                            document.querySelectorAll('.group-question-form .option-btn input[type=radio]').forEach(radio => {
+                                radio.addEventListener('change', function() {
+                                    this.form.submit();
+                                });
+                            });
+                            </script>
                         @else
                             <div class="space-y-3">
                                 @foreach($question->options as $option)
