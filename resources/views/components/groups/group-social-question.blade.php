@@ -13,15 +13,13 @@
             $userHasAnswered = $socialQuestion->answers->where('user_id', auth()->user()->id)->first();
         @endphp
         @if((!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now()) || ($userHasAnswered && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
-            <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="space-y-3">
+            <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="space-y-3 group-social-form">
                 @csrf
-                @foreach($socialQuestion->options as $option)
-                    <button type="submit"
-                            name="question_option_id"
-                            value="{{ $option->id }}"
-                            class="w-full text-left bg-offside-primary hover:bg-offside-primary transition-colors p-4 rounded-lg">
-                        <div class="flex justify-between items-center">
-                            <span>{{ $option->text }}</span>
+                <div class="flex flex-col gap-4">
+                    @foreach($socialQuestion->options as $option)
+                        <label class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg cursor-pointer social-option-btn" style="user-select:none;">
+                            <input type="radio" name="question_option_id" value="{{ $option->id }}" class="hidden" required>
+                            <span class="flex-1 text-center">{{ $option->text }}</span>
                             <div class="flex items-center space-x-2">
                                 @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
                                     @php
@@ -39,10 +37,17 @@
                                     </div>
                                 @endforeach
                             </div>
-                        </div>
-                    </button>
-                @endforeach
+                        </label>
+                    @endforeach
+                </div>
             </form>
+            <script>
+            document.querySelectorAll('.group-social-form .social-option-btn input[type=radio]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    this.form.submit();
+                });
+            });
+            </script>
         @else
             <div class="space-y-3">
                 @foreach($socialQuestion->options as $option)
