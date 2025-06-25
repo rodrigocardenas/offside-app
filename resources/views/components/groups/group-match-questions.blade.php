@@ -134,13 +134,13 @@
                         <!-- Like/Dislike Buttons -->
                         <div class="flex justify-end space-x-4 mt-4">
                             <button type="button"
-                                    class="like-btn flex items-center {{ isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('reaction', 'like')->isNotEmpty() ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
+                                    class="like-btn flex items-center {{ isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
                                     data-question-id="{{ $question->id }}"
                                     data-template-question-id="{{ $question->template_question_id }}">
                                 <i class="fas fa-thumbs-up mr-1"></i>
                             </button>
                             <button type="button"
-                                    class="dislike-btn flex items-center {{ isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('reaction', 'dislike')->isNotEmpty() ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
+                                    class="dislike-btn flex items-center {{ isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty() ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
                                     data-question-id="{{ $question->id }}"
                                     data-template-question-id="{{ $question->template_question_id }}">
                                 <i class="fas fa-thumbs-down mr-1"></i>

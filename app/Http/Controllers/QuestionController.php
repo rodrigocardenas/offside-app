@@ -75,6 +75,15 @@ class QuestionController extends Controller
                 );
         }
 
+        // Limpiar cache relacionado con las preguntas que usan este template
+        $questions = Question::where('template_question_id', $question->id)->get();
+        foreach ($questions as $q) {
+            Cache::forget("group_{$q->group_id}_match_questions");
+            Cache::forget("group_{$q->group_id}_social_question");
+            Cache::forget("group_{$q->group_id}_user_answers");
+            Cache::forget("group_{$q->group_id}_show_data");
+        }
+
         return response()->json([
             'success' => true,
             'likes' => $question->getLikesCount(),
