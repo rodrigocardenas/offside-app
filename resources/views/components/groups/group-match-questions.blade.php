@@ -52,7 +52,7 @@
                         @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now() && !$question->is_disabled) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
                             <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3 group-question-form">
                                 @csrf
-                                <div class="flex flex-col gap-2">
+                                <div class="flex flex-col gap-4">
                                     @foreach($question->options as $option)
                                         <label class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg cursor-pointer option-btn" style="user-select:none;">
                                             <input type="radio" name="question_option_id" value="{{ $option->id }}" class="hidden" required>
