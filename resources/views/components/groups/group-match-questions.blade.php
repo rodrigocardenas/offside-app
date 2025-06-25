@@ -53,11 +53,8 @@
                             <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3">
                                 @csrf
                                 @foreach($question->options as $option)
-                                    <button type="submit"
-                                            name="question_option_id"
-                                            value="{{ $option->id }}"
-                                            data-debug="option-{{ $option->id }}"
-                                            class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg">
+                                    <label class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg cursor-pointer">
+                                        <input type="radio" name="question_option_id" value="{{ $option->id }}" class="mr-2" required>
                                         <span class="flex-1 text-center">{{ $option->text }}</span>
                                         <div class="flex items-center space-x-2">
                                             @foreach($question->answers->where('question_option_id', $option->id) as $answer)
@@ -76,8 +73,9 @@
                                                 </div>
                                             @endforeach
                                         </div>
-                                    </button>
+                                    </label>
                                 @endforeach
+                                <button type="submit" class="w-full mt-2 bg-offside-secondary hover:bg-offside-primary transition-colors p-3 rounded-lg font-bold">Responder</button>
                             </form>
                         @else
                             <div class="space-y-3">
