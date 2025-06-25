@@ -85,7 +85,7 @@ class QuestionController extends Controller
 
     public function answer(Request $request, Question $question)
     {
-        if ($question->available_from > Carbon::now() || $question->available_until < Carbon::now()) {
+        if ($question->available_from > Carbon::now()->addHours(4) || $question->available_until < Carbon::now()->addHours(4)) {
             return back()->with('error', 'No puedes responder a esta pregunta en este momento.');
         }
 
