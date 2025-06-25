@@ -22,19 +22,26 @@
                             <span class="flex-1 text-center">{{ $option->text }}</span>
                             <div class="flex items-center space-x-2">
                                 @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
-                                    @php
-                                        $initials = '';
-                                        $nameParts = explode(' ', $answer->user->name);
-                                        foreach($nameParts as $part) {
-                                            $initials .= strtoupper(substr($part, 0, 1));
-                                        }
-                                        $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
-                                        $color = $colors[array_rand($colors)];
-                                    @endphp
-                                    <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
-                                         title="{{ $answer->user->name }}">
-                                        {{ $initials }}
-                                    </div>
+                                    @if($answer->user->avatar)
+                                        <img src="{{ $answer->user->avatar_url }}"
+                                             alt="{{ $answer->user->name }}"
+                                             class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
+                                             title="{{ $answer->user->name }}">
+                                    @else
+                                        @php
+                                            $initials = '';
+                                            $nameParts = explode(' ', $answer->user->name);
+                                            foreach($nameParts as $part) {
+                                                $initials .= strtoupper(substr($part, 0, 1));
+                                            }
+                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                            $color = $colors[array_rand($colors)];
+                                        @endphp
+                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
+                                             title="{{ $answer->user->name }}">
+                                            {{ $initials }}
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </label>
@@ -60,19 +67,26 @@
                             <span>{{ $option->text }}</span>
                             <div class="flex items-center space-x-2">
                                 @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
-                                    @php
-                                        $initials = '';
-                                        $nameParts = explode(' ', $answer->user->name);
-                                        foreach($nameParts as $part) {
-                                            $initials .= strtoupper(substr($part, 0, 1));
-                                        }
-                                        $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
-                                        $color = $colors[array_rand($colors)];
-                                    @endphp
-                                    <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
-                                            title="{{ $answer->user->name }}">
-                                        {{ $initials }}
-                                    </div>
+                                    @if($answer->user->avatar)
+                                        <img src="{{ $answer->user->avatar_url }}"
+                                             alt="{{ $answer->user->name }}"
+                                             class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
+                                             title="{{ $answer->user->name }}">
+                                    @else
+                                        @php
+                                            $initials = '';
+                                            $nameParts = explode(' ', $answer->user->name);
+                                            foreach($nameParts as $part) {
+                                                $initials .= strtoupper(substr($part, 0, 1));
+                                            }
+                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                            $color = $colors[array_rand($colors)];
+                                        @endphp
+                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
+                                                title="{{ $answer->user->name }}">
+                                            {{ $initials }}
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
