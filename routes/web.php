@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CompetitionController;
 use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionController;
 use App\Http\Controllers\Admin\TemplateQuestionController;
+use App\Http\Controllers\TestAvatarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -132,4 +133,10 @@ Route::get('/avatars/{filename}', function ($filename) {
         ->header('Content-Type', $type)
         ->header('Cache-Control', 'public, max-age=31536000');
 })->where('filename', '.*');
+
+// Ruta de prueba para avatares
+Route::post('/test-avatar-upload', [TestAvatarController::class, 'testUpload']);
+Route::get('/test-avatar', function() {
+    return view('test-avatar');
+});
 
