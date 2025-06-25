@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use App\Models\TemplateQuestion;
 
 trait HandlesQuestions
@@ -265,5 +266,151 @@ trait HandlesQuestions
         }
 
         return $vigentes->merge($nuevas)->take(5);
+    }
+
+    /**
+     * Crea una pregunta desde una plantilla para un partido específico
+     */
+    protected function createQuestionFromTemplate($template, $match, $group)
+    {
+        try {
+            if (!is_object($template)) {
+                Log::warning('Template no es un objeto:', [
+                    'template' => $template,
+                    'match_id' => $match['id']
+                ]);
+                return null;
+            }
+
+            if (!isset($template->text) || !isset($template->type) || !isset($template->options)) {
+                Log::warning('Template incompleto:', [
+                    'template' => $template,
+                    'match_id' => $match['id']
+                ]);
+                return null;
+            }
+
+            $questionText = str_replace(
+                ['{{home_team}}', '{{away_team}}', '{{ home_team }}', '{{ away_team }}'],
+                [$match['home_team'], $match['away_team'], $match['home_team'], $match['away_team']],
+                $template->text
+            );
+
+            $options = collect($template->options)->map(function ($option) use ($match) {
+                if (!isset($option['text'])) {
+                    Log::warning('Opción sin texto:', [
+                        'option' => $option,
+                        'match_id' => $match['id']
+                    ]);
+                    return null;
+                }
+
+                $optionText = str_replace(
+                    ['{{home_team}}', '{{away_team}}', '{{ home_team }}', '{{ away_team }}'],
+                    [$match['home_team'], $match['away_team'], $match['home_team'], $match['away_team']],
+                    $option['text']
+                );
+                return [
+                    'text' => $optionText,
+                    'is_correct' => $option['is_correct'] ?? false
+                ];
+            })->filter()->toArray();
+
+            // Para preguntas sobre jugadores, usar opciones genéricas ya que no tenemos acceso al FootballDataService
+            if (strpos($questionText, 'jugador') !== false) {
+                $options = [
+                    ['text' => 'Jugador Local 1', 'is_correct' => false],
+                    ['text' => 'Jugador Local 2', 'is_correct' => false],
+                    ['text' => 'Jugador Visitante 1', 'is_correct' => false],
+                    ['text' => 'Jugador Visitante 2', 'is_correct' => false]
+                ];
+                shuffle($options);
+            }
+
+            $availableUntil = \Carbon\Carbon::parse($match['date'])
+                ->setTimezone('UTC')
+                ->format('Y-m-d H:i:s');
+
+            $questionData = [
+                'type' => $template->type,
+                'title' => $questionText,
+                'description' => $questionText,
+                'competition_id' => $group->competition_id,
+                'group_id' => $group->id,
+                'match_id' => $match['id'],
+                'available_until' => $availableUntil,
+                'points' => $template->type === 'predictive' ? 300 : 0,
+                'options' => $options,
+                'template_question_id' => $template->id ?? null,
+            ];
+
+            if (!isset($questionData['title']) || !isset($questionData['options'])) {
+                Log::warning('Datos de pregunta incompletos:', [
+                    'question_data' => $questionData,
+                    'match_id' => $match['id']
+                ]);
+                return null;
+            }
+
+            $question = Question::firstOrCreate([
+                'title' => $questionData['title'],
+                'group_id' => $questionData['group_id'],
+                'match_id' => $questionData['match_id'],
+                'template_question_id' => $questionData['template_question_id']
+            ], [
+                'type' => $template->type,
+                'title' => $questionData['title'],
+                'description' => $questionData['description'],
+                'competition_id' => $questionData['competition_id'],
+                'group_id' => $questionData['group_id'],
+                'match_id' => $questionData['match_id'],
+                'available_until' => $availableUntil,
+                'points' => $template->type === 'predictive' ? 300 : 0,
+                'template_question_id' => $questionData['template_question_id']
+            ]);
+
+            if ($template->type === 'predictive' && is_array($questionData['options'])) {
+                foreach ($questionData['options'] as $option) {
+                    QuestionOption::updateOrCreate(
+                        [
+                            'question_id' => $question->id,
+                            'text' => $option['text']
+                        ],
+                        [
+                            'is_correct' => $option['is_correct'] ?? false
+                        ]
+                    );
+                }
+            }
+
+            if ($template->type === 'social') {
+                $members = $group->users;
+                foreach ($members as $member) {
+                    QuestionOption::updateOrCreate(
+                        [
+                            'question_id' => $question->id,
+                            'text' => $member->name
+                        ],
+                        [
+                            'is_correct' => false
+                        ]
+                    );
+                }
+            }
+
+            Log::info('Pregunta creada:', [
+                'question_id' => $question->id,
+                'match_id' => $match['id'],
+                'title' => $questionText
+            ]);
+
+            return $question->load('options');
+        } catch (\Exception $e) {
+            Log::error('Error al crear pregunta desde template:', [
+                'error' => $e->getMessage(),
+                'match_id' => $match['id']
+            ]);
+            return null;
+        }
     }
 }
