@@ -21,12 +21,12 @@
                                 <div class="w-10 h-10 flex items-center justify-center rounded-full bg-offside-primary text-white font-bold mr-4">
                                     {{ $index + 1 }}
                                 </div>
-                                
+
                                 <!-- Avatar del usuario -->
                                 <div class="flex-shrink-0 mr-4">
                                     @if($user->avatar)
-                                        <img src="{{ asset('storage/avatars/' . $user->avatar) }}" 
-                                             alt="{{ $user->name }}" 
+                                        <img src="{{ $user->avatar_url }}"
+                                             alt="{{ $user->name }}"
                                              class="w-12 h-12 rounded-full border-2 border-offside-primary">
                                     @else
                                         <div class="w-12 h-12 rounded-full bg-offside-primary flex items-center justify-center text-white font-bold">
@@ -34,13 +34,13 @@
                                         </div>
                                     @endif
                                 </div>
-                                
+
                                 <!-- Nombre y puntuación -->
                                 <div class="flex-1">
                                     <h3 class="font-semibold">{{ $user->name }}</h3>
                                     <p class="text-sm text-offside-light">ID: {{ $user->unique_id }}</p>
                                 </div>
-                                
+
                                 <!-- Puntuación -->
                                 <div class="text-right">
                                     <span class="text-2xl font-bold text-offside-primary">{{ $user->total_points ?? 0 }}</span>
@@ -51,7 +51,7 @@
                     </div>
                 @endif
             </div>
-            
+
             <!-- Botón de volver -->
             <div class="mt-8 text-center">
                 <a href="{{ url()->previous() }}" class="inline-flex items-center px-6 py-2 bg-offside-primary text-white rounded-md hover:bg-opacity-90 transition-colors">

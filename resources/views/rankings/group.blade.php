@@ -38,7 +38,7 @@
                                 <!-- Avatar del usuario -->
                                 <div class="flex-shrink-0 mr-4">
                                     @if($user->avatar)
-                                        <img src="{{ asset('storage/avatars/' . $user->avatar) }}"
+                                        <img src="{{ $user->avatar_url }}"
                                              alt="{{ $user->name }}"
                                              class="w-12 h-12 rounded-full border-2 border-offside-primary">
                                     @else

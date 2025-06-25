@@ -39,14 +39,65 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $data = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Manejar la subida del avatar
+        if ($request->hasFile('avatar') && $request->file('avatar')->isValid()) {
+            try {
+                // Eliminar el avatar anterior si existe
+                if ($user->avatar && Storage::disk('public')->exists('avatars/' . $user->avatar)) {
+                    Storage::disk('public')->delete('avatars/' . $user->avatar);
+                }
+
+                // Guardar el nuevo avatar
+                $avatarFile = $request->file('avatar');
+
+                // Obtener la extensión del archivo
+                $extension = $avatarFile->getClientOriginalExtension();
+                if (empty($extension)) {
+                    // Si no hay extensión, intentar obtenerla del MIME type
+                    $mimeType = $avatarFile->getMimeType();
+                    $extension = match($mimeType) {
+                        'image/jpeg' => 'jpg',
+                        'image/jpg' => 'jpg',
+                        'image/png' => 'png',
+                        'image/gif' => 'gif',
+                        'image/webp' => 'webp',
+                        default => 'jpg'
+                    };
+                }
+
+                $avatarName = Str::uuid() . '.' . $extension;
+
+                // Verificar que el directorio existe
+                if (!Storage::disk('public')->exists('avatars')) {
+                    Storage::disk('public')->makeDirectory('avatars');
+                }
+
+                $avatarFile->storeAs('avatars', $avatarName, 'public');
+
+                $data['avatar'] = $avatarName;
+
+            } catch (\Exception $e) {
+                return Redirect::route('profile.edit')
+                    ->withErrors(['avatar' => 'Error al subir la imagen: ' . $e->getMessage()]);
+            }
         }
 
-        $request->user()->save();
+        $user->fill($data);
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        $message = 'Perfil actualizado correctamente.';
+        if (isset($data['avatar'])) {
+            $message .= ' Avatar actualizado.';
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated')->with('success', $message);
     }
 }

@@ -21,7 +21,7 @@
                     <button type="button" class="flex items-center max-w-xs rounded-full bg-offside-primary text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary" id="user-menu" aria-expanded="false" aria-haspopup="true">
                         <span class="sr-only">Abrir menú de usuario</span>
                         @if(Auth::user()->avatar)
-                            <img class="h-8 w-8 rounded-full" src="{{ asset('storage/avatars/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
+                            <img class="h-8 w-8 rounded-full" src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}">
                         @else
                             <div class="h-8 w-8 rounded-full bg-offside-primary flex items-center justify-center text-white">
                                 {{ substr(Auth::user()->name, 0, 1) }}

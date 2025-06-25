@@ -23,7 +23,7 @@
                     <div class="mb-6 flex flex-col items-center">
                         <div class="relative mb-4">
                             @if($user->avatar)
-                                <img src="{{ asset('storage/avatars/' . $user->avatar) }}"
+                                <img src="{{ $user->avatar_url }}"
                                      alt="{{ $user->name }}"
                                      class="w-32 h-32 rounded-full object-cover border-2 border-offside-primary">
                             @else
@@ -40,6 +40,9 @@
                             </label>
                         </div>
                         <p class="text-sm text-offside-light">Haz clic en el ícono para cambiar tu foto de perfil</p>
+                        @error('avatar')
+                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Nombre -->

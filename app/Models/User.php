@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -61,7 +62,19 @@ class User extends Authenticatable
     public function getAvatarUrlAttribute()
     {
         if ($this->avatar) {
-            return asset('storage/avatars/' . $this->avatar);
+            // Verificar si el archivo existe en el storage público
+            if (Storage::disk('public')->exists('avatars/' . $this->avatar)) {
+                return url('/avatars/' . $this->avatar);
+            }
+
+            // Si no existe en storage público, intentar con la ruta directa
+            $directPath = storage_path('app/public/avatars/' . $this->avatar);
+            if (file_exists($directPath)) {
+                return url('/avatars/' . $this->avatar);
+            }
+
+            // Si el archivo no existe, limpiar el campo avatar
+            $this->update(['avatar' => null]);
         }
 
         // Retornar un avatar por defecto basado en el nombre del usuario
