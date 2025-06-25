@@ -60,7 +60,7 @@
                                             <div class="flex items-center space-x-2">
                                                 @foreach($question->answers->where('question_option_id', $option->id) as $answer)
                                                     @php
-                                                        $initials = '';
+                                                        $initials = $answer->user->avatar_url ? substr($answer->user->avatar_url, 0, 1) : '';
                                                         $nameParts = explode(' ', $answer->user->name);
                                                         foreach($nameParts as $part) {
                                                             $initials .= strtoupper(substr($part, 0, 1));
