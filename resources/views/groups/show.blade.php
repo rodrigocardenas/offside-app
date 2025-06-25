@@ -498,6 +498,8 @@
         // Capturar el envío de formularios de preguntas para debugging
         document.querySelectorAll('form[action*="questions.answer"]').forEach(form => {
             form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevenir el envío normal
+
                 const formData = new FormData(this);
                 const questionOptionId = formData.get('question_option_id');
 
@@ -523,7 +525,32 @@
                     formData.set('question_option_id', clickedButton.value);
                 }
 
-                // No prevenir el envío, solo loggear para debugging
+                // Enviar manualmente con fetch
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        return response.text();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        console.log('Respuesta del servidor:', data);
+                        // Recargar la página para mostrar los cambios
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al enviar formulario:', error);
+                    alert('Error al enviar la respuesta. Por favor, intenta nuevamente.');
+                });
             });
         });
 
