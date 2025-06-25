@@ -440,92 +440,28 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Solo si existe el botón (es el creador)
-        const openBtn = document.getElementById('openRewardPenaltyModal');
-        if (openBtn) {
-            openBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.getElementById('rewardPenaltyModal').classList.remove('hidden');
+        // Variable global temporal para guardar el último botón clickeado
+        let lastClickedOptionButton = null;
+
+        // Capturar clicks en los botones de opciones
+        document.querySelectorAll('button[name="question_option_id"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                lastClickedOptionButton = this;
+                // Permitir el submit normal
             });
-        }
-        // Cerrar modal
-        const closeBtn = document.getElementById('closeRewardPenaltyModal');
-        if (closeBtn) closeBtn.addEventListener('click', function() {
-            document.getElementById('rewardPenaltyModal').classList.add('hidden');
         });
-        const cancelBtn = document.getElementById('cancelRewardPenalty');
-        if (cancelBtn) cancelBtn.addEventListener('click', function() {
-            document.getElementById('rewardPenaltyModal').classList.add('hidden');
-        });
-        // Enviar formulario
-        const form = document.getElementById('rewardPenaltyForm');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const textarea = document.getElementById('reward_or_penalty');
-                const btn = this.querySelector('button[type="submit"]');
-                btn.disabled = true;
-                fetch("{{ route('groups.updateRewardOrPenalty', $group) }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ reward_or_penalty: textarea.value })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('rewardPenaltySuccess').classList.remove('hidden');
-                        // Actualizar el texto del botón
-                        if (openBtn) {
-                            openBtn.innerHTML = `<svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M11 5h2m-1 0v14m-7-7h14' /></svg><span class='truncate max-w-xs'>${data.reward_or_penalty}</span><svg class='w-5 h-5 ml-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15.232 5.232l3.536 3.536M9 11l6 6M3 21h6a2 2 0 002-2v-6a2 2 0 00-2-2H3a2 2 0 00-2 2v6a2 2 0 002 2z' /></svg>`;
-                        }
-                        setTimeout(() => {
-                            document.getElementById('rewardPenaltyModal').classList.add('hidden');
-                            document.getElementById('rewardPenaltySuccess').classList.add('hidden');
-                        }, 1200);
-                    }
-                })
-                .catch(() => alert('Error al guardar.'))
-                .finally(() => { btn.disabled = false; });
-            });
-        }
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Capturar el envío de formularios de preguntas para debugging
+
+        // Capturar el envío de formularios de preguntas
         document.querySelectorAll('form[action*="questions.answer"]').forEach(form => {
             form.addEventListener('submit', function(e) {
-                e.preventDefault(); // Prevenir el envío normal
-
+                e.preventDefault();
                 const formData = new FormData(this);
-                const questionOptionId = formData.get('question_option_id');
 
-                // Verificar qué botón fue clickeado
-                const clickedButton = document.activeElement;
-                const buttonValue = clickedButton ? clickedButton.value : 'No button found';
-
-                console.log('Formulario enviado:', {
-                    action: this.action,
-                    questionOptionId: questionOptionId,
-                    buttonValue: buttonValue,
-                    clickedButton: clickedButton,
-                    formData: Object.fromEntries(formData),
-                    allButtons: Array.from(this.querySelectorAll('button[name="question_option_id"]')).map(btn => ({
-                        value: btn.value,
-                        text: btn.textContent.trim()
-                    }))
-                });
-
-                // Si no hay questionOptionId, intentar obtenerlo del botón clickeado
-                if (!questionOptionId && clickedButton && clickedButton.name === 'question_option_id') {
-                    console.log('Agregando valor del botón clickeado:', clickedButton.value);
-                    formData.set('question_option_id', clickedButton.value);
+                // Si hay un botón clickeado, agregar su valor
+                if (lastClickedOptionButton && lastClickedOptionButton.form === this) {
+                    formData.set('question_option_id', lastClickedOptionButton.value);
                 }
 
-                // Enviar manualmente con fetch
                 fetch(this.action, {
                     method: 'POST',
                     body: formData,
@@ -542,25 +478,11 @@
                 })
                 .then(data => {
                     if (data) {
-                        console.log('Respuesta del servidor:', data);
-                        // Recargar la página para mostrar los cambios
                         window.location.reload();
                     }
                 })
                 .catch(error => {
-                    console.error('Error al enviar formulario:', error);
                     alert('Error al enviar la respuesta. Por favor, intenta nuevamente.');
-                });
-            });
-        });
-
-        // También capturar clicks en los botones de opciones
-        document.querySelectorAll('button[name="question_option_id"]').forEach(button => {
-            button.addEventListener('click', function(e) {
-                console.log('Botón de opción clickeado:', {
-                    value: this.value,
-                    text: this.textContent.trim(),
-                    name: this.name
                 });
             });
         });
