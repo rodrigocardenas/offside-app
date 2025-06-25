@@ -56,6 +56,7 @@
                                     <button type="submit"
                                             name="question_option_id"
                                             value="{{ $option->id }}"
+                                            data-debug="option-{{ $option->id }}"
                                             class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg">
                                         <span class="flex-1 text-center">{{ $option->text }}</span>
                                         <div class="flex items-center space-x-2">

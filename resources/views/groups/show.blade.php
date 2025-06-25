@@ -500,13 +500,41 @@
             form.addEventListener('submit', function(e) {
                 const formData = new FormData(this);
                 const questionOptionId = formData.get('question_option_id');
+
+                // Verificar qué botón fue clickeado
+                const clickedButton = document.activeElement;
+                const buttonValue = clickedButton ? clickedButton.value : 'No button found';
+
                 console.log('Formulario enviado:', {
                     action: this.action,
                     questionOptionId: questionOptionId,
-                    formData: Object.fromEntries(formData)
+                    buttonValue: buttonValue,
+                    clickedButton: clickedButton,
+                    formData: Object.fromEntries(formData),
+                    allButtons: Array.from(this.querySelectorAll('button[name="question_option_id"]')).map(btn => ({
+                        value: btn.value,
+                        text: btn.textContent.trim()
+                    }))
                 });
 
+                // Si no hay questionOptionId, intentar obtenerlo del botón clickeado
+                if (!questionOptionId && clickedButton && clickedButton.name === 'question_option_id') {
+                    console.log('Agregando valor del botón clickeado:', clickedButton.value);
+                    formData.set('question_option_id', clickedButton.value);
+                }
+
                 // No prevenir el envío, solo loggear para debugging
+            });
+        });
+
+        // También capturar clicks en los botones de opciones
+        document.querySelectorAll('button[name="question_option_id"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                console.log('Botón de opción clickeado:', {
+                    value: this.value,
+                    text: this.textContent.trim(),
+                    name: this.name
+                });
             });
         });
     });
