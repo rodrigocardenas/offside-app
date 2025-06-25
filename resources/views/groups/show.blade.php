@@ -511,4 +511,29 @@
         });
     });
 </script>
+<script>
+    // Forzar actualización del Service Worker para solucionar problemas de caché
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.update();
+                console.log('Service Worker actualizado');
+            }
+        });
+
+        // Limpiar cache del service worker si es necesario
+        if ('caches' in window) {
+            caches.keys().then(function(cacheNames) {
+                return Promise.all(
+                    cacheNames.map(function(cacheName) {
+                        if (cacheName.includes('offside-club')) {
+                            console.log('Limpiando cache:', cacheName);
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            });
+        }
+    }
+</script>
 

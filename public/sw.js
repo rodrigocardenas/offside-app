@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offside-club-v1.0.3';
+const CACHE_NAME = 'offside-club-v1.0.4';
 const ASSETS_TO_CACHE = [
   '/',
   '/login'
@@ -64,6 +64,13 @@ const pendingRequests = new Map();
 self.addEventListener('fetch', function(event) {
   // Manejar solicitudes POST
   if (event.request.method === 'POST') {
+    // Excluir rutas de preguntas del sistema de bloqueo de duplicados
+    if (event.request.url.includes('/questions/') && event.request.url.includes('/answer')) {
+      // Para formularios de preguntas, permitir el envío normal sin bloqueo
+      event.respondWith(fetch(event.request));
+      return;
+    }
+
     const requestId = event.request.url + event.request.headers.get('X-CSRF-TOKEN');
 
     // Si hay una solicitud pendiente con el mismo ID, bloquearla
