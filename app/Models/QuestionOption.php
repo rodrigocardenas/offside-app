@@ -18,7 +18,9 @@ class QuestionOption extends Model
     ];
 
     protected $casts = [
-        'is_correct' => 'boolean'
+        'is_correct' => 'boolean',
+        'available_until' => 'datetime',
+        'points' => 'integer'
     ];
 
     public function question()
