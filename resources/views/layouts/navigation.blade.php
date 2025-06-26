@@ -10,7 +10,12 @@
                 </div>
             </div>
             <div class="flex items-center mr-2" id="installButtonContainer">
-                @yield('navigation-title', '')
+                {{-- si hay navigation-logo, si no solo mostrar navigation title:--}}
+                @if(View::hasSection('navigation-logo'))
+                    <img src="@yield('navigation-logo')" class="h-8 w-8 rounded-full" style="margin-left:10px; background-color: white"/>
+                @else
+                    @yield('navigation-title', '')
+                @endif
             </div>
 
 

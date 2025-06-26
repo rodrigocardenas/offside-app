@@ -1,6 +1,10 @@
 <x-app-layout>
     {{-- setear en el navigation el yield navigation-title: --}}
     @section('navigation-title', $group->name)
+    @if ($group->id == 69)
+        @section('navigation-logo', asset("images/competitions/".$group->competition?->crest_url))
+    @endif
+
     <div class="min-h-screen bg-offside-dark text-white p-1 md:p-6 pb-24">
 
         <!-- Encabezado del grupo -->
