@@ -370,14 +370,20 @@ class GroupController extends Controller
 
     public function join(Request $request)
     {
+        $request->validate([
+            'code' => 'required|string|max:10'
+        ]);
+
         $group = Group::where('code', $request->code)->firstOrFail();
 
-        if ($group->users->contains(auth()->id())) {
+        // Verificar si ya es miembro usando la relación pivot
+        if ($group->users()->where('user_id', auth()->id())->exists()) {
             return redirect()->route('groups.show', $group)
                 ->with('error', 'Ya eres miembro de este grupo.');
         }
 
-        $group->users()->attach(auth()->id());
+        // Usar syncWithoutDetaching para evitar duplicados
+        $group->users()->syncWithoutDetaching([auth()->id()]);
 
         return redirect()->route('groups.show', $group)
             ->with('success', 'Te has unido al grupo exitosamente.');
@@ -385,11 +391,19 @@ class GroupController extends Controller
 
     public function leave(Group $group)
     {
-        // if ($group->user_id === auth()->id()) {
-        //     return redirect()->route('groups.index')
-        //         ->with('error', 'No puedes abandonar un grupo que has creado.');
-        // }
+        // Verificar que el usuario sea miembro del grupo
+        if (!$group->users()->where('user_id', auth()->id())->exists()) {
+            return redirect()->route('groups.index')
+                ->with('error', 'No eres miembro de este grupo.');
+        }
 
+        // Verificar que no sea el creador del grupo
+        if ($group->created_by === auth()->id()) {
+            return redirect()->route('groups.index')
+                ->with('error', 'No puedes abandonar un grupo que has creado.');
+        }
+
+        // Remover solo al usuario actual
         $group->users()->detach(auth()->id());
 
         return redirect()->route('groups.index')
@@ -400,12 +414,14 @@ class GroupController extends Controller
     {
         $group = Group::where('code', $code)->firstOrFail();
 
-        if ($group->users->contains(auth()->id())) {
+        // Verificar si ya es miembro usando la relación pivot
+        if ($group->users()->where('user_id', auth()->id())->exists()) {
             return redirect()->route('groups.show', $group)
                 ->with('error', 'Ya eres miembro de este grupo.');
         }
 
-        $group->users()->attach(auth()->id());
+        // Usar syncWithoutDetaching para evitar duplicados
+        $group->users()->syncWithoutDetaching([auth()->id()]);
 
         return redirect()->route('groups.show', $group)
             ->with('success', 'Te has unido al grupo exitosamente.');
@@ -476,12 +492,12 @@ class GroupController extends Controller
             ]);
 
             foreach ($group->users as $user) {
-                // $questionOption = QuestionOption::create([
-                //     'question_id' => $question->id,
-                //     'text' => $user->name,
-                //     'is_correct' => false,
-                //     'user_id' => $user->id,
-                // ]);
+                $questionOption = QuestionOption::create([
+                    'question_id' => $question->id,
+                    'text' => $user->name,
+                    'is_correct' => false,
+                    'user_id' => $user->id,
+                ]);
             }
         } else {
             if ($socialQuestion->id == 42) {
@@ -495,12 +511,12 @@ class GroupController extends Controller
             });
 
             foreach ($newUsers as $user) {
-                // QuestionOption::create([
-                //     'question_id' => $socialQuestion->id,
-                //     'text' => $user->name,
-                //     'is_correct' => false,
-                //     'user_id' => $user->id,
-                // ]);
+                QuestionOption::create([
+                    'question_id' => $socialQuestion->id,
+                    'text' => $user->name,
+                    'is_correct' => false,
+                    'user_id' => $user->id,
+                ]);
             }
         }
 
