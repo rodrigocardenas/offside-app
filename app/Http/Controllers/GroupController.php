@@ -495,12 +495,12 @@ class GroupController extends Controller
             });
 
             foreach ($newUsers as $user) {
-                QuestionOption::create([
-                    'question_id' => $socialQuestion->id,
-                    'text' => $user->name,
-                    'is_correct' => false,
-                    'user_id' => $user->id,
-                ]);
+                // QuestionOption::create([
+                //     'question_id' => $socialQuestion->id,
+                //     'text' => $user->name,
+                //     'is_correct' => false,
+                //     'user_id' => $user->id,
+                // ]);
             }
         }
 
