@@ -14,6 +14,14 @@
     <meta name="apple-mobile-web-app-title" content="Offside Club">
     <link rel="apple-touch-icon" href="/images/logo-offside-192x192.png">
     <link rel="icon" type="image/png" href="/images/logo-offside-192x192.png">
+    {{-- agregar meta  --}}
+    <meta property="og:title" content="Offside Club">
+    <meta property="og:description" content="Offside Club la app que te permite jugar a preguntas y respuestas sobre fútbol con tus amigos.">
+    <meta property="og:image" content="/images/logo-offside-192x192.png">
+    <meta property="og:url" content="https://offside.club">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:image:width" content="192">
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">

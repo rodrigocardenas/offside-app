@@ -374,19 +374,69 @@ class GroupController extends Controller
             'code' => 'required|string|max:10'
         ]);
 
-        $group = Group::where('code', $request->code)->firstOrFail();
+        Log::info('Solicitud de unirse a grupo', [
+            'code' => $request->code,
+            'user_id' => auth()->id(),
+            'user_agent' => request()->userAgent(),
+            'ip' => request()->ip()
+        ]);
 
-        // Verificar si ya es miembro usando la relación pivot
-        if ($group->users()->where('user_id', auth()->id())->exists()) {
+        return DB::transaction(function () use ($request) {
+            $group = Group::where('code', $request->code)->firstOrFail();
+
+            // Verificar si ya es miembro usando la relación pivot con bloqueo
+            $existingMembership = $group->users()
+                ->where('user_id', auth()->id())
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingMembership) {
+                Log::info('Usuario ya es miembro del grupo', [
+                    'user_id' => auth()->id(),
+                    'group_id' => $group->id,
+                    'code' => $request->code
+                ]);
+
+                return redirect()->route('groups.show', $group)
+                    ->with('error', 'Ya eres miembro de este grupo.');
+            }
+
+            // Verificar si hay una solicitud reciente del mismo usuario para el mismo grupo
+            $recentJoin = DB::table('group_user')
+                ->where('user_id', auth()->id())
+                ->where('group_id', $group->id)
+                ->where('created_at', '>=', now()->subSeconds(5))
+                ->first();
+
+            if ($recentJoin) {
+                Log::info('Solicitud reciente detectada, evitando duplicado', [
+                    'user_id' => auth()->id(),
+                    'group_id' => $group->id,
+                    'code' => $request->code
+                ]);
+
+                return redirect()->route('groups.show', $group)
+                    ->with('success', 'Te has unido al grupo exitosamente.');
+            }
+
+            // Agregar usuario al grupo
+            $group->users()->attach(auth()->id(), [
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            Log::info('Usuario agregado exitosamente al grupo', [
+                'user_id' => auth()->id(),
+                'group_id' => $group->id,
+                'code' => $request->code
+            ]);
+
+            // Limpiar caché relacionada
+            Cache::tags(['groups', 'user_' . auth()->id()])->flush();
+
             return redirect()->route('groups.show', $group)
-                ->with('error', 'Ya eres miembro de este grupo.');
-        }
-
-        // Usar syncWithoutDetaching para evitar duplicados
-        $group->users()->syncWithoutDetaching([auth()->id()]);
-
-        return redirect()->route('groups.show', $group)
-            ->with('success', 'Te has unido al grupo exitosamente.');
+                ->with('success', 'Te has unido al grupo exitosamente.');
+        });
     }
 
     public function leave(Group $group)
@@ -412,19 +462,69 @@ class GroupController extends Controller
 
     public function joinByInvite($code)
     {
-        $group = Group::where('code', $code)->firstOrFail();
+        Log::info('Solicitud de unirse a grupo por invitación', [
+            'code' => $code,
+            'user_id' => auth()->id(),
+            'user_agent' => request()->userAgent(),
+            'ip' => request()->ip()
+        ]);
 
-        // Verificar si ya es miembro usando la relación pivot
-        if ($group->users()->where('user_id', auth()->id())->exists()) {
+        return DB::transaction(function () use ($code) {
+            $group = Group::where('code', $code)->firstOrFail();
+
+            // Verificar si ya es miembro usando la relación pivot con bloqueo
+            $existingMembership = $group->users()
+                ->where('user_id', auth()->id())
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingMembership) {
+                Log::info('Usuario ya es miembro del grupo', [
+                    'user_id' => auth()->id(),
+                    'group_id' => $group->id,
+                    'code' => $code
+                ]);
+
+                return redirect()->route('groups.show', $group)
+                    ->with('error', 'Ya eres miembro de este grupo.');
+            }
+
+            // Verificar si hay una solicitud reciente del mismo usuario para el mismo grupo
+            $recentJoin = DB::table('group_user')
+                ->where('user_id', auth()->id())
+                ->where('group_id', $group->id)
+                ->where('created_at', '>=', now()->subSeconds(5))
+                ->first();
+
+            if ($recentJoin) {
+                Log::info('Solicitud reciente detectada, evitando duplicado', [
+                    'user_id' => auth()->id(),
+                    'group_id' => $group->id,
+                    'code' => $code
+                ]);
+
+                return redirect()->route('groups.show', $group)
+                    ->with('success', 'Te has unido al grupo exitosamente.');
+            }
+
+            // Agregar usuario al grupo
+            $group->users()->attach(auth()->id(), [
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            Log::info('Usuario agregado exitosamente al grupo', [
+                'user_id' => auth()->id(),
+                'group_id' => $group->id,
+                'code' => $code
+            ]);
+
+            // Limpiar caché relacionada
+            Cache::tags(['groups', 'user_' . auth()->id()])->flush();
+
             return redirect()->route('groups.show', $group)
-                ->with('error', 'Ya eres miembro de este grupo.');
-        }
-
-        // Usar syncWithoutDetaching para evitar duplicados
-        $group->users()->syncWithoutDetaching([auth()->id()]);
-
-        return redirect()->route('groups.show', $group)
-            ->with('success', 'Te has unido al grupo exitosamente.');
+                ->with('success', 'Te has unido al grupo exitosamente.');
+        });
     }
 
     protected function getNextMatchdayMatches($competition)
