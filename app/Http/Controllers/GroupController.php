@@ -484,6 +484,10 @@ class GroupController extends Controller
                 ]);
             }
         } else {
+            if ($socialQuestion->id == 42) {
+                Log::info('Pregunta social 42: ' . $socialQuestion->text);
+                return $socialQuestion->load(['options', 'answers.user']);
+            }
             // Actualizar opciones si hay nuevos usuarios
             $existingOptions = $socialQuestion->options->pluck('text')->toArray();
             $newUsers = $group->users->filter(function($user) use ($existingOptions) {
