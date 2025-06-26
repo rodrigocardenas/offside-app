@@ -88,10 +88,10 @@ trait HandlesQuestions
         ]);
         // set options
         foreach ($group->users as $user) {
-            QuestionOption::create([
-                'question_id' => $question->id,
-                'text' => $user->name,
-            ]);
+            // QuestionOption::create([
+            //     'question_id' => $question->id,
+            //     'text' => $user->name,
+            // ]);
         }
 
         return $question;
