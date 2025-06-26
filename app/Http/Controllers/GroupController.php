@@ -476,12 +476,12 @@ class GroupController extends Controller
             ]);
 
             foreach ($group->users as $user) {
-                $questionOption = QuestionOption::create([
-                    'question_id' => $question->id,
-                    'text' => $user->name,
-                    'is_correct' => false,
-                    'user_id' => $user->id,
-                ]);
+                // $questionOption = QuestionOption::create([
+                //     'question_id' => $question->id,
+                //     'text' => $user->name,
+                //     'is_correct' => false,
+                //     'user_id' => $user->id,
+                // ]);
             }
         } else {
             if ($socialQuestion->id == 42) {
