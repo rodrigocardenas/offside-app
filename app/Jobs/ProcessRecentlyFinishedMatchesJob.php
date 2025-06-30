@@ -49,25 +49,17 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
         foreach ($finishedMatches as $match) {
             try {
                 // Actualizar el partido usando la API
-                $updatedMatch = $footballService->getMatch($match->id);
-                Log::info('Partido actualizado: ' . $updatedMatch->id);
+                $updatedMatch = $footballService->updateMatchFromApi($match->id);
+                Log::info('Partido actualizado: ' . $match->id);
 
                 if ($updatedMatch) {
                     // Si el partido terminó, actualizar el estado
-                    // if ($updatedMatch->status === 'Match Finished' || $updatedMatch->status === 'FINISHED') {
-                        $match->update([
-                            'status' => 'FINISHED',
-                            'home_team_score' => $updatedMatch->home_team_score,
-                            'away_team_score' => $updatedMatch->away_team_score,
-                            'score' => $updatedMatch->score,
-                            'events' => $updatedMatch->events
-                        ]);
-
+                    if ($updatedMatch->status === 'Match Finished' || $updatedMatch->status === 'FINISHED') {
                         Log::info('Partido actualizado como FINISHED: ' . $match->id, [
                             'match_teams' => $match->home_team . ' vs ' . $match->away_team,
                             'score' => $updatedMatch->score
                         ]);
-                    // }
+                    }
                 }
             } catch (\Exception $e) {
                 Log::error('Error al actualizar partido ' . $match->id, [

@@ -154,7 +154,8 @@ class FootballService
     {
         $leagueId = $this->leagueMap[$competition] ?? null;
         if (!$leagueId) {
-            throw new \Exception("Competencia no soportada: $competition");
+            Log::warning("Competencia no soportada: $competition, usando Champions League como fallback");
+            $leagueId = $this->leagueMap['champions-league'];
         }
 
         $response = Http::withHeaders([
@@ -220,8 +221,8 @@ class FootballService
         }
 
         // 2. Obtener datos necesarios del registro
-        $competition = $match->competition_slug ?? 'champions-league'; // Ajusta según tu modelo
-        $season = $match->season ?? 2024;
+        $competition = $match->league ?? 'champions-league'; // Usar el campo league
+        $season = 2025; // Temporada actual
         $homeTeam = $match->home_team;
         $awayTeam = $match->away_team;
 

@@ -134,10 +134,10 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
 
         foreach ($pendingQuestions as $question) {
             try {
-                $matches = $footballService->getMatch($question->football_match->id);
+                // Actualizar el partido usando la API
+                $updatedMatch = $footballService->updateMatchFromApi($question->football_match->id);
                 $match = $question->football_match;
                 $answers = $question->answers;
-                // dd($answers, $question);
 
                 // Verificar resultados usando OpenAI
                 $correctAnswers = $openAIService->verifyMatchResults(
