@@ -53,7 +53,7 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
 
                 if ($updatedMatch) {
                     // Si el partido terminó, actualizar el estado
-                    if ($updatedMatch->status === 'Match Finished' || $updatedMatch->status === 'FINISHED') {
+                    // if ($updatedMatch->status === 'Match Finished' || $updatedMatch->status === 'FINISHED') {
                         $match->update([
                             'status' => 'FINISHED',
                             'home_team_score' => $updatedMatch->home_team_score,
@@ -66,7 +66,7 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
                             'match_teams' => $match->home_team . ' vs ' . $match->away_team,
                             'score' => $updatedMatch->score
                         ]);
-                    }
+                    // }
                 }
             } catch (\Exception $e) {
                 Log::error('Error al actualizar partido ' . $match->id, [
