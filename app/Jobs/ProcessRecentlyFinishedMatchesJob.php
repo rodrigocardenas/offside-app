@@ -40,7 +40,7 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
     {
         // Obtener partidos que deberían haber terminado (fecha + 2 horas de margen)
         $finishedMatches = FootballMatch::where('status', '!=', 'FINISHED')
-            ->where('date', '<=', now()->subHours(2))
+            ->where('date', '<=', now()->subHours(96))
             ->get();
 
         Log::info('Partidos que deberían haber terminado encontrados: ' . $finishedMatches->count());
