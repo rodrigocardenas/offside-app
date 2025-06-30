@@ -101,7 +101,12 @@ trait HandlesQuestions
     {
         $userAnswersCacheKey = "user_{$group->id}_answers";
         return Cache::remember($userAnswersCacheKey, now()->addMinutes(5), function () use ($group, $matchQuestions, $socialQuestion) {
-            return auth()->user()->answers()
+            $user = auth()->user();
+            if (!$user) {
+                return collect();
+            }
+
+            return $user->answers()
                 ->whereIn('question_id', $matchQuestions->pluck('id'))
                 ->when($socialQuestion, function ($query) use ($socialQuestion) {
                     $query->orWhere('question_id', $socialQuestion->id);
@@ -277,7 +282,7 @@ trait HandlesQuestions
             if (!is_object($template)) {
                 Log::warning('Template no es un objeto:', [
                     'template' => $template,
-                    'match_id' => $match['id']
+                    'match_id' => $match->id
                 ]);
                 return null;
             }
@@ -285,14 +290,14 @@ trait HandlesQuestions
             if (!isset($template->text) || !isset($template->type) || !isset($template->options)) {
                 Log::warning('Template incompleto:', [
                     'template' => $template,
-                    'match_id' => $match['id']
+                    'match_id' => $match->id
                 ]);
                 return null;
             }
 
             $questionText = str_replace(
                 ['{{home_team}}', '{{away_team}}', '{{ home_team }}', '{{ away_team }}'],
-                [$match['home_team'], $match['away_team'], $match['home_team'], $match['away_team']],
+                [$match->home_team, $match->away_team, $match->home_team, $match->away_team],
                 $template->text
             );
 
@@ -300,14 +305,14 @@ trait HandlesQuestions
                 if (!isset($option['text'])) {
                     Log::warning('Opción sin texto:', [
                         'option' => $option,
-                        'match_id' => $match['id']
+                        'match_id' => $match->id
                     ]);
                     return null;
                 }
 
                 $optionText = str_replace(
                     ['{{home_team}}', '{{away_team}}', '{{ home_team }}', '{{ away_team }}'],
-                    [$match['home_team'], $match['away_team'], $match['home_team'], $match['away_team']],
+                    [$match->home_team, $match->away_team, $match->home_team, $match->away_team],
                     $option['text']
                 );
                 return [
@@ -327,7 +332,7 @@ trait HandlesQuestions
                 shuffle($options);
             }
 
-            $availableUntil = \Carbon\Carbon::parse($match['date'])
+            $availableUntil = \Carbon\Carbon::parse($match->date)
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
 
@@ -337,7 +342,7 @@ trait HandlesQuestions
                 'description' => $questionText,
                 'competition_id' => $group->competition_id,
                 'group_id' => $group->id,
-                'match_id' => $match['id'],
+                'match_id' => $match->id,
                 'available_until' => $availableUntil,
                 'points' => $template->type === 'predictive' ? 300 : 0,
                 'options' => $options,
@@ -347,7 +352,7 @@ trait HandlesQuestions
             if (!isset($questionData['title']) || !isset($questionData['options'])) {
                 Log::warning('Datos de pregunta incompletos:', [
                     'question_data' => $questionData,
-                    'match_id' => $match['id']
+                    'match_id' => $match->id
                 ]);
                 return null;
             }
@@ -400,7 +405,7 @@ trait HandlesQuestions
 
             Log::info('Pregunta creada:', [
                 'question_id' => $question->id,
-                'match_id' => $match['id'],
+                'match_id' => $match->id,
                 'title' => $questionText
             ]);
 
@@ -408,7 +413,7 @@ trait HandlesQuestions
         } catch (\Exception $e) {
             Log::error('Error al crear pregunta desde template:', [
                 'error' => $e->getMessage(),
-                'match_id' => $match['id']
+                'match_id' => $match->id
             ]);
             return null;
         }

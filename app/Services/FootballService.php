@@ -111,22 +111,37 @@ class FootballService
                 // Si no existe, puedes crearlo o retornar null
                 return null;
             }
-            // dd($fixture);
 
-            // Actualiza los campos principales (ajusta según tu modelo)
-            $match->update([
-                'home_team' => $fixture['teams']['home']['name'] ?? null,
-                'away_team' => $fixture['teams']['away']['name'] ?? null,
-                'date' => $fixture['fixture']['date'] ?? null,
-                'status' => $fixture['fixture']['status']['long'] ?? null,
-                'score_home' => $fixture['goals']['home'] ?? null,
-                'score_away' => $fixture['goals']['away'] ?? null,
-                'score' => $fixture['goals']['home'] . ' - ' . $fixture['goals']['away'],
-                // Puedes guardar más campos si lo necesitas
-                'events' => isset($fixture['events']) ? json_encode($fixture['events']) : null,
-            ]);
+            // Procesar eventos como string legible
+            $eventos = [];
+            if (isset($fixture['events']) && is_array($fixture['events'])) {
+                foreach ($fixture['events'] as $evento) {
+                    if (in_array($evento['type'], ['Goal', 'Goal Penalty', 'Own Goal'])) {
+                        $minuto = $evento['time']['elapsed'];
+                        $jugador = $evento['player']['name'];
+                        $equipo = $evento['team']['name'];
+                        $tipo = $evento['type'];
+                        $eventos[] = "{$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                    }
+                }
+            }
+            $eventosString = implode(' | ', $eventos);
 
-            return $match;
+            // Crear un objeto con los datos actualizados sin modificar el registro original
+            $updatedMatch = new FootballMatch();
+            $updatedMatch->id = $match->id;
+            $updatedMatch->home_team = $fixture['teams']['home']['name'] ?? $match->home_team;
+            $updatedMatch->away_team = $fixture['teams']['away']['name'] ?? $match->away_team;
+            $updatedMatch->date = $fixture['fixture']['date'] ?? $match->date;
+            $updatedMatch->status = $fixture['fixture']['status']['long'] ?? $match->status;
+            $updatedMatch->home_team_score = $fixture['goals']['home'] ?? null;
+            $updatedMatch->away_team_score = $fixture['goals']['away'] ?? null;
+            $updatedMatch->score = ($fixture['goals']['home'] && $fixture['goals']['away'])
+                ? $fixture['goals']['home'] . ' - ' . $fixture['goals']['away']
+                : null;
+            $updatedMatch->events = $eventosString;
+
+            return $updatedMatch;
         }
 
         return null;

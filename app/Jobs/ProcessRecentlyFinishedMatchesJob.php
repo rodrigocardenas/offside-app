@@ -26,23 +26,59 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
     {
         Log::info('Iniciando procesamiento de partidos finalizados recientemente');
 
-        // 1. Verificar resultados de preguntas de partidos finalizados recientemente
-        $this->verifyRecentlyFinishedQuestions($footballService, $openAIService);
+        // 1. Actualizar partidos finalizados y verificar resultados de preguntas
+        $this->updateFinishedMatchesAndVerifyResults($footballService, $openAIService);
 
         // 2. Crear nuevas preguntas predictivas y notificar usuarios
         $this->createNewPredictiveQuestions();
     }
 
     /**
-     * Verifica resultados de preguntas de partidos finalizados recientemente
+     * Actualiza partidos finalizados y verifica resultados de preguntas
      */
-    private function verifyRecentlyFinishedQuestions(FootballService $footballService, OpenAIService $openAIService)
+    private function updateFinishedMatchesAndVerifyResults(FootballService $footballService, OpenAIService $openAIService)
     {
-        // Obtener preguntas pendientes de partidos que deberían haber terminado
-        // Usamos la fecha del partido + 2 horas de margen para asegurar que terminó
+        // Obtener partidos que deberían haber terminado (fecha + 2 horas de margen)
+        $finishedMatches = FootballMatch::where('status', '!=', 'FINISHED')
+            ->where('date', '<=', now()->subHours(2))
+            ->get();
+
+        Log::info('Partidos que deberían haber terminado encontrados: ' . $finishedMatches->count());
+
+        foreach ($finishedMatches as $match) {
+            try {
+                // Actualizar el partido usando la API
+                $updatedMatch = $footballService->getMatch($match->id);
+
+                if ($updatedMatch) {
+                    // Si el partido terminó, actualizar el estado
+                    if ($updatedMatch->status === 'Match Finished' || $updatedMatch->status === 'FINISHED') {
+                        $match->update([
+                            'status' => 'FINISHED',
+                            'home_team_score' => $updatedMatch->home_team_score,
+                            'away_team_score' => $updatedMatch->away_team_score,
+                            'score' => $updatedMatch->score,
+                            'events' => $updatedMatch->events
+                        ]);
+
+                        Log::info('Partido actualizado como FINISHED: ' . $match->id, [
+                            'match_teams' => $match->home_team . ' vs ' . $match->away_team,
+                            'score' => $updatedMatch->score
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Error al actualizar partido ' . $match->id, [
+                    'error' => $e->getMessage()
+                ]);
+                continue;
+            }
+        }
+
+        // Verificar resultados de preguntas de partidos finalizados
         $pendingQuestions = Question::whereNull('result_verified_at')
             ->whereHas('football_match', function($query) {
-                $query->where('date', '<=', now()->subHours(2)); // Partido terminado hace al menos 2 horas
+                $query->where('status', 'FINISHED');
             })
             ->get();
 
@@ -118,15 +154,16 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
                 // Solo crear nuevas preguntas si hay menos de 5 activas
                 if ($activeCount < 5) {
                     // Usar el método del trait HandlesQuestions (reutilizando lógica existente)
-                    $newQuestions = $this->fillGroupPredictiveQuestions($group);
+                    $allQuestions = $this->fillGroupPredictiveQuestions($group);
+                    $newQuestionsCount = $allQuestions->count() - $activeCount;
 
-                    if ($newQuestions->count() > 0) {
+                    if ($newQuestionsCount > 0) {
                         // Notificar a los usuarios del grupo
-                        \App\Jobs\SendNewPredictiveQuestionsPushNotification::dispatch($group->id, $newQuestions->count());
+                        \App\Jobs\SendNewPredictiveQuestionsPushNotification::dispatch($group->id, $newQuestionsCount);
 
                         Log::info("Nuevas preguntas predictivas creadas y notificación enviada al grupo {$group->id}", [
-                            'new_questions_count' => $newQuestions->count(),
-                            'total_active' => $activeCount + $newQuestions->count()
+                            'new_questions_count' => $newQuestionsCount,
+                            'total_active' => $allQuestions->count()
                         ]);
                     }
                 }
