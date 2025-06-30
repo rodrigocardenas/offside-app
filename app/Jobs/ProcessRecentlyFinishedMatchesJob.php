@@ -50,6 +50,7 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
             try {
                 // Actualizar el partido usando la API
                 $updatedMatch = $footballService->getMatch($match->id);
+                Log::info('Partido actualizado: ' . $updatedMatch->id);
 
                 if ($updatedMatch) {
                     // Si el partido terminó, actualizar el estado
