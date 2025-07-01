@@ -46,8 +46,15 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
 
         Log::info('Partidos que deberían haber terminado encontrados: ' . $finishedMatches->count());
 
-        foreach ($finishedMatches as $match) {
+        foreach ($finishedMatches as $index => $match) {
             try {
+                // Agregar delay entre requests para evitar rate limiting
+                if ($index > 0) {
+                    $delaySeconds = 3; // 3 segundos entre cada partido
+                    Log::info("Esperando $delaySeconds segundos antes de procesar el siguiente partido...");
+                    sleep($delaySeconds);
+                }
+
                 // Actualizar el partido usando la API
                 $updatedMatch = $footballService->updateMatchFromApi($match->id);
                 Log::info('Partido actualizado: ' . $match->id);

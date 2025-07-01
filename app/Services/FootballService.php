@@ -148,6 +148,15 @@ class FootballService
     }
 
     /**
+     * Aplica un delay aleatorio para evitar rate limiting
+     */
+    private function applyRateLimitDelay($minSeconds = 1, $maxSeconds = 3)
+    {
+        $delay = rand($minSeconds * 1000000, $maxSeconds * 1000000); // Microsegundos
+        usleep($delay);
+    }
+
+    /**
      * Busca el fixtureId de un partido terminado por nombres de equipos, liga y temporada
      */
     public function buscarFixtureId($competition, $season, $homeTeam, $awayTeam)
@@ -160,20 +169,43 @@ class FootballService
 
         Log::info("Buscando fixture para: $homeTeam vs $awayTeam en liga $competition (ID: $leagueId), temporada $season");
 
-        $response = Http::withHeaders([
-            'X-RapidAPI-Key' => $this->apiKey,
-            'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
-        ])->get($this->baseUrl . 'fixtures', [
-            'league' => $leagueId,
-            'season' => $season,
-            'status' => 'FT'
-        ]);
+        // Implementar retry con delay para evitar rate limiting
+        $maxRetries = 3;
+        $delaySeconds = 2;
 
-        Log::info("API Response Status: " . $response->status());
-        Log::info("API Response Body: " . $response->body());
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            // Aplicar delay aleatorio antes de cada request
+            $this->applyRateLimitDelay(1, 2);
+
+            $response = Http::withHeaders([
+                'X-RapidAPI-Key' => $this->apiKey,
+                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            ])->get($this->baseUrl . 'fixtures', [
+                'league' => $leagueId,
+                'season' => $season,
+                'status' => 'FT'
+            ]);
+
+            Log::info("API Response Status (attempt $attempt): " . $response->status());
+
+            if ($response->successful()) {
+                break;
+            }
+
+            if (str_contains($response->body(), 'Too many requests')) {
+                Log::warning("Rate limit alcanzado en intento $attempt. Esperando $delaySeconds segundos...");
+                if ($attempt < $maxRetries) {
+                    sleep($delaySeconds);
+                    $delaySeconds *= 2; // Exponential backoff
+                }
+            } else {
+                Log::error("Error en API (attempt $attempt): " . $response->body());
+                break;
+            }
+        }
 
         if (!$response->successful()) {
-            Log::error("Error en API: " . $response->body());
+            Log::error("Error final en API después de $maxRetries intentos: " . $response->body());
             return null;
         }
 
@@ -207,13 +239,37 @@ class FootballService
 
         // Intentar búsqueda sin filtro de estado
         Log::info("Intentando búsqueda sin filtro de estado...");
-        $response2 = Http::withHeaders([
-            'X-RapidAPI-Key' => $this->apiKey,
-            'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
-        ])->get($this->baseUrl . 'fixtures', [
-            'league' => $leagueId,
-            'season' => $season
-        ]);
+
+        $maxRetries2 = 3;
+        $delaySeconds2 = 2;
+
+        for ($attempt2 = 1; $attempt2 <= $maxRetries2; $attempt2++) {
+            // Aplicar delay aleatorio antes de cada request
+            $this->applyRateLimitDelay(1, 2);
+
+            $response2 = Http::withHeaders([
+                'X-RapidAPI-Key' => $this->apiKey,
+                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            ])->get($this->baseUrl . 'fixtures', [
+                'league' => $leagueId,
+                'season' => $season
+            ]);
+
+            if ($response2->successful()) {
+                break;
+            }
+
+            if (str_contains($response2->body(), 'Too many requests')) {
+                Log::warning("Rate limit alcanzado en búsqueda sin filtro (attempt $attempt2). Esperando $delaySeconds2 segundos...");
+                if ($attempt2 < $maxRetries2) {
+                    sleep($delaySeconds2);
+                    $delaySeconds2 *= 2;
+                }
+            } else {
+                Log::error("Error en API sin filtro (attempt $attempt2): " . $response2->body());
+                break;
+            }
+        }
 
         if ($response2->successful()) {
             $fixtures2 = $response2->json('response') ?? [];
@@ -305,14 +361,37 @@ class FootballService
         }
 
         // 4. Obtener los datos del fixture y actualizar el registro
-        $response = Http::withHeaders([
-            'X-RapidAPI-Key' => $this->apiKey,
-            'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
-        ])->get($this->baseUrl . 'fixtures', [
-            'id' => $fixtureId
-        ]);
+        $maxRetries = 3;
+        $delaySeconds = 2;
 
-        Log::info('Response: ' . $response->body());
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            // Aplicar delay aleatorio antes de cada request
+            $this->applyRateLimitDelay(1, 2);
+
+            $response = Http::withHeaders([
+                'X-RapidAPI-Key' => $this->apiKey,
+                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            ])->get($this->baseUrl . 'fixtures', [
+                'id' => $fixtureId
+            ]);
+
+            Log::info("Response (attempt $attempt): " . $response->body());
+
+            if ($response->successful()) {
+                break;
+            }
+
+            if (str_contains($response->body(), 'Too many requests')) {
+                Log::warning("Rate limit alcanzado al obtener fixture (attempt $attempt). Esperando $delaySeconds segundos...");
+                if ($attempt < $maxRetries) {
+                    sleep($delaySeconds);
+                    $delaySeconds *= 2;
+                }
+            } else {
+                Log::error("Error al obtener fixture (attempt $attempt): " . $response->body());
+                break;
+            }
+        }
 
         if ($response->successful()) {
             $fixture = $response->json('response.0');
