@@ -233,6 +233,7 @@ class FootballService
 
         // 3. Buscar el fixtureId en la API
         $fixtureId = $this->buscarFixtureId($competition, $season, $homeTeam, $awayTeam);
+        Log::info('Fixture ID: ' . $fixtureId);
         if (!$fixtureId) {
             return null;
         }
@@ -244,6 +245,8 @@ class FootballService
         ])->get($this->baseUrl . 'fixtures', [
             'id' => $fixtureId
         ]);
+
+        Log::info('Response: ' . $response->body());
 
         if ($response->successful()) {
             $fixture = $response->json('response.0');
