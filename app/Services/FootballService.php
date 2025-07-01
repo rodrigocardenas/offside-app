@@ -158,6 +158,8 @@ class FootballService
             $leagueId = $this->leagueMap['champions-league'];
         }
 
+        Log::info("Buscando fixture para: $homeTeam vs $awayTeam en liga $competition (ID: $leagueId), temporada $season");
+
         $response = Http::withHeaders([
             'X-RapidAPI-Key' => $this->apiKey,
             'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
@@ -167,18 +169,72 @@ class FootballService
             'status' => 'FT'
         ]);
 
+        Log::info("API Response Status: " . $response->status());
+        Log::info("API Response Body: " . $response->body());
+
+        if (!$response->successful()) {
+            Log::error("Error en API: " . $response->body());
+            return null;
+        }
+
         $fixtures = $response->json('response') ?? [];
         if (!is_array($fixtures)) {
+            Log::warning("No se encontraron fixtures o formato incorrecto");
             $fixtures = [];
         }
-        foreach ($fixtures as $fixture) {
+
+        Log::info("Fixtures encontrados: " . count($fixtures));
+
+                foreach ($fixtures as $fixture) {
             $home = strtolower($fixture['teams']['home']['name']);
             $away = strtolower($fixture['teams']['away']['name']);
-            if (str_contains($home, strtolower($homeTeam)) && str_contains($away, strtolower($awayTeam))) {
-                // ddd($home. ' - '. $away, $fixture['fixture']['id']);
+            $homeTeamLower = strtolower($homeTeam);
+            $awayTeamLower = strtolower($awayTeam);
+
+            Log::info("Comparando: '$home' vs '$homeTeamLower' y '$away' vs '$awayTeamLower'");
+
+            // Búsqueda más flexible: verificar ambas combinaciones
+            $match1 = str_contains($home, $homeTeamLower) && str_contains($away, $awayTeamLower);
+            $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
+
+            if ($match1 || $match2) {
+                Log::info("¡Fixture encontrado! ID: " . $fixture['fixture']['id']);
                 return $fixture['fixture']['id'];
             }
         }
+
+        Log::warning("No se encontró fixture para: $homeTeam vs $awayTeam");
+
+        // Intentar búsqueda sin filtro de estado
+        Log::info("Intentando búsqueda sin filtro de estado...");
+        $response2 = Http::withHeaders([
+            'X-RapidAPI-Key' => $this->apiKey,
+            'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+        ])->get($this->baseUrl . 'fixtures', [
+            'league' => $leagueId,
+            'season' => $season
+        ]);
+
+        if ($response2->successful()) {
+            $fixtures2 = $response2->json('response') ?? [];
+            Log::info("Fixtures sin filtro de estado: " . count($fixtures2));
+
+            foreach ($fixtures2 as $fixture) {
+                $home = strtolower($fixture['teams']['home']['name']);
+                $away = strtolower($fixture['teams']['away']['name']);
+                $homeTeamLower = strtolower($homeTeam);
+                $awayTeamLower = strtolower($awayTeam);
+
+                $match1 = str_contains($home, $homeTeamLower) && str_contains($away, $awayTeamLower);
+                $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
+
+                if ($match1 || $match2) {
+                    Log::info("¡Fixture encontrado sin filtro de estado! ID: " . $fixture['fixture']['id'] . " Status: " . $fixture['fixture']['status']['long']);
+                    return $fixture['fixture']['id'];
+                }
+            }
+        }
+
         return null;
     }
 
@@ -226,10 +282,20 @@ class FootballService
         $homeTeam = $match->home_team;
         $awayTeam = $match->away_team;
 
+        Log::info("Datos del partido:", [
+            'id' => $match->id,
+            'competition' => $competition,
+            'season' => $season,
+            'home_team' => $homeTeam,
+            'away_team' => $awayTeam,
+            'date' => $match->date,
+            'status' => $match->status
+        ]);
+
         if (!$competition || !$season || !$homeTeam || !$awayTeam) {
+            Log::error("Datos faltantes para buscar fixture");
             return null;
         }
-        // dd($match);
 
         // 3. Buscar el fixtureId en la API
         $fixtureId = $this->buscarFixtureId($competition, $season, $homeTeam, $awayTeam);

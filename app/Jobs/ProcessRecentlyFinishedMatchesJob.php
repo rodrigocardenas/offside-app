@@ -39,7 +39,7 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
     private function updateFinishedMatchesAndVerifyResults(FootballService $footballService, OpenAIService $openAIService)
     {
         // Obtener partidos que deberían haber terminado (fecha + 2 horas de margen)
-        $finishedMatches = FootballMatch::where('status', '!=', 'FINISHED')
+        $finishedMatches = FootballMatch::whereNotIn('status', ['FINISHED', 'Match Finished'])
             ->where('date', '<=', now()->subHours(2))
             ->where('date', '>=', now()->subHours(100))
             ->get();
@@ -57,7 +57,8 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
                     if ($updatedMatch->status === 'Match Finished' || $updatedMatch->status === 'FINISHED') {
                         Log::info('Partido actualizado como FINISHED: ' . $match->id, [
                             'match_teams' => $match->home_team . ' vs ' . $match->away_team,
-                            'score' => $updatedMatch->score
+                            'score' => $updatedMatch->score,
+                            'status' => $updatedMatch->status
                         ]);
                     }
                 }
@@ -72,7 +73,7 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
         // Verificar resultados de preguntas de partidos finalizados
         $pendingQuestions = Question::whereNull('result_verified_at')
             ->whereHas('football_match', function($query) {
-                $query->where('status', 'FINISHED');
+                $query->whereIn('status', ['FINISHED', 'Match Finished']);
             })
             ->get();
 
