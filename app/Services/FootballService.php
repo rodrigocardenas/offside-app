@@ -114,18 +114,60 @@ class FootballService
 
             // Procesar eventos como string legible
             $eventos = [];
+            $estadisticas = [];
+
             if (isset($fixture['events']) && is_array($fixture['events'])) {
                 foreach ($fixture['events'] as $evento) {
-                    if (in_array($evento['type'], ['Goal', 'Goal Penalty', 'Own Goal'])) {
-                        $minuto = $evento['time']['elapsed'];
-                        $jugador = $evento['player']['name'];
-                        $equipo = $evento['team']['name'];
-                        $tipo = $evento['type'];
-                        $eventos[] = "{$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                    $minuto = $evento['time']['elapsed'] ?? 'N/A';
+                    $jugador = $evento['player']['name'] ?? 'N/A';
+                    $equipo = $evento['team']['name'] ?? 'N/A';
+                    $tipo = $evento['type'] ?? 'N/A';
+                    $detalle = $evento['detail'] ?? '';
+
+                    switch ($tipo) {
+                        case 'Goal':
+                        case 'Goal Penalty':
+                        case 'Own Goal':
+                            $eventos[] = "⚽ {$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                            break;
+                        case 'Card':
+                            $color = $detalle === 'Yellow Card' ? '🟨' : '🟥';
+                            $eventos[] = "{$color} {$minuto}' - {$jugador} ({$equipo}) [{$detalle}]";
+                            break;
+                        case 'Subst':
+                            $eventos[] = "🔄 {$minuto}' - {$jugador} ({$equipo}) [Sustitución]";
+                            break;
+                        case 'Var':
+                            $eventos[] = "📺 {$minuto}' - {$jugador} ({$equipo}) [VAR - {$detalle}]";
+                            break;
+                        default:
+                            $eventos[] = "📊 {$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                            break;
                     }
                 }
             }
+
+            // Procesar estadísticas del partido
+            if (isset($fixture['statistics']) && is_array($fixture['statistics'])) {
+                foreach ($fixture['statistics'] as $stat) {
+                    if (isset($stat['team']) && isset($stat['statistics'])) {
+                        $equipo = $stat['team']['name'];
+                        $stats = $stat['statistics'];
+
+                        $estadisticas[$equipo] = [
+                            'posesion' => $this->buscarEstadistica($stats, 'Ball Possession'),
+                            'tiros_totales' => $this->buscarEstadistica($stats, 'Total Shots'),
+                            'tiros_a_gol' => $this->buscarEstadistica($stats, 'Shots on Goal'),
+                            'faltas' => $this->buscarEstadistica($stats, 'Fouls'),
+                            'tarjetas_amarillas' => $this->buscarEstadistica($stats, 'Yellow Cards'),
+                            'tarjetas_rojas' => $this->buscarEstadistica($stats, 'Red Cards'),
+                        ];
+                    }
+                }
+            }
+
             $eventosString = implode(' | ', $eventos);
+            $estadisticasString = $this->formatearEstadisticas($estadisticas);
 
             // Crear un objeto con los datos actualizados sin modificar el registro original
             $updatedMatch = new FootballMatch();
@@ -295,9 +337,9 @@ class FootballService
     }
 
     /**
-     * Obtiene los goles y autores de un fixture específico
+     * Obtiene todos los eventos de un partido (goles, tarjetas, posesión, etc.)
      */
-    public function obtenerGolesPartido($fixtureId)
+    public function obtenerTodosLosEventos($fixtureId)
     {
         $response = Http::withHeaders([
             'X-RapidAPI-Key' => $this->apiKey,
@@ -306,19 +348,124 @@ class FootballService
             'id' => $fixtureId
         ]);
 
-        $fixture = $response->json('response.0');
-        $events = $fixture['events'] ?? [];
+        if (!$response->successful()) {
+            return null;
+        }
 
-        return collect($events)
-            ->whereIn('type', ['Goal', 'Goal Penalty', 'Own Goal'])
-            ->map(function($evento) {
-                return [
-                    'minuto' => $evento['time']['elapsed'],
-                    'jugador' => $evento['player']['name'],
-                    'equipo' => $evento['team']['name'],
-                    'tipo' => $evento['type'],
-                ];
-            })->values();
+        $fixture = $response->json('response.0');
+        if (!$fixture) {
+            return null;
+        }
+
+        $eventos = [];
+        $estadisticas = [];
+
+        // Procesar eventos
+        if (isset($fixture['events']) && is_array($fixture['events'])) {
+            foreach ($fixture['events'] as $evento) {
+                $minuto = $evento['time']['elapsed'] ?? 'N/A';
+                $jugador = $evento['player']['name'] ?? 'N/A';
+                $equipo = $evento['team']['name'] ?? 'N/A';
+                $tipo = $evento['type'] ?? 'N/A';
+                $detalle = $evento['detail'] ?? '';
+
+                switch ($tipo) {
+                    case 'Goal':
+                    case 'Goal Penalty':
+                    case 'Own Goal':
+                        $eventos[] = "⚽ {$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                        break;
+                    case 'Card':
+                        $color = $detalle === 'Yellow Card' ? '🟨' : '🟥';
+                        $eventos[] = "{$color} {$minuto}' - {$jugador} ({$equipo}) [{$detalle}]";
+                        break;
+                    case 'Subst':
+                        $eventos[] = "🔄 {$minuto}' - {$jugador} ({$equipo}) [Sustitución]";
+                        break;
+                    case 'Var':
+                        $eventos[] = "📺 {$minuto}' - {$jugador} ({$equipo}) [VAR - {$detalle}]";
+                        break;
+                    case 'Normal Goal':
+                        $eventos[] = "⚽ {$minuto}' - {$jugador} ({$equipo}) [Gol Normal]";
+                        break;
+                    case 'Penalty':
+                        $eventos[] = "⚽ {$minuto}' - {$jugador} ({$equipo}) [Penalti]";
+                        break;
+                    case 'Missed Penalty':
+                        $eventos[] = "❌ {$minuto}' - {$jugador} ({$equipo}) [Penalti Fallado]";
+                        break;
+                    default:
+                        $eventos[] = "📊 {$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                        break;
+                }
+            }
+        }
+
+        // Procesar estadísticas del partido
+        if (isset($fixture['statistics']) && is_array($fixture['statistics'])) {
+            foreach ($fixture['statistics'] as $stat) {
+                if (isset($stat['team']) && isset($stat['statistics'])) {
+                    $equipo = $stat['team']['name'];
+                    $stats = $stat['statistics'];
+
+                    $estadisticas[$equipo] = [
+                        'posesion' => $this->buscarEstadistica($stats, 'Ball Possession'),
+                        'tiros_totales' => $this->buscarEstadistica($stats, 'Total Shots'),
+                        'tiros_a_gol' => $this->buscarEstadistica($stats, 'Shots on Goal'),
+                        'tiros_fuera' => $this->buscarEstadistica($stats, 'Shots off Goal'),
+                        'tiros_bloqueados' => $this->buscarEstadistica($stats, 'Blocked Shots'),
+                        'tiros_esquina' => $this->buscarEstadistica($stats, 'Corner Kicks'),
+                        'faltas' => $this->buscarEstadistica($stats, 'Fouls'),
+                        'tarjetas_amarillas' => $this->buscarEstadistica($stats, 'Yellow Cards'),
+                        'tarjetas_rojas' => $this->buscarEstadistica($stats, 'Red Cards'),
+                        'offsides' => $this->buscarEstadistica($stats, 'Offsides'),
+                        'ataques' => $this->buscarEstadistica($stats, 'Attacks'),
+                        'ataques_peligrosos' => $this->buscarEstadistica($stats, 'Dangerous Attacks'),
+                    ];
+                }
+            }
+        }
+
+        return [
+            'eventos' => $eventos,
+            'estadisticas' => $estadisticas,
+            'eventos_string' => implode(' | ', $eventos),
+            'estadisticas_string' => $this->formatearEstadisticas($estadisticas)
+        ];
+    }
+
+    /**
+     * Busca una estadística específica en el array de estadísticas
+     */
+    private function buscarEstadistica($stats, $nombre)
+    {
+        foreach ($stats as $stat) {
+            if ($stat['type'] === $nombre) {
+                return $stat['value'] ?? 0;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Formatea las estadísticas como string legible
+     */
+    private function formatearEstadisticas($estadisticas)
+    {
+        $formato = [];
+
+        foreach ($estadisticas as $equipo => $stats) {
+            $equipoStats = [];
+            $equipoStats[] = "Posesión: {$stats['posesion']}%";
+            $equipoStats[] = "Tiros: {$stats['tiros_totales']} ({$stats['tiros_a_gol']} a gol)";
+            $equipoStats[] = "Faltas: {$stats['faltas']}";
+            $equipoStats[] = "Tarjetas: 🟨{$stats['tarjetas_amarillas']} 🟥{$stats['tarjetas_rojas']}";
+            $equipoStats[] = "Offsides: {$stats['offsides']}";
+
+            $formato[] = "{$equipo}: " . implode(', ', $equipoStats);
+        }
+
+        return implode(' | ', $formato);
     }
 
     /**
@@ -401,18 +548,60 @@ class FootballService
 
             // Procesar eventos como string legible
             $eventos = [];
+            $estadisticas = [];
+
             if (isset($fixture['events']) && is_array($fixture['events'])) {
                 foreach ($fixture['events'] as $evento) {
-                    if (in_array($evento['type'], ['Goal', 'Goal Penalty', 'Own Goal'])) {
-                        $minuto = $evento['time']['elapsed'];
-                        $jugador = $evento['player']['name'];
-                        $equipo = $evento['team']['name'];
-                        $tipo = $evento['type'];
-                        $eventos[] = "{$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                    $minuto = $evento['time']['elapsed'] ?? 'N/A';
+                    $jugador = $evento['player']['name'] ?? 'N/A';
+                    $equipo = $evento['team']['name'] ?? 'N/A';
+                    $tipo = $evento['type'] ?? 'N/A';
+                    $detalle = $evento['detail'] ?? '';
+
+                    switch ($tipo) {
+                        case 'Goal':
+                        case 'Goal Penalty':
+                        case 'Own Goal':
+                            $eventos[] = "⚽ {$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                            break;
+                        case 'Card':
+                            $color = $detalle === 'Yellow Card' ? '🟨' : '🟥';
+                            $eventos[] = "{$color} {$minuto}' - {$jugador} ({$equipo}) [{$detalle}]";
+                            break;
+                        case 'Subst':
+                            $eventos[] = "🔄 {$minuto}' - {$jugador} ({$equipo}) [Sustitución]";
+                            break;
+                        case 'Var':
+                            $eventos[] = "📺 {$minuto}' - {$jugador} ({$equipo}) [VAR - {$detalle}]";
+                            break;
+                        default:
+                            $eventos[] = "📊 {$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
+                            break;
                     }
                 }
             }
+
+            // Procesar estadísticas del partido
+            if (isset($fixture['statistics']) && is_array($fixture['statistics'])) {
+                foreach ($fixture['statistics'] as $stat) {
+                    if (isset($stat['team']) && isset($stat['statistics'])) {
+                        $equipo = $stat['team']['name'];
+                        $stats = $stat['statistics'];
+
+                        $estadisticas[$equipo] = [
+                            'posesion' => $this->buscarEstadistica($stats, 'Ball Possession'),
+                            'tiros_totales' => $this->buscarEstadistica($stats, 'Total Shots'),
+                            'tiros_a_gol' => $this->buscarEstadistica($stats, 'Shots on Goal'),
+                            'faltas' => $this->buscarEstadistica($stats, 'Fouls'),
+                            'tarjetas_amarillas' => $this->buscarEstadistica($stats, 'Yellow Cards'),
+                            'tarjetas_rojas' => $this->buscarEstadistica($stats, 'Red Cards'),
+                        ];
+                    }
+                }
+            }
+
             $eventosString = implode(' | ', $eventos);
+            $estadisticasString = $this->formatearEstadisticas($estadisticas);
 
             $match->update([
                 'home_team' => $fixture['teams']['home']['name'] ?? null,
@@ -423,6 +612,7 @@ class FootballService
                 'score_away' => $fixture['goals']['away'] ?? null,
                 'score' => $fixture['goals']['home'] . ' - ' . $fixture['goals']['away'],
                 'events' => $eventosString,
+                'statistics' => $estadisticasString,
             ]);
             return $match;
         }

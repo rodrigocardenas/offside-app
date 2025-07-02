@@ -107,9 +107,27 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
                     ]
                 );
 
+                // Convertir las respuestas correctas de texto a IDs de opciones
+                $correctOptionIds = [];
+                foreach ($correctAnswers as $correctAnswerText) {
+                    $option = $question->options->first(function($option) use ($correctAnswerText) {
+                        return stripos($option->text, $correctAnswerText) !== false ||
+                               stripos($correctAnswerText, $option->text) !== false;
+                    });
+                    if ($option) {
+                        $correctOptionIds[] = $option->id;
+                    }
+                }
+
+                Log::info('Verificación completada', [
+                    'question_id' => $question->id,
+                    'correct_answers_text' => $correctAnswers->toArray(),
+                    'correct_option_ids' => $correctOptionIds
+                ]);
+
                 // Actualizar las respuestas correctas
                 foreach ($answers as $answer) {
-                    $answer->is_correct = in_array($answer->option_id, $correctAnswers->toArray());
+                    $answer->is_correct = in_array($answer->option_id, $correctOptionIds);
                     $answer->points_earned = $answer->is_correct ? 300 : 0;
                     $answer->save();
                 }

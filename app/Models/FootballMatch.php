@@ -36,6 +36,7 @@ class FootballMatch extends Model
         'competition',
         'match_date',
         'events',
+        'statistics',
         'score',
     ];
 

@@ -102,20 +102,47 @@ class OpenAIService
         $questionsText = collect($questions)->map(function($q) {
             return "{$q['title']} (Opciones: " . implode(", ", $q['options']) . ")";
         })->join("\n");
-        // dd($questionsText, $match);
 
         $response = OpenAI::chat()->create([
             'model' => 'gpt-4',
             'messages' => [
-                ['role' => 'system', 'content' => 'Actúa como un verificador de preguntas de fútbol. Tu trabajo es determinar las respuestas correctas a preguntas sobre un partido basándote en la información del resultado, limita tu respuesta a la opción correcta.'],
+                ['role' => 'system', 'content' => 'Actúa como un verificador de preguntas de fútbol. Tu trabajo es determinar las respuestas correctas a preguntas sobre un partido basándote en la información del resultado. Devuelve SOLO el nombre de la opción correcta, sin explicaciones adicionales.'],
                 ['role' => 'user', 'content' => "Para el partido {$match['homeTeam']} vs {$match['awayTeam']} (Resultado: {$match['score']}, Eventos: {$match['events']}), verifica la respuesta correcta para esta pregunta:\n{$questionsText}"],
             ],
         ]);
 
         $content = $response->choices[0]->message->content;
-        $results = is_json($content) ? json_decode($content, true) : [$content];
 
-        return collect($results['respuestas'] ?? []);
+        // Limpiar la respuesta y extraer solo el texto de la opción correcta
+        $content = trim($content);
+
+        // Si la respuesta es JSON, intentar decodificarla
+        if (is_json($content)) {
+            $results = json_decode($content, true);
+            if (isset($results['respuestas']) && is_array($results['respuestas'])) {
+                return collect($results['respuestas']);
+            }
+        }
+
+        // Si no es JSON o no tiene el formato esperado, tratar como texto plano
+        // Buscar la opción correcta en el texto de respuesta
+        $correctOptions = [];
+        foreach ($questions as $question) {
+            foreach ($question['options'] as $option) {
+                if (stripos($content, $option) !== false) {
+                    $correctOptions[] = $option;
+                    break; // Solo tomar la primera opción que coincida
+                }
+            }
+        }
+
+        Log::info('Verificación de resultados', [
+            'match' => $match['homeTeam'] . ' vs ' . $match['awayTeam'],
+            'openai_response' => $content,
+            'correct_options_found' => $correctOptions
+        ]);
+
+        return collect($correctOptions);
     }
 
     public function generateQuestion($match)
