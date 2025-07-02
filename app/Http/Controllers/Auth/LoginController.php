@@ -22,21 +22,28 @@ class LoginController extends Controller
             'name' => 'required|string',
         ]);
 
-        // Buscar usuario por ID completo (username_id)
+        // Buscar usuario por ID completo (unique_id)
         $user = User::where('unique_id', $request->name)->first();
 
-        // Si no se encuentra por ID completo, buscar por nombre base
+        // Si no se encuentra por ID completo, crear un nuevo usuario
         if (!$user) {
-            $user = User::where('name', $request->name)->first();
+            // Generar un username único basado en el nombre ingresado
+            $baseName = $request->name;
+            $counter = 1;
+            $uniqueName = $baseName;
 
-            // Si no existe, crear nuevo usuario
-            if (!$user) {
-                $user = User::create([
-                    'name' => $request->name,
-                    'email' => $request->name . '@offsideclub.com',
-                    'password' => Hash::make(Str::random(16)),
-                ]);
+            // Verificar si el nombre base ya existe y generar uno único
+            while (User::where('name', $uniqueName)->exists()) {
+                $uniqueName = $baseName . $counter;
+                $counter++;
             }
+
+            // Crear nuevo usuario con el nombre único
+            $user = User::create([
+                'name' => $uniqueName,
+                'email' => $uniqueName . '@offsideclub.com',
+                'password' => Hash::make(Str::random(16)),
+            ]);
         }
 
         Auth::login($user);
