@@ -521,6 +521,7 @@ class GroupController extends Controller
 
             // Limpiar caché relacionada
             Cache::tags(['groups', 'user_' . auth()->id()])->flush();
+            Cache::forget("group_{$group->id}_show_data");
 
             return redirect()->route('groups.show', $group)
                 ->with('success', 'Te has unido al grupo exitosamente.');
