@@ -600,7 +600,7 @@ class GroupController extends Controller
                 ]);
             }
         } else {
-            if ($socialQuestion->id == 42) {
+            if ($socialQuestion->id == 42 || $socialQuestion->id == 90) {
                 Log::info('Pregunta social 42: ' . $socialQuestion->text);
                 return $socialQuestion->load(['options', 'answers.user']);
             }
