@@ -485,8 +485,7 @@ class GroupController extends Controller
                     'code' => $code
                 ]);
 
-                return redirect()->route('groups.show', $group)
-                    ->with('error', 'Ya eres miembro de este grupo.');
+                return redirect()->route('groups.show', $group);
             }
 
             // Verificar si hay una solicitud reciente del mismo usuario para el mismo grupo
