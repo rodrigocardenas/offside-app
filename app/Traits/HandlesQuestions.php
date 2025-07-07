@@ -181,7 +181,7 @@ trait HandlesQuestions
 
     private function updateSocialQuestionOptions($question, $group)
     {
-        if ($group->users->count() <= 4 && $question->id != 90) {
+        if ($group->users->count() <= 4 && $question->id != 42) {
             foreach ($group->users as $user) {
                 QuestionOption::updateOrCreate([
                     'question_id' => $question->id,
