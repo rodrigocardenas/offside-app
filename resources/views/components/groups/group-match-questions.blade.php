@@ -21,7 +21,7 @@
                                         <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-6 h-6 mr-2" title="{{ $question->football_match->homeTeam?->name }}"> vs <img src="{{ $question->football_match->awayTeam?->crest_url }}" title="{{ $question->football_match->awayTeam?->name }}" class="w-6 h-6 ml-2">
                                     @endif
                                 @else
-                                    {{ $question->title }}
+                                    {{ $question->description }}
                                 @endif
                             </p>
                             <h4 class="text-xl font-bold mb-2">{{ $question->title }}</h4>
