@@ -63,12 +63,12 @@
                                                     $isStacked = $answers->count() > 2;
                                                     $allNames = $answers->pluck('user.name')->implode(', ');
                                                 @endphp
-                                                <div class="flex items-center {{ $isStacked ? '-space-x-7' : 'space-x-2' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
+                                                <div class="flex items-center {{ $isStacked ? '-space-x-4' : 'space-x-2' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
                                                     @foreach($answers->take(5) as $answer)
                                                         @if($answer->user->avatar)
                                                             <img src="{{ $answer->user->avatar_url }}"
                                                                  alt="{{ $answer->user->name }}"
-                                                                 class="{{ $isStacked ? 'w-6 h-6 border' : 'w-8 h-8 border-2' }} rounded-full border-white shadow-sm object-cover {{ $isStacked ? 'ring-2 ring-white' : '' }}"
+                                                                 class="{{ $isStacked ? 'w-6 h-6 border border-white/70' : 'w-8 h-8 border-2 border-white' }} rounded-full shadow-sm object-cover {{ $isStacked ? 'ring-2 ring-white' : '' }}"
                                                                  title="{{ $answer->user->name }}">
                                                         @else
                                                             @php
@@ -80,7 +80,7 @@
                                                                 $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
                                                                 $color = $colors[array_rand($colors)];
                                                             @endphp
-                                                            <div class="{{ $isStacked ? 'w-6 h-6 border' : 'w-8 h-8 border-2' }} rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-white shadow-sm {{ $isStacked ? 'ring-2 ring-white' : '' }}"
+                                                            <div class="{{ $isStacked ? 'w-6 h-6 border border-white/70' : 'w-8 h-8 border-2 border-white' }} rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold shadow-sm {{ $isStacked ? 'ring-2 ring-white' : '' }}"
                                                                 title="{{ $answer->user->name }}">
                                                                 {{ $initials }}
                                                             </div>
