@@ -58,28 +58,38 @@
                                             <input type="radio" name="question_option_id" value="{{ $option->id }}" class="hidden" required>
                                             <span class="flex-1 text-center">{{ $option->text }}</span>
                                             <div class="flex items-center space-x-2">
-                                                @foreach($question->answers->where('question_option_id', $option->id) as $answer)
-                                                    @if($answer->user->avatar)
-                                                        <img src="{{ $answer->user->avatar_url }}"
-                                                             alt="{{ $answer->user->name }}"
-                                                             class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
-                                                             title="{{ $answer->user->name }}">
-                                                    @else
-                                                        @php
-                                                            $initials = '';
-                                                            $nameParts = explode(' ', $answer->user->name);
-                                                            foreach($nameParts as $part) {
-                                                                $initials .= strtoupper(substr($part, 0, 1));
-                                                            }
-                                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
-                                                            $color = $colors[array_rand($colors)];
-                                                        @endphp
-                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
-                                                            title="{{ $answer->user->name }}">
-                                                            {{ $initials }}
-                                                        </div>
+                                                @php
+                                                    $answers = $question->answers->where('question_option_id', $option->id);
+                                                    $isStacked = $answers->count() > 2;
+                                                    $allNames = $answers->pluck('user.name')->implode(', ');
+                                                @endphp
+                                                <div class="flex items-center {{ $isStacked ? '-space-x-3' : 'space-x-2' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
+                                                    @foreach($answers->take(5) as $answer)
+                                                        @if($answer->user->avatar)
+                                                            <img src="{{ $answer->user->avatar_url }}"
+                                                                 alt="{{ $answer->user->name }}"
+                                                                 class="{{ $isStacked ? 'w-6 h-6' : 'w-8 h-8' }} rounded-full border-2 border-white shadow-sm object-cover {{ $isStacked ? 'ring-2 ring-white' : '' }}"
+                                                                 title="{{ $answer->user->name }}">
+                                                        @else
+                                                            @php
+                                                                $initials = '';
+                                                                $nameParts = explode(' ', $answer->user->name);
+                                                                foreach($nameParts as $part) {
+                                                                    $initials .= strtoupper(substr($part, 0, 1));
+                                                                }
+                                                                $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                                                $color = $colors[array_rand($colors)];
+                                                            @endphp
+                                                            <div class="{{ $isStacked ? 'w-6 h-6' : 'w-8 h-8' }} rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm {{ $isStacked ? 'ring-2 ring-white' : '' }}"
+                                                                title="{{ $answer->user->name }}">
+                                                                {{ $initials }}
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                    @if($isStacked && $answers->count() > 5)
+                                                        <span class="ml-2 text-xs text-gray-600 font-bold">+{{ $answers->count() - 5 }}</span>
                                                     @endif
-                                                @endforeach
+                                                </div>
                                             </div>
                                         </label>
                                     @endforeach
@@ -103,28 +113,38 @@
                                         <div class="flex justify-between items-center">
                                             <span>{{ $option->text }}</span>
                                             <div class="flex items-center space-x-2">
-                                                @foreach($question->answers->where('question_option_id', $option->id) as $answer)
-                                                    @if($answer->user->avatar)
-                                                        <img src="{{ $answer->user->avatar_url }}"
-                                                             alt="{{ $answer->user->name }}"
-                                                             class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
-                                                             title="{{ $answer->user->name }}">
-                                                    @else
-                                                        @php
-                                                            $initials = '';
-                                                            $nameParts = explode(' ', $answer->user->name);
-                                                            foreach($nameParts as $part) {
-                                                                $initials .= strtoupper(substr($part, 0, 1));
-                                                            }
-                                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
-                                                            $color = $colors[array_rand($colors)];
-                                                        @endphp
-                                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
-                                                            title="{{ $answer->user->name }}">
-                                                            {{ $initials }}
-                                                        </div>
+                                                @php
+                                                    $answers = $question->answers->where('question_option_id', $option->id);
+                                                    $isStacked = $answers->count() > 2;
+                                                    $allNames = $answers->pluck('user.name')->implode(', ');
+                                                @endphp
+                                                <div class="flex items-center {{ $isStacked ? '-space-x-3' : 'space-x-2' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
+                                                    @foreach($answers->take(5) as $answer)
+                                                        @if($answer->user->avatar)
+                                                            <img src="{{ $answer->user->avatar_url }}"
+                                                                 alt="{{ $answer->user->name }}"
+                                                                 class="{{ $isStacked ? 'w-6 h-6' : 'w-8 h-8' }} rounded-full border-2 border-white shadow-sm object-cover {{ $isStacked ? 'ring-2 ring-white' : '' }}"
+                                                                 title="{{ $answer->user->name }}">
+                                                        @else
+                                                            @php
+                                                                $initials = '';
+                                                                $nameParts = explode(' ', $answer->user->name);
+                                                                foreach($nameParts as $part) {
+                                                                    $initials .= strtoupper(substr($part, 0, 1));
+                                                                }
+                                                                $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                                                $color = $colors[array_rand($colors)];
+                                                            @endphp
+                                                            <div class="{{ $isStacked ? 'w-6 h-6' : 'w-8 h-8' }} rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm {{ $isStacked ? 'ring-2 ring-white' : '' }}"
+                                                                title="{{ $answer->user->name }}">
+                                                                {{ $initials }}
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                    @if($isStacked && $answers->count() > 5)
+                                                        <span class="ml-2 text-xs text-gray-600 font-bold">+{{ $answers->count() - 5 }}</span>
                                                     @endif
-                                                @endforeach
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

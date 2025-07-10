@@ -6,6 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Offside Club') }}</title>
 
+    <!-- Meta tags básicos -->
+    <meta name="description" content="Offside Club: La app que te permite jugar a preguntas y respuestas sobre fútbol con tus amigos. ¡Pon a prueba tus conocimientos futbolísticos!">
+    <meta name="keywords" content="fútbol, preguntas, respuestas, juego, amigos, offside club">
+    <meta name="author" content="Offside Club">
+
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2d3748">
@@ -14,14 +19,24 @@
     <meta name="apple-mobile-web-app-title" content="Offside Club">
     <link rel="apple-touch-icon" href="/images/logo-offside-192x192.png">
     <link rel="icon" type="image/png" href="/images/logo-offside-192x192.png">
-    {{-- agregar meta  --}}
-    <meta property="og:title" content="Offside Club">
-    <meta property="og:description" content="Offside Club la app que te permite jugar a preguntas y respuestas sobre fútbol con tus amigos.">
-    <meta property="og:image" content="/images/logo-offside-192x192.png">
-    <meta property="og:url" content="https://offside.club">
+    <!-- Open Graph Meta Tags para compartir en redes sociales -->
+    <meta property="og:title" content="Offside Club - Preguntas y Respuestas de Fútbol">
+    <meta property="og:description" content="Offside Club: La app que te permite jugar a preguntas y respuestas sobre fútbol con tus amigos. ¡Pon a prueba tus conocimientos futbolísticos!">
+    <meta property="og:image" content="{{ url('/images/logo-offside-512x512.png') }}">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:image:alt" content="Logo de Offside Club">
+    <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="es_ES">
-    <meta property="og:image:width" content="192">
+    <meta property="og:site_name" content="Offside Club">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Offside Club - Preguntas y Respuestas de Fútbol">
+    <meta name="twitter:description" content="Offside Club: La app que te permite jugar a preguntas y respuestas sobre fútbol con tus amigos. ¡Pon a prueba tus conocimientos futbolísticos!">
+    <meta name="twitter:image" content="{{ url('/images/logo-offside-512x512.png') }}">
+    <meta name="twitter:image:alt" content="Logo de Offside Club">
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
