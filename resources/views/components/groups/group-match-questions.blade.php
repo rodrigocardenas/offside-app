@@ -63,7 +63,7 @@
                                                     $isStacked = $answers->count() > 2;
                                                     $allNames = $answers->pluck('user.name')->implode(', ');
                                                 @endphp
-                                                <div class="flex items-center {{ $isStacked ? '-space-x-3' : 'space-x-2' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
+                                                <div class="flex items-center {{ $isStacked ? '-space-x-5' : 'space-x-2' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
                                                     @foreach($answers->take(5) as $answer)
                                                         @if($answer->user->avatar)
                                                             <img src="{{ $answer->user->avatar_url }}"
@@ -118,7 +118,7 @@
                                                     $isStacked = $answers->count() > 2;
                                                     $allNames = $answers->pluck('user.name')->implode(', ');
                                                 @endphp
-                                                <div class="flex items-center {{ $isStacked ? '-space-x-3' : 'space-x-2' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
+                                                <div class="flex items-center {{ $isStacked ? '-space-x-5' : 'space-x-2' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
                                                     @foreach($answers->take(5) as $answer)
                                                         @if($answer->user->avatar)
                                                             <img src="{{ $answer->user->avatar_url }}"
