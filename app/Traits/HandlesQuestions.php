@@ -162,7 +162,7 @@ trait HandlesQuestions
             $this->setQuestionModificationStatus($question);
         });
 
-        return $questions->unique('id')->take(10);
+        return $questions->unique('id')->take(17);
     }
 
     private function setQuestionModificationStatus($question)
