@@ -53,7 +53,7 @@
                             <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-3 group-question-form">
                                 @csrf
                                 <div class="flex flex-col gap-4">
-                                    @foreach($question->options as $option)
+                                    @foreach($question->options->sortBy('text') as $option)
                                         <label class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg cursor-pointer option-btn" style="user-select:none;">
                                             <input type="radio" name="question_option_id" value="{{ $option->id }}" class="hidden" required>
                                             <span class="flex-1 text-center">{{ $option->text }}</span>
@@ -104,7 +104,7 @@
                             </script>
                         @else
                             <div class="space-y-3">
-                                @foreach($question->options as $option)
+                                @foreach($question->options->sortBy('text') as $option)
                                     <div class="p-4 rounded-lg {{
                                         $question->available_until->addHours(4) > now() && !$question->is_disabled
                                             ? ($userHasAnswered->id == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
