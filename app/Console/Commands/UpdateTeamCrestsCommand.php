@@ -31,14 +31,15 @@ class UpdateTeamCrestsCommand extends Command
         ],
         'liga-colombia' => [
             'name' => 'Liga Colombia',
-            'url' => 'https://www.transfermarkt.es/liga-colombia/startseite/wettbewerb/CO1',
+            'url' => 'https://www.transfermarkt.es/liga-dimayor-ii/startseite/wettbewerb/COL1',
             'selector' => '.items tbody tr',
         ],
         'chile-campeonato-nacional' => [
             'name' => 'Campeonato Nacional de Chile',
-            'url' => 'https://www.transfermarkt.es/chile-campeonato-nacional/startseite/wettbewerb/CL1',
+            'url' => 'https://www.transfermarkt.es/primera-division-de-chile/startseite/wettbewerb/CLPD',
             'selector' => '.items tbody tr',
         ]
+
     ];
 
     public function handle()
