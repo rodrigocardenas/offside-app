@@ -27,6 +27,10 @@ class FootballService
             'ligue-1' => 61,
             'champions-league' => 2,
             'world-club-championship' => 15,
+            // colombia
+            'liga-colombia' => 121,
+            // Chile campeonato nacional
+            'chile-campeonato-nacional' => 127,
         ];
     }
 

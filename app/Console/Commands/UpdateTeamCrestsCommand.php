@@ -28,6 +28,16 @@ class UpdateTeamCrestsCommand extends Command
             'name' => 'Champions League',
             'url' => 'https://www.transfermarkt.es/uefa-champions-league/gesamtspielplan/pokalwettbewerb/CL/saison_id/2024',
             'selector' => '.items tbody tr',
+        ],
+        'liga-colombia' => [
+            'name' => 'Liga Colombia',
+            'url' => 'https://www.transfermarkt.es/liga-colombia/startseite/wettbewerb/CO1',
+            'selector' => '.items tbody tr',
+        ],
+        'chile-campeonato-nacional' => [
+            'name' => 'Campeonato Nacional de Chile',
+            'url' => 'https://www.transfermarkt.es/chile-campeonato-nacional/startseite/wettbewerb/CL1',
+            'selector' => '.items tbody tr',
         ]
     ];
 

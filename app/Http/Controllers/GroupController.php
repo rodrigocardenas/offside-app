@@ -35,6 +35,8 @@ class GroupController extends Controller
         'laliga' => 2014,    // La Liga
         'premier' => 2021,   // Premier League
         'world-club-championship' => 15,
+        'liga-colombia' => 121,
+        'chile-campeonato-nacional' => 127,
     ];
     protected $questionTemplates = [
         [
@@ -101,7 +103,11 @@ class GroupController extends Controller
 
     public function create()
     {
-        $competitions = Competition::where('type', 'world-club-championship')->get();
+        $competitions = Competition::whereIn('type', [
+            'world-club-championship',
+            'chile-campeonato-nacional',
+            'liga-colombia',
+        ])->get();
         return view('groups.create', compact('competitions'));
     }
 
@@ -911,6 +917,20 @@ class GroupController extends Controller
             ->limit(20) // Últimas 20 respuestas
             ->get();
 
+        // Obtener los IDs de las preguntas para buscar los votos de todos los usuarios
+        $questionIds = $predictiveAnswers->pluck('question_id')->unique();
+
+        // Obtener todos los votos de todos los usuarios del grupo para esas preguntas
+        $allVotes = Answer::whereIn('question_id', $questionIds)
+            ->whereHas('question', function ($query) use ($group) {
+                $query->where('group_id', $group->id)
+                    ->where('type', 'predictive')
+                    ->where('result_verified_at', '!=', null);
+            })
+            ->with(['user', 'questionOption'])
+            ->get()
+            ->groupBy('question_id');
+
         // Agrupar por fecha para mejor organización
         $groupedAnswers = $predictiveAnswers->groupBy(function ($answer) {
             return $answer->question->football_match ?
@@ -927,6 +947,7 @@ class GroupController extends Controller
                 round(($predictiveAnswers->where('is_correct', true)->count() / $predictiveAnswers->count()) * 100, 1) : 0
         ];
 
-        return view('groups.predictive-results', compact('group', 'groupedAnswers', 'stats'));
+        // Pasar $allVotes a la vista
+        return view('groups.predictive-results', compact('group', 'groupedAnswers', 'stats', 'allVotes'));
     }
 }
