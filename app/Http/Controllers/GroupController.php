@@ -220,7 +220,14 @@ class GroupController extends Controller
             // Enviar notificación de nuevas preguntas si se generaron
             if ($questions->count() > 0) {
                 foreach ($group->users as $user) {
-                    $user->notify(new NewPredictiveQuestionsAvailable($group, $questions->count()));
+                    $yaNotificado = $user->unreadNotifications()
+                        ->where('type', \App\Notifications\NewPredictiveQuestionsAvailable::class)
+                        ->where('data->group_id', $group->id)
+                        ->exists();
+
+                    if (!$yaNotificado) {
+                        $user->notify(new NewPredictiveQuestionsAvailable($group, $questions->count()));
+                    }
                 }
             }
 

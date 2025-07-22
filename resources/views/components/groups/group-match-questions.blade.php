@@ -9,16 +9,16 @@
     <!-- Carrusel de preguntas -->
     <div class="relative">
         <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 pb-4" id="predictiveQuestionsCarousel">
-            @forelse($matchQuestions as $question)
+            @forelse($matchQuestions->where('type', 'predictive') as $question)
                 <div class="snap-center flex-none w-full text-center" id="question{{ $question->id }}">
                     <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6 {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-50' : '' }}">
                         <div class="mb-4">
                             <p class="text-xl text-offside-light flex items-center justify-center">
                                 @if($question->football_match)
                                     @if($question->templateQuestion->homeTeam)
-                                        <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-6 h-6 mr-2" title="{{ $question->templateQuestion->homeTeam?->name }}"> vs <img src="{{ $question->templateQuestion->awayTeam?->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->name }}" title="{{ $question->templateQuestion->awayTeam->name }}" class="w-6 h-6 ml-2">
+                                        <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-6 h-6 mr-2" title="{{ $question->templateQuestion->homeTeam?->name }}" style="width: 50px; height: 50px;"> vs <img src="{{ $question->templateQuestion->awayTeam?->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->name }}" title="{{ $question->templateQuestion->awayTeam->name }}" class="w-6 h-6 ml-2" style="width: 50px; height: 50px;">
                                     @else
-                                        <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-6 h-6 mr-2" title="{{ $question->football_match->homeTeam?->name }}"> vs <img src="{{ $question->football_match->awayTeam?->crest_url }}" title="{{ $question->football_match->awayTeam?->name }}" class="w-6 h-6 ml-2">
+                                        <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-6 h-6 mr-2" title="{{ $question->football_match->homeTeam?->name }}" style="width: 50px; height: 50px;"> vs <img src="{{ $question->football_match->awayTeam?->crest_url }}" title="{{ $question->football_match->awayTeam?->name }}" class="w-6 h-6 ml-2" style="width: 50px; height: 50px;">
                                     @endif
                                 @else
                                     {{ $question->description }}

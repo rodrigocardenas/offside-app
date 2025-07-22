@@ -142,3 +142,31 @@
         </div>
     </div>
 @endif
+
+<!-- Modal Premio/Penitencia -->
+@if($group->created_by === auth()->id())
+<div id="rewardPenaltyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-offside-dark rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Premio o Penitencia</h3>
+            <button id="closeRewardPenaltyModal" class="text-offside-light hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <form id="rewardPenaltyForm">
+            @csrf
+            <div class="mb-4">
+                <label for="reward_or_penalty" class="block text-sm font-medium mb-2">Escribe el premio para el ganador o la penitencia para el perdedor:</label>
+                <textarea id="reward_or_penalty" name="reward_or_penalty" rows="4" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white" required>{{ $group->reward_or_penalty }}</textarea>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" id="cancelRewardPenalty" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-offside-primary text-white rounded-md hover:bg-offside-primary/90">Guardar</button>
+            </div>
+        </form>
+        <div id="rewardPenaltySuccess" class="hidden mt-4 text-green-500 font-bold">¡Guardado correctamente!</div>
+    </div>
+</div>
+@endif
+
+
