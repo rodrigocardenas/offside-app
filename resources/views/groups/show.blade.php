@@ -258,7 +258,7 @@
             var $target = $(hash);
             if($target.length) {
                 // Sube dos niveles: el padre del padre del div con el id
-                var $scrollTo = $target.parent().parent();
+                var $scrollTo = $target.parent().parent().parent();
                 if($scrollTo.length) {
                     $('html, body').animate({
                         scrollTop: $scrollTo.offset().top - 40 // Ajusta el margen si lo necesitas
