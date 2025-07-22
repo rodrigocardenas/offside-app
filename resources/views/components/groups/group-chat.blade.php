@@ -169,4 +169,29 @@
 </div>
 @endif
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const openModalBtn = document.getElementById('openRewardPenaltyModal');
+        const closeModalBtn = document.getElementById('closeRewardPenaltyModal');
+        const cancelBtn = document.getElementById('cancelRewardPenalty');
+        const modal = document.getElementById('rewardPenaltyModal');
+
+        if (openModalBtn && modal) {
+            openModalBtn.addEventListener('click', function() {
+                modal.classList.remove('hidden');
+            });
+        }
+        if (closeModalBtn && modal) {
+            closeModalBtn.addEventListener('click', function() {
+                modal.classList.add('hidden');
+            });
+        }
+        if (cancelBtn && modal) {
+            cancelBtn.addEventListener('click', function() {
+                modal.classList.add('hidden');
+            });
+        }
+    });
+</script>
+
 
