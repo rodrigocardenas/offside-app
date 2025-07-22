@@ -121,7 +121,7 @@
         <div class="flex justify-center mt-2 mb-2">
             <div class="px-4 py-1 bg-offside-primary bg-opacity-40 text-white rounded-lg text-center">
                 <span class="font-bold text-offside-secondary">Recompensa/Penitencia:</span><br>
-                <span>{{ $group->reward_or_penalty }} <button id="openRewardPenaltyModal" class=" text-white rounded-lg hover:bg-offside-secondary transition-colors focus:outline-none">
+                <span class="reward-or-penalty-text">{{ $group->reward_or_penalty }}</span> <button id="openRewardPenaltyModal" class=" text-white rounded-lg hover:bg-offside-secondary transition-colors focus:outline-none">
                         <i class="fa-solid fa-edit ml-2"></i>
                     </button>
                 </span>
@@ -138,7 +138,7 @@
     <div class="flex justify-center mt-2 mb-2">
         <div class="px-4 py-2 bg-offside-primary text-white rounded-lg text-center">
             <span class="font-bold text-offside-secondary">Recompensa/Penitencia:</span><br>
-            <span>{{ $group->reward_or_penalty }}</span>
+            <span class="reward-or-penalty-text">{{ $group->reward_or_penalty }}</span>
         </div>
     </div>
 @endif
@@ -189,6 +189,48 @@
         if (cancelBtn && modal) {
             cancelBtn.addEventListener('click', function() {
                 modal.classList.add('hidden');
+            });
+        }
+
+        // Lógica para guardar la recompensa/penitencia por AJAX
+        const rewardPenaltyForm = document.getElementById('rewardPenaltyForm');
+        const rewardPenaltyModal = document.getElementById('rewardPenaltyModal');
+        const rewardPenaltySuccess = document.getElementById('rewardPenaltySuccess');
+        const rewardOrPenaltyTextarea = document.getElementById('reward_or_penalty');
+
+        if (rewardPenaltyForm) {
+            rewardPenaltyForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const groupId = {{ $group->id }};
+                const url = `/groups/${groupId}/reward-or-penalty`;
+                const data = {
+                    reward_or_penalty: rewardOrPenaltyTextarea.value,
+                    _token: document.querySelector('meta[name=\"csrf-token\"]').content
+                };
+
+                // Usando jQuery para AJAX
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: data,
+                    success: function(response) {
+                        if (response.success) {
+                            rewardPenaltySuccess.classList.remove('hidden');
+                            setTimeout(() => {
+                                rewardPenaltySuccess.classList.add('hidden');
+                                rewardPenaltyModal.classList.add('hidden');
+                                // Actualizar el texto en la vista sin recargar
+                                document.querySelectorAll('.reward-or-penalty-text').forEach(el => {
+                                    el.textContent = response.reward_or_penalty;
+                                });
+                            }, 1200);
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Error al guardar. Intenta de nuevo.');
+                    }
+                });
             });
         }
     });
