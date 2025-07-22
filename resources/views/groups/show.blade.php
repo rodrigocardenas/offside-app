@@ -253,6 +253,27 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
+        var hash = window.location.hash;
+        if(hash && /^#question\d+$/.test(hash)) {
+            var $target = $(hash);
+            if($target.length) {
+                // Sube dos niveles: el padre del padre del div con el id
+                var $scrollTo = $target.parent().parent();
+                if($scrollTo.length) {
+                    $('html, body').animate({
+                        scrollTop: $scrollTo.offset().top - 40 // Ajusta el margen si lo necesitas
+                    }, 600);
+                } else {
+                    $('html, body').animate({
+                        scrollTop: $target.offset().top - 40
+                    }, 600);
+                }
+            }
+        }
+    });
+</script>
+<script>
+    $(document).ready(function() {
         // Abrir modal
         $('#openFeedbackModal').on('click', function(e) {
             console.log('Open feedback modal clicked');
