@@ -185,6 +185,26 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Detalle de votos de todos los usuarios -->
+                                <div class="mt-4 bg-offside-dark bg-opacity-40 rounded p-3">
+                                    <h5 class="text-xs font-semibold text-offside-secondary mb-2">Votos de los miembros:</h5>
+                                    <ul>
+                                        @foreach(($allVotes[$answer->question_id] ?? collect()) as $vote)
+                                            <li class="flex items-center mb-1">
+                                                <span class="font-medium text-white mr-2">{{ $vote->user->name }}</span>
+                                                <span class="text-xs px-2 py-0.5 rounded-full {{ $vote->is_correct ? 'bg-green-100 text-green-800' : 'bg-offside-primary text-white' }}">
+                                                    {{ $vote->questionOption->text }}
+                                                </span>
+                                                @if($vote->is_correct)
+                                                    <svg class="h-3 w-3 text-green-500 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                @endif
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
                             </div>
                         @endforeach
                     </div>
