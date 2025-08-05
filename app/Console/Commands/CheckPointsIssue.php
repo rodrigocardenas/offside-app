@@ -49,7 +49,7 @@ class CheckPointsIssue extends Command
             $pendingQuestions = Question::whereHas('answers')
                 ->whereNull('result_verified_at')
                 ->whereHas('football_match', function($query) {
-                    $query->whereIn('status', ['FINISHED', 'Match Finished']);
+                    $query->where('created_at', '>', '2025-08-01')->whereIn('status', ['FINISHED', 'Match Finished']);
                 })
                 ->with(['answers.user', 'answers.questionOption', 'options', 'football_match'])
                 ->get();
