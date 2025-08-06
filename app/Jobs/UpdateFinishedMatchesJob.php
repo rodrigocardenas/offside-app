@@ -28,7 +28,7 @@ class UpdateFinishedMatchesJob implements ShouldQueue
         // Obtener partidos que deberían haber terminado (fecha + 2 horas de margen)
         $finishedMatches = FootballMatch::whereNotIn('status', ['FINISHED', 'Match Finished'])
             ->where('date', '<=', now()->subHours(2))
-            ->where('date', '>=', now()->subHours(600))
+            ->where('date', '>=', now()->subWeeks(4))
             ->pluck('id')
             ->toArray();
 
