@@ -48,7 +48,7 @@ class LoginController extends Controller
 
         Auth::login($user);
 
-        return redirect()->intended(route('groups.index'))
+        return redirect()->intended('/')
             ->with('success', '¡Bienvenido ' . $user->name . '! Tu ID completo es: ' . $user->unique_id);
     }
 

@@ -25,10 +25,6 @@ use App\Http\Controllers\TestAvatarController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 // Rutas de autenticación
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -139,4 +135,9 @@ Route::post('/test-avatar-upload', [TestAvatarController::class, 'testUpload']);
 Route::get('/test-avatar', function() {
     return view('test-avatar');
 });
+
+// Ruta para limpiar cache del service worker
+Route::get('/clear-cache', function() {
+    return view('clear-cache');
+})->name('clear-cache');
 

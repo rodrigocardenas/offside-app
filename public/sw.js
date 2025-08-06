@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offside-club-v1.0.4';
+const CACHE_NAME = 'offside-club-v1.0.5';
 const ASSETS_TO_CACHE = [
   '/',
   '/login'
@@ -57,67 +57,23 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Sistema de bloqueo de solicitudes duplicadas
-const pendingRequests = new Map();
-
 // Estrategia de red con caché
 self.addEventListener('fetch', function(event) {
-  // Manejar solicitudes POST
+  // Permitir todas las solicitudes POST sin interferencia
   if (event.request.method === 'POST') {
-    // Excluir rutas de preguntas del sistema de bloqueo de duplicados
-    if (event.request.url.includes('/questions/') && event.request.url.includes('/answer')) {
-      // Para formularios de preguntas, permitir el envío normal sin bloqueo
-      event.respondWith(fetch(event.request));
-      return;
-    }
-
-    const requestId = event.request.url + event.request.headers.get('X-CSRF-TOKEN');
-
-    // Si hay una solicitud pendiente con el mismo ID, bloquearla
-    if (pendingRequests.has(requestId)) {
-      console.log('[Service Worker] Bloqueando solicitud POST duplicada:', requestId);
-      event.respondWith(
-        new Response(JSON.stringify({
-          error: 'Solicitud duplicada detectada'
-        }), {
-          status: 429,
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-      );
-      return;
-    }
-
-    // Marcar la solicitud como pendiente
-    pendingRequests.set(requestId, true);
-
-    // Limpiar después de 5 segundos
-    setTimeout(() => {
-      pendingRequests.delete(requestId);
-    }, 5000);
-
-    // Continuar con la solicitud original
-    event.respondWith(
-      fetch(event.request.clone())
-        .then(response => {
-          pendingRequests.delete(requestId);
-          return response;
-        })
-        .catch(error => {
-          pendingRequests.delete(requestId);
-          throw error;
-        })
-    );
+    event.respondWith(fetch(event.request));
     return;
   }
 
-  // No cachear rutas dinámicas
+  // No cachear rutas dinámicas y de autenticación
   if (event.request.url.includes('/groups') ||
       event.request.url.includes('/predictions') ||
       event.request.url.includes('/profile') ||
-      event.request.url.includes('/ranking')) {
-    return fetch(event.request);
+      event.request.url.includes('/ranking') ||
+      event.request.url.includes('/login') ||
+      event.request.url.includes('/logout')) {
+    event.respondWith(fetch(event.request));
+    return;
   }
 
   event.respondWith(
