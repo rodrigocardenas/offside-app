@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class LoginController extends Controller
@@ -48,7 +49,12 @@ class LoginController extends Controller
 
         Auth::login($user);
 
-        return redirect()->intended('/')
+        // Log para debug
+        Log::info('Usuario autenticado: ' . $user->name . ' (ID: ' . $user->id . ')');
+        Log::info('Redirigiendo a: /groups');
+
+        // Redirección simple y directa
+        return redirect('/groups')
             ->with('success', '¡Bienvenido ' . $user->name . '! Tu ID completo es: ' . $user->unique_id);
     }
 
