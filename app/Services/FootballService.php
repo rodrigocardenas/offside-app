@@ -527,9 +527,9 @@ class FootballService
                         'faltas' => $this->buscarEstadistica($stats, 'Fouls'),
                         'tarjetas_amarillas' => $this->buscarEstadistica($stats, 'Yellow Cards'),
                         'tarjetas_rojas' => $this->buscarEstadistica($stats, 'Red Cards'),
-                        'offsides' => $this->buscarEstadistica($stats, 'Offsides'),
-                        'ataques' => $this->buscarEstadistica($stats, 'Attacks'),
-                        'ataques_peligrosos' => $this->buscarEstadistica($stats, 'Dangerous Attacks'),
+                        // 'offsides' => $this->buscarEstadistica($stats, 'Offsides'),
+                        // 'ataques' => $this->buscarEstadistica($stats, 'Attacks'),
+                        // 'ataques_peligrosos' => $this->buscarEstadistica($stats, 'Dangerous Attacks'),
                     ];
                 }
             }
