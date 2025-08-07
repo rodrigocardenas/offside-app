@@ -33,6 +33,7 @@ class UpdateFinishedMatchesJob implements ShouldQueue
             ->toArray();
 
         Log::info('Partidos que deberían haber terminado encontrados: ' . count($finishedMatches));
+        Log::info($finishedMatches);
 
         if (empty($finishedMatches)) {
             Log::info('No hay partidos para procesar');

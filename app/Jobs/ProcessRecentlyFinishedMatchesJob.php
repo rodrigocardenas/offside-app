@@ -30,11 +30,12 @@ class ProcessRecentlyFinishedMatchesJob implements ShouldQueue
 
             // 2. Verificar resultados de preguntas (después de actualizar partidos)
             Log::info('Despachando job para verificar resultados de preguntas');
-            VerifyQuestionResultsJob::dispatch()->delay(now()->addMinutes(2));
+
+            // VerifyQuestionResultsJob::dispatch()->delay(now()->addMinutes(2));
 
             // 3. Crear nuevas preguntas predictivas (al final)
-            Log::info('Despachando job para crear nuevas preguntas predictivas');
-            CreatePredictiveQuestionsJob::dispatch()->delay(now()->addMinutes(5));
+            // Log::info('Despachando job para crear nuevas preguntas predictivas');
+            // CreatePredictiveQuestionsJob::dispatch()->delay(now()->addMinutes(5));
 
             Log::info('Jobs despachados correctamente');
 
