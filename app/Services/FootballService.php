@@ -202,6 +202,111 @@ class FootballService
         usleep($delay);
     }
 
+            /**
+     * Extrae el fixtureId del external_id almacenado
+     * El external_id puede tener diferentes formatos:
+     * 1. Número directo (fixture ID): "123456"
+     * 2. Formato con equipos y fecha: "Bucaramanga_Once Caldas_2025-07-22T20:00:00+00:00"
+     */
+    private function extraerFixtureIdDelExternalId($externalId)
+    {
+        Log::info("Extrayendo fixtureId del external_id: $externalId");
+
+        // Si el external_id es directamente un número (fixture ID), retornarlo
+        if (is_numeric($externalId)) {
+            Log::info("External_id es un número directo: $externalId");
+            return $externalId;
+        }
+
+        // Si el external_id tiene el formato con fecha, necesitamos buscar el fixture
+        // por los nombres de equipos y fecha
+        $parts = explode('_', $externalId);
+        if (count($parts) >= 3) {
+            $homeTeam = $parts[0];
+            $awayTeam = $parts[1];
+            $dateString = $parts[2];
+
+            Log::info("Parsing external_id:", [
+                'home_team' => $homeTeam,
+                'away_team' => $awayTeam,
+                'date_string' => $dateString
+            ]);
+
+            try {
+                // Convertir la fecha a formato legible
+                $date = \Carbon\Carbon::parse($dateString);
+                $season = $date->year;
+
+                Log::info("Fecha parseada:", [
+                    'date' => $date->toISOString(),
+                    'season' => $season
+                ]);
+
+                // Intentar con diferentes competencias en orden de prioridad
+                $competitions = ['liga-colombia', 'champions-league', 'premier-league', 'la-liga'];
+
+                foreach ($competitions as $competition) {
+                    Log::info("Intentando buscar fixture en competencia: $competition");
+                    $fixtureId = $this->buscarFixtureId($competition, $season, $homeTeam, $awayTeam);
+                    if ($fixtureId) {
+                        Log::info("Fixture encontrado en $competition: $fixtureId");
+                        return $fixtureId;
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error("Error al parsear fecha del external_id: " . $e->getMessage());
+            }
+        } else {
+            Log::warning("Formato de external_id no reconocido: $externalId");
+        }
+
+        return null;
+    }
+
+    /**
+     * Obtiene directamente un fixture usando su ID
+     * Método más eficiente que buscarFixtureId
+     */
+    private function obtenerFixtureDirecto($fixtureId)
+    {
+        Log::info("Obteniendo fixture directo con ID: $fixtureId");
+
+        $maxRetries = 3;
+        $delaySeconds = 2;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            $this->applyRateLimitDelay(1, 2);
+
+            $response = Http::withHeaders([
+                'X-RapidAPI-Key' => $this->apiKey,
+                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            ])->get($this->baseUrl . 'fixtures', [
+                'id' => $fixtureId
+            ]);
+
+            if ($response->successful()) {
+                $fixture = $response->json('response.0');
+                if ($fixture) {
+                    Log::info("Fixture obtenido exitosamente");
+                    return $fixture;
+                }
+            }
+
+            if (str_contains($response->body(), 'Too many requests')) {
+                Log::warning("Rate limit alcanzado al obtener fixture directo (attempt $attempt). Esperando $delaySeconds segundos...");
+                if ($attempt < $maxRetries) {
+                    sleep($delaySeconds);
+                    $delaySeconds *= 2;
+                }
+            } else {
+                Log::error("Error al obtener fixture directo (attempt $attempt): " . $response->body());
+                break;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Busca el fixtureId de un partido terminado por nombres de equipos, liga y temporada
      */
@@ -483,72 +588,38 @@ class FootballService
             return null;
         }
 
-        // 2. Obtener datos necesarios del registro
-        $competition = $match->league ?? 'champions-league'; // Usar el campo league
-        $season = 2025; // Temporada actual
-        $homeTeam = $match->home_team;
-        $awayTeam = $match->away_team;
+        // 2. Verificar si tiene external_id
+        if (!$match->external_id) {
+            Log::error("El partido no tiene external_id configurado", [
+                'match_id' => $match->id,
+                'home_team' => $match->home_team,
+                'away_team' => $match->away_team
+            ]);
+            return null;
+        }
 
-        Log::info("Datos del partido:", [
+        Log::info("Actualizando partido usando external_id:", [
             'id' => $match->id,
-            'competition' => $competition,
-            'season' => $season,
-            'home_team' => $homeTeam,
-            'away_team' => $awayTeam,
+            'external_id' => $match->external_id,
+            'home_team' => $match->home_team,
+            'away_team' => $match->away_team,
             'date' => $match->date,
             'status' => $match->status
         ]);
 
-        if (!$competition || !$season || !$homeTeam || !$awayTeam) {
-            Log::error("Datos faltantes para buscar fixture");
-            return null;
-        }
-
-        // 3. Buscar el fixtureId en la API
-        $fixtureId = $this->buscarFixtureId($competition, $season, $homeTeam, $awayTeam);
-        Log::info('Fixture ID: ' . $fixtureId);
+        // 3. Extraer el fixtureId del external_id
+        $fixtureId = $this->extraerFixtureIdDelExternalId($match->external_id);
+        Log::info('Fixture ID extraído: ' . $fixtureId);
         if (!$fixtureId) {
             return null;
         }
 
-        // 4. Obtener los datos del fixture y actualizar el registro
-        $maxRetries = 3;
-        $delaySeconds = 2;
-
-        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            // Aplicar delay aleatorio antes de cada request
-            $this->applyRateLimitDelay(1, 2);
-
-            $response = Http::withHeaders([
-                'X-RapidAPI-Key' => $this->apiKey,
-                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
-            ])->get($this->baseUrl . 'fixtures', [
-                'id' => $fixtureId
-            ]);
-
-            Log::info("Response (attempt $attempt): " . $response->body());
-
-            if ($response->successful()) {
-                break;
-            }
-
-            if (str_contains($response->body(), 'Too many requests')) {
-                Log::warning("Rate limit alcanzado al obtener fixture (attempt $attempt). Esperando $delaySeconds segundos...");
-                if ($attempt < $maxRetries) {
-                    sleep($delaySeconds);
-                    $delaySeconds *= 2;
-                }
-            } else {
-                Log::error("Error al obtener fixture (attempt $attempt): " . $response->body());
-                break;
-            }
+        // 4. Obtener los datos del fixture directamente
+        $fixture = $this->obtenerFixtureDirecto($fixtureId);
+        if (!$fixture) {
+            Log::error("No se pudo obtener el fixture con ID: $fixtureId");
+            return null;
         }
-
-        if ($response->successful()) {
-            $fixture = $response->json('response.0');
-            if (!$fixture) {
-                return null;
-            }
 
             // Procesar eventos como string legible
             $eventos = [];
@@ -620,7 +691,4 @@ class FootballService
             ]);
             return $match;
         }
-
-        return null;
     }
-}
