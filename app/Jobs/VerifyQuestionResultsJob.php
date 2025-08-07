@@ -57,27 +57,71 @@ class VerifyQuestionResultsJob implements ShouldQueue
 
                 // Convertir las respuestas correctas de texto a IDs de opciones
                 $correctOptionIds = [];
+                $correctOptions = [];
+
+                Log::info('Respuesta de OpenAI:', [
+                    'question_id' => $question->id,
+                    'openai_response' => $correctAnswers->toArray(),
+                    'available_options' => $question->options->pluck('text')->toArray()
+                ]);
+
                 foreach ($correctAnswers as $correctAnswerText) {
-                    $option = $question->options->first(function($option) use ($correctAnswerText) {
-                        return stripos($option->text, $correctAnswerText) !== false ||
-                               stripos($correctAnswerText, $option->text) !== false;
+                    // Buscar coincidencias exactas primero
+                    $exactMatch = $question->options->first(function($option) use ($correctAnswerText) {
+                        return strtolower(trim($option->text)) === strtolower(trim($correctAnswerText));
                     });
-                    if ($option) {
-                        $correctOptionIds[] = $option->id;
+
+                    if ($exactMatch) {
+                        $correctOptionIds[] = $exactMatch->id;
+                        $correctOptions[] = $exactMatch->text;
+                        Log::info("Coincidencia exacta encontrada: '{$exactMatch->text}'");
+                        continue;
+                    }
+
+                    // Si no hay coincidencia exacta, buscar coincidencias parciales
+                    $partialMatch = $question->options->first(function($option) use ($correctAnswerText) {
+                        return stripos(trim($option->text), trim($correctAnswerText)) !== false ||
+                               stripos(trim($correctAnswerText), trim($option->text)) !== false;
+                    });
+
+                    if ($partialMatch) {
+                        $correctOptionIds[] = $partialMatch->id;
+                        $correctOptions[] = $partialMatch->text;
+                        Log::info("Coincidencia parcial encontrada: '{$partialMatch->text}' para '{$correctAnswerText}'");
+                    } else {
+                        Log::warning("No se encontró coincidencia para: '{$correctAnswerText}'");
                     }
                 }
 
                 Log::info('Verificación completada', [
                     'question_id' => $question->id,
                     'correct_answers_text' => $correctAnswers->toArray(),
+                    'correct_options_found' => $correctOptions,
                     'correct_option_ids' => $correctOptionIds
                 ]);
 
-                // Actualizar las respuestas correctas
+                // Actualizar las opciones correctas en question_options
+                foreach ($question->options as $option) {
+                    $wasCorrect = $option->is_correct;
+                    $option->is_correct = in_array($option->id, $correctOptionIds);
+                    $option->save();
+
+                    if ($wasCorrect !== $option->is_correct) {
+                        Log::info("Opción actualizada: '{$option->text}' - is_correct: " . ($option->is_correct ? 'true' : 'false'));
+                    }
+                }
+
+                // Actualizar las respuestas correctas en answers
+                $updatedAnswers = 0;
                 foreach ($answers as $answer) {
+                    $wasCorrect = $answer->is_correct;
                     $answer->is_correct = in_array($answer->option_id, $correctOptionIds);
                     $answer->points_earned = $answer->is_correct ? 300 : 0;
                     $answer->save();
+
+                    if ($wasCorrect !== $answer->is_correct) {
+                        $updatedAnswers++;
+                    }
                 }
 
                 // Marcar la pregunta como verificada
@@ -86,7 +130,10 @@ class VerifyQuestionResultsJob implements ShouldQueue
 
                 Log::info('Pregunta verificada correctamente: ' . $question->id, [
                     'match_date' => $match->date,
-                    'match_teams' => $match->home_team . ' vs ' . $match->away_team
+                    'match_teams' => $match->home_team . ' vs ' . $match->away_team,
+                    'correct_options' => $correctOptions,
+                    'answers_updated' => $updatedAnswers,
+                    'total_answers' => $answers->count()
                 ]);
 
             } catch (\Exception $e) {

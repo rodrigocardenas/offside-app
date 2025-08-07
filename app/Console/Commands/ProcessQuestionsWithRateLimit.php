@@ -99,19 +99,53 @@ class ProcessQuestionsWithRateLimit extends Command
                         ]
                     );
 
-                    // Convertir las respuestas correctas de texto a IDs de opciones
+                                        // Convertir las respuestas correctas de texto a IDs de opciones
                     $correctOptionIds = [];
+                    $correctOptions = [];
+
+                    $this->info("  Respuesta de OpenAI: " . implode(', ', $correctAnswers->toArray()));
+                    $this->info("  Opciones disponibles: " . implode(', ', $question->options->pluck('text')->toArray()));
+
                     foreach ($correctAnswers as $correctAnswerText) {
-                        $option = $question->options->first(function($option) use ($correctAnswerText) {
-                            return stripos($option->text, $correctAnswerText) !== false ||
-                                   stripos($correctAnswerText, $option->text) !== false;
+                        // Buscar coincidencias exactas primero
+                        $exactMatch = $question->options->first(function($option) use ($correctAnswerText) {
+                            return strtolower(trim($option->text)) === strtolower(trim($correctAnswerText));
                         });
-                        if ($option) {
-                            $correctOptionIds[] = $option->id;
+
+                        if ($exactMatch) {
+                            $correctOptionIds[] = $exactMatch->id;
+                            $correctOptions[] = $exactMatch->text;
+                            $this->info("  ✅ Coincidencia exacta: '{$exactMatch->text}'");
+                            continue;
+                        }
+
+                        // Si no hay coincidencia exacta, buscar coincidencias parciales
+                        $partialMatch = $question->options->first(function($option) use ($correctAnswerText) {
+                            return stripos(trim($option->text), trim($correctAnswerText)) !== false ||
+                                   stripos(trim($correctAnswerText), trim($option->text)) !== false;
+                        });
+
+                        if ($partialMatch) {
+                            $correctOptionIds[] = $partialMatch->id;
+                            $correctOptions[] = $partialMatch->text;
+                            $this->info("  🔍 Coincidencia parcial: '{$partialMatch->text}' para '{$correctAnswerText}'");
+                        } else {
+                            $this->warn("  ⚠️ No se encontró coincidencia para: '{$correctAnswerText}'");
                         }
                     }
 
-                    // Actualizar las respuestas correctas
+                    // Actualizar las opciones correctas en question_options
+                    foreach ($question->options as $option) {
+                        $wasCorrect = $option->is_correct;
+                        $option->is_correct = in_array($option->id, $correctOptionIds);
+                        $option->save();
+
+                        if ($wasCorrect !== $option->is_correct) {
+                            $this->info("  📝 Opción actualizada: '{$option->text}' - " . ($option->is_correct ? '✅ Correcta' : '❌ Incorrecta'));
+                        }
+                    }
+
+                    // Actualizar las respuestas correctas en answers
                     $updatedAnswers = 0;
                     foreach ($answers as $answer) {
                         $wasCorrect = $answer->is_correct;
