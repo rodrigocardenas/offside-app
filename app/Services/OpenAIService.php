@@ -103,46 +103,87 @@ class OpenAIService
             return "{$q['title']} (Opciones: " . implode(", ", $q['options']) . ")";
         })->join("\n");
 
-        $response = OpenAI::chat()->create([
-            'model' => 'gpt-4',
-            'messages' => [
-                ['role' => 'system', 'content' => 'Actúa como un verificador de preguntas de fútbol. Tu trabajo es determinar las respuestas correctas a preguntas sobre un partido basándote en la información del resultado. Devuelve SOLO el nombre de la opción correcta, sin explicaciones adicionales.'],
-                ['role' => 'user', 'content' => "Para el partido {$match['homeTeam']} vs {$match['awayTeam']} (Resultado: {$match['score']}, Eventos: {$match['events']}), verifica la respuesta correcta para esta pregunta:\n{$questionsText}"],
-            ],
-        ]);
+        $maxRetries = 5;
+        $baseDelay = 2;
 
-        $content = $response->choices[0]->message->content;
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                Log::info("Intento {$attempt} de verificación con OpenAI", [
+                    'match' => $match['homeTeam'] . ' vs ' . $match['awayTeam']
+                ]);
 
-        // Limpiar la respuesta y extraer solo el texto de la opción correcta
-        $content = trim($content);
+                $response = OpenAI::chat()->create([
+                    'model' => 'gpt-4',
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'Actúa como un verificador de preguntas de fútbol. Tu trabajo es determinar las respuestas correctas a preguntas sobre un partido basándote en la información del resultado. Devuelve SOLO el nombre de la opción correcta, sin explicaciones adicionales.'],
+                        ['role' => 'user', 'content' => "Para el partido {$match['homeTeam']} vs {$match['awayTeam']} (Resultado: {$match['score']}, Eventos: {$match['events']}), verifica la respuesta correcta para esta pregunta:\n{$questionsText}"],
+                    ],
+                ]);
 
-        // Si la respuesta es JSON, intentar decodificarla
-        if (is_json($content)) {
-            $results = json_decode($content, true);
-            if (isset($results['respuestas']) && is_array($results['respuestas'])) {
-                return collect($results['respuestas']);
-            }
-        }
+                $content = $response->choices[0]->message->content;
 
-        // Si no es JSON o no tiene el formato esperado, tratar como texto plano
-        // Buscar la opción correcta en el texto de respuesta
-        $correctOptions = [];
-        foreach ($questions as $question) {
-            foreach ($question['options'] as $option) {
-                if (stripos($content, $option) !== false) {
-                    $correctOptions[] = $option;
-                    break; // Solo tomar la primera opción que coincida
+                // Limpiar la respuesta y extraer solo el texto de la opción correcta
+                $content = trim($content);
+
+                // Si la respuesta es JSON, intentar decodificarla
+                if (is_json($content)) {
+                    $results = json_decode($content, true);
+                    if (isset($results['respuestas']) && is_array($results['respuestas'])) {
+                        Log::info('Verificación exitosa en intento ' . $attempt, [
+                            'match' => $match['homeTeam'] . ' vs ' . $match['awayTeam'],
+                            'openai_response' => $content
+                        ]);
+                        return collect($results['respuestas']);
+                    }
+                }
+
+                // Si no es JSON o no tiene el formato esperado, tratar como texto plano
+                // Buscar la opción correcta en el texto de respuesta
+                $correctOptions = [];
+                foreach ($questions as $question) {
+                    foreach ($question['options'] as $option) {
+                        if (stripos($content, $option) !== false) {
+                            $correctOptions[] = $option;
+                            break; // Solo tomar la primera opción que coincida
+                        }
+                    }
+                }
+
+                Log::info('Verificación exitosa en intento ' . $attempt, [
+                    'match' => $match['homeTeam'] . ' vs ' . $match['awayTeam'],
+                    'openai_response' => $content,
+                    'correct_options_found' => $correctOptions
+                ]);
+
+                return collect($correctOptions);
+
+            } catch (\Exception $e) {
+                $errorMessage = $e->getMessage();
+                Log::warning("Error en intento {$attempt} de verificación con OpenAI: " . $errorMessage);
+
+                // Si es rate limit, esperar más tiempo
+                if (str_contains($errorMessage, 'rate limit') || str_contains($errorMessage, 'TPM')) {
+                    $delay = $baseDelay * pow(2, $attempt - 1); // Exponential backoff
+                    Log::info("Rate limit detectado. Esperando {$delay} segundos antes del siguiente intento...");
+                    sleep($delay);
+                } else {
+                    // Para otros errores, esperar un tiempo fijo
+                    sleep($baseDelay);
+                }
+
+                // Si es el último intento, lanzar la excepción
+                if ($attempt >= $maxRetries) {
+                    Log::error("Se alcanzó el máximo de intentos para verificación con OpenAI", [
+                        'match' => $match['homeTeam'] . ' vs ' . $match['awayTeam'],
+                        'error' => $errorMessage
+                    ]);
+                    throw $e;
                 }
             }
         }
 
-        Log::info('Verificación de resultados', [
-            'match' => $match['homeTeam'] . ' vs ' . $match['awayTeam'],
-            'openai_response' => $content,
-            'correct_options_found' => $correctOptions
-        ]);
-
-        return collect($correctOptions);
+        // Esto no debería ejecutarse, pero por si acaso
+        return collect();
     }
 
     public function generateQuestion($match)

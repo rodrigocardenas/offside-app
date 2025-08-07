@@ -681,7 +681,7 @@ class FootballService
             $match->update([
                 'home_team' => $fixture['teams']['home']['name'] ?? null,
                 'away_team' => $fixture['teams']['away']['name'] ?? null,
-                'date' => $fixture['fixture']['date'] ?? null,
+                // 'date' => $fixture['fixture']['date'] ?? null,
                 'status' => $fixture['fixture']['status']['long'] ?? null,
                 'score_home' => $fixture['goals']['home'] ?? null,
                 'score_away' => $fixture['goals']['away'] ?? null,
