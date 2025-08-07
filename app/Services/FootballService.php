@@ -569,7 +569,7 @@ class FootballService
             $equipoStats[] = "Tiros: {$stats['tiros_totales']} ({$stats['tiros_a_gol']} a gol)";
             $equipoStats[] = "Faltas: {$stats['faltas']}";
             $equipoStats[] = "Tarjetas: 🟨{$stats['tarjetas_amarillas']} 🟥{$stats['tarjetas_rojas']}";
-            $equipoStats[] = "Offsides: {$stats['offsides']}";
+            // $equipoStats[] = "Offsides: {$stats['offsides']}";
 
             $formato[] = "{$equipo}: " . implode(', ', $equipoStats);
         }
