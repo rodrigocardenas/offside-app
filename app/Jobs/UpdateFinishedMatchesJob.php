@@ -29,6 +29,7 @@ class UpdateFinishedMatchesJob implements ShouldQueue
         $finishedMatches = FootballMatch::whereNotIn('status', ['FINISHED', 'Match Finished'])
             ->where('date', '<=', now()->subHours(2))
             ->where('date', '>=', now()->subWeeks(4))
+            ->where('league', 'liga-colombia')
             ->pluck('id')
             ->toArray();
 
