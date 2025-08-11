@@ -280,7 +280,7 @@ class FootballService
         usleep($delay);
     }
 
-    /**
+        /**
      * Determina la temporada correcta basada en la fecha del partido
      * Para la mayoría de ligas europeas, la temporada va de agosto a julio
      */
@@ -306,15 +306,52 @@ class FootballService
         return $year;
     }
 
+    /**
+     * Determina si una liga es latinoamericana (con dos torneos por año)
+     */
+    private function isLatinAmericanLeague($competition)
+    {
+        $latinAmericanLeagues = [
+            'liga-colombia',
+            'chile-campeonato-nacional',
+            'liga-argentina',
+            'liga-mexicana',
+            'liga-brasilera'
+        ];
+
+        return in_array($competition, $latinAmericanLeagues);
+    }
+
+    /**
+     * Determina el torneo (Apertura/Clausura) basado en la fecha
+     * Para ligas latinoamericanas que tienen dos torneos por año
+     */
+    private function getTournamentType($matchDate)
+    {
+        if (is_string($matchDate)) {
+            $matchDate = \Carbon\Carbon::parse($matchDate);
+        }
+
+        $month = $matchDate->month;
+
+        // Apertura: generalmente de enero/febrero a junio/julio
+        // Clausura: generalmente de julio/agosto a diciembre
+        if ($month >= 1 && $month <= 6) {
+            return 'Apertura';
+        } else {
+            return 'Clausura';
+        }
+    }
+
             /**
      * Extrae el fixtureId del external_id almacenado
      * El external_id puede tener diferentes formatos:
      * 1. Número directo (fixture ID): "123456"
      * 2. Formato con equipos y fecha: "Bucaramanga_Once Caldas_2025-07-22T20:00:00+00:00"
      */
-    private function extraerFixtureIdDelExternalId($externalId)
+    public function extraerFixtureIdDelExternalId($externalId, $matchDate = null)
     {
-        Log::info("Extrayendo fixtureId del external_id: $externalId");
+        Log::info("Extrayendo fixtureId del external_id: $externalId, fecha del partido: $matchDate");
 
         // Si el external_id es directamente un número (fixture ID), retornarlo
         if (is_numeric($externalId)) {
@@ -346,12 +383,15 @@ class FootballService
                     'season' => $season
                 ]);
 
+                // Usar la fecha del partido si está disponible, sino usar la fecha del external_id
+                $searchDate = $matchDate ? $matchDate : $date->format('Y-m-d');
+
                 // Intentar con diferentes competencias en orden de prioridad
                 $competitions = ['liga-colombia', 'champions-league', 'premier-league', 'la-liga'];
 
                 foreach ($competitions as $competition) {
-                    Log::info("Intentando buscar fixture en competencia: $competition");
-                    $fixtureId = $this->buscarFixtureId($competition, $season, $homeTeam, $awayTeam);
+                    Log::info("Intentando buscar fixture en competencia: $competition con fecha: $searchDate");
+                    $fixtureId = $this->buscarFixtureId($competition, $season, $homeTeam, $awayTeam, $searchDate);
                     if ($fixtureId) {
                         Log::info("Fixture encontrado en $competition: $fixtureId");
                         return $fixtureId;
@@ -371,7 +411,7 @@ class FootballService
      * Obtiene directamente un fixture usando su ID
      * Método más eficiente que buscarFixtureId
      */
-    private function obtenerFixtureDirecto($fixtureId)
+    public function obtenerFixtureDirecto($fixtureId)
     {
         Log::info("Obteniendo fixture directo con ID: $fixtureId");
 
@@ -412,9 +452,9 @@ class FootballService
     }
 
     /**
-     * Busca el fixtureId de un partido terminado por nombres de equipos, liga y temporada
+     * Busca el fixtureId de un partido terminado por nombres de equipos, liga, temporada y fecha
      */
-    public function buscarFixtureId($competition, $season, $homeTeam, $awayTeam)
+    public function buscarFixtureId($competition, $season, $homeTeam, $awayTeam, $matchDate = null)
     {
         $leagueId = $this->leagueMap[$competition] ?? null;
         if (!$leagueId) {
@@ -422,7 +462,29 @@ class FootballService
             $leagueId = $this->leagueMap['champions-league'];
         }
 
-        Log::info("Buscando fixture para: $homeTeam vs $awayTeam en liga $competition (ID: $leagueId), temporada $season");
+        Log::info("Buscando fixture para: $homeTeam vs $awayTeam en liga $competition (ID: $leagueId), temporada $season, fecha: $matchDate");
+
+        // Si tenemos la fecha del partido, usarla para filtrar más específicamente
+        $dateFrom = null;
+        $dateTo = null;
+
+        if ($matchDate) {
+            $matchDateObj = \Carbon\Carbon::parse($matchDate);
+
+            // Para ligas latinoamericanas, ser más específico con el rango de fechas
+            if ($this->isLatinAmericanLeague($competition)) {
+                $tournamentType = $this->getTournamentType($matchDate);
+                Log::info("Liga latinoamericana detectada, torneo: $tournamentType");
+
+                // Buscar en un rango más específico para evitar confusión entre torneos
+                $dateFrom = $matchDateObj->subDays(1)->format('Y-m-d');
+                $dateTo = $matchDateObj->addDays(1)->format('Y-m-d');
+            } else {
+                // Para ligas europeas, mantener el rango más amplio
+                $dateFrom = $matchDateObj->subDays(3)->format('Y-m-d');
+                $dateTo = $matchDateObj->addDays(6)->format('Y-m-d'); // +6 porque ya restamos 3
+            }
+        }
 
         // Implementar retry con delay para evitar rate limiting
         $maxRetries = 3;
@@ -432,14 +494,22 @@ class FootballService
             // Aplicar delay aleatorio antes de cada request
             $this->applyRateLimitDelay(1, 2);
 
-            $response = Http::withHeaders([
-                'X-RapidAPI-Key' => $this->apiKey,
-                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
-            ])->get($this->baseUrl . 'fixtures', [
+            $params = [
                 'league' => $leagueId,
                 'season' => $season,
                 'status' => 'FT'
-            ]);
+            ];
+
+            // Agregar filtros de fecha si están disponibles
+            if ($dateFrom && $dateTo) {
+                $params['date'] = $dateFrom;
+                $params['dateTo'] = $dateTo;
+            }
+
+            $response = Http::withHeaders([
+                'X-RapidAPI-Key' => $this->apiKey,
+                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            ])->get($this->baseUrl . 'fixtures', $params);
 
             Log::info("API Response Status (attempt $attempt): " . $response->status());
 
@@ -472,21 +542,54 @@ class FootballService
 
         Log::info("Fixtures encontrados: " . count($fixtures));
 
-                foreach ($fixtures as $fixture) {
+        // Ordenar fixtures por fecha para priorizar el más cercano a la fecha del partido
+        if ($matchDate && !empty($fixtures)) {
+            $matchDateObj = \Carbon\Carbon::parse($matchDate);
+            usort($fixtures, function($a, $b) use ($matchDateObj) {
+                $dateA = \Carbon\Carbon::parse($a['fixture']['date']);
+                $dateB = \Carbon\Carbon::parse($b['fixture']['date']);
+
+                $diffA = abs($dateA->diffInDays($matchDateObj));
+                $diffB = abs($dateB->diffInDays($matchDateObj));
+
+                return $diffA <=> $diffB;
+            });
+        }
+
+        foreach ($fixtures as $fixture) {
             $home = strtolower($fixture['teams']['home']['name']);
             $away = strtolower($fixture['teams']['away']['name']);
             $homeTeamLower = strtolower($homeTeam);
             $awayTeamLower = strtolower($awayTeam);
+            $fixtureDate = $fixture['fixture']['date'] ?? null;
 
-            Log::info("Comparando: '$home' vs '$homeTeamLower' y '$away' vs '$awayTeamLower'");
+            Log::info("Comparando: '$home' vs '$homeTeamLower' y '$away' vs '$awayTeamLower', fecha fixture: $fixtureDate");
 
             // Búsqueda más flexible: verificar ambas combinaciones
             $match1 = str_contains($home, $homeTeamLower) && str_contains($away, $awayTeamLower);
             $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
 
             if ($match1 || $match2) {
-                Log::info("¡Fixture encontrado! ID: " . $fixture['fixture']['id']);
-                return $fixture['fixture']['id'];
+                // Si tenemos fecha del partido, verificar que sea cercana
+                if ($matchDate && $fixtureDate) {
+                    $matchDateObj = \Carbon\Carbon::parse($matchDate);
+                    $fixtureDateObj = \Carbon\Carbon::parse($fixtureDate);
+                    $daysDiff = abs($matchDateObj->diffInDays($fixtureDateObj));
+
+                    // Para ligas latinoamericanas, ser más estricto con la fecha
+                    $maxDaysDiff = $this->isLatinAmericanLeague($competition) ? 1 : 3;
+
+                    if ($daysDiff <= $maxDaysDiff) {
+                        Log::info("¡Fixture encontrado con fecha cercana! ID: " . $fixture['fixture']['id'] . ", diferencia de días: $daysDiff (máximo permitido: $maxDaysDiff)");
+                        return $fixture['fixture']['id'];
+                    } else {
+                        Log::info("Fixture encontrado pero fecha muy diferente (diferencia: $daysDiff días, máximo permitido: $maxDaysDiff), continuando búsqueda...");
+                        continue;
+                    }
+                } else {
+                    Log::info("¡Fixture encontrado! ID: " . $fixture['fixture']['id']);
+                    return $fixture['fixture']['id'];
+                }
             }
         }
 
@@ -502,13 +605,21 @@ class FootballService
             // Aplicar delay aleatorio antes de cada request
             $this->applyRateLimitDelay(1, 2);
 
+            $params2 = [
+                'league' => $leagueId,
+                'season' => $season
+            ];
+
+            // Agregar filtros de fecha si están disponibles
+            if ($dateFrom && $dateTo) {
+                $params2['date'] = $dateFrom;
+                $params2['dateTo'] = $dateTo;
+            }
+
             $response2 = Http::withHeaders([
                 'X-RapidAPI-Key' => $this->apiKey,
                 'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
-            ])->get($this->baseUrl . 'fixtures', [
-                'league' => $leagueId,
-                'season' => $season
-            ]);
+            ])->get($this->baseUrl . 'fixtures', $params2);
 
             if ($response2->successful()) {
                 break;
@@ -530,18 +641,51 @@ class FootballService
             $fixtures2 = $response2->json('response') ?? [];
             Log::info("Fixtures sin filtro de estado: " . count($fixtures2));
 
+            // Ordenar fixtures por fecha si tenemos fecha del partido
+            if ($matchDate && !empty($fixtures2)) {
+                $matchDateObj = \Carbon\Carbon::parse($matchDate);
+                usort($fixtures2, function($a, $b) use ($matchDateObj) {
+                    $dateA = \Carbon\Carbon::parse($a['fixture']['date']);
+                    $dateB = \Carbon\Carbon::parse($b['fixture']['date']);
+
+                    $diffA = abs($dateA->diffInDays($matchDateObj));
+                    $diffB = abs($dateB->diffInDays($matchDateObj));
+
+                    return $diffA <=> $diffB;
+                });
+            }
+
             foreach ($fixtures2 as $fixture) {
                 $home = strtolower($fixture['teams']['home']['name']);
                 $away = strtolower($fixture['teams']['away']['name']);
                 $homeTeamLower = strtolower($homeTeam);
                 $awayTeamLower = strtolower($awayTeam);
+                $fixtureDate = $fixture['fixture']['date'] ?? null;
 
                 $match1 = str_contains($home, $homeTeamLower) && str_contains($away, $awayTeamLower);
                 $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
 
                 if ($match1 || $match2) {
-                    Log::info("¡Fixture encontrado sin filtro de estado! ID: " . $fixture['fixture']['id'] . " Status: " . $fixture['fixture']['status']['long']);
-                    return $fixture['fixture']['id'];
+                    // Si tenemos fecha del partido, verificar que sea cercana
+                    if ($matchDate && $fixtureDate) {
+                        $matchDateObj = \Carbon\Carbon::parse($matchDate);
+                        $fixtureDateObj = \Carbon\Carbon::parse($fixtureDate);
+                        $daysDiff = abs($matchDateObj->diffInDays($fixtureDateObj));
+
+                        // Para ligas latinoamericanas, ser más estricto con la fecha
+                        $maxDaysDiff = $this->isLatinAmericanLeague($competition) ? 1 : 3;
+
+                        if ($daysDiff <= $maxDaysDiff) {
+                            Log::info("¡Fixture encontrado sin filtro de estado con fecha cercana! ID: " . $fixture['fixture']['id'] . " Status: " . $fixture['fixture']['status']['long'] . ", diferencia de días: $daysDiff (máximo permitido: $maxDaysDiff)");
+                            return $fixture['fixture']['id'];
+                        } else {
+                            Log::info("Fixture encontrado sin filtro pero fecha muy diferente (diferencia: $daysDiff días, máximo permitido: $maxDaysDiff), continuando búsqueda...");
+                            continue;
+                        }
+                    } else {
+                        Log::info("¡Fixture encontrado sin filtro de estado! ID: " . $fixture['fixture']['id'] . " Status: " . $fixture['fixture']['status']['long']);
+                        return $fixture['fixture']['id'];
+                    }
                 }
             }
         }
@@ -711,9 +855,10 @@ class FootballService
             'status' => $match->status
         ]);
 
-        // 3. Extraer el fixtureId del external_id
-        $fixtureId = $this->extraerFixtureIdDelExternalId($match->external_id);
-        Log::info('Fixture ID extraído: ' . $fixtureId);
+        // 3. Extraer el fixtureId del external_id usando la fecha del partido
+        $matchDate = $match->date ? $match->date->format('Y-m-d') : null;
+        $fixtureId = $this->extraerFixtureIdDelExternalId($match->external_id, $matchDate);
+        Log::info('Fixture ID extraído: ' . $fixtureId . ' para fecha: ' . $matchDate);
         if (!$fixtureId) {
             return null;
         }
