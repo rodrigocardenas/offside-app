@@ -397,6 +397,18 @@ class FootballService
                         return $fixtureId;
                     }
                 }
+
+                // Si no se encontró con filtros de fecha, intentar sin filtros para ligas latinoamericanas
+                foreach ($competitions as $competition) {
+                    if ($this->isLatinAmericanLeague($competition)) {
+                        Log::info("Intentando búsqueda sin filtros de fecha para liga latinoamericana: $competition");
+                        $fixtureId = $this->buscarFixtureIdLatinoamericano($competition, $season, $homeTeam, $awayTeam);
+                        if ($fixtureId) {
+                            Log::info("Fixture encontrado sin filtros en $competition: $fixtureId");
+                            return $fixtureId;
+                        }
+                    }
+                }
             } catch (\Exception $e) {
                 Log::error("Error al parsear fecha del external_id: " . $e->getMessage());
             }
@@ -471,14 +483,14 @@ class FootballService
         if ($matchDate) {
             $matchDateObj = \Carbon\Carbon::parse($matchDate);
 
-            // Para ligas latinoamericanas, ser más específico con el rango de fechas
+                        // Para ligas latinoamericanas, usar un rango más amplio para encontrar el partido
             if ($this->isLatinAmericanLeague($competition)) {
                 $tournamentType = $this->getTournamentType($matchDate);
                 Log::info("Liga latinoamericana detectada, torneo: $tournamentType");
 
-                // Buscar en un rango más específico para evitar confusión entre torneos
-                $dateFrom = $matchDateObj->subDays(1)->format('Y-m-d');
-                $dateTo = $matchDateObj->addDays(1)->format('Y-m-d');
+                // Usar un rango más amplio para ligas latinoamericanas
+                $dateFrom = $matchDateObj->subDays(7)->format('Y-m-d');
+                $dateTo = $matchDateObj->addDays(7)->format('Y-m-d');
             } else {
                 // Para ligas europeas, mantener el rango más amplio
                 $dateFrom = $matchDateObj->subDays(3)->format('Y-m-d');
@@ -542,8 +554,9 @@ class FootballService
 
         Log::info("Fixtures encontrados: " . count($fixtures));
 
-        // Ordenar fixtures por fecha para priorizar el más cercano a la fecha del partido
-        if ($matchDate && !empty($fixtures)) {
+                // Ordenar fixtures por fecha para priorizar el más cercano a la fecha del partido
+        // Pero solo si tenemos fecha del partido y no es una liga latinoamericana
+        if ($matchDate && !empty($fixtures) && !$this->isLatinAmericanLeague($competition)) {
             $matchDateObj = \Carbon\Carbon::parse($matchDate);
             usort($fixtures, function($a, $b) use ($matchDateObj) {
                 $dateA = \Carbon\Carbon::parse($a['fixture']['date']);
@@ -570,20 +583,23 @@ class FootballService
             $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
 
             if ($match1 || $match2) {
-                // Si tenemos fecha del partido, verificar que sea cercana
+                                // Para ligas latinoamericanas, ser más flexible con las fechas
+                if ($this->isLatinAmericanLeague($competition)) {
+                    Log::info("¡Fixture encontrado para liga latinoamericana! ID: " . $fixture['fixture']['id'] . ", fecha fixture: $fixtureDate");
+                    return $fixture['fixture']['id'];
+                }
+
+                // Para otras ligas, verificar que la fecha sea cercana
                 if ($matchDate && $fixtureDate) {
                     $matchDateObj = \Carbon\Carbon::parse($matchDate);
                     $fixtureDateObj = \Carbon\Carbon::parse($fixtureDate);
                     $daysDiff = abs($matchDateObj->diffInDays($fixtureDateObj));
 
-                    // Para ligas latinoamericanas, ser más estricto con la fecha
-                    $maxDaysDiff = $this->isLatinAmericanLeague($competition) ? 1 : 3;
-
-                    if ($daysDiff <= $maxDaysDiff) {
-                        Log::info("¡Fixture encontrado con fecha cercana! ID: " . $fixture['fixture']['id'] . ", diferencia de días: $daysDiff (máximo permitido: $maxDaysDiff)");
+                    if ($daysDiff <= 3) {
+                        Log::info("¡Fixture encontrado con fecha cercana! ID: " . $fixture['fixture']['id'] . ", diferencia de días: $daysDiff");
                         return $fixture['fixture']['id'];
                     } else {
-                        Log::info("Fixture encontrado pero fecha muy diferente (diferencia: $daysDiff días, máximo permitido: $maxDaysDiff), continuando búsqueda...");
+                        Log::info("Fixture encontrado pero fecha muy diferente (diferencia: $daysDiff días), continuando búsqueda...");
                         continue;
                     }
                 } else {
@@ -641,8 +657,8 @@ class FootballService
             $fixtures2 = $response2->json('response') ?? [];
             Log::info("Fixtures sin filtro de estado: " . count($fixtures2));
 
-            // Ordenar fixtures por fecha si tenemos fecha del partido
-            if ($matchDate && !empty($fixtures2)) {
+                        // Ordenar fixtures por fecha si tenemos fecha del partido y no es liga latinoamericana
+            if ($matchDate && !empty($fixtures2) && !$this->isLatinAmericanLeague($competition)) {
                 $matchDateObj = \Carbon\Carbon::parse($matchDate);
                 usort($fixtures2, function($a, $b) use ($matchDateObj) {
                     $dateA = \Carbon\Carbon::parse($a['fixture']['date']);
@@ -666,20 +682,23 @@ class FootballService
                 $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
 
                 if ($match1 || $match2) {
-                    // Si tenemos fecha del partido, verificar que sea cercana
+                                        // Para ligas latinoamericanas, ser más flexible con las fechas
+                    if ($this->isLatinAmericanLeague($competition)) {
+                        Log::info("¡Fixture encontrado sin filtro para liga latinoamericana! ID: " . $fixture['fixture']['id'] . " Status: " . $fixture['fixture']['status']['long'] . ", fecha fixture: $fixtureDate");
+                        return $fixture['fixture']['id'];
+                    }
+
+                    // Para otras ligas, verificar que la fecha sea cercana
                     if ($matchDate && $fixtureDate) {
                         $matchDateObj = \Carbon\Carbon::parse($matchDate);
                         $fixtureDateObj = \Carbon\Carbon::parse($fixtureDate);
                         $daysDiff = abs($matchDateObj->diffInDays($fixtureDateObj));
 
-                        // Para ligas latinoamericanas, ser más estricto con la fecha
-                        $maxDaysDiff = $this->isLatinAmericanLeague($competition) ? 1 : 3;
-
-                        if ($daysDiff <= $maxDaysDiff) {
-                            Log::info("¡Fixture encontrado sin filtro de estado con fecha cercana! ID: " . $fixture['fixture']['id'] . " Status: " . $fixture['fixture']['status']['long'] . ", diferencia de días: $daysDiff (máximo permitido: $maxDaysDiff)");
+                        if ($daysDiff <= 3) {
+                            Log::info("¡Fixture encontrado sin filtro de estado con fecha cercana! ID: " . $fixture['fixture']['id'] . " Status: " . $fixture['fixture']['status']['long'] . ", diferencia de días: $daysDiff");
                             return $fixture['fixture']['id'];
                         } else {
-                            Log::info("Fixture encontrado sin filtro pero fecha muy diferente (diferencia: $daysDiff días, máximo permitido: $maxDaysDiff), continuando búsqueda...");
+                            Log::info("Fixture encontrado sin filtro pero fecha muy diferente (diferencia: $daysDiff días), continuando búsqueda...");
                             continue;
                         }
                     } else {
@@ -940,4 +959,82 @@ class FootballService
             ]);
             return $match;
         }
+
+    /**
+     * Busca el fixtureId específicamente para ligas latinoamericanas sin filtros de fecha
+     * Útil cuando los filtros de fecha son muy restrictivos
+     */
+    public function buscarFixtureIdLatinoamericano($competition, $season, $homeTeam, $awayTeam)
+    {
+        $leagueId = $this->leagueMap[$competition] ?? null;
+        if (!$leagueId) {
+            Log::warning("Competencia no soportada: $competition");
+            return null;
+        }
+
+        Log::info("Buscando fixture latinoamericano para: $homeTeam vs $awayTeam en liga $competition (ID: $leagueId), temporada $season");
+
+        // Implementar retry con delay para evitar rate limiting
+        $maxRetries = 3;
+        $delaySeconds = 2;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            $this->applyRateLimitDelay(1, 2);
+
+            $response = Http::withHeaders([
+                'X-RapidAPI-Key' => $this->apiKey,
+                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            ])->get($this->baseUrl . 'fixtures', [
+                'league' => $leagueId,
+                'season' => $season
+            ]);
+
+            if ($response->successful()) {
+                break;
+            }
+
+            if (str_contains($response->body(), 'Too many requests')) {
+                Log::warning("Rate limit alcanzado en intento $attempt. Esperando $delaySeconds segundos...");
+                if ($attempt < $maxRetries) {
+                    sleep($delaySeconds);
+                    $delaySeconds *= 2;
+                }
+            } else {
+                Log::error("Error en API (attempt $attempt): " . $response->body());
+                break;
+            }
+        }
+
+        if (!$response->successful()) {
+            Log::error("Error final en API después de $maxRetries intentos: " . $response->body());
+            return null;
+        }
+
+        $fixtures = $response->json('response') ?? [];
+        Log::info("Fixtures encontrados sin filtros: " . count($fixtures));
+
+        // Buscar por nombres de equipos sin restricciones de fecha
+        foreach ($fixtures as $fixture) {
+            $home = strtolower($fixture['teams']['home']['name']);
+            $away = strtolower($fixture['teams']['away']['name']);
+            $homeTeamLower = strtolower($homeTeam);
+            $awayTeamLower = strtolower($awayTeam);
+            $fixtureDate = $fixture['fixture']['date'] ?? null;
+            $status = $fixture['fixture']['status']['long'] ?? 'N/A';
+
+            Log::info("Comparando: '$home' vs '$homeTeamLower' y '$away' vs '$awayTeamLower', fecha: $fixtureDate, status: $status");
+
+            // Búsqueda más flexible: verificar ambas combinaciones
+            $match1 = str_contains($home, $homeTeamLower) && str_contains($away, $awayTeamLower);
+            $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
+
+            if ($match1 || $match2) {
+                Log::info("¡Fixture encontrado para liga latinoamericana! ID: " . $fixture['fixture']['id'] . ", fecha: $fixtureDate, status: $status");
+                return $fixture['fixture']['id'];
+            }
+        }
+
+        Log::warning("No se encontró fixture para liga latinoamericana: $homeTeam vs $awayTeam");
+        return null;
     }
+}
