@@ -65,6 +65,32 @@ class FootballDataService
         ];
     }
 
+    /**
+     * Determina la temporada correcta basada en la fecha del partido
+     * Para la mayoría de ligas europeas, la temporada va de agosto a julio
+     */
+    private function getSeasonForDate($matchDate = null)
+    {
+        if (!$matchDate) {
+            $matchDate = now();
+        }
+
+        if (is_string($matchDate)) {
+            $matchDate = Carbon::parse($matchDate);
+        }
+
+        $year = $matchDate->year;
+        $month = $matchDate->month;
+
+        // Para ligas que van de agosto a julio (temporada europea)
+        // Si estamos entre enero y julio, usar el año anterior como temporada
+        if ($month >= 1 && $month <= 7) {
+            return $year - 1;
+        }
+
+        return $year;
+    }
+
     public function getCurrentMatchday($competitionId)
     {
         if (app()->environment('local')) {
@@ -226,13 +252,41 @@ class FootballDataService
         ];
     }
 
-    public function getMatches($competitionId)
+    public function getMatches($competitionId, $forceRefresh = false)
     {
         $cacheKey = "matches_{$competitionId}";
+
+        // Si se fuerza el refresh, limpiar el cache
+        if ($forceRefresh) {
+            Cache::forget($cacheKey);
+        }
+
         return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($competitionId) {
+            // Obtener la temporada correcta basada en la fecha actual
+            $currentSeason = $this->getSeasonForDate();
+
+            Log::info("FootballDataService: Obteniendo partidos para competencia $competitionId, temporada calculada: $currentSeason");
+
+            // Intentar primero con la temporada calculada
             $response = Http::withHeaders([
                 'X-Auth-Token' => config('services.football_data.api_key'),
-            ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches");
+            ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches", [
+                'season' => $currentSeason
+            ]);
+
+            // Si no hay datos en la temporada calculada, intentar con la temporada anterior
+            if (!$response->successful() || empty($response->json()['matches'])) {
+                $previousSeason = $currentSeason - 1;
+                Log::info("FootballDataService: No se encontraron partidos en temporada $currentSeason, intentando con temporada anterior: $previousSeason");
+
+                $response = Http::withHeaders([
+                    'X-Auth-Token' => config('services.football_data.api_key'),
+                ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches", [
+                    'season' => $previousSeason
+                ]);
+            } else {
+                Log::info("FootballDataService: Partidos encontrados en temporada calculada: " . count($response->json()['matches'] ?? []));
+            }
 
             if ($response->successful()) {
                 return collect($response->json()['matches'])->map(function ($match) {

@@ -66,13 +66,41 @@ class FootballService
         });
     }
 
-    public function getMatches($competitionId)
+    public function getMatches($competitionId, $forceRefresh = false)
     {
         $cacheKey = "matches_{$competitionId}";
+
+        // Si se fuerza el refresh, limpiar el cache
+        if ($forceRefresh) {
+            Cache::forget($cacheKey);
+        }
+
         return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($competitionId) {
+            // Obtener la temporada correcta basada en la fecha actual
+            $currentSeason = $this->getSeasonForDate();
+
+            Log::info("Obteniendo partidos para competencia $competitionId, temporada calculada: $currentSeason");
+
+            // Intentar primero con la temporada calculada
             $response = Http::withHeaders([
                 'X-Auth-Token' => config('services.football_data.api_key'),
-            ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches");
+            ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches", [
+                'season' => $currentSeason
+            ]);
+
+            // Si no hay datos en la temporada calculada, intentar con la temporada anterior
+            if (!$response->successful() || empty($response->json()['matches'])) {
+                $previousSeason = $currentSeason - 1;
+                Log::info("No se encontraron partidos en temporada $currentSeason, intentando con temporada anterior: $previousSeason");
+
+                $response = Http::withHeaders([
+                    'X-Auth-Token' => config('services.football_data.api_key'),
+                ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches", [
+                    'season' => $previousSeason
+                ]);
+            } else {
+                Log::info("Partidos encontrados en temporada calculada: " . count($response->json()['matches'] ?? []));
+            }
 
             if ($response->successful()) {
                 return collect($response->json()['matches'])->map(function ($match) {
@@ -90,6 +118,56 @@ class FootballService
                 });
             }
 
+            return collect();
+        });
+    }
+
+    /**
+     * Obtiene partidos para una competencia específica en una fecha específica
+     */
+    public function getMatchesByDate($competitionId, $date, $forceRefresh = false)
+    {
+        $cacheKey = "matches_{$competitionId}_{$date}";
+
+        // Si se fuerza el refresh, limpiar el cache
+        if ($forceRefresh) {
+            Cache::forget($cacheKey);
+        }
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($competitionId, $date) {
+            // Obtener la temporada correcta basada en la fecha del partido
+            $season = $this->getSeasonForDate($date);
+
+            Log::info("Obteniendo partidos para competencia $competitionId en fecha $date, temporada: $season");
+
+            $response = Http::withHeaders([
+                'X-Auth-Token' => config('services.football_data.api_key'),
+            ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches", [
+                'season' => $season,
+                'dateFrom' => $date,
+                'dateTo' => $date
+            ]);
+
+            if ($response->successful()) {
+                $matches = collect($response->json()['matches'])->map(function ($match) {
+                    return [
+                        'id' => $match['id'],
+                        'home_team' => $match['homeTeam']['name'],
+                        'away_team' => $match['awayTeam']['name'],
+                        'date' => $match['utcDate'],
+                        'status' => $match['status'],
+                        'score' => [
+                            'home' => $match['score']['fullTime']['home'] ?? null,
+                            'away' => $match['score']['fullTime']['away'] ?? null,
+                        ],
+                    ];
+                });
+
+                Log::info("Partidos encontrados para fecha $date: " . $matches->count());
+                return $matches;
+            }
+
+            Log::warning("No se encontraron partidos para fecha $date");
             return collect();
         });
     }
@@ -200,6 +278,32 @@ class FootballService
     {
         $delay = rand($minSeconds * 1000000, $maxSeconds * 1000000); // Microsegundos
         usleep($delay);
+    }
+
+    /**
+     * Determina la temporada correcta basada en la fecha del partido
+     * Para la mayoría de ligas europeas, la temporada va de agosto a julio
+     */
+    private function getSeasonForDate($matchDate = null)
+    {
+        if (!$matchDate) {
+            $matchDate = now();
+        }
+
+        if (is_string($matchDate)) {
+            $matchDate = \Carbon\Carbon::parse($matchDate);
+        }
+
+        $year = $matchDate->year;
+        $month = $matchDate->month;
+
+        // Para ligas que van de agosto a julio (temporada europea)
+        // Si estamos entre enero y julio, usar el año anterior como temporada
+        if ($month >= 1 && $month <= 7) {
+            return $year - 1;
+        }
+
+        return $year;
     }
 
             /**
