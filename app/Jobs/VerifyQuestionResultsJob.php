@@ -115,7 +115,7 @@ class VerifyQuestionResultsJob implements ShouldQueue
                 $updatedAnswers = 0;
                 foreach ($answers as $answer) {
                     $wasCorrect = $answer->is_correct;
-                    $answer->is_correct = in_array($answer->option_id, $correctOptionIds);
+                    $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
                     $answer->points_earned = $answer->is_correct ? 300 : 0;
                     $answer->save();
 
