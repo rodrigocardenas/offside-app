@@ -583,10 +583,21 @@ class FootballService
             $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
 
             if ($match1 || $match2) {
-                                // Para ligas latinoamericanas, ser más flexible con las fechas
+                                // Para ligas latinoamericanas, recolectar todos los partidos y tomar el más reciente
                 if ($this->isLatinAmericanLeague($competition)) {
-                    Log::info("¡Fixture encontrado para liga latinoamericana! ID: " . $fixture['fixture']['id'] . ", fecha fixture: $fixtureDate");
-                    return $fixture['fixture']['id'];
+                    // Si es la primera vez que encontramos un partido, recolectar todos
+                    if (!isset($matchingFixtures)) {
+                        $matchingFixtures = [];
+                    }
+
+                    $matchingFixtures[] = [
+                        'fixture' => $fixture,
+                        'date' => $fixtureDate,
+                        'status' => $fixture['fixture']['status']['long'] ?? 'N/A',
+                        'id' => $fixture['fixture']['id']
+                    ];
+                    Log::info("Partido encontrado para liga latinoamericana: ID " . $fixture['fixture']['id'] . ", fecha: $fixtureDate");
+                    continue; // Continuar buscando más partidos
                 }
 
                 // Para otras ligas, verificar que la fecha sea cercana
@@ -607,6 +618,30 @@ class FootballService
                     return $fixture['fixture']['id'];
                 }
             }
+        }
+
+        // Para ligas latinoamericanas, procesar todos los partidos encontrados
+        if ($this->isLatinAmericanLeague($competition) && isset($matchingFixtures) && !empty($matchingFixtures)) {
+            // Ordenar por fecha (más reciente primero)
+            usort($matchingFixtures, function($a, $b) {
+                $dateA = \Carbon\Carbon::parse($a['date']);
+                $dateB = \Carbon\Carbon::parse($b['date']);
+                return $dateB->timestamp - $dateA->timestamp; // Orden descendente (más reciente primero)
+            });
+
+            // Tomar el más reciente
+            $mostRecent = $matchingFixtures[0];
+            Log::info("Seleccionando el partido más reciente para liga latinoamericana: ID " . $mostRecent['id'] . ", fecha: " . $mostRecent['date'] . ", status: " . $mostRecent['status']);
+
+            if (count($matchingFixtures) > 1) {
+                Log::info("Se encontraron " . count($matchingFixtures) . " partidos entre estos equipos:");
+                foreach ($matchingFixtures as $index => $match) {
+                    $tournamentType = $this->getTournamentType($match['date']);
+                    Log::info("  " . ($index + 1) . ". ID: " . $match['id'] . ", fecha: " . $match['date'] . ", torneo: $tournamentType, status: " . $match['status']);
+                }
+            }
+
+            return $mostRecent['id'];
         }
 
         Log::warning("No se encontró fixture para: $homeTeam vs $awayTeam");
@@ -682,10 +717,21 @@ class FootballService
                 $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
 
                 if ($match1 || $match2) {
-                                        // Para ligas latinoamericanas, ser más flexible con las fechas
+                                        // Para ligas latinoamericanas, recolectar todos los partidos y tomar el más reciente
                     if ($this->isLatinAmericanLeague($competition)) {
-                        Log::info("¡Fixture encontrado sin filtro para liga latinoamericana! ID: " . $fixture['fixture']['id'] . " Status: " . $fixture['fixture']['status']['long'] . ", fecha fixture: $fixtureDate");
-                        return $fixture['fixture']['id'];
+                        // Si es la primera vez que encontramos un partido, recolectar todos
+                        if (!isset($matchingFixtures2)) {
+                            $matchingFixtures2 = [];
+                        }
+
+                        $matchingFixtures2[] = [
+                            'fixture' => $fixture,
+                            'date' => $fixtureDate,
+                            'status' => $fixture['fixture']['status']['long'] ?? 'N/A',
+                            'id' => $fixture['fixture']['id']
+                        ];
+                        Log::info("Partido encontrado sin filtro para liga latinoamericana: ID " . $fixture['fixture']['id'] . ", fecha: $fixtureDate");
+                        continue; // Continuar buscando más partidos
                     }
 
                     // Para otras ligas, verificar que la fecha sea cercana
@@ -707,6 +753,30 @@ class FootballService
                     }
                 }
             }
+        }
+
+        // Para ligas latinoamericanas, procesar todos los partidos encontrados en la segunda búsqueda
+        if ($this->isLatinAmericanLeague($competition) && isset($matchingFixtures2) && !empty($matchingFixtures2)) {
+            // Ordenar por fecha (más reciente primero)
+            usort($matchingFixtures2, function($a, $b) {
+                $dateA = \Carbon\Carbon::parse($a['date']);
+                $dateB = \Carbon\Carbon::parse($b['date']);
+                return $dateB->timestamp - $dateA->timestamp; // Orden descendente (más reciente primero)
+            });
+
+            // Tomar el más reciente
+            $mostRecent = $matchingFixtures2[0];
+            Log::info("Seleccionando el partido más reciente sin filtro para liga latinoamericana: ID " . $mostRecent['id'] . ", fecha: " . $mostRecent['date'] . ", status: " . $mostRecent['status']);
+
+            if (count($matchingFixtures2) > 1) {
+                Log::info("Se encontraron " . count($matchingFixtures2) . " partidos sin filtro entre estos equipos:");
+                foreach ($matchingFixtures2 as $index => $match) {
+                    $tournamentType = $this->getTournamentType($match['date']);
+                    Log::info("  " . ($index + 1) . ". ID: " . $match['id'] . ", fecha: " . $match['date'] . ", torneo: $tournamentType, status: " . $match['status']);
+                }
+            }
+
+            return $mostRecent['id'];
         }
 
         return null;
@@ -962,7 +1032,7 @@ class FootballService
 
     /**
      * Busca el fixtureId específicamente para ligas latinoamericanas sin filtros de fecha
-     * Útil cuando los filtros de fecha son muy restrictivos
+     * Obtiene todos los partidos entre los equipos y retorna el más reciente
      */
     public function buscarFixtureIdLatinoamericano($competition, $season, $homeTeam, $awayTeam)
     {
@@ -1013,7 +1083,8 @@ class FootballService
         $fixtures = $response->json('response') ?? [];
         Log::info("Fixtures encontrados sin filtros: " . count($fixtures));
 
-        // Buscar por nombres de equipos sin restricciones de fecha
+        // Buscar todos los partidos entre estos equipos
+        $matchingFixtures = [];
         foreach ($fixtures as $fixture) {
             $home = strtolower($fixture['teams']['home']['name']);
             $away = strtolower($fixture['teams']['away']['name']);
@@ -1022,19 +1093,45 @@ class FootballService
             $fixtureDate = $fixture['fixture']['date'] ?? null;
             $status = $fixture['fixture']['status']['long'] ?? 'N/A';
 
-            Log::info("Comparando: '$home' vs '$homeTeamLower' y '$away' vs '$awayTeamLower', fecha: $fixtureDate, status: $status");
-
             // Búsqueda más flexible: verificar ambas combinaciones
             $match1 = str_contains($home, $homeTeamLower) && str_contains($away, $awayTeamLower);
             $match2 = str_contains($home, $awayTeamLower) && str_contains($away, $homeTeamLower);
 
             if ($match1 || $match2) {
-                Log::info("¡Fixture encontrado para liga latinoamericana! ID: " . $fixture['fixture']['id'] . ", fecha: $fixtureDate, status: $status");
-                return $fixture['fixture']['id'];
+                $matchingFixtures[] = [
+                    'fixture' => $fixture,
+                    'date' => $fixtureDate,
+                    'status' => $status,
+                    'id' => $fixture['fixture']['id']
+                ];
+                Log::info("Partido encontrado: ID " . $fixture['fixture']['id'] . ", fecha: $fixtureDate, status: $status");
             }
         }
 
-        Log::warning("No se encontró fixture para liga latinoamericana: $homeTeam vs $awayTeam");
-        return null;
+        if (empty($matchingFixtures)) {
+            Log::warning("No se encontraron partidos para liga latinoamericana: $homeTeam vs $awayTeam");
+            return null;
+        }
+
+                    // Ordenar por fecha (más reciente primero)
+            usort($matchingFixtures, function($a, $b) {
+                $dateA = \Carbon\Carbon::parse($a['date']);
+                $dateB = \Carbon\Carbon::parse($b['date']);
+                return $dateB->timestamp - $dateA->timestamp; // Orden descendente (más reciente primero)
+            });
+
+        // Tomar el más reciente
+        $mostRecent = $matchingFixtures[0];
+        Log::info("Seleccionando el partido más reciente: ID " . $mostRecent['id'] . ", fecha: " . $mostRecent['date'] . ", status: " . $mostRecent['status']);
+
+        if (count($matchingFixtures) > 1) {
+            Log::info("Se encontraron " . count($matchingFixtures) . " partidos entre estos equipos:");
+            foreach ($matchingFixtures as $index => $match) {
+                $tournamentType = $this->getTournamentType($match['date']);
+                Log::info("  " . ($index + 1) . ". ID: " . $match['id'] . ", fecha: " . $match['date'] . ", torneo: $tournamentType, status: " . $match['status']);
+            }
+        }
+
+        return $mostRecent['id'];
     }
 }
