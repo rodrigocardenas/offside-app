@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel
             ->timezone('America/Mexico_City');
 
         $schedule->command('matches:process-recently-finished')
-            ->everyHour()
+            ->hourly()
             ->onFailure(function () {
                 Log::error('Error en el procesamiento de partidos finalizados');
             });

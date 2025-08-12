@@ -313,7 +313,7 @@ class FootballService
     {
         $latinAmericanLeagues = [
             'liga-colombia',
-            'chile-campeonato-nacional',
+            // 'chile-campeonato-nacional',
             'liga-argentina',
             'liga-mexicana',
             'liga-brasilera'
