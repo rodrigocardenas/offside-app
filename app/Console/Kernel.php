@@ -24,11 +24,11 @@ class Kernel extends ConsoleKernel
             ->dailyAt('15:00')
             ->timezone('America/Mexico_City');
 
-        $schedule->command('matches:process-recently-finished')
-            ->hourly()
-            ->onFailure(function () {
-                Log::error('Error en el procesamiento de partidos finalizados');
-            });
+        // $schedule->command('matches:process-recently-finished')
+        //     ->hourly()
+        //     ->onFailure(function () {
+        //         Log::error('Error en el procesamiento de partidos finalizados');
+        //     });
     }
 
     /**
