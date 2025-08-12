@@ -23,6 +23,12 @@ class Kernel extends ConsoleKernel
         $schedule->command('social-questions:renew')
             ->dailyAt('15:00')
             ->timezone('America/Mexico_City');
+
+        $schedule->command('matches:process-recently-finished')
+            ->everyHour()
+            ->onFailure(function () {
+                Log::error('Error en el procesamiento de partidos finalizados');
+            });
     }
 
     /**
