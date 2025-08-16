@@ -14,21 +14,21 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('app:update-football-data')
-            ->dailyAt('03:00')
-            ->onFailure(function () {
-                Log::error('Error en la actualización diaria de datos de fútbol');
-            });
-
-        $schedule->command('social-questions:renew')
-            ->dailyAt('15:00')
-            ->timezone('America/Mexico_City');
-
-        // $schedule->command('matches:process-recently-finished')
-        //     ->hourly()
+        // $schedule->command('app:update-football-data')
+        //     ->dailyAt('03:00')
         //     ->onFailure(function () {
-        //         Log::error('Error en el procesamiento de partidos finalizados');
+        //         Log::error('Error en la actualización diaria de datos de fútbol');
         //     });
+
+        // $schedule->command('social-questions:renew')
+        //     ->dailyAt('15:00')
+        //     ->timezone('America/Mexico_City');
+
+        $schedule->command('matches:process-recently-finished')
+            ->hourly()
+            ->onFailure(function () {
+                Log::error('Error en el procesamiento de partidos finalizados');
+            });
     }
 
     /**
