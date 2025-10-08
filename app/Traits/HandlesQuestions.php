@@ -55,7 +55,7 @@ trait HandlesQuestions
                 ])
                 ->first();
 
-            if ($question) {
+            if ($question && $question->id != 340) {
                 $this->updateSocialQuestionOptions($question, $group);
             } else {
                 $question = $this->createSocialQuestion($group);
