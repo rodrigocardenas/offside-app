@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Models\FootballMatch;
+use App\Exceptions\FootballApiException;
 
 class FootballService
 {
@@ -39,7 +40,10 @@ class FootballService
         $leagueId = $this->leagueMap[$competition] ?? null;
 
         if (!$leagueId) {
-            throw new \Exception("Competencia no soportada: $competition");
+            throw new FootballApiException(
+                "Competencia no soportada: $competition",
+                ['competition' => $competition, 'available_competitions' => array_keys($this->leagueMap)]
+            );
         }
 
         $response = Http::withHeaders([
@@ -52,7 +56,16 @@ class FootballService
         ]);
 
         if ($response->failed()) {
-            throw new \Exception('Error al obtener los partidos: ' . $response->body());
+            throw new FootballApiException(
+                'Error al obtener los partidos desde la API externa',
+                [
+                    'competition' => $competition,
+                    'league_id' => $leagueId,
+                    'season' => 2025,
+                    'status_code' => $response->status(),
+                    'response_body' => $response->body()
+                ]
+            );
         }
 
         return collect($response->json('response'))->map(function ($match) {

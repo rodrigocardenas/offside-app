@@ -1,41 +1,59 @@
-<x-app-layout>
-    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6">
-        <div class="max-w-2xl mx-auto" style="margin-top: 60px;">
-            <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold text-offside-light">Crear nuevo grupo</h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-offside-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+<x-dynamic-layout>
+    @php
+        $themeMode = auth()->user()->theme_mode ?? 'auto';
+        $isDark = $themeMode === 'dark';
+
+        // Define color variables
+        $bgPrimary = $isDark ? '#0a2e2c' : '#ffffff';
+        $bgSecondary = $isDark ? '#0f3d3a' : '#f5f5f5';
+        $borderColor = $isDark ? '#2a4a47' : '#e0e0e0';
+        $textPrimary = $isDark ? '#ffffff' : '#333333';
+        $textSecondary = $isDark ? '#b0b0b0' : '#999999';
+        $labelColor = $isDark ? '#ffffff' : '#333333';
+        $inputBg = $isDark ? '#1a524e' : '#ffffff';
+        $accentColor = '#00deb0';
+        $accentDark = '#17b796';
+    @endphp
+
+    <div style="min-height: 100vh; background: {{ $isDark ? 'linear-gradient(135deg, #0a2e2c 0%, #0f3d3a 100%)' : '#f9f9f9' }}; color: {{ $textPrimary }}; padding: 16px 20px; padding-top: 80px;">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <div style="background: {{ $bgPrimary }}; border: 1px solid {{ $borderColor }}; border-radius: 16px; padding: 32px 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, {{ $isDark ? '0.3' : '0.1' }});">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px;">
+                    <h2 style="font-size: 28px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">Crear nuevo grupo</h2>
+                    <i class="fas fa-users" style="font-size: 32px; color: {{ $accentColor }};"></i>
                 </div>
 
-                <form method="POST" action="{{ route('groups.store') }}" class="space-y-6" id="createGroupForm">
+                <form method="POST" action="{{ route('groups.store') }}" id="createGroupForm" style="display: flex; flex-direction: column; gap: 20px;">
                     @csrf
                     <input type="hidden" name="form_submitted" value="1">
 
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-400 mb-2">Nombre del grupo</label>
+                        <label for="name" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">Nombre del grupo</label>
                         <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
-                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('name') border-red-500 @enderror"
-                            placeholder="Ej: Grupo de amigos">
+                            style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease;"
+                            onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
+                            onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'"
+                            placeholder="Ej: Grupo de amigos" />
                         @error('name')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                            <p style="margin-top: 6px; font-size: 13px; color: #ef4444;">{{ $message }}</p>
                         @enderror
                     </div>
                     {{-- category --}}
                     <div>
-                        <label for="category" class="block text-sm font-medium text-gray-400 mb-2">Categoría</label>
+                        <label for="category" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">Categoría</label>
                         <select id="category" name="category" required readonly
-                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('category') border-red-500 @enderror">
+                            style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; cursor: pointer;">
                             <option value="official" selected>Oficial</option>
                             <option value="aficionado">Mis partidos</option>
                         </select>
                     </div>
 
                     <div>
-                        <label for="competition_id" class="block text-sm font-medium text-gray-400 mb-2">Competición</label>
+                        <label for="competition_id" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">Competición</label>
                         <select id="competition_id" name="competition_id" required
-                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('competition_id') border-red-500 @enderror">
+                            style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; cursor: pointer;"
+                            onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
+                            onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'">
                             <option value="">Selecciona una competición</option>
                             @foreach($competitions as $competition)
                                 <option value="{{ $competition->id }}" {{ old('competition_id') == $competition->id ? 'selected' : '' }}>
@@ -44,35 +62,51 @@
                             @endforeach
                         </select>
                         @error('competition_id')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                            <p style="margin-top: 6px; font-size: 13px; color: #ef4444;">{{ $message }}</p>
                         @enderror
                     </div>
                     {{-- recompensa o penalización --}}
                     <div>
-                        <label for="reward_or_penalty" class="block text-sm font-medium text-gray-400 mb-2">Recompensa o penalización</label>
+                        <label for="reward_or_penalty" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">Recompensa o penalización</label>
                         <textarea id="reward_or_penalty" name="reward_or_penalty" rows="4"
-                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('reward_or_penalty') border-red-500 @enderror"
+                            style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; resize: vertical; font-family: inherit;"
+                            onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
+                            onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'"
                             placeholder="Escribe el premio para el ganador o la penitencia para el perdedor">{{ old('reward_or_penalty') }}</textarea>
                     </div>
 
-                    <div class="flex items-center justify-between">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; margin-top: 12px; border-top: 1px solid {{ $borderColor }};">
                         <a href="{{ route('groups.index') }}"
-                           class="text-sm text-offside-light hover:text-white transition-colors">
+                           style="font-size: 14px; color: {{ $textSecondary }}; text-decoration: none; transition: color 0.3s ease;"
+                           onmouseover="this.style.color='{{ $textPrimary }}'"
+                           onmouseout="this.style.color='{{ $textSecondary }}'">
                             Cancelar
                         </a>
                         <button type="submit"
-                                class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-6 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all relative"
+                                style="background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); color: white; padding: 12px 24px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;"
+                                onmouseover="this.style.opacity='0.9'"
+                                onmouseout="this.style.opacity='1'"
                                 id="submitButton">
                             <span id="buttonText">Crear grupo</span>
-                            <span id="loadingSpinner" class="hidden">
-                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
+                            <span id="loadingSpinner" style="display: none;">
+                                <i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i>
                             </span>
                         </button>
                     </div>
                 </form>
+
+                <style>
+                    @keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+
+                    html body input:focus,
+                    html body select:focus,
+                    html body textarea:focus {
+                        outline: none;
+                    }
+                </style>
 
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
@@ -99,7 +133,7 @@
                             isSubmitting = true;
                             submitButton.disabled = true;
                             buttonText.textContent = 'Creando...';
-                            loadingSpinner.classList.remove('hidden');
+                            loadingSpinner.style.display = 'inline';
 
                             // Deshabilitar el botón después de 5 segundos si no hay respuesta
                             setTimeout(() => {
@@ -107,7 +141,7 @@
                                     isSubmitting = false;
                                     submitButton.disabled = false;
                                     buttonText.textContent = 'Crear grupo';
-                                    loadingSpinner.classList.add('hidden');
+                                    loadingSpinner.style.display = 'none';
                                 }
                             }, 5000);
                         });
@@ -116,4 +150,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-dynamic-layout>

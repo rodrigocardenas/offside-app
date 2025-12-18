@@ -1,201 +1,299 @@
-<x-app-layout>
-    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6">
-        <div class="max-w-4xl mx-auto">
-            <!-- Encabezado -->
-            <div class="mb-8 mt-12">
-                <h1 class="text-2xl font-bold mb-2">Editar Perfil</h1>
-                <p class="text-offside-light">Actualiza tu información personal y preferencias.</p>
+@php
+    $themeMode = auth()->user()->theme_mode ?? 'auto';
+    $isDark = $themeMode === 'dark' || ($themeMode === 'auto' && false);
+    $layout = $isDark ? 'mobile-dark-layout' : 'mobile-light-layout';
+@endphp
+
+<x-dynamic-layout :layout="$layout">
+    @push('scripts')
+        <script src="{{ asset('js/common/navigation.js') }}"></script>
+        <script src="{{ asset('js/common/modal-handler.js') }}"></script>
+    @endpush
+
+    <div class="main-container">
+        {{-- HEADER --}}
+        <x-layout.header-profile
+            :logo-url="asset('images/logo_alone.png')"
+            alt-text="Offside Club"
+        />
+
+        {{-- SUCCESS MESSAGE --}}
+        @if(session('success'))
+            @php
+                $msgBgProfile = $isDark ? 'background: rgba(40, 167, 69, 0.15); color: #5cdd6f;' : 'background: #d4edda; color: #155724;';
+            @endphp
+            <div style="{{ $msgBgProfile }} border-left: 4px solid #28a745; padding: 12px 16px; margin: 16px; border-radius: 8px; font-size: 14px;">
+                <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                {{ session('success') }}
             </div>
+        @endif
 
-            <!-- Formulario -->
-            <div class="card rounded-lg p-6" style="margin-bottom: 90px;">
-                @if(session('success'))
-                    <div class="mb-4 p-4 bg-green-600 rounded-md">
-                        {{ session('success') }}
-                    </div>
-                @endif
+        {{-- PROFILE FORM --}}
+        <div class="profile-section">
+            {{-- <div class="section-title mt-8 mb-4" style="display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 24px; margin-bottom: 16px;">
+                <i class="fas fa-user"></i>
+                Editar Perfil
+            </div> --}}
+            {{-- <p style="color: #666; font-size: 14px; margin: 0 16px 20px 16px;">Actualiza tu información personal</p> --}}
 
-                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
+            <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" style="margin: 16px; padding-bottom: 80px;">
+                @csrf
+                @method('PUT')
 
-                    <!-- Avatar -->
-                    <div class="mb-6 flex flex-col items-center">
-                        <div class="relative mb-4">
-                            @if($user->avatar)
-                                <img src="{{ $user->avatar_url }}"
-                                     alt="{{ $user->name }}"
-                                     class="w-32 h-32 rounded-full object-cover border-2 border-offside-primary">
-                            @else
-                                <div class="w-32 h-32 rounded-full bg-offside-primary flex items-center justify-center">
-                                    <span class="text-4xl">{{ substr($user->name, 0, 1) }}</span>
-                                </div>
-                            @endif
-                            <label for="avatar" class="absolute bottom-0 right-0 bg-offside-primary p-2 rounded-full cursor-pointer hover:bg-offside-primary/90">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <input type="file" id="avatar" name="avatar" class="hidden" accept="image/*">
-                            </label>
-                        </div>
-                        <p class="text-sm text-offside-light">Haz clic en el ícono para cambiar tu foto de perfil</p>
-                        @error('avatar')
-                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
-                        @enderror
+                {{-- AVATAR SECTION --}}
+                @php
+                    $cardBg = $isDark ? '#1a3d3a' : '#fff';
+                    $cardBorder = $isDark ? '#2a4a47' : '#e0e0e0';
+                    $textColor = $isDark ? '#b0b0b0' : '#666';
+                    $labelColor = $isDark ? '#ffffff' : '#333';
+                    $inputBg = $isDark ? '#0f3d3a' : 'white';
+                @endphp
+                <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 20px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }}; text-align: center;">
+                    <div style="position: relative; display: inline-block; margin-bottom: 16px;">
+                        @if($user->avatar)
+                            <img src="{{ $user->avatar_url }}"
+                                 alt="{{ $user->name }}"
+                                 class="avatar-preview"
+                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #00deb0; display: block;">
+                        @else
+                            <div class="avatar-placeholder" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #17b796, #00deb0); display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; font-weight: bold; border: 3px solid #00deb0; margin: 0 auto;">
+                                {{ substr($user->name, 0, 1) }}
+                            </div>
+                        @endif
+                        <label for="avatar" style="position: absolute; bottom: -8px; right: -8px; background: #00deb0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 222, 176, 0.3); transition: all 0.3s ease; border: 3px solid white;">
+                            <i class="fas fa-camera" style="color: white; font-size: 16px;"></i>
+                        </label>
+                        <input type="file" id="avatar" name="avatar" accept="image/*" style="display: none;">
                     </div>
-
-                    <!-- Nombre -->
-                    <div class="mb-4">
-                        <label for="name" class="block text-sm font-medium mb-2">Nombre</label>
-                        <input type="text" id="name" name="name"
-                               value="{{ old('name', $user->name) }}"
-                               class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
-                        @error('name')
-                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Email -->
-                    <div class="mb-6">
-                        <label for="email" class="block text-sm font-medium mb-2">Correo electrónico</label>
-                        <input type="email" id="email" name="email"
-                               value="{{ old('email', $user->email) }}"
-                               class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
-                        @error('email')
-                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Competencia Favorita -->
-                    <div class="mb-6">
-                        <label for="favorite_competition_id" class="block text-sm font-medium mb-2">Competencia Favorita</label>
-                        <select id="favorite_competition_id" name="favorite_competition_id"
-                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
-                            <option value="">Selecciona una competencia</option>
-                            @foreach($competitions as $competition)
-                                <option value="{{ $competition->id }}" {{ old('favorite_competition_id', $user->favorite_competition_id) == $competition->id ? 'selected' : '' }}>
-                                    {{ $competition->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('favorite_competition_id')
-                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Club Favorito -->
-                    <div class="mb-6">
-                        <label for="favorite_club_id" class="block text-sm font-medium mb-2">Club Favorito</label>
-                        <select id="favorite_club_id" name="favorite_club_id"
-                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
-                            <option value="">Selecciona un club</option>
-                            @foreach($clubs as $club)
-                                <option value="{{ $club->id }}" {{ old('favorite_club_id', $user->favorite_club_id) == $club->id ? 'selected' : '' }}>
-                                    {{ $club->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('favorite_club_id')
-                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Selección Nacional Favorita -->
-                    <div class="mb-6">
-                        <label for="favorite_national_team_id" class="block text-sm font-medium mb-2">Selección Nacional Favorita</label>
-                        <select id="favorite_national_team_id" name="favorite_national_team_id"
-                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
-                            <option value="">Selecciona una selección</option>
-                            @foreach($nationalTeams as $team)
-                                <option value="{{ $team->id }}" {{ old('favorite_national_team_id', $user->favorite_national_team_id) == $team->id ? 'selected' : '' }}>
-                                    {{ $team->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('favorite_national_team_id')
-                            <p class="mt-1 text-red-400 text-sm">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    {{-- theme selector --}}
-                    <div class="mb-6">
-                        <label for="theme" class="block text-sm font-medium mb-2">Tema</label>
-                        <select id="theme" name="theme"
-                                class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white focus:ring-2 focus:ring-offset-2 focus:ring-offside-primary focus:outline-none">
-                            <option value="light" {{ $user->theme === 'light' ? 'selected' : '' }}>Claro</option>
-                            <option value="dark" {{ $user->theme === 'dark' ? 'selected' : '' }}>Oscuro</option>
-                        </select>
-                    </div>
-
-                    <!-- Botones -->
-                    <div class="flex justify-end space-x-4">
-                        <a href="{{ url()->previous() }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
-                            Cancelar
-                        </a>
-                        <button type="submit" class="px-4 py-2 bg-offside-primary text-white rounded-md hover:bg-offside-primary/90 transition-colors">
-                            Guardar cambios
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="fixed bottom-0 left-0 right-0 bg-offside-dark border-t border-offside-primary">
-            <div class="max-w-4xl mx-auto">
-                <div class="flex justify-around items-center py-3">
-                    <!-- <a href="{{ route('dashboard') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        <span class="text-xs mt-1">Inicio</span>
-                    </a> -->
-                    <a href="{{ route('groups.index') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <span class="text-xs mt-1">Grupos</span>
-                    </a>
-                    <a href="{{ route('rankings.daily') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                        <span class="text-xs mt-1">Ranking</span>
-                    </a>
-                    <a href="#" id="openFeedbackModal" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                        <span class="text-xs mt-1">Tu opinión</span>
-                    </a>
-                    <a href="{{ route('profile.edit') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span class="text-xs mt-1">Perfil</span>
-                    </a>
+                    <p style="color: {{ $textColor }}; font-size: 13px; margin: 8px 0 0 0; padding: 0 16px; word-wrap: break-word; overflow-wrap: break-word;">Toca el ícono para cambiar tu foto</p>
+                    @error('avatar')
+                        <p style="color: #dc3545; font-size: 12px; margin-top: 8px;">{{ $message }}</p>
+                    @enderror
                 </div>
-            </div>
-            <!-- Botón flotante del chat -->
 
+                {{-- NOMBRE --}}
+                <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
+                    <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
+                        <i class="fas fa-user" style="color: #00deb0; margin-right: 6px;"></i>
+                        Nombre
+                    </label>
+                    <input type="text" id="name" name="name"
+                           value="{{ old('name', $user->name) }}"
+                           style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; background: {{ $inputBg }}; box-sizing: border-box;">
+                    @error('name')
+                        <p style="color: #dc3545; font-size: 12px; margin-top: 6px;">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- EMAIL --}}
+                <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
+                    <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
+                        <i class="fas fa-envelope" style="color: #00deb0; margin-right: 6px;"></i>
+                        Correo electrónico
+                    </label>
+                    <input type="email" id="email" name="email"
+                           value="{{ old('email', $user->email) }}"
+                           style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; background: {{ $inputBg }}; box-sizing: border-box;">
+                    @error('email')
+                        <p style="color: #dc3545; font-size: 12px; margin-top: 6px;">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- COMPETENCIA FAVORITA --}}
+                <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
+                    <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
+                        <i class="fas fa-trophy" style="color: #00deb0; margin-right: 6px;"></i>
+                        Competencia Favorita
+                    </label>
+                    <select id="favorite_competition_id" name="favorite_competition_id"
+                            style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; box-sizing: border-box; background: {{ $inputBg }};">
+                        <option value="">Selecciona una competencia</option>
+                        @foreach($competitions as $competition)
+                            <option value="{{ $competition->id }}" {{ old('favorite_competition_id', $user->favorite_competition_id) == $competition->id ? 'selected' : '' }}>
+                                {{ $competition->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('favorite_competition_id')
+                        <p style="color: #dc3545; font-size: 12px; margin-top: 6px;">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- CLUB FAVORITO --}}
+                <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
+                    <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
+                        <i class="fas fa-shield-alt" style="color: #00deb0; margin-right: 6px;"></i>
+                        Club Favorito
+                    </label>
+                    <select id="favorite_club_id" name="favorite_club_id"
+                            style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; box-sizing: border-box; background: {{ $inputBg }};">
+                        <option value="">Selecciona un club</option>
+                        @foreach($clubs as $club)
+                            <option value="{{ $club->id }}" {{ old('favorite_club_id', $user->favorite_club_id) == $club->id ? 'selected' : '' }}>
+                                {{ $club->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('favorite_club_id')
+                        <p style="color: #dc3545; font-size: 12px; margin-top: 6px;">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- SELECCIÓN NACIONAL FAVORITA --}}
+                <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
+                    <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
+                        <i class="fas fa-flag" style="color: #00deb0; margin-right: 6px;"></i>
+                        Selección Nacional Favorita
+                    </label>
+                    <select id="favorite_national_team_id" name="favorite_national_team_id"
+                            style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; box-sizing: border-box; background: {{ $inputBg }};">
+                        <option value="">Selecciona una selección</option>
+                        @foreach($nationalTeams as $team)
+                            <option value="{{ $team->id }}" {{ old('favorite_national_team_id', $user->favorite_national_team_id) == $team->id ? 'selected' : '' }}>
+                                {{ $team->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('favorite_national_team_id')
+                        <p style="color: #dc3545; font-size: 12px; margin-top: 6px;">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- BOTÓN GUARDAR --}}
+                <button type="submit" style="width: 100%; padding: 12px 16px; background: linear-gradient(135deg, #17b796, #00deb0); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px;">
+                    <i class="fas fa-save"></i>
+                    Guardar Cambios
+                </button>
+            </form>
+        </div>
+        {{-- BOTTOM NAVIGATION --}}
+        <x-layout.bottom-navigation active-item="profile" />
     </div>
 
+    {{-- MODALES --}}
+    @if(View::exists('components.feedback-modal'))
+        <x-feedback-modal />
+    @endif
+
+
+    <style>
+        .profile-section {
+            margin-bottom: 80px;
+        }
+
+        /* Avatar Label - Hover Effect */
+        label[for="avatar"] {
+            transition: all 0.3s ease;
+        }
+
+        label[for="avatar"]:hover {
+            background: #0eb88a !important;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 222, 176, 0.4) !important;
+        }
+
+        label[for="avatar"]:active {
+            transform: scale(0.95);
+        }
+
+        /* Avatar Preview */
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #00deb0;
+            display: block;
+        }
+
+        .avatar-placeholder {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #17b796, #00deb0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            border: 3px solid #00deb0;
+            margin: 0 auto;
+        }
+
+        /* Estilos para input y select */
+        input[type="text"],
+        input[type="email"],
+        select {
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #00deb0;
+            box-shadow: 0 0 0 3px rgba(0, 222, 176, 0.1);
+        }
+
+        button[type="submit"] {
+            transition: all 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 222, 176, 0.3);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        /* Responsivo */
+        @media (max-width: 480px) {
+            .avatar-placeholder,
+            .avatar-preview {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+
+            label[for="avatar"] {
+                width: 36px;
+                height: 36px;
+                bottom: -6px;
+                right: -6px;
+            }
+
+            label[for="avatar"] i {
+                font-size: 14px;
+            }
+        }
+    </style>
 
     <script>
         // Mostrar vista previa de la imagen seleccionada
         document.getElementById('avatar').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
+                // Validar que sea una imagen
+                if (!file.type.startsWith('image/')) {
+                    alert('Por favor selecciona un archivo de imagen');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    img.className = 'w-32 h-32 rounded-full object-cover border-2 border-offside-primary';
+                    img.classList.add('avatar-preview');
+                    img.style.display = 'block';
 
-                    const avatarContainer = document.querySelector('.relative.mb-4');
-                    const existingImg = avatarContainer.querySelector('img, div');
-                    if (existingImg) {
-                        avatarContainer.replaceChild(img, existingImg);
-                    } else {
-                        avatarContainer.appendChild(img);
+                    const avatarContainer = document.querySelector('div[style*="position: relative"]');
+                    const existingElement = avatarContainer.querySelector('img, .avatar-placeholder');
+
+                    if (existingElement) {
+                        avatarContainer.replaceChild(img, existingElement);
                     }
                 }
                 reader.readAsDataURL(file);
@@ -235,7 +333,4 @@
             }, 1000);
         </script>
     @endif
-
-<x-feedback-modal />
-
-</x-app-layout>
+</x-dynamic-layout>

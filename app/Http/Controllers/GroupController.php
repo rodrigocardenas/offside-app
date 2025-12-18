@@ -22,6 +22,7 @@ use App\Traits\HandlesQuestions;
 use App\Services\GroupRoleService;
 use App\Models\Answer;
 use App\Notifications\NewPredictiveQuestionsAvailable;
+use App\Exceptions\GroupAccessException;
 
 class GroupController extends Controller
 {
@@ -91,22 +92,58 @@ class GroupController extends Controller
 
     public function index()
     {
-        $groups = auth()->user()->groups()
-            ->with(['creator', 'competition', 'users.roles'])
+        $user = auth()->user();
+
+        $groups = $user->groups()
+            ->with([
+                'creator:id,name',
+                'competition:id,name,type,crest_url',
+                'users' => function ($query) {
+                    $query->select('users.id', 'users.name')
+                          ->with('roles:id,name');
+                }
+            ])
+            ->withCount('users')
             ->get();
+
+        // Enrich groups with additional data
+        $groups = $groups->map(function($group) use ($user) {
+            $group->userRank = $group->getUserRank($user->id);
+            $group->pending = $group->hasPendingPredictions($user->id);
+            return $group;
+        });
 
         $officialGroups = $groups->where('category', 'official');
         $amateurGroups = $groups->where('category', 'amateur');
 
-        return view('groups.index', compact('officialGroups', 'amateurGroups'));
+        // Calculate user stats
+        $userStreak = $this->calculateUserStreak($user);
+        $userAccuracy = $this->calculateUserAccuracy($user);
+        $totalGroups = $groups->count();
+
+        // Get featured match (next match in user's groups)
+        $featuredMatch = $this->getFeaturedMatch($groups);
+
+        // Check for pending predictions
+        $hasPendingPredictions = $this->checkPendingPredictions($user, $groups);
+
+        return view('groups.index', compact(
+            'officialGroups',
+            'amateurGroups',
+            'userStreak',
+            'userAccuracy',
+            'totalGroups',
+            'featuredMatch',
+            'hasPendingPredictions'
+        ));
     }
 
     public function create()
     {
         $competitions = Competition::whereIn('type', [
-            'world-club-championship',
-            'chile-campeonato-nacional',
-            'liga-colombia',
+            'laliga',
+            'premier',
+            'champions',
         ])->get();
         return view('groups.create', compact('competitions'));
     }
@@ -163,7 +200,8 @@ class GroupController extends Controller
             }
 
             // Limpiar cualquier caché relacionada
-            Cache::tags(['groups', 'user_' . auth()->id()])->flush();
+            Cache::forget('user_' . auth()->id() . '_groups');
+            Cache::forget('groups_list');
 
             return redirect()->route('groups.show', $group)
                 ->with('success', 'Grupo creado exitosamente.');
@@ -219,15 +257,19 @@ class GroupController extends Controller
 
             // Enviar notificación de nuevas preguntas si se generaron
             if ($questions->count() > 0) {
-                foreach ($group->users as $user) {
-                    $yaNotificado = $user->unreadNotifications()
-                        ->where('type', \App\Notifications\NewPredictiveQuestionsAvailable::class)
-                        ->where('data->group_id', $group->id)
-                        ->exists();
+                // Obtener IDs de usuarios ya notificados para evitar N+1 queries
+                $notifiedUserIds = DB::table('notifications')
+                    ->where('type', \App\Notifications\NewPredictiveQuestionsAvailable::class)
+                    ->where('read_at', null)
+                    ->whereRaw("JSON_EXTRACT(data, '$.group_id') = ?", [$group->id])
+                    ->pluck('notifiable_id')
+                    ->unique();
 
-                    if (!$yaNotificado) {
-                        $user->notify(new NewPredictiveQuestionsAvailable($group, $questions->count()));
-                    }
+                // Notificar solo a usuarios no notificados
+                $usersToNotify = $group->users->whereNotIn('id', $notifiedUserIds);
+
+                foreach ($usersToNotify as $user) {
+                    $user->notify(new NewPredictiveQuestionsAvailable($group, $questions->count()));
                 }
             }
 
@@ -251,23 +293,30 @@ class GroupController extends Controller
             // Obtener roles
             $roles = $this->groupRoleService->getGroupRoles($group);
 
-            // Cargar relaciones del grupo
+            // Cargar relaciones del grupo de manera optimizada
             $group->load([
-                'competition',
+                'competition:id,name,type,crest_url',
                 'users' => function ($query) use ($group) {
-                    $query->with([
-                        'answers' => function ($query) use ($group) {
-                            $query->whereHas('question', function ($questionQuery) use ($group) {
-                                $questionQuery->where('group_id', $group->id);
-                            });
-                        }
-                    ])->withSum(['answers as total_points' => function ($query) use ($group) {
-                        $query->whereHas('question', function ($questionQuery) use ($group) {
-                            $questionQuery->where('group_id', $group->id);
-                        });
-                    }], 'points_earned');
+                    $query->select('users.id', 'users.name', 'users.avatar')
+                          ->with([
+                              'answers' => function ($query) use ($group) {
+                                  $query->select('answers.id', 'answers.user_id', 'answers.points_earned', 'answers.question_id')
+                                        ->whereHas('question', function ($questionQuery) use ($group) {
+                                            $questionQuery->where('group_id', $group->id);
+                                        });
+                              }
+                          ])->withSum(['answers as total_points' => function ($query) use ($group) {
+                              $query->whereHas('question', function ($questionQuery) use ($group) {
+                                  $questionQuery->where('group_id', $group->id);
+                              });
+                          }], 'points_earned');
                 },
-                'chatMessages.user'
+                'chatMessages' => function ($query) {
+                    $query->select('chat_messages.id', 'chat_messages.message', 'chat_messages.user_id', 'chat_messages.group_id', 'chat_messages.created_at')
+                          ->with('user:id,name,avatar')
+                          ->latest()
+                          ->limit(50); // Limitar mensajes de chat para mejor rendimiento
+                }
             ]);
 
             // Asignar roles
@@ -287,7 +336,57 @@ class GroupController extends Controller
         });
 
         if (!$cachedData['group']->users->contains('id', auth()->id())) {
-            return redirect()->route('dashboard')->with('error', 'No tienes acceso a este grupo.');
+            // si el grupo es el id 83 (grupo oficial de la app) AGREGAR al usuario al grupo automáticamente
+            if ($group->id === 83) {
+                $group->users()->attach(auth()->id());
+                // Limpiar caché relacionada
+                Cache::forget('user_' . auth()->id() . '_groups');
+                Cache::forget('groups_list');
+                // Recargar datos frescos
+                $group->load([
+                    'competition:id,name,type,crest_url',
+                    'users' => function ($query) use ($group) {
+                        $query->select('users.id', 'users.name', 'users.avatar')
+                              ->with([
+                                  'answers' => function ($query) use ($group) {
+                                      $query->select('answers.id', 'answers.user_id', 'answers.points_earned', 'answers.question_id')
+                                            ->whereHas('question', function ($questionQuery) use ($group) {
+                                                $questionQuery->where('group_id', $group->id);
+                                            });
+                                  }
+                              ])->withSum(['answers as total_points' => function ($query) use ($group) {
+                                  $query->whereHas('question', function ($questionQuery) use ($group) {
+                                      $questionQuery->where('group_id', $group->id);
+                                  });
+                              }], 'points_earned');
+                    },
+                    'chatMessages' => function ($query) {
+                        $query->select('chat_messages.id', 'chat_messages.message', 'chat_messages.user_id', 'chat_messages.group_id', 'chat_messages.created_at')
+                              ->with('user:id,name,avatar')
+                              ->latest()
+                              ->limit(50);
+                    }
+                ]);
+
+                $this->groupRoleService->assignRolesToUsers($group, $this->groupRoleService->getGroupRoles($group));
+
+                $matchQuestions = $this->getMatchQuestions($group, $this->groupRoleService->getGroupRoles($group));
+                $socialQuestion = $this->getSocialQuestion($group, $this->groupRoleService->getGroupRoles($group));
+                $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
+
+                return view('groups.show', [
+                    'group' => $group,
+                    'matchQuestions' => $matchQuestions,
+                    'userAnswers' => $userAnswers,
+                    'socialQuestion' => $socialQuestion,
+                    'currentMatchday' => null
+                ])->with('success', 'Te has unido al grupo oficial exitosamente.');
+            }
+            throw new GroupAccessException(
+                "No tienes acceso a este grupo",
+                $group->id,
+                auth()->id()
+            );
         }
 
         return view('groups.show', array_merge($cachedData, ['currentMatchday' => null]));
@@ -394,8 +493,20 @@ class GroupController extends Controller
             'ip' => request()->ip()
         ]);
 
-        return DB::transaction(function () use ($request) {
-            $group = Group::where('code', $request->code)->firstOrFail();
+        // Buscar el grupo por código
+        $group = Group::where('code', $request->code)->first();
+
+        if (!$group) {
+            Log::warning('Intento de unirse a grupo inexistente', [
+                'code' => $request->code,
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()->route('groups.index')
+                ->with('error', 'El código del grupo no existe o es incorrecto.');
+        }
+
+        return DB::transaction(function () use ($request, $group) {
 
             // Verificar si ya es miembro usando la relación pivot con bloqueo
             $existingMembership = $group->users()
@@ -445,7 +556,8 @@ class GroupController extends Controller
             ]);
 
             // Limpiar caché relacionada
-            Cache::tags(['groups', 'user_' . auth()->id()])->flush();
+            Cache::forget('user_' . auth()->id() . '_groups');
+            Cache::forget('groups_list');
 
             return redirect()->route('groups.show', $group)
                 ->with('success', 'Te has unido al grupo exitosamente.');
@@ -482,8 +594,20 @@ class GroupController extends Controller
             'ip' => request()->ip()
         ]);
 
-        return DB::transaction(function () use ($code) {
-            $group = Group::where('code', $code)->firstOrFail();
+        // Buscar el grupo por código
+        $group = Group::where('code', $code)->first();
+
+        if (!$group) {
+            Log::warning('Intento de unirse a grupo inexistente por invitación', [
+                'code' => $code,
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()->route('groups.index')
+                ->with('error', 'El enlace de invitación es inválido o ha expirado.');
+        }
+
+        return DB::transaction(function () use ($code, $group) {
 
             // Verificar si ya es miembro usando la relación pivot con bloqueo
             $existingMembership = $group->users()
@@ -532,7 +656,8 @@ class GroupController extends Controller
             ]);
 
             // Limpiar caché relacionada
-            Cache::tags(['groups', 'user_' . auth()->id()])->flush();
+            Cache::forget('user_' . auth()->id() . '_groups');
+            Cache::forget('groups_list');
             Cache::forget("group_{$group->id}_show_data");
 
             return redirect()->route('groups.show', $group)
@@ -573,10 +698,9 @@ class GroupController extends Controller
             return null;
         }
 
-        $socialQuestion = Question::where('type', 'social')
-            ->where('group_id', $group->id)
-            ->where('available_until', '>', now())
-            ->first();
+        $socialQuestion = Question::where('type', 'social')->where('group_id', $group->id)->where('available_until', '>', now())->first();
+
+        $question = null;
 
         if (!$socialQuestion) {
             // Obtener una pregunta social aleatoria que no haya sido usada en este grupo
@@ -613,7 +737,7 @@ class GroupController extends Controller
                 ]);
             }
         } else {
-            if ($socialQuestion->id == 42 || $socialQuestion->id == 90) {
+            if ($socialQuestion->id == 42 || $socialQuestion->id == 340) {
                 Log::info('Pregunta social 42: ' . $socialQuestion->text);
                 return $socialQuestion->load(['options', 'answers.user']);
             }
@@ -633,7 +757,7 @@ class GroupController extends Controller
             }
         }
 
-        return $question->load(['options', 'answers.user']);
+        return $question?->load(['options', 'answers.user']);
     }
 
     public function testGenerateQuestions()
@@ -904,15 +1028,19 @@ class GroupController extends Controller
     {
         // Verificar que el usuario sea miembro del grupo
         if (!$group->users->contains('id', auth()->id())) {
-            return redirect()->route('dashboard')->with('error', 'No tienes acceso a este grupo.');
+            throw new GroupAccessException(
+                "No tienes acceso a este grupo",
+                $group->id,
+                auth()->id()
+            );
         }
 
-        // Obtener las últimas respuestas predictivas del usuario en este grupo
+        // Obtener las últimas respuestas predictivas del usuario en este grupo con una sola query optimizada
         $predictiveAnswers = Answer::where('user_id', auth()->id())
             ->whereHas('question', function ($query) use ($group) {
                 $query->where('group_id', $group->id)
                     ->where('type', 'predictive')
-                    ->where('result_verified_at', '!=', null); // Solo preguntas con resultados verificados
+                    ->whereNotNull('result_verified_at'); // Solo preguntas con resultados verificados
             })
             ->with([
                 'question' => function ($query) {
@@ -924,17 +1052,20 @@ class GroupController extends Controller
             ->limit(20) // Últimas 20 respuestas
             ->get();
 
-        // Obtener los IDs de las preguntas para buscar los votos de todos los usuarios
+        // Obtener los IDs de las preguntas
         $questionIds = $predictiveAnswers->pluck('question_id')->unique();
 
-        // Obtener todos los votos de todos los usuarios del grupo para esas preguntas
+        // Obtener todos los votos de todos los usuarios del grupo para esas preguntas en una sola query
         $allVotes = Answer::whereIn('question_id', $questionIds)
             ->whereHas('question', function ($query) use ($group) {
                 $query->where('group_id', $group->id)
                     ->where('type', 'predictive')
-                    ->where('result_verified_at', '!=', null);
+                    ->whereNotNull('result_verified_at');
             })
-            ->with(['user', 'questionOption'])
+            ->with([
+                'user:id,name', // Solo cargar campos necesarios
+                'questionOption:id,text'
+            ])
             ->get()
             ->groupBy('question_id');
 
@@ -956,5 +1087,144 @@ class GroupController extends Controller
 
         // Pasar $allVotes a la vista
         return view('groups.predictive-results', compact('group', 'groupedAnswers', 'stats', 'allVotes'));
+    }
+
+    /**
+     * Calculate user's current streak of consecutive days with predictions
+     */
+    protected function calculateUserStreak($user)
+    {
+        $answers = Answer::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($answers->isEmpty()) {
+            return 0;
+        }
+
+        $streak = 1;
+        $lastDate = $answers->first()->created_at->startOfDay();
+
+        foreach ($answers->skip(1) as $answer) {
+            $answerDate = $answer->created_at->startOfDay();
+            $dayDiff = $lastDate->diffInDays($answerDate);
+
+            if ($dayDiff === 1) {
+                $streak++;
+                $lastDate = $answerDate;
+            } elseif ($dayDiff > 1) {
+                break;
+            }
+        }
+
+        return $streak;
+    }
+
+    /**
+     * Calculate user's prediction accuracy percentage
+     */
+    protected function calculateUserAccuracy($user)
+    {
+        $totalAnswers = Answer::where('user_id', $user->id)
+            ->whereHas('question', function($q) {
+                $q->whereNotNull('result_verified_at');
+            })
+            ->count();
+
+        if ($totalAnswers === 0) {
+            return 0;
+        }
+
+        $correctAnswers = Answer::where('user_id', $user->id)
+            ->where('is_correct', true)
+            ->whereHas('question', function($q) {
+                $q->whereNotNull('result_verified_at');
+            })
+            ->count();
+
+        return round(($correctAnswers / $totalAnswers) * 100);
+    }
+
+    /**
+     * Get the next featured match from user's groups
+     */
+    protected function getFeaturedMatch($groups)
+    {
+        $competitionIds = $groups->pluck('competition_id')->filter()->unique();
+
+        if ($competitionIds->isEmpty()) {
+            return null;
+        }
+
+        return FootballMatch::whereIn('competition_id', $competitionIds)
+            ->where('date', '>', now())
+            ->with(['homeTeam', 'awayTeam', 'competition'])
+            ->orderBy('date', 'asc')
+            ->first();
+    }
+
+    /**
+     * Check if user has pending predictions in any group
+     */
+    protected function checkPendingPredictions($user, $groups)
+    {
+        $groupIds = $groups->pluck('id');
+
+        $unansweredQuestions = Question::whereIn('group_id', $groupIds)
+            ->where('available_until', '>', now())
+            ->whereDoesntHave('answers', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->exists();
+
+        return $unansweredQuestions;
+    }
+
+    /**
+     * Get group ranking data for API
+     */
+    public function getRanking(Group $group)
+    {
+        // Verify user has access
+        if (!$group->users->contains('id', auth()->id())) {
+            return response()->json([
+                'error' => 'No tienes acceso a este grupo'
+            ], 403);
+        }
+
+        // Get ranked users with their stats
+        $rankedUsers = $group->users()
+            ->withCount([
+                'answers as correct_answers' => function($q) use ($group) {
+                    $q->where('is_correct', true)
+                      ->whereHas('question', function($query) use ($group) {
+                          $query->where('group_id', $group->id);
+                      });
+                }
+            ])
+            ->orderBy('total_points', 'desc')
+            ->get()
+            ->map(function($user, $index) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'total_points' => $user->total_points ?? 0,
+                    'correct_answers' => $user->correct_answers ?? 0,
+                    'rank' => $index + 1,
+                    'is_current_user' => $user->id === auth()->id()
+                ];
+            });
+
+        // Get current user stats
+        $currentUser = $rankedUsers->firstWhere('is_current_user', true);
+
+        return response()->json([
+            'players' => $rankedUsers->values(),
+            'stats' => [
+                'total_players' => $rankedUsers->count(),
+                'user_position' => $currentUser['rank'] ?? null,
+                'user_points' => $currentUser['total_points'] ?? 0
+            ]
+        ]);
     }
 }

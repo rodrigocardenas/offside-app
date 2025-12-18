@@ -9,9 +9,8 @@ export default defineConfig(({ mode }) => {
         plugins: [
             laravel({
                 input: [
-                    'resources/css/app.css', 
-                    'resources/js/app.js',
-                    'resources/js/navigation.js'
+                    'resources/css/app.css',
+                    'resources/js/app.js'
                 ],
                 refresh: true,
             }),

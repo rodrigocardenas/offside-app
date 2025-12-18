@@ -1,9 +1,19 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import '@fortawesome/fontawesome-free/js/all';
+import './header-dropdown';
+import './navigation';
 
 window.Alpine = Alpine;
-Alpine.start();
+
+// Inicializar Alpine después de que el DOM esté completamente cargado
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        Alpine.start();
+    });
+} else {
+    Alpine.start();
+}
 
 // Sistema global de prevención de envíos duplicados
 const formSubmissionTracker = {

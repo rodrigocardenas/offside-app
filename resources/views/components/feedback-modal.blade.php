@@ -1,36 +1,40 @@
 <!-- Modal de Feedback -->
-<div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-offside-dark rounded-lg p-6 w-full max-w-md">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold">Envíanos tu opinión</h3>
-            <button id="closeFeedbackModal" onclick="document.getElementById('feedbackModal').classList.add('hidden')" class="text-offside-light hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+<div id="feedbackModal" class="modal-overlay">
+    <div class="modal-content" style="background: var(--dark-bg-secondary, #fff); color: var(--dark-text-primary, #333);">
+        <div class="modal-header" style="border-bottom-color: var(--dark-border, #e0e0e0);">
+            <h3 class="modal-title" style="color: var(--dark-text-primary, #333);">Envíanos tu opinión</h3>
+            <button id="closeFeedbackModal" class="modal-close" type="button" style="color: var(--dark-text-secondary, #666);">
+                <i class="fas fa-times"></i>
             </button>
         </div>
+
         <form id="feedbackForm" action="{{ route('feedback.store') }}" method="POST">
             @csrf
-            <div class="mb-4">
-                <label for="type" class="block text-sm font-medium mb-2">Tipo de comentario</label>
-                <select id="type" name="type" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white">
-                    <option value="suggestion">Sugerencia</option>
-                    <option value="bug">Reportar un error</option>
-                    <option value="compliment">Elogio</option>
-                    <option value="other">Otro</option>
-                </select>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="type" style="color: var(--dark-text-primary, #333);">Tipo de comentario</label>
+                    <select id="type" name="type" style="background: var(--dark-bg-tertiary, white); color: var(--dark-text-primary, #333); border-color: var(--dark-border, #e0e0e0);">
+                        <option value="suggestion">Sugerencia</option>
+                        <option value="bug">Reportar un error</option>
+                        <option value="compliment">Elogio</option>
+                        <option value="other">Otro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message" style="color: var(--dark-text-primary, #333);">Mensaje</label>
+                    <textarea id="message" name="message" rows="4" minlength="10" required style="background: var(--dark-bg-tertiary, white); color: var(--dark-text-primary, #333); border-color: var(--dark-border, #e0e0e0);"></textarea>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="is_anonymous" name="is_anonymous" style="width: auto; margin: 0;">
+                    <label for="is_anonymous" style="margin: 0; color: var(--dark-text-primary, #333);">Enviar como anónimo</label>
+                </div>
             </div>
-            <div class="mb-4">
-                <label for="message" class="block text-sm font-medium mb-2">Mensaje</label>
-                <textarea id="message" name="message" rows="4" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white" required></textarea>
-            </div>
-            <div class="mb-4 flex items-center">
-                <input type="checkbox" id="is_anonymous" name="is_anonymous" class="rounded border-offside-primary bg-offside-primary bg-opacity-20 text-offside-primary focus:ring-offside-primary">
-                <label for="is_anonymous" class="ml-2 text-sm">Enviar como anónimo</label>
-            </div>
-            <div class="flex justify-end space-x-2">
-                <button type="button" id="cancelFeedback" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-offside-primary text-white rounded-md hover:bg-offside-primary/90">Enviar</button>
+
+            <div class="modal-footer">
+                <button type="button" id="cancelFeedback" class="btn-secondary" style="background: var(--dark-bg-tertiary, #f0f0f0); color: var(--dark-text-primary, #333); border: 1px solid var(--dark-border, #e0e0e0);">Cancelar</button>
+                <button type="submit" class="btn-primary">Enviar</button>
             </div>
         </form>
     </div>
@@ -38,21 +42,40 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Abrir modal
-    document.getElementById('openFeedbackModal').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('feedbackModal').classList.remove('hidden');
+    const modal = document.getElementById('feedbackModal');
+    const closeBtn = document.getElementById('closeFeedbackModal');
+    const cancelBtn = document.getElementById('cancelFeedback');
+    const form = document.getElementById('feedbackForm');
+
+    // Función para abrir modal
+    window.openFeedbackModal = function(e) {
+        if (e) e.preventDefault();
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    // Función para cerrar modal
+    function closeFeedbackModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        form.reset();
+    }
+
+    // Event listeners
+    if (closeBtn) closeBtn.addEventListener('click', closeFeedbackModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeFeedbackModal);
+
+    // Cerrar al hacer click en el overlay
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeFeedbackModal();
+        }
     });
 
-    // Cerrar modal
-    document.getElementById('closeFeedbackModal').addEventListener('click', function() {
-        document.getElementById('feedbackModal').classList.add('hidden');
-    });
-
-    // Cancelar formulario
-    document.getElementById('cancelFeedback').addEventListener('click', function() {
-        document.getElementById('feedbackModal').classList.add('hidden');
-        document.getElementById('feedbackForm').reset();
+    // Enviar formulario
+    form.addEventListener('submit', function(e) {
+        // El formulario se enviará normalmente
+        console.log('📤 Enviando feedback...');
     });
 });
 </script>

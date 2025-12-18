@@ -51,7 +51,7 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
             try {
                 Log::info('Obteniendo partidos para la liga ' . $league);
                 // dump('Obteniendo partidos para la liga ' . $league);
-                $matches = $footballService->getNextMatches($league, 20);
+                $matches = $footballService->getNextMatches($league, 1);
                 Log::info('Se obtuvieron ' . count($matches) . ' partidos para la liga ' . $league);
                 Log::info('Partidos: ' . json_encode($matches));
 

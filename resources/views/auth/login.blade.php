@@ -1,88 +1,161 @@
-<x-app-layout>
-    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6">
-        <div class="max-w-md mx-auto">
-            <div class="bg-white bg-opacity-10 rounded-xl p-6 backdrop-blur-sm" style="margin-top: 50px;">
-                <div class="flex items-center justify-center mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-offside-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+@php
+    // Detectar tema: para login, usar tema claro por defecto ya que el usuario no está autenticado
+    $themeMode = 'light';
+    $isDark = false;
+    $layout = 'mobile-light-layout';
+
+    // Colores dinámicos
+    $bgCard = '#fff';
+    $bgInput = '#fff';
+    $textColor = '#333';
+    $labelColor = '#333';
+    $borderColor = '#e0e0e0';
+    $accentColor = '#00deb0';
+    $accentDark = '#17b796';
+@endphp
+
+<x-dynamic-layout :layout="$layout">
+    <div class="main-container" style="padding: 20px 16px; display: flex; flex-direction: column; min-height: 100vh; justify-content: center;">
+        <div style="max-width: 414px; width: 100%; margin: 0 auto;">
+            <!-- Logo y Título -->
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="margin-bottom: 16px;">
+                    <img src="{{ asset('images/logo_alone.png') }}" alt="Offside Club" style="width: 60px; height: 60px; margin: 0 auto; display: block;">
                 </div>
+                <h1 style="font-size: 28px; font-weight: 700; color: {{ $textColor }}; margin: 0 0 8px 0;">Offside Club</h1>
+                <p style="color: #999; font-size: 14px; margin: 0;">Tu app de predicciones</p>
+            </div>
 
-                <h2 class="text-2xl font-bold text-center text-offside-light mb-6">Iniciar sesión</h2>
+            <!-- Formulario de Login -->
+            <div style="background: {{ $bgCard }}; border-radius: 12px; padding: 20px; border: 1px solid {{ $borderColor }}; margin-bottom: 24px;">
+                <h2 style="font-size: 20px; font-weight: 600; color: {{ $textColor }}; margin: 0 0 20px 0; text-align: center;">
+                    Iniciar sesión
+                </h2>
 
-                <!-- Modal de instalación PWA -->
-                <div id="pwaInstallModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4" style="margin-top: 100px;">
-                    <div class="bg-white rounded-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
-                        <button onclick="closePwaModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-
-                        <div class="text-center">
-                            <img src="{{ asset('images/logo_white_bg.png') }}" alt="Offside Club" class="mx-auto mb-4 h-10 rounded-lg shadow-lg">
-                            <h3 class="text-xl font-bold text-gray-900 mb-3">¡Instala Offside Club!</h3>
-
-                            <!-- Instrucciones para Android -->
-                            <div id="androidInstructions" class="hidden">
-                                <p class="text-gray-600 mb-4">Instala la aplicación directamente en tu dispositivo Android para una mejor experiencia.</p>
-                                <button id="installPwaButton" class="w-full bg-[#FF6B35] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#FF6B35]/90 transition-colors mb-4">
-                                    Instalar App
-                                </button>
-                            </div>
-
-                            <!-- Instrucciones para iOS -->
-                            <div id="iosInstructions" class="hidden">
-                                <p class="text-gray-600 mb-4">Para instalar en tu iPhone o iPad:</p>
-                                <ol class="text-left text-gray-600 mb-4 space-y-2">
-                                    <li>1. Toca el botón <span class="font-semibold">Compartir</span> en Safari</li>
-                                    <li>2. Desplázate y selecciona <span class="font-semibold">Añadir a la pantalla de inicio</span></li>
-                                    <li>3. Toca <span class="font-semibold">Añadir</span> para confirmar</li>
-                                </ol>
-                            </div>
-
-                            <!-- Instrucciones para otros dispositivos -->
-                            <div id="otherInstructions" class="hidden">
-                                <p class="text-gray-600 mb-4">Para instalar la aplicación:</p>
-                                <ol class="text-left text-gray-600 mb-4 space-y-2">
-                                    <li>1. Abre el menú de opciones de tu navegador</li>
-                                    <li>2. Busca la opción "Instalar" o "Añadir a aplicaciones"</li>
-                                    <li>3. Sigue las instrucciones en pantalla</li>
-                                </ol>
-                            </div>
-
-                            <button onclick="closePwaModal()" class="w-full text-gray-600 hover:text-gray-800 mt-2">
-                                Más tarde
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                <form method="POST" action="{{ route('login') }}" style="display: flex; flex-direction: column; gap: 16px;">
                     @csrf
 
+                    <!-- Campo Username/Nickname -->
                     <div>
-                        <label for="name" class="block text-sm font-medium text-gray-400 mb-2">Nombre de usuario</label>
-                        <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
-                            class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('name') border-red-500 @enderror">
+                        <label for="name" style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
+                            <i class="fas fa-user" style="color: {{ $accentColor }}; margin-right: 6px;"></i>
+                            Tu nickname
+                        </label>
+                        <input
+                            id="name"
+                            type="text"
+                            name="name"
+                            value="{{ old('name') }}"
+                            required
+                            autofocus
+                            style="width: 100%; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px; font-size: 14px; color: {{ $textColor }}; background: {{ $bgInput }}; box-sizing: border-box; font-family: inherit;"
+                            placeholder="tu_nickname">
                         @error('name')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                            <p style="color: #dc3545; font-size: 12px; margin-top: 6px; margin: 6px 0 0 0;">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- <div class="flex items-center justify-between mt-6">
-                        <a href="{{ route('register') }}" class="text-sm text-offside-light hover:text-white transition-colors">
-                            ¿No tienes cuenta?
-                        </a>
-                    </div> --}}
-
-                    <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all">
-                        Iniciar sesión
+                    <!-- Botón Iniciar Sesión -->
+                    <button
+                        type="submit"
+                        style="width: 100%; padding: 12px 16px; background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Jugar ahora
                     </button>
+
+                    <!-- Enlaces alternativos -->
+                    @if (Route::has('register'))
+                        <div style="text-align: center; margin-top: 12px; font-size: 13px;">
+                            <a href="{{ route('register') }}" style="color: {{ $accentColor }}; text-decoration: none; transition: color 0.3s ease;">
+                                Crear una nueva cuenta
+                            </a>
+                        </div>
+                    @endif
                 </form>
+            </div>
+
+            <!-- Información Adicional -->
+            <div style="background: rgba(0, 222, 176, 0.08); border-left: 4px solid {{ $accentColor }}; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="color: {{ $labelColor }}; font-size: 13px; margin: 0; line-height: 1.5;">
+                    <i class="fas fa-info-circle" style="color: {{ $accentColor }}; margin-right: 8px;"></i>
+                    <strong>¿Nuevo en Offside Club?</strong> Crea tu cuenta para empezar a hacer predicciones y compite con otros usuarios.
+                </p>
+            </div>
+
+            <!-- Modal de instalación PWA -->
+            <div id="pwaInstallModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: flex-end; justify-content: center; z-index: 9999;">
+                <div style="background: {{ $bgCard }}; width: 100%; max-width: 414px; border-radius: 20px 20px 0 0; padding: 24px; color: {{ $textColor }};">
+                    <button onclick="closePwaModal()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; color: #999; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+
+                    <div style="text-align: center;">
+                        <img src="{{ asset('images/logo_alone.png') }}" alt="Offside Club" style="width: 50px; height: 50px; margin: 0 auto 16px; display: block;">
+                        <h3 style="font-size: 18px; font-weight: 600; color: {{ $textColor }}; margin: 0 0 12px 0;">¡Instala Offside Club!</h3>
+                        <p style="color: #999; font-size: 13px; margin: 0 0 16px 0;">Accede desde cualquier lugar sin conexión a internet</p>
+
+                        <!-- Instrucciones para Android -->
+                        <div id="androidInstructions" style="display: none;">
+                            <button id="installPwaButton" style="width: 100%; background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); color: white; padding: 12px 16px; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; margin-bottom: 12px;">
+                                Instalar App
+                            </button>
+                        </div>
+
+                        <!-- Instrucciones para iOS -->
+                        <div id="iosInstructions" style="display: none; text-align: left;">
+                            <p style="color: #999; font-size: 13px; margin-bottom: 12px;">Para instalar en tu iPhone o iPad:</p>
+                            <ol style="color: #999; font-size: 13px; margin: 0; padding-left: 20px; text-align: left;">
+                                <li style="margin-bottom: 6px;">Toca el botón <strong>Compartir</strong> en Safari</li>
+                                <li style="margin-bottom: 6px;">Desplázate y selecciona <strong>Añadir a la pantalla de inicio</strong></li>
+                                <li>Toca <strong>Añadir</strong> para confirmar</li>
+                            </ol>
+                        </div>
+
+                        <button onclick="closePwaModal()" style="width: 100%; background: none; color: {{ $accentColor }}; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 12px;">
+                            Más tarde
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <style>
+        .main-container input[type="text"]:focus,
+        .main-container input[type="password"]:focus {
+            outline: none;
+            border-color: {{ $accentColor }} !important;
+            box-shadow: 0 0 0 3px rgba(0, 222, 176, 0.1);
+        }
+
+        .main-container button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 222, 176, 0.3);
+        }
+
+        .main-container button[type="submit"]:active {
+            transform: translateY(0);
+        }
+
+        #pwaInstallModal {
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 16px;
+            }
+        }
+    </style>
 
     <script>
         // Variables globales
@@ -91,13 +164,11 @@
         const installPwaButton = document.getElementById('installPwaButton');
         const androidInstructions = document.getElementById('androidInstructions');
         const iosInstructions = document.getElementById('iosInstructions');
-        const otherInstructions = document.getElementById('otherInstructions');
 
         // Función global para cerrar el modal
         function closePwaModal() {
-            console.log('Cerrando modal PWA');
             if (pwaInstallModal) {
-                pwaInstallModal.classList.add('hidden');
+                pwaInstallModal.style.display = 'none';
             }
             localStorage.setItem('pwaInstallShown', 'true');
         }
@@ -111,8 +182,7 @@
         // Función para mostrar el modal de instalación
         function showInstallModal() {
             if (pwaInstallModal) {
-                console.log('Mostrando modal PWA');
-                pwaInstallModal.classList.remove('hidden');
+                pwaInstallModal.style.display = 'flex';
                 showDeviceInstructions();
             }
         }
@@ -122,68 +192,46 @@
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const isAndroid = /Android/.test(navigator.userAgent);
 
-            console.log('Detectando dispositivo:', { isIOS, isAndroid, deferredPrompt });
-
             if (isIOS) {
-                iosInstructions.classList.remove('hidden');
-                androidInstructions.classList.add('hidden');
-                otherInstructions.classList.add('hidden');
-            } else if (isAndroid ) {
-                androidInstructions.classList.remove('hidden');
-                iosInstructions.classList.add('hidden');
-                otherInstructions.classList.add('hidden');
-            } else {
-                otherInstructions.classList.remove('hidden');
-                androidInstructions.classList.add('hidden');
-                iosInstructions.classList.add('hidden');
+                iosInstructions.style.display = 'block';
+                androidInstructions.style.display = 'none';
+            } else if (isAndroid) {
+                androidInstructions.style.display = 'block';
+                iosInstructions.style.display = 'none';
             }
         }
 
         // Escuchar el evento beforeinstallprompt
         window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('Evento beforeinstallprompt capturado');
             e.preventDefault();
             deferredPrompt = e;
 
             // Actualizar las instrucciones si el modal está visible
-            if (!pwaInstallModal.classList.contains('hidden')) {
+            if (pwaInstallModal.style.display === 'flex') {
                 showDeviceInstructions();
             }
         });
 
         window.addEventListener('load', function() {
-            console.log('Página cargada, inicializando PWA...');
-
             // Verificar si es la primera visita y no está instalada
             if (!localStorage.getItem('pwaInstallShown') && !isPWAInstalled()) {
-                console.log('Primera visita detectada y PWA no instalada');
                 showInstallModal();
             }
 
             // Manejar la instalación
             if (installPwaButton) {
                 installPwaButton.addEventListener('click', async () => {
-                    console.log('Botón de instalación clickeado');
                     if (deferredPrompt) {
-                        console.log('Mostrando prompt de instalación');
                         try {
                             deferredPrompt.prompt();
                             const { outcome } = await deferredPrompt.userChoice;
-                            console.log('Resultado de la instalación:', outcome);
                             if (outcome === 'accepted') {
                                 console.log('Usuario aceptó la instalación');
-                            } else {
-                                console.log('Usuario rechazó la instalación');
                             }
-
                         } catch (error) {
                             console.error('Error durante la instalación:', error);
                         }
                         deferredPrompt = null;
-                    } else {
-                        console.log('No hay prompt de instalación disponible');
-                        // Mostrar instrucciones alternativas
-                        alert('Para instalar la aplicación, por favor usa el menú de opciones de tu navegador.');
                     }
                     closePwaModal();
                 });
@@ -202,7 +250,7 @@
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
-                        console.log('ServiceWorker registrado con éxito:', registration);
+                        console.log('ServiceWorker registrado con éxito');
                     })
                     .catch(function(error) {
                         console.error('Error al registrar el ServiceWorker:', error);
@@ -210,4 +258,4 @@
             }
         });
     </script>
-</x-app-layout>
+</x-dynamic-layout>

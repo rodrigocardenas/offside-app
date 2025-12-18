@@ -19,4 +19,5 @@ yarn-error.log
 /.vscode
 /storage/offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json
 storage/app/firebase/firebase_credentials.json
+storage/framework/sessions/
 

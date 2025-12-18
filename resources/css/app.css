@@ -22,3 +22,6 @@
         @apply bg-offside-dark border border-offside-primary rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-secondary;
     }
 }
+
+/* Import custom components for UX redesign */
+@import 'components.css';

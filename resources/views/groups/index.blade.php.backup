@@ -1,0 +1,270 @@
+<x-app-layout>
+    <div class="min-h-screen bg-offside-dark text-white p-4 md:p-6 pb-28">
+        <div class="max-w-4xl mx-auto mt-16">
+            {{-- welcome wizard --}}
+            <!-- Título de la sección -->
+            <div class="flex items-center mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-offside-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <h2 class="text-xl font-semibold text-offside-light">Tus grupos</h2>
+                <button id="activar-notificaciones" class="ml-4 px-3 py-1 bg-offside-primary text-white rounded hover:bg-orange-600" style="display:none;">
+                    🔔 Activar notificaciones
+                </button>
+            </div>
+
+            <!-- Lista de grupos -->
+            <div class="space-y-4">
+                <!-- Pestañas -->
+                <div class="flex space-x-4 mb-6">
+                    <button onclick="showTab('official')" class="tab-button active px-4 py-2 rounded-lg bg-offside-primary text-white" data-tab="official">
+                        Competiciones Oficiales
+                    </button>
+                    <button onclick="showTab('amateur')" class="tab-button px-4 py-2 rounded-lg bg-white/10 text-gray-400 hover:text-white" data-tab="amateur">
+                        Mis Partidos
+                    </button>
+                </div>
+
+                <!-- Grupos Oficiales -->
+                <div id="official-tab" class="tab-content">
+                    @if($officialGroups->isEmpty())
+                        <div class="text-center py-8 text-gray-400">
+                            <p>No tienes grupos de competiciones oficiales.</p>
+                        </div>
+                    @else
+                        @foreach($officialGroups as $group)
+                            <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-15 transition-all mb-4">
+                                <div class="flex items-center justify-between">
+                                    <a href="{{ route('groups.show', $group) }}" class="flex-1">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="flex -space-x-2">
+                                                @foreach($group->users->take(4) as $user)
+                                                    <div class="w-8 h-8 rounded-full bg-offside-primary flex items-center justify-center text-xs font-bold ring-2 ring-offside-dark">
+                                                        {{ substr($user->name, 0, 1) }}
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="bg-white rounded-full p-1">
+                                                        <img src="{{ asset("images/competitions/".$group->competition?->crest_url) }}" alt="{{ $group->competition?->name }}" class="w-4 h-4">
+                                                    </div>
+                                                    <h3 class="font-semibold">{{ $group->name }}</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <div class="flex space-x-2 ml-4">
+                                        <button
+                                            type="button"
+                                            onclick="showInviteModal('{{ $group->name }}', '{{ route('groups.invite', $group->code) }}')"
+                                            class="flex items-center space-x-1 text-offside-light hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+                                            title="Compartir grupo">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                        </button>
+                                        @if($group->users()->where('user_id', auth()->id())->exists())
+                                            <form action="{{ route('groups.leave', $group) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    type="submit"
+                                                    class="flex items-center space-x-1 text-yellow-500 hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10"
+                                                    title="Salir del grupo"
+                                                    onclick="return confirm('¿Estás seguro de que quieres salir de este grupo?')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+
+                <!-- Grupos Amateurs -->
+                <div id="amateur-tab" class="tab-content hidden">
+                    @if($amateurGroups->isEmpty())
+                        <div class="text-center py-8 text-gray-400">
+                            <p>No tienes grupos de competiciones amateurs.</p>
+                        </div>
+                    @else
+                        @foreach($amateurGroups as $group)
+                            <div class="bg-white bg-opacity-10 rounded-xl p-4 hover:bg-opacity-15 transition-all mb-4">
+                                <div class="flex items-center justify-between">
+                                    <a href="{{ route('groups.show', $group) }}" class="flex-1">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="flex -space-x-2">
+                                                @foreach($group->users->take(4) as $user)
+                                                    <div class="w-8 h-8 rounded-full bg-offside-primary flex items-center justify-center text-xs font-bold ring-2 ring-offside-dark">
+                                                        {{ substr($user->name, 0, 1) }}
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center space-x-2">
+                                                    {{-- div con diseño de budge que contiene el logo de la competicion --}}
+                                                    <div class="bg-offside-primary rounded-full p-1">
+                                                        <img src="{{ asset("images/competitions/".$group->competition?->crest_url) }}" alt="{{ $group->competition?->name }}" class="w-4 h-4">
+                                                    </div>
+                                                    <h3 class="font-semibold">{{ $group->name }}</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <div class="flex space-x-2 ml-4">
+                                        <button
+                                            type="button"
+                                            onclick="showInviteModal('{{ $group->name }}', '{{ route('groups.invite', $group->code) }}')"
+                                            class="flex items-center space-x-1 text-offside-light hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+                                            title="Compartir grupo">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                            </svg>
+                                        </button>
+                                        @if($group->users()->where('user_id', auth()->id())->exists())
+                                            <form action="{{ route('groups.leave', $group) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    type="submit"
+                                                    class="flex items-center space-x-1 text-yellow-500 hover:text-yellow-400 transition-colors p-2 rounded-lg hover:bg-white/10"
+                                                    title="Salir del grupo"
+                                                    onclick="return confirm('¿Estás seguro de que quieres salir de este grupo?')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
+
+            <!-- Botón Crear Grupo -->
+            <div class=" bottom-2   w-full  px-4">
+                <a href="{{ route('groups.create') }}" class="block w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white text-center py-4 rounded-full font-semibold hover:from-orange-600 hover:to-orange-500 transition-all">
+                    + Crear grupo
+                </a>
+            </div>
+
+            <!-- Unirse a grupo -->
+            <div class="mt-4 text-center">
+                <span class="text-gray-400">o</span>
+                <button onclick="document.getElementById('joinGroupModal').classList.remove('hidden')" class="ml-2 text-offside-light hover:underline">
+                    Unirse a un grupo
+                </button>
+            </div>
+
+            <!-- Modal del Wizard -->
+            <div id="welcomeWizard" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+                <!-- ... resto del contenido del modal ... -->
+            </div>
+
+            <!-- Modal para unirse a grupo -->
+            <div id="joinGroupModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-offside-dark rounded-lg p-6 w-full max-w-md">
+                    <h3 class="text-xl font-bold mb-4">Unirse a un Grupo</h3>
+                    <form action="{{ route('groups.join') }}" method="POST" class="space-y-4">
+                        @csrf
+                        <div>
+                            <label for="code" class="block text-sm font-medium mb-2">Código del Grupo</label>
+                            <input type="text" name="code" id="code" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white" required>
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" id="closeJoinModal" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancelar</button>
+                            <button type="submit" class="px-4 py-2 bg-offside-primary text-white rounded-md hover:bg-offside-primary/90">Unirse</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal de invitación -->
+            <div id="inviteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+                <div class="bg-offside-dark rounded-xl p-6 w-full max-w-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-white">Compartir grupo</h3>
+                        <button onclick="hideInviteModal()" class="text-gray-400 hover:text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Mensaje de invitación</label>
+                            <textarea id="inviteMessage" rows="3" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary"></textarea>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="copyInviteText()" class="flex-1 flex items-center justify-center space-x-2 bg-offside-primary hover:bg-offside-primary-dark text-white px-4 py-2 rounded-lg transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-12a2 2 0 00-2-2h-2M8 5a2 2 0 002 2h4a2 2 0 002-2M8 5a2 2 0 012-2h4a2 2 0 012 2" />
+                                </svg>
+                                <span>Copiar</span>
+                            </button>
+                            <button onclick="shareOnWhatsApp()" class="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                <span>WhatsApp</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú inferior fijo -->
+        <div class="fixed bottom-0 left-0 right-0 bg-offside-dark border-t border-offside-primary mt-16">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-around items-center py-3">
+                    <a href="{{ route('groups.index') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="text-xs mt-1">Grupos</span>
+                    </a>
+                    <button disabled class="flex flex-col items-center text-gray-500 cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-xs mt-1">Comunidades</span>
+                    </button>
+                    <a href="#" id="openFeedbackModal" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <span class="text-xs mt-1">Tu opinión</span>
+                    </a>
+                    <a href="{{ route('profile.edit') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span class="text-xs mt-1">Perfil</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <x-feedback-modal />
+    </div>
+
+    {{-- Scripts omitidos por brevedad --}}
+
+    <style>
+        .wizard-step {
+            transition: all 0.3s ease-in-out;
+        }
+        .wizard-dot {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</x-app-layout>

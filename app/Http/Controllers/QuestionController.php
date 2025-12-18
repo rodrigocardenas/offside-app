@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Exceptions\QuestionException;
 
 class QuestionController extends Controller
 {
@@ -96,7 +97,12 @@ class QuestionController extends Controller
     {
         if ($question->available_until->addHours(4) < Carbon::now()) {
             Log::info('No puedes responder a esta pregunta en este momento. Disponible desde: ' . $question->available_from . ' hasta: ' . $question->available_until);
-            return back()->with('error', 'No puedes responder a esta pregunta en este momento.');
+            throw new QuestionException(
+                'No puedes responder a esta pregunta en este momento.',
+                $question->id,
+                auth()->id(),
+                'question_expired'
+            );
         }
 
         $request->validate([
@@ -131,7 +137,12 @@ class QuestionController extends Controller
     public function results(Question $question)
     {
         if ($question->available_until > Carbon::now()) {
-            return back()->with('error', 'Los resultados aún no están disponibles.');
+            throw new QuestionException(
+                'Los resultados aún no están disponibles.',
+                $question->id,
+                auth()->id(),
+                'results_not_available'
+            );
         }
 
         $answers = $question->answers()

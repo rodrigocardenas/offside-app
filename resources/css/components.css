@@ -1,0 +1,703 @@
+/**
+ * Custom Component Styles for Offside Club
+ * UX Redesign - Light Theme Components
+ * Basado en main-light.html
+ */
+
+/* ==================== Global Overrides ==================== */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    background: #f5f5f5 !important;
+    color: #333 !important;
+}
+
+/* ==================== Main Container ==================== */
+.main-container {
+    max-width: 414px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #f5f5f5;
+    position: relative;
+    padding-bottom: 80px;
+    padding-top: 60px;
+}
+
+/* ==================== Header ==================== */
+.header {
+    background: #fff;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 60px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+}
+
+/* Header Profile Button & Dropdown */
+.header-profile-btn {
+    position: relative;
+}
+
+.profile-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 2px solid #e0e0e0;
+    background: #f5f5f5;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profile-btn:hover {
+    border-color: #00857B;
+    box-shadow: 0 2px 8px rgba(0, 133, 123, 0.2);
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #00857B, #00B5A5);
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 180px;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background: #f5f5f5;
+    color: #00857B;
+}
+
+.dropdown-item i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Logo Container */
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Legacy support */
+.profile-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.profile-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* ==================== Stats Bar ==================== */
+.stats-bar {
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 16px;
+    background: #fff;
+    margin: 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+.stat-item i {
+    color: #00deb0;
+}
+
+.stat-value {
+    color: #333;
+    font-weight: 600;
+}
+
+/* ==================== Notification Banner ==================== */
+.notification-banner {
+    background: #fff3cd;
+    padding: 12px 16px;
+    margin: 16px;
+    border-radius: 8px;
+    border-left: 4px solid #856404;
+    font-size: 13px;
+    color: #856404;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ==================== Featured Match ==================== */
+.featured-match {
+    margin: 16px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.featured-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.match-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #dee2e6;
+}
+
+.match-teams {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.team-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.team-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.match-time-inline {
+    font-size: 14px;
+    font-weight: 600;
+    color: #003b2f;
+    margin: 0 8px;
+}
+
+.match-league {
+    text-align: center;
+    font-size: 11px;
+    color: #666;
+}
+
+/* ==================== Groups Section ==================== */
+.groups-section {
+    margin: 16px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+/* ==================== Ranking Badges ==================== */
+.rank-gold {
+    @apply bg-yellow-400 text-black font-bold;
+}
+
+.rank-silver {
+    @apply bg-gray-400 text-black font-bold;
+}
+
+.rank-bronze {
+    @apply bg-orange-400 text-black font-bold;
+}
+
+.rank-other {
+    @apply bg-gray-600 text-white font-bold;
+}
+
+/* ==================== Button Styles ==================== */
+.option-btn {
+    @apply px-4 py-3 border border-gray-300 rounded-xl text-sm font-normal cursor-pointer transition-all duration-300 ease-in-out bg-gray-100 text-gray-600 text-center;
+}
+
+.option-btn:hover {
+    @apply border-offside-primary bg-gray-200 -translate-y-0.5 shadow-lg;
+}
+
+.option-btn.selected {
+    @apply border-offside-primary bg-offside-dark text-offside-light;
+}
+
+/* ==================== Group Card ==================== */
+.group-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid #e0e0e0;
+    position: relative;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.group-card:hover {
+    border-color: #00deb0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.group-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #00deb0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.group-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.group-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.group-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: #003b2f;
+}
+
+.group-status {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 16px;
+}
+
+.group-status .fa-exclamation-triangle {
+    color: #ffc107;
+}
+
+.group-status .fa-check-circle {
+    color: #00deb0;
+}
+
+.ranking-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #17b796;
+}
+
+/* ==================== Bottom Menu ==================== */
+.bottom-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: #fff;
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    color: #666;
+    text-decoration: none;
+}
+
+.menu-item:hover {
+    color: #00857B;
+}
+
+.menu-item.active {
+    color: #00857B;
+}
+
+.menu-icon {
+    font-size: 20px;
+}
+
+.menu-label {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* ==================== Chat Styles ==================== */
+.chat-input-field {
+    @apply flex-1 px-3 py-2.5 border border-gray-300 rounded-full text-sm outline-none bg-gray-100 text-gray-800;
+}
+
+.chat-input-field::placeholder {
+    @apply text-gray-500;
+}
+
+.chat-send-button {
+    @apply px-4 py-2.5 bg-offside-primary text-offside-dark border-none rounded-full cursor-pointer font-semibold transition-all duration-200;
+}
+
+.chat-send-button:hover {
+    @apply bg-opacity-90;
+}
+
+/* ==================== Match Styles ==================== */
+.match-card {
+    @apply bg-gray-100 rounded-lg p-3 border border-gray-300;
+}
+
+.match-time-inline {
+    @apply text-sm font-semibold text-offside-dark mx-2;
+}
+
+.team-logo {
+    @apply w-6 h-6 object-contain;
+}
+
+/* ==================== Badge Styles ==================== */
+.prediction-badge {
+    @apply inline-block bg-offside-primary text-black px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider;
+}
+
+/* ==================== Bottom Navigation ==================== */
+.menu-item {
+    @apply flex flex-col items-center gap-1 px-3 py-2 cursor-pointer transition-colors duration-300 text-gray-600;
+}
+
+.menu-item:hover {
+    @apply text-offside-primary;
+}
+
+.menu-item.active {
+    @apply text-offside-primary;
+}
+
+.menu-icon {
+    @apply text-xl;
+}
+
+.menu-label {
+    @apply text-[11px] font-medium;
+}
+
+/* ==================== Notification Banner ==================== */
+.notification-banner {
+    @apply bg-yellow-50 px-4 py-3 mx-4 rounded-lg border-l-4 border-yellow-800 text-sm text-yellow-800 shadow-card;
+}
+
+.notification-banner.info {
+    @apply bg-blue-50 border-blue-600 text-blue-800;
+}
+
+.notification-banner.success {
+    @apply bg-green-50 border-green-600 text-green-800;
+}
+
+.notification-banner.error {
+    @apply bg-red-50 border-red-600 text-red-800;
+}
+
+/* ==================== Ranking Section ==================== */
+.ranking-list {
+    @apply flex gap-2 overflow-x-auto pb-1;
+}
+
+.ranking-list::-webkit-scrollbar {
+    @apply h-0.5;
+}
+
+.ranking-list::-webkit-scrollbar-track {
+    @apply bg-gray-300 rounded-full;
+}
+
+.ranking-list::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+}
+
+/* ==================== Prediction Section ==================== */
+.prediction-section {
+    @apply mx-4 bg-white rounded-2xl p-5 border border-gray-300 relative shadow-card;
+}
+
+.prediction-question {
+    @apply text-base font-bold mb-5 text-offside-primary text-center cursor-default;
+}
+
+.prediction-options {
+    @apply grid grid-cols-2 gap-3 mb-5;
+}
+
+/* ==================== Timer ==================== */
+.timer {
+    @apply text-center text-sm font-semibold text-offside-light mt-2.5;
+}
+
+/* ==================== Utilities ==================== */
+.back-button {
+    @apply absolute left-4 top-1/2 -translate-y-1/2 bg-transparent border-none text-offside-primary text-xl cursor-pointer p-2;
+}
+
+/* ==================== Modal Styles ==================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: #fff;
+    width: 100%;
+    max-width: 414px;
+    border-radius: 20px 20px 0 0;
+    padding: 24px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-body {
+    color: #333;
+}
+
+.modal-body .form-group {
+    margin-bottom: 16px;
+}
+
+.modal-body label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background: #fff;
+    transition: border-color 0.2s ease;
+}
+
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+    outline: none;
+    border-color: #00deb0;
+}
+
+.modal-body textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.modal-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 12px;
+}
+
+.modal-footer button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-footer .btn-primary {
+    background: #00deb0;
+    color: #003b2f;
+}
+
+.modal-footer .btn-primary:hover {
+    background: #00c59f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 222, 176, 0.3);
+}
+
+.modal-footer .btn-secondary {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.modal-footer .btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+/* ==================== Responsive Adjustments ==================== */
+@media (max-width: 414px) {
+    .prediction-options {
+        @apply gap-2;
+    }
+
+    .option-btn {
+        @apply text-xs py-2.5;
+    }
+
+    .modal-content {
+        max-height: 90vh;
+    }
+}

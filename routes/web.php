@@ -13,6 +13,7 @@ use App\Http\Controllers\CompetitionController;
 use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionController;
 use App\Http\Controllers\Admin\TemplateQuestionController;
 use App\Http\Controllers\TestAvatarController;
+use App\Http\Controllers\SettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
     Route::delete('groups/{group}/leave', [GroupController::class, 'leave'])->name('groups.leave');
     Route::get('groups/{group}/predictive-results', [GroupController::class, 'showPredictiveResults'])->name('groups.predictive-results');
+    Route::get('groups/{group}/ranking', [GroupController::class, 'getRanking'])->name('groups.ranking');
 
     // Preguntas
     Route::resource('questions', QuestionController::class);
@@ -66,6 +68,10 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Rutas de configuración
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 
     Route::resource('competitions', CompetitionController::class);
 

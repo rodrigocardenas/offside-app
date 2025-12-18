@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             CompetitionSeeder::class,
+            FootballMatchSeeder::class,
+            Group83QuestionSeeder::class,
             GroupSeeder::class,
             SocialQuestionsSeeder::class,
             TemplateQuestionSeeder::class,

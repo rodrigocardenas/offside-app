@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Los Cracks - Grupo (Light)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #f5f5f5;
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: #fff;
+            padding: 20px 16px 16px;
+            color: #333;
+            position: relative;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .group-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .group-avatar {
+            width: 40px;
+            height: 40px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .group-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #00deb0;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .ranking-section {
+            background: #fff;
+            margin: 16px;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .ranking-title {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .ranking-title i {
+            font-size: 16px;
+        }
+
+        .ranking-expand {
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s ease;
+        }
+
+        .ranking-expand:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .ranking-list {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .ranking-list::-webkit-scrollbar {
+            height: 2px;
+        }
+
+        .ranking-list::-webkit-scrollbar-track {
+            background: #dee2e6;
+            border-radius: 10px;
+        }
+
+        .ranking-list::-webkit-scrollbar-thumb {
+            background: #6c757d;
+            border-radius: 10px;
+        }
+
+        .player-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 8px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            min-width: 80px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+        }
+
+        .player-item:hover {
+            background: #e9ecef;
+            border-color: #00deb0;
+            transform: translateY(-2px);
+        }
+
+        .player-rank {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 10px;
+            color: #000;
+            margin-bottom: 2px;
+        }
+
+        .rank-1 { background: #FFD700; }
+        .rank-2 { background: #C0C0C0; }
+        .rank-3 { background: #CD7F32; }
+        .rank-other { background: #6c757d; color: #fff; }
+
+        .player-info {
+            text-align: center;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 2px;
+            color: #333;
+            text-align: center;
+        }
+
+        .player-points {
+            font-weight: bold;
+            color: #00deb0;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .prediction-section {
+            margin: 16px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .prediction-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .prediction-badge {
+            display: inline-block;
+            background: #00deb0;
+            color: #000;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .competition-name {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .match-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .team-logo {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .team-name {
+            font-size: 15px;
+            font-weight: 400;
+            color: #333;
+        }
+
+        .match-time-inline {
+            font-size: 14px;
+            font-weight: 600;
+            color: #003b2f;
+            margin: 0 8px;
+        }
+
+        .prediction-question {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #00deb0;
+            text-align: center;
+            cursor: default;
+        }
+
+        .prediction-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            border-color: #00deb0;
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .option-btn.selected {
+            border-color: #00deb0;
+            background: #003b2f;
+            color: #c1ff72;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #c1ff72;
+            margin-top: 10px;
+        }
+
+        .chat-section {
+            margin: 16px;
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #00deb0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #003b2f;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .message-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        .message-text {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #495057;
+        }
+
+        .chat-input {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .chat-input input::placeholder {
+            color: #6c757d;
+        }
+
+        .chat-input button {
+            padding: 10px 16px;
+            background: #00deb0;
+            color: #003b2f;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input button:hover {
+            background: #00c49a;
+        }
+
+        .bottom-menu {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid #e0e0e0;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            color: #6c757d;
+        }
+
+        .menu-item.active {
+            color: #00deb0;
+        }
+
+        .menu-icon {
+            font-size: 20px;
+        }
+
+        .menu-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <button class="back-button" onclick="goBack()">←</button>
+            <div class="group-info">
+                <div class="group-avatar"><i class="fas fa-trophy" style="color: #000;"></i></div>
+                <div class="group-name">Los Cracks</div>
+            </div>
+        </div>
+
+        <!-- Ranking Section -->
+        <div class="ranking-section">
+            <div class="ranking-title">
+                <i class="fas fa-trophy"></i> Ranking
+                <div class="ranking-expand" onclick="expandRanking()">Ver todos</div>
+            </div>
+            <div class="ranking-list">
+                <div class="player-item">
+                    <div class="player-rank rank-1">1</div>
+                    <div class="player-info">
+                        <div class="player-name">Juan M.</div>
+                        <div class="player-points">1,250</div>
+                    </div>
+                </div>
+
+                <div class="player-item">
+                    <div class="player-rank rank-2">2</div>
+                    <div class="player-info">
+                        <div class="player-name">Ana L.</div>
+                        <div class="player-points">980</div>
+                    </div>
+                </div>
+
+                <div class="player-item">
+                    <div class="player-rank rank-3">3</div>
+                    <div class="player-info">
+                        <div class="player-name">Carlos R.</div>
+                        <div class="player-points">875</div>
+                    </div>
+                </div>
+
+                <div class="player-item">
+                    <div class="player-rank rank-other">4</div>
+                    <div class="player-info">
+                        <div class="player-name">Tú</div>
+                        <div class="player-points">650</div>
+                    </div>
+                </div>
+
+                <div class="player-item">
+                    <div class="player-rank rank-other">5</div>
+                    <div class="player-info">
+                        <div class="player-name">María G.</div>
+                        <div class="player-points">540</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Section -->
+        <div class="prediction-section">
+            <div class="prediction-header">
+                <div class="prediction-badge">Predicción del Día</div>
+                <div class="competition-name"><i class="fas fa-circle" style="color: white;"></i> La liga • Jornada 7</div>
+            </div>
+
+            <div class="match-info">
+                <span class="team-name">Real Madrid</span>
+                <img src="real-madrid-c-f-logo-png-transparent.png" class="team-logo" alt="Real Madrid">
+                <span class="match-time-inline">21:00</span>
+                <img src="FC_Barcelona_(crest).svg.png" class="team-logo" alt="Barcelona">
+                <span class="team-name">Barcelona</span>
+            </div>
+
+            <div class="prediction-question">
+                ¿Cuántos goles habrá en total en el partido?
+            </div>
+
+            <div class="prediction-options">
+                <button class="option-btn" onclick="selectOption(this)">
+                    No habrá goles
+                </button>
+                <button class="option-btn" onclick="selectOption(this)">
+                    1 gol
+                </button>
+                <button class="option-btn" onclick="selectOption(this)">
+                    2 goles
+                </button>
+                <button class="option-btn" onclick="selectOption(this)">
+                    +3 goles
+                </button>
+            </div>
+
+            <div class="timer">
+                <i class="fas fa-clock"></i> Quedan 2h 45m para cerrar predicciones
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <div class="chat-title">
+                <i class="fas fa-comments"></i> Chat del Grupo
+            </div>
+
+            <div class="chat-messages">
+                <div class="message">
+                    <div class="message-avatar">JM</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <div class="message-name">Juan Martín</div>
+                            <div class="message-time">hace 5 min</div>
+                        </div>
+                        <div class="message-text">¡Yo voy por 2-3 goles! El Clásico siempre es intenso <i class="fas fa-fire"></i></div>
+                    </div>
+                </div>
+
+                <div class="message">
+                    <div class="message-avatar">AL</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <div class="message-name">Ana López</div>
+                            <div class="message-time">hace 3 min</div>
+                        </div>
+                        <div class="message-text">Creo que será más defensivo... 0-1 goles máximo</div>
+                    </div>
+                </div>
+
+                <div class="message">
+                    <div class="message-avatar">CR</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <div class="message-name">Carlos Ruiz</div>
+                            <div class="message-time">hace 1 min</div>
+                        </div>
+                        <div class="message-text">¿Están locos? ¡Va a llover goles! 4+ seguro <i class="fas fa-bolt"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" placeholder="Escribe un mensaje..." id="messageInput">
+                <button onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+
+        <!-- Bottom Menu -->
+        <div class="bottom-menu">
+            <div class="menu-item active">
+                <div class="menu-icon"><i class="fas fa-users"></i></div>
+                <div class="menu-label">Grupo</div>
+            </div>
+            <div class="menu-item">
+                <div class="menu-icon"><i class="fas fa-globe"></i></div>
+                <div class="menu-label">Comunidades</div>
+            </div>
+            <div class="menu-item">
+                <div class="menu-icon"><i class="fas fa-comments"></i></div>
+                <div class="menu-label">Tu opinión</div>
+            </div>
+            <div class="menu-item">
+                <div class="menu-icon"><i class="fas fa-user"></i></div>
+                <div class="menu-label">Perfil</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            // In a real app, this would navigate back to the main groups page
+            window.history.back();
+            // Or: window.location.href = 'index.html';
+        }
+
+        function selectOption(button) {
+            // Remove previous selections
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Add selection to clicked button
+            button.classList.add('selected');
+
+            // Show confirmation
+            setTimeout(() => {
+                alert('¡Predicción guardada!');
+                if (!button.innerHTML.includes('<i class="fas fa-check-circle"></i>')) {
+                    button.innerHTML += ' <i class="fas fa-check-circle"></i>';
+                }
+            }, 500);
+        }
+
+        function expandRanking() {
+            alert('📊 Vista completa del ranking próximamente...');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const messageText = input.value.trim();
+
+            if (messageText) {
+                const chatMessages = document.querySelector('.chat-messages');
+
+                // Create new message element
+                const newMessage = document.createElement('div');
+                newMessage.className = 'message';
+                newMessage.innerHTML = `
+                    <div class="message-avatar">TU</div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <div class="message-name">Tú</div>
+                            <div class="message-time">ahora</div>
+                        </div>
+                        <div class="message-text">${messageText}</div>
+                    </div>
+                `;
+
+                // Add to chat
+                chatMessages.appendChild(newMessage);
+
+                // Clear input
+                input.value = '';
+
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Allow sending message with Enter key
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Auto-scroll chat to bottom on load
+        const chatMessages = document.querySelector('.chat-messages');
+        if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Simulate real-time updates for timer
+        setInterval(() => {
+            const timer = document.querySelector('.timer');
+            if (timer) {
+                // This would be connected to real-time data in production
+                const timeLeft = Math.max(0, Math.floor(Math.random() * 10800)); // Random time for demo
+                const hours = Math.floor(timeLeft / 3600);
+                const minutes = Math.floor((timeLeft % 3600) / 60);
+                timer.innerHTML = `<i class="fas fa-clock"></i> Quedan ${hours}h ${minutes}m para cerrar predicciones`;
+            }
+        }, 30000);
+
+        // Add hover effects
+        document.querySelectorAll('.option-btn, .player-item').forEach(item => {
+            item.addEventListener('mouseover', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(-2px)';
+                }
+            });
+
+            item.addEventListener('mouseout', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(0)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -29,7 +29,7 @@ class ProfileUpdateRequest extends FormRequest
             'favorite_competition_id' => ['nullable', 'exists:competitions,id'],
             'favorite_club_id' => ['nullable', 'exists:teams,id'],
             'favorite_national_team_id' => ['nullable', 'exists:teams,id'],
-            'theme' => ['required', 'string', 'in:light,dark'],
+            // 'theme' => ['required', 'string', 'in:light,dark'],
         ];
     }
 }

@@ -238,5 +238,8 @@
             };
         }
     </script>
+
+    <!-- Navigation Module (UX Redesign) -->
+    <script src="{{ asset('js/common/navigation.js') }}" defer></script>
 </body>
 </html>

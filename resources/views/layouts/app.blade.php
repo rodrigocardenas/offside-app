@@ -38,16 +38,18 @@
     <meta name="twitter:image" content="{{ url('/images/logo-offside-512x512.png') }}">
     <meta name="twitter:image:alt" content="Logo de Offside Club">
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/navigation.js'])
+    <!-- Scripts & Base Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Component Styles (DESPUÉS de Tailwind para que tenga prioridad) -->
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    @stack('styles')
     @stack('scripts')
 </head>
 <body class="h-full font-sans antialiased bg-black text-white">
@@ -72,9 +74,7 @@
                 </div>
             </div>
         @endauth
-        {{ $slot }}
-
-    @stack('styles')
+        @yield('content')
 
     <!-- Modal de instalación -->
     <div id="installModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

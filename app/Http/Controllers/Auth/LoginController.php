@@ -51,10 +51,13 @@ class LoginController extends Controller
 
         // Log para debug
         Log::info('Usuario autenticado: ' . $user->name . ' (ID: ' . $user->id . ')');
-        Log::info('Redirigiendo a: /groups');
+        $intended = session('url.intended');
+        Log::info('Intended URL: ' . $intended);
+        $redirectUrl = $intended ?: '/';
+        Log::info('Redirigiendo a: ' . $redirectUrl);
 
-        // Redirección simple y directa
-        return redirect('/groups')
+        return redirect($redirectUrl)
+
             ->with('success', '¡Bienvenido ' . $user->name . '! Tu ID completo es: ' . $user->unique_id);
     }
 
