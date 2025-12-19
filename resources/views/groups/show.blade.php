@@ -1,19 +1,34 @@
-<x-app-layout>
+<x-app-layout
+    :logo-url="asset('images/logo_alone.png')"
+    alt-text="Offside Club"
+>
     {{-- setear en el navigation el yield navigation-title: --}}
     @section('navigation-title', $group->name)
     @if ($group->id == 69)
         @section('navigation-logo', asset("images/competitions/".$group->competition?->crest_url))
     @endif
 
-    <div class="min-h-screen bg-offside-dark text-white p-1 md:p-6 pb-24">
+    @php
+        $themeMode = auth()->user()->theme_mode ?? 'auto';
+        $isDark = $themeMode === 'dark' || ($themeMode === 'auto' && false);
 
-        <!-- Encabezado del grupo -->
-        <x-groups.group-header :group="$group" />
+        // Colores dinámicos
+        $bgPrimary = $isDark ? '#0a2e2c' : '#f5f5f5';
+        $bgSecondary = $isDark ? '#0f3d3a' : '#f5f5f5';
+        $bgTertiary = $isDark ? '#1a524e' : '#ffffff';
+        $textPrimary = $isDark ? '#ffffff' : '#333333';
+        $textSecondary = $isDark ? '#b0b0b0' : '#999999';
+        $borderColor = $isDark ? '#2a4a47' : '#e0e0e0';
+        $accentColor = '#00deb0';
+        $accentDark = '#17b796';
+    @endphp
 
-        <div class="bg-offside-primary bg-opacity-99 p-1 mb-4 fixed  left-0 right-0 w-full" style="z-index: 1000; margin-top: 2.2rem;">
+    <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
+
+        {{-- <div class="p-1 mb-4 fixed left-0 right-0 w-full" style="z-index: 50; top: 60px; background: {{ $bgSecondary }}; opacity: 0.99;">
             <marquee behavior="scroll" direction="left" scrollamount="5">
                 @foreach($group->users->sortByDesc('total_points')->take(3) as $index => $user)
-                    <span class="font-bold text-offside-light">
+                    <span class="font-bold" style="color: {{ $textSecondary }};">
                         @if($index === 0) 🥇 @elseif($index === 1) 🥈 @elseif($index === 2) 🥉 @endif
                         {{ $user->name }} ({{ $user->total_points ?? 0 }} puntos)
                     </span>
@@ -22,25 +37,25 @@
                     @endif
                 @endforeach
             </marquee>
-        </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        </div> --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" style="margin-top: 60px;">
                 <div>
 
                     <!-- Preguntas de Partidos -->
-                    <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" />
+                    <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
 
                     <!-- Pregunta Social -->
                     @if($group->users->count() >= 2)
                         @if($socialQuestion)
-                            <x-groups.group-social-question :social-question="$socialQuestion" :user-answers="$userAnswers" />
+                            <x-groups.group-social-question :social-question="$socialQuestion" :user-answers="$userAnswers" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
                         @endif
                     @else
-                        <div class="bg-offside-dark rounded-lg p-6 mt-1">
+                        <div class="rounded-lg p-6 mt-1" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }};">
                             <div class="text-center">
                                 <h2 class="text-xl font-bold mb-2">Preguntas Sociales</h2>
-                                <p class="text-offside-light">Invita a más miembros al grupo para desbloquear las preguntas sociales.</p>
+                                <p style="color: {{ $textSecondary }};">Invita a más miembros al grupo para desbloquear las preguntas sociales.</p>
                                 <div class="mt-4">
-                                    <p class="text-sm">Código de invitación: <span class="font-mono bg-offside-primary bg-opacity-20 px-2 py-1 rounded">{{ $group->code }}</span></p>
+                                    <p class="text-sm">Código de invitación: <span class="font-mono px-2 py-1 rounded" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }};">{{ $group->code }}</span></p>
                                 </div>
                             </div>
                         </div>
@@ -48,21 +63,21 @@
                 </div>
 
                 <!-- Chat del Grupo -->
-                <x-groups.group-chat :group="$group" />
+                <x-groups.group-chat :group="$group" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
             </div>
         </div>
 
         <!-- Menú inferior fijo -->
-        <x-groups.group-bottom-menu :group="$group" />
+        <x-groups.group-bottom-menu :group="$group" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
 
     </div>
 
     <!-- Modal de Feedback -->
     <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-offside-dark rounded-lg p-6 w-full max-w-md">
+        <div class="rounded-lg p-6 w-full max-w-md" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }};">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold">Envíanos tu opinión</h3>
-                <button id="closeFeedbackModal" onclick="document.getElementById('feedbackModal').classList.add('hidden')" class="text-offside-light hover:text-white">
+                <button id="closeFeedbackModal" onclick="document.getElementById('feedbackModal').classList.add('hidden')" style="color: {{ $textSecondary }}; cursor: pointer;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -72,7 +87,7 @@
                 @csrf
                 <div class="mb-4">
                     <label for="type" class="block text-sm font-medium mb-2">Tipo de comentario</label>
-                    <select id="type" name="type" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white">
+                    <select id="type" name="type" class="w-full rounded-md p-2" style="background: {{ $bgTertiary }}; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};">
                         <option value="suggestion">Sugerencia</option>
                         <option value="bug">Reportar un error</option>
                         <option value="compliment">Elogio</option>
@@ -81,15 +96,15 @@
                 </div>
                 <div class="mb-4">
                     <label for="message" class="block text-sm font-medium mb-2">Mensaje</label>
-                    <textarea id="message" name="message" rows="4" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white" required></textarea>
+                    <textarea id="message" name="message" rows="4" class="w-full rounded-md p-2" style="background: {{ $bgTertiary }}; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};" required></textarea>
                 </div>
                 <div class="mb-4 flex items-center">
-                    <input type="checkbox" id="is_anonymous" name="is_anonymous" class="rounded border-offside-primary bg-offside-primary bg-opacity-20 text-offside-primary focus:ring-offside-primary">
+                    <input type="checkbox" id="is_anonymous" name="is_anonymous" class="rounded" style="border-color: {{ $borderColor }}; background: {{ $bgTertiary }}; accent-color: {{ $accentColor }};">
                     <label for="is_anonymous" class="ml-2 text-sm">Enviar como anónimo</label>
                 </div>
                 <div class="flex justify-end space-x-2">
-                    <button type="button" id="cancelFeedback" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-offside-primary text-white rounded-md hover:bg-offside-primary/90">Enviar</button>
+                    <button type="button" id="cancelFeedback" class="px-4 py-2 rounded-md" style="background: #666; color: {{ $textPrimary }};">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-white rounded-md" style="background: {{ $accentColor }}; color: #000;">Enviar</button>
                 </div>
             </form>
         </div>
@@ -98,10 +113,10 @@
     <!-- Modal Premio/Penitencia -->
     @if($group->created_by === auth()->id())
     <div id="rewardPenaltyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-offside-dark rounded-lg p-6 w-full max-w-md">
+        <div class="rounded-lg p-6 w-full max-w-md" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }};">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold">Premio o Penitencia</h3>
-                <button id="closeRewardPenaltyModal" class="text-offside-light hover:text-white">
+                <button id="closeRewardPenaltyModal" style="color: {{ $textSecondary }}; cursor: pointer;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -109,23 +124,23 @@
                 @csrf
                 <div class="mb-4">
                     <label for="reward_or_penalty" class="block text-sm font-medium mb-2">Escribe el premio para el ganador o la penitencia para el perdedor:</label>
-                    <textarea id="reward_or_penalty" name="reward_or_penalty" rows="4" class="w-full bg-offside-primary bg-opacity-20 border border-offside-primary rounded-md p-2 text-white" required>{{ $group->reward_or_penalty }}</textarea>
+                    <textarea id="reward_or_penalty" name="reward_or_penalty" rows="4" class="w-full rounded-md p-2" style="background: {{ $bgTertiary }}; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};" required>{{ $group->reward_or_penalty }}</textarea>
                 </div>
                 <div class="flex justify-end space-x-2">
-                    <button type="button" id="cancelRewardPenalty" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-offside-primary text-white rounded-md hover:bg-offside-primary/90">Guardar</button>
+                    <button type="button" id="cancelRewardPenalty" class="px-4 py-2 rounded-md" style="background: #666; color: {{ $textPrimary }};">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-white rounded-md" style="background: {{ $accentColor }}; color: #000;">Guardar</button>
                 </div>
             </form>
-            <div id="rewardPenaltySuccess" class="hidden mt-4 text-green-500 font-bold">¡Guardado correctamente!</div>
+            <div id="rewardPenaltySuccess" class="hidden mt-4 font-bold" style="color: #00ff00;">¡Guardado correctamente!</div>
         </div>
     </div>
     @endif
 
     <!-- Mostrar el premio/penitencia actual si existe -->
     @if($group->reward_or_penalty)
-        <div class="max-w-2xl mx-auto my-4 p-4 bg-offside-primary bg-opacity-20 rounded-lg text-center">
-            <span class="font-bold text-offside-secondary">Premio/Penitencia del grupo:</span><br>
-            <span>{{ $group->reward_or_penalty }}</span>
+        <div class="max-w-2xl mx-auto my-4 p-4 rounded-lg text-center" style="background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }};">
+            <span class="font-bold" style="color: {{ $textSecondary }};">Premio/Penitencia del grupo:</span><br>
+            <span style="color: {{ $textPrimary }};">{{ $group->reward_or_penalty }}</span>
         </div>
     @endif
 
@@ -403,66 +418,7 @@
         }
     });
 </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const chatForm = document.getElementById('chatForm');
-        const sendMessageBtn = document.getElementById('sendMessageBtn');
-        const chatMessage = document.getElementById('chatMessage');
-        const chatContainer = document.querySelector('.overflow-y-auto');
-        let isSubmitting = false;
 
-        // Función para mostrar mensaje de error
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'bg-red-500 text-white p-3 rounded-lg mb-4';
-            errorDiv.textContent = message;
-            chatContainer.insertBefore(errorDiv, chatContainer.firstChild);
-            setTimeout(() => errorDiv.remove(), 5000);
-        }
-
-        chatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            if (isSubmitting) return;
-
-            isSubmitting = true;
-            sendMessageBtn.disabled = true;
-            sendMessageBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-            const formData = new FormData(chatForm);
-
-            fetch(chatForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    chatMessage.value = '';
-                    // Agregar el nuevo mensaje al contenedor
-                    chatContainer.insertAdjacentHTML('beforeend', data.html);
-                    // Desplazar al final
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                } else {
-                    showError(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('Ha ocurrido un error al enviar el mensaje. Por favor, intenta nuevamente.');
-            })
-            .finally(() => {
-                isSubmitting = false;
-                sendMessageBtn.disabled = false;
-                sendMessageBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            });
-        });
-    });
-</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Variable global temporal para guardar el último botón clickeado

@@ -1,5 +1,17 @@
-<div class="bg-offside-dark rounded-lg p-6 mt-16">
-    <h2 class="text-sm font-bold mb-2">
+@php
+    $themeColors = $themeColors ?? [];
+    $bgPrimary = $themeColors['bgPrimary'] ?? '#0a2e2c';
+    $bgSecondary = $themeColors['bgSecondary'] ?? '#0f3d3a';
+    $bgTertiary = $themeColors['bgTertiary'] ?? '#1a524e';
+    $textPrimary = $themeColors['textPrimary'] ?? '#ffffff';
+    $textSecondary = $themeColors['textSecondary'] ?? '#b0b0b0';
+    $borderColor = $themeColors['borderColor'] ?? '#2a4a47';
+    $accentColor = $themeColors['accentColor'] ?? '#00deb0';
+    $accentDark = $themeColors['accentDark'] ?? '#17b796';
+@endphp
+
+<div class="rounded-lg p-6 mt-16" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }};">
+    <h2 class="text-sm font-bold mb-2" style="color: {{ $textPrimary }};">
         @if($currentMatchday)
             JORNADA {{ $currentMatchday }}
         @else
@@ -11,9 +23,9 @@
         <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 pb-4" id="predictiveQuestionsCarousel">
             @forelse($matchQuestions->where('type', 'predictive') as $question)
                 <div class="snap-center flex-none w-full text-center" id="question{{ $question->id }}">
-                    <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6 {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-50' : '' }}">
+                    <div class="rounded-lg p-6 {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-50' : '' }}" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }}; border: 1px solid {{ $borderColor }};">
                         <div class="mb-4">
-                            <p class="text-xl text-offside-light flex items-center justify-center">
+                            <p class="text-xl flex items-center justify-center" style="color: {{ $textSecondary }};">
                                 @if($question->football_match)
                                     @if($question->templateQuestion->homeTeam)
                                         <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-6 h-6 mr-2" title="{{ $question->templateQuestion->homeTeam?->name }}" style="width: 50px; height: 50px;"> vs <img src="{{ $question->templateQuestion->awayTeam?->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->name }}" title="{{ $question->templateQuestion->awayTeam->name }}" class="w-6 h-6 ml-2" style="width: 50px; height: 50px;">
@@ -24,8 +36,8 @@
                                     {{ $question->description }}
                                 @endif
                             </p>
-                            <h4 class="text-xl font-bold mb-2">{{ $question->title }}</h4>
-                            <p class="text-sm text-offside-light">
+                            <h4 class="text-xl font-bold mb-2" style="color: {{ $accentColor }};">{{ $question->title }}</h4>
+                            <p class="text-sm" style="color: {{ $textSecondary }};">
                                 @if($question->is_disabled)
                                     Pregunta deshabilitada
                                 @elseif($question->available_until->addHours(4) > now())
@@ -54,7 +66,7 @@
                                 @csrf
                                 <div class="flex flex-col gap-4">
                                     @foreach($question->options->sortBy('text') as $option)
-                                        <label class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg cursor-pointer option-btn" style="user-select:none;">
+                                        <label class="w-full flex justify-between items-center transition-colors p-4 rounded-lg cursor-pointer option-btn" style="user-select:none; background: {{ $bgTertiary }}; color: {{ $textPrimary }}; border: 1px solid {{ $borderColor }};" onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $accentDark }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgTertiary }}'">
                                             <input type="radio" name="question_option_id" value="{{ $option->id }}" class="hidden" required>
                                             <span class="flex-1 text-center">{{ $option->text }}</span>
                                             <div class="flex items-center space-x-2">
@@ -105,11 +117,25 @@
                         @else
                             <div class="space-y-3">
                                 @foreach($question->options->sortBy('text') as $option)
-                                    <div class="p-4 rounded-lg {{
-                                        $question->available_until->addHours(4) > now() && !$question->is_disabled
-                                            ? ($userHasAnswered->id == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
-                                            : ($option->is_correct ? 'bg-green-600' : (($userHasAnswered->id ?? null) == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
-                                    }}">
+                                    @php
+                                        $optionBg = $bgTertiary;
+                                        $optionColor = $textPrimary;
+                                        if ($question->available_until->addHours(4) > now() && !$question->is_disabled) {
+                                            if ($userHasAnswered->id == $option->id) {
+                                                $optionBg = '#003b2f';
+                                                $optionColor = $accentColor;
+                                            }
+                                        } else {
+                                            if ($option->is_correct) {
+                                                $optionBg = '#00c800';
+                                                $optionColor = '#ffffff';
+                                            } elseif (($userHasAnswered->id ?? null) == $option->id) {
+                                                $optionBg = '#c80000';
+                                                $optionColor = '#ffffff';
+                                            }
+                                        }
+                                    @endphp
+                                    <div class="p-4 rounded-lg" style="background: {{ $optionBg }}; color: {{ $optionColor }}; border: 1px solid {{ $borderColor }};">
                                         <div class="flex justify-between items-center">
                                             <span>{{ $option->text }}</span>
                                             <div class="flex items-center space-x-2">
@@ -177,7 +203,7 @@
         <!-- Indicadores de navegación -->
         <div class="flex justify-center mt-1 space-x-2">
             @foreach($matchQuestions as $index => $question)
-                <button class="w-2 h-2 rounded-full bg-offside-light question-indicator" data-index="{{ $index }}"></button>
+                <button class="w-2 h-2 rounded-full question-indicator" style="background: {{ $textSecondary }};" data-index="{{ $index }}"></button>
             @endforeach
         </div>
     </div>

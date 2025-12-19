@@ -161,11 +161,129 @@
             background-color: #fff !important;
             box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
         }
+
+        /* ==================== Header - Always Light ==================== */
+        .header {
+            background: #fff !important;
+            border-bottom: 1px solid #e0e0e0 !important;
+            color: #333 !important;
+            z-index: 900 !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 10px 16px !important;
+            height: 60px !important;
+            width: 100% !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+        }
+
+        .header-logo {
+            height: 32px !important;
+            width: auto !important;
+            max-width: 90px !important;
+            object-fit: contain !important;
+            flex-shrink: 0 !important;
+        }
+
+        .logo-container {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+        }
+
+        .header-profile-btn {
+            position: relative !important;
+            flex-shrink: 0 !important;
+            margin-left: auto !important;
+        }
+
+        .profile-btn {
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: hidden !important;
+            border: 2px solid #e0e0e0 !important;
+            background: #f5f5f5 !important;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-avatar {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 50% !important;
+        }
+
+        .profile-avatar-placeholder {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: linear-gradient(135deg, #00857B, #00B5A5) !important;
+            color: white !important;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white !important;
+            border: 1px solid #e0e0e0 !important;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000 !important;
+            min-width: 180px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #333 !important;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: #f5f5f5;
+            color: #00857B;
+        }
+
+        .dropdown-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="h-full font-sans antialiased">
-    <div class="min-h-screen bg-offside-dark">
-        @include('layouts.navigation')
+    <div class="min-h-screen">
+        <x-layout.header-profile
+            :logo-url="$logoUrl ?? asset('images/logo_alone.png')"
+            :alt-text="$altText ?? 'Offside Club'"
+        />
 
         <!-- Page Content -->
         <main @class([

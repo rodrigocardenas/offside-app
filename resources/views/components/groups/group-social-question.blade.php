@@ -1,26 +1,38 @@
-<div class="bg-offside-dark rounded-lg p-6 mt-1">
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-sm font-bold">PREGUNTA DEL DÍA</h2>
+@php
+    $themeColors = $themeColors ?? [];
+    $bgPrimary = $themeColors['bgPrimary'] ?? '#0a2e2c';
+    $bgSecondary = $themeColors['bgSecondary'] ?? '#0f3d3a';
+    $bgTertiary = $themeColors['bgTertiary'] ?? '#1a524e';
+    $textPrimary = $themeColors['textPrimary'] ?? '#ffffff';
+    $textSecondary = $themeColors['textSecondary'] ?? '#b0b0b0';
+    $borderColor = $themeColors['borderColor'] ?? '#2a4a47';
+    $accentColor = $themeColors['accentColor'] ?? '#00deb0';
+    $accentDark = $themeColors['accentDark'] ?? '#17b796';
+@endphp
+
+<div style="background: {{ $bgTertiary }}; border-radius: 0.5rem; padding: 1.5rem; margin-top: 0.25rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+        <h2 style="font-size: 0.875rem; font-weight: bold; color: {{ $textPrimary }};">PREGUNTA DEL DÍA</h2>
     </div>
-    <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6">
-        <div class="mb-4">
-            <h3 class="text-xl mb-2">{{ $socialQuestion->title }}</h3>
+    <div style="background: {{ $bgSecondary }}; border-radius: 0.5rem; padding: 1.5rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};">
+        <div style="margin-bottom: 1rem;">
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: {{ $accentColor }};">{{ $socialQuestion->title }}</h3>
             @if($socialQuestion->description)
-                <p class="text-sm text-offside-light">⌛ <span class="countdown" data-time="{{ $socialQuestion->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span></p>
+                <p style="font-size: 0.875rem; color: {{ $textSecondary }};">⌛ <span class="countdown" data-time="{{ $socialQuestion->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span></p>
             @endif
         </div>
         @php
             $userHasAnswered = $socialQuestion->answers->where('user_id', auth()->user()->id)->first();
         @endphp
         @if((!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now()) || ($userHasAnswered && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
-            <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="space-y-3 group-social-form">
+            <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem;" class="group-social-form">
                 @csrf
-                <div class="flex flex-col gap-4">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
                     @foreach($socialQuestion->options as $option)
-                        <label class="w-full flex justify-between items-center bg-offside-primary hover:bg-offside-secondary transition-colors p-4 rounded-lg cursor-pointer social-option-btn" style="user-select:none;">
-                            <input type="radio" name="question_option_id" value="{{ $option->id }}" class="hidden" required>
-                            <span class="flex-1 text-center">{{ $option->text }}</span>
-                            <div class="flex items-center space-x-2">
+                        <label style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: {{ $bgPrimary }}; cursor: pointer; padding: 1rem; border-radius: 0.5rem; user-select: none; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; transition: opacity 0.2s;" class="hover:opacity-80 social-option-btn" onmouseover="this.style.borderColor='{{ $accentColor }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'">
+                            <input type="radio" name="question_option_id" value="{{ $option->id }}" style="display: none;" required>
+                            <span style="flex: 1; text-align: center;">{{ $option->text }}</span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
                                     @if($answer->user->avatar)
                                         <img src="{{ $answer->user->avatar_url }}"
@@ -56,16 +68,30 @@
             });
             </script>
         @else
-            <div class="space-y-3">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 @foreach($socialQuestion->options as $option)
-                    <div class="p-4 rounded-lg {{
-                        $socialQuestion->available_until->addHours(4) > now()
-                            ? (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id ? 'bg-blue-600' : 'bg-offside-primary bg-opacity-20')
-                            : ($option->is_correct ? 'bg-green-600' : (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id ? 'bg-red-600' : 'bg-offside-primary bg-opacity-20'))
-                    }}">
-                        <div class="flex justify-between items-center">
-                            <span>{{ $option->text }}</span>
-                            <div class="flex items-center space-x-2">
+                    @php
+                        $optionBg = $bgPrimary;
+                        $optionColor = $textPrimary;
+                        if ($socialQuestion->available_until->addHours(4) > now()) {
+                            if (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id) {
+                                $optionBg = '#003b2f';
+                                $optionColor = $accentColor;
+                            }
+                        } else {
+                            if ($option->is_correct) {
+                                $optionBg = '#00c800';
+                                $optionColor = '#ffffff';
+                            } elseif (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id) {
+                                $optionBg = '#c80000';
+                                $optionColor = '#ffffff';
+                            }
+                        }
+                    @endphp
+                    <div style="padding: 1rem; border-radius: 0.5rem; background: {{ $optionBg }}; border: 1px solid {{ $borderColor }}; color: {{ $optionColor }};">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: {{ $optionColor }};">{{ $option->text }}</span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
                                     @if($answer->user->avatar)
                                         <img src="{{ $answer->user->avatar_url }}"
@@ -95,18 +121,24 @@
             </div>
         @endif
         <!-- Like/Dislike Buttons -->
-        <div class="flex justify-end space-x-4 mt-4">
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
             <button type="button"
-                    class="like-btn flex items-center {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? 'text-green-500' : 'text-gray-400' }} hover:text-green-400 transition-colors"
+                    style="display: flex; align-items: center; cursor: pointer; color: {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? $accentColor : $textSecondary }}; transition: color 0.2s;"
+                    class="like-btn"
                     data-question-id="{{ $socialQuestion->id }}"
-                    data-template-question-id="{{ $socialQuestion->template_question_id }}">
-                <i class="fas fa-thumbs-up mr-1"></i>
+                    data-template-question-id="{{ $socialQuestion->template_question_id }}"
+                    onmouseover="this.style.color='{{ $accentColor }}'"
+                    onmouseout="this.style.color='{{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? $accentColor : $textSecondary }}'">
+                <i class="fas fa-thumbs-up" style="margin-right: 0.25rem;"></i>
             </button>
             <button type="button"
-                    class="dislike-btn flex items-center {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty() ? 'text-red-500' : 'text-gray-400' }} hover:text-red-400 transition-colors"
+                    style="display: flex; align-items: center; cursor: pointer; color: {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty() ? '#ef4444' : $textSecondary }}; transition: color 0.2s;"
+                    class="dislike-btn"
                     data-question-id="{{ $socialQuestion->id }}"
-                    data-template-question-id="{{ $socialQuestion->template_question_id }}">
-                <i class="fas fa-thumbs-down mr-1"></i>
+                    data-template-question-id="{{ $socialQuestion->template_question_id }}"
+                    onmouseover="this.style.color='#ef4444'"
+                    onmouseout="this.style.color='{{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty() ? '#ef4444' : $textSecondary }}'">
+                <i class="fas fa-thumbs-down" style="margin-right: 0.25rem;"></i>
             </button>
         </div>
     </div>

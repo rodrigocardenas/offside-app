@@ -1,117 +1,184 @@
-<div id="chatSection" class="bg-offside-dark rounded-lg p-6">
-    <div class="bg-offside-primary bg-opacity-20 rounded-lg h-[300px] flex flex-col">
-        <div class="flex-1 p-4 overflow-y-auto space-y-4">
-            @foreach($group->chatMessages as $message)
-                <div class="flex items-start space-x-3">
-                    <div class="flex-1">
-                        <div class="bg-offside-primary bg-opacity-40 rounded-lg p-3">
-                            <div class="font-medium text-sm">{{ $message->user->name }}</div>
-                            <div class="text-white">{{ $message->message }}</div>
-                            <div class="text-xs text-gray-400 mt-1">
-                                {{ $message->created_at->format('d/m/Y H:i') }}
-                            </div>
+@php
+    $themeColors = $themeColors ?? [];
+    $bgPrimary = $themeColors['bgPrimary'] ?? '#0a2e2c';
+    $bgSecondary = $themeColors['bgSecondary'] ?? '#0f3d3a';
+    $bgTertiary = $themeColors['bgTertiary'] ?? '#1a524e';
+    $textPrimary = $themeColors['textPrimary'] ?? '#ffffff';
+    $textSecondary = $themeColors['textSecondary'] ?? '#b0b0b0';
+    $borderColor = $themeColors['borderColor'] ?? '#2a4a47';
+    $accentColor = $themeColors['accentColor'] ?? '#00deb0';
+    $accentDark = $themeColors['accentDark'] ?? '#17b796';
+    $isDark = $textPrimary === '#ffffff'; // Si textPrimary es blanco, es modo oscuro
+@endphp
+
+<!-- Chat Section - New Design -->
+<div id="chatSection" class="chat-section" style="margin: 16px; background: {{ $isDark ? '#1a1a1a' : '#fff' }}; border-radius: 16px; display: flex; flex-direction: column; max-height: 400px; border: 1px solid {{ $isDark ? '#333' : '#e0e0e0' }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: {{ $isDark ? '#fff' : '#333' }};">
+    <!-- Chat Title -->
+    <div class="chat-title" style="display: flex; align-items: center; gap: 8px; padding: 16px; font-size: 16px; font-weight: 600; color: {{ $isDark ? '#fff' : '#333' }}; border-bottom: 1px solid {{ $isDark ? '#333' : '#e0e0e0' }}; flex-shrink: 0;">
+        <i class="fas fa-comments"></i> Chat del Grupo
+    </div>
+
+    <!-- Chat Messages Container (Scrollable) -->
+    <div class="chat-messages" id="chatMessages" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow-y: auto; flex: 1;">
+        @forelse($group->chatMessages->reverse() as $message)
+            <div class="message" style="display: flex; gap: 8px; align-items: flex-start;">
+                <!-- Avatar -->
+                <div class="message-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: {{ $accentColor }}; display: flex; align-items: center; justify-content: center; color: {{ $isDark ? '#fff' : '#003b2f' }}; font-size: 12px; font-weight: bold; flex-shrink: 0;">
+                    {{ strtoupper(substr($message->user->name, 0, 1)) }}
+                </div>
+
+                <!-- Message Content -->
+                <div class="message-content" style="flex: 1;">
+                    <!-- Message Header (Name + Time) -->
+                    <div class="message-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <div class="message-name" style="font-size: 12px; font-weight: 600; color: {{ $isDark ? '#fff' : '#333' }};">
+                            {{ $message->user->name }}
+                        </div>
+                        <div class="message-time" style="font-size: 11px; color: {{ $isDark ? '#999' : '#6c757d' }};">
+                            {{ $message->created_at->diffForHumans() }}
                         </div>
                     </div>
+
+                    <!-- Message Text -->
+                    <div class="message-text" style="font-size: 14px; line-height: 1.4; color: {{ $isDark ? '#ddd' : '#495057' }};">
+                        {{ $message->message }}
+                    </div>
                 </div>
-            @endforeach
-        </div>
-        <div class="p-4 border-t border-offside-primary">
-            <form action="{{ route('chat.store', $group) }}" method="POST" class="flex items-center w-full space-x-2" id="chatForm">
-                @csrf
-                <div class="flex-1">
-                    <input type="text"
-                           name="message"
-                           id="chatMessage"
-                           class="w-full bg-offside-primary bg-opacity-40 border-0 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-offside-secondary px-4 py-2"
-                           placeholder="Escribe un mensaje..."
-                           required>
-                </div>
-                <button type="submit"
-                        id="sendMessageBtn"
-                        title="Enviar mensaje"
-                        class="bg-offside-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center">
-                    <span class="hidden sm:block">Enviar</span>
-                    <i class="fas fa-paper-plane sm:hidden"></i>
-                </button>
-            </form>
+            </div>
+        @empty
+            <div style="text-align: center; padding: 20px; color: {{ $isDark ? '#999' : '#6c757d' }};">
+                <p>No hay mensajes aún. ¡Sé el primero en escribir!</p>
+            </div>
+        @endforelse
+    </div>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const chatForm = document.getElementById('chatForm');
-                    const sendButton = document.getElementById('sendMessageBtn');
-                    const messageInput = document.getElementById('chatMessage');
-                    const chatContainer = document.querySelector('.overflow-y-auto');
-                    let lastMessageTime = 0;
+    <!-- Chat Input (Fixed at bottom) -->
+    <div class="chat-input" style="padding: 12px 16px; border-top: 1px solid {{ $isDark ? '#333' : '#e0e0e0' }}; display: flex; gap: 8px; flex-shrink: 0; background: {{ $isDark ? '#1a1a1a' : '#fff' }};">
+        <form action="{{ route('chat.store', $group) }}" method="POST" style="display: flex; gap: 8px; width: 100%;" id="chatForm">
+            @csrf
+            <input type="text"
+                   name="message"
+                   id="chatMessage"
+                   style="flex: 1; padding: 10px 12px; border: 1px solid {{ $isDark ? '#444' : '#dee2e6' }}; border-radius: 20px; font-size: 14px; outline: none; background: {{ $isDark ? '#222' : '#f8f9fa' }}; color: {{ $isDark ? '#fff' : '#333' }};"
+                   placeholder="Escribe un mensaje..."
+                   required>
+            <button type="submit"
+                    id="sendMessageBtn"
+                    title="Enviar mensaje"
+                    style="padding: 10px 16px; background: {{ $accentColor }}; color: {{ $isDark ? '#000' : '#003b2f' }}; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; flex-shrink: 0;"
+                    class="hover:opacity-80">
+                <span class="hidden sm:block">Enviar</span>
+                <i class="fas fa-paper-plane sm:hidden"></i>
+            </button>
+        </form>
+    </div>
+</div>
 
-                    chatForm.addEventListener('submit', async function(e) {
-                        e.preventDefault();
+<script>
+(function() {
+    'use strict';
+    
+    let isSubmitting = false;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatForm = document.getElementById('chatForm');
+        const sendButton = document.getElementById('sendMessageBtn');
+        const messageInput = document.getElementById('chatMessage');
+        const chatContainer = document.getElementById('chatMessages');
+        
+        if (!chatForm || !sendButton || !messageInput || !chatContainer) {
+            console.warn('Chat elements not found');
+            return;
+        }
 
-                        const now = Date.now();
-                        if (formSubmissionTracker.isSubmitting('chatForm') || (now - lastMessageTime < 2000)) {
-                            return;
-                        }
+        // Scroll al final al cargar
+        setTimeout(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 100);
 
-                        formSubmissionTracker.startSubmission('chatForm');
-                        lastMessageTime = now;
-                        sendButton.disabled = true;
-                        sendButton.classList.add('opacity-50', 'cursor-not-allowed');
+        chatForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-                        try {
-                            const formData = new FormData(chatForm);
-                            const response = await fetch(chatForm.action, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                }
-                            });
+            if (isSubmitting) return;
 
-                            if (response.status === 429) {
-                                console.log('Mensaje duplicado detectado');
-                                return;
-                            }
+            isSubmitting = true;
+            sendButton.disabled = true;
+            sendButton.style.opacity = '0.6';
 
-                            if (response.ok) {
-                                const data = await response.json();
-                                messageInput.value = '';
-                                const messageHtml = `
-                                    <div class="flex items-start space-x-3">
-                                        <div class="flex-1">
-                                            <div class="bg-offside-primary bg-opacity-40 rounded-lg p-3">
-                                                <div class="font-medium text-sm">${data.message.user.name}</div>
-                                                <div class="text-white">${data.message.message}</div>
-                                                <div class="text-xs text-gray-400 mt-1">
-                                                    ${new Date(data.message.created_at).toLocaleString()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                                chatContainer.insertAdjacentHTML('beforeend', messageHtml);
-                                chatContainer.scrollTop = chatContainer.scrollHeight;
-                            } else {
-                                throw new Error('Error al enviar el mensaje');
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                        } finally {
-                            setTimeout(() => {
-                                formSubmissionTracker.endSubmission('chatForm');
-                                sendButton.disabled = false;
-                                sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                            }, 1000);
-                        }
-                    });
-
-                    // Prevenir envío con Enter múltiple
-                    messageInput.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter' && formSubmissionTracker.isSubmitting('chatForm')) {
-                            e.preventDefault();
-                        }
-                    });
+            try {
+                const formData = new FormData(chatForm);
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                
+                const response = await fetch(chatForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken ? csrfToken.content : ''
+                    }
                 });
-            </script>
+
+                if (response.ok) {
+                    const data = await response.json();
+                    messageInput.value = '';
+                    
+                    // Limpiar mensaje vacío
+                    const emptyMsg = chatContainer.querySelector('[style*="text-align"]');
+                    if (emptyMsg) {
+                        emptyMsg.remove();
+                    }
+                    
+                    const firstLetter = (data.message.user.name || '?').charAt(0).toUpperCase();
+                    const newMessageHTML = `
+                        <div class="message" style="display: flex; gap: 8px; align-items: flex-start;">
+                            <div class="message-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #00deb0; display: flex; align-items: center; justify-content: center; color: #333; font-size: 12px; font-weight: bold; flex-shrink: 0;">
+                                ${firstLetter}
+                            </div>
+                            <div class="message-content" style="flex: 1;">
+                                <div class="message-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <div class="message-name" style="font-size: 12px; font-weight: 600;">
+                                        ${(data.message.user.name || 'Usuario').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                                    </div>
+                                    <div class="message-time" style="font-size: 11px; color: #999;">
+                                        hace unos segundos
+                                    </div>
+                                </div>
+                                <div class="message-text" style="font-size: 14px; line-height: 1.4;">
+                                    ${(data.message.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = newMessageHTML;
+                    const messageEl = tempDiv.firstElementChild;
+                    
+                    if (messageEl && chatContainer) {
+                        chatContainer.appendChild(messageEl);
+                        setTimeout(() => {
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                        }, 50);
+                    }
+                }
+            } catch (error) {
+                console.error('Error al enviar mensaje:', error);
+            } finally {
+                isSubmitting = false;
+                sendButton.disabled = false;
+                sendButton.style.opacity = '1';
+            }
+        });
+
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey && !isSubmitting) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    });
+})();
+</script>
         </div>
     </div>
 </div>
@@ -170,70 +237,69 @@
 @endif
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const openModalBtn = document.getElementById('openRewardPenaltyModal');
-        const closeModalBtn = document.getElementById('closeRewardPenaltyModal');
-        const cancelBtn = document.getElementById('cancelRewardPenalty');
-        const modal = document.getElementById('rewardPenaltyModal');
+document.addEventListener('DOMContentLoaded', function() {
+    const openModalBtn = document.getElementById('openRewardPenaltyModal');
+    const closeModalBtn = document.getElementById('closeRewardPenaltyModal');
+    const cancelBtn = document.getElementById('cancelRewardPenalty');
+    const modal = document.getElementById('rewardPenaltyModal');
+    const rewardPenaltyForm = document.getElementById('rewardPenaltyForm');
 
-        if (openModalBtn && modal) {
-            openModalBtn.addEventListener('click', function() {
-                modal.classList.remove('hidden');
-            });
-        }
-        if (closeModalBtn && modal) {
-            closeModalBtn.addEventListener('click', function() {
-                modal.classList.add('hidden');
-            });
-        }
-        if (cancelBtn && modal) {
-            cancelBtn.addEventListener('click', function() {
-                modal.classList.add('hidden');
-            });
-        }
+    if (!modal) return;
 
-        // Lógica para guardar la recompensa/penitencia por AJAX
-        const rewardPenaltyForm = document.getElementById('rewardPenaltyForm');
-        const rewardPenaltyModal = document.getElementById('rewardPenaltyModal');
-        const rewardPenaltySuccess = document.getElementById('rewardPenaltySuccess');
-        const rewardOrPenaltyTextarea = document.getElementById('reward_or_penalty');
+    if (openModalBtn) {
+        openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    }
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    }
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    }
 
-        if (rewardPenaltyForm) {
-            rewardPenaltyForm.addEventListener('submit', function(e) {
-                e.preventDefault();
+    if (rewardPenaltyForm) {
+        rewardPenaltyForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-                const groupId = {{ $group->id }};
-                const url = `/groups/${groupId}/reward-or-penalty`;
-                const data = {
-                    reward_or_penalty: rewardOrPenaltyTextarea.value,
-                    _token: document.querySelector('meta[name=\"csrf-token\"]').content
-                };
-
-                // Usando jQuery para AJAX
-                $.ajax({
-                    url: url,
+            const groupId = {{ $group->id }};
+            const textarea = document.getElementById('reward_or_penalty');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            
+            try {
+                const response = await fetch(`/groups/${groupId}/reward-or-penalty`, {
                     method: 'POST',
-                    data: data,
-                    success: function(response) {
-                        if (response.success) {
-                            rewardPenaltySuccess.classList.remove('hidden');
-                            setTimeout(() => {
-                                rewardPenaltySuccess.classList.add('hidden');
-                                rewardPenaltyModal.classList.add('hidden');
-                                // Actualizar el texto en la vista sin recargar
-                                document.querySelectorAll('.reward-or-penalty-text').forEach(el => {
-                                    el.textContent = response.reward_or_penalty;
-                                });
-                            }, 1200);
-                        }
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken ? csrfToken.content : '',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
-                    error: function(xhr) {
-                        alert('Error al guardar. Intenta de nuevo.');
-                    }
+                    body: JSON.stringify({
+                        reward_or_penalty: textarea.value
+                    })
                 });
-            });
-        }
-    });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    const successMsg = document.getElementById('rewardPenaltySuccess');
+                    if (successMsg) {
+                        successMsg.classList.remove('hidden');
+                        setTimeout(() => {
+                            successMsg.classList.add('hidden');
+                            modal.classList.add('hidden');
+                            document.querySelectorAll('.reward-or-penalty-text').forEach(el => {
+                                el.textContent = result.reward_or_penalty || textarea.value;
+                            });
+                        }, 1200);
+                    }
+                } else {
+                    alert('Error al guardar. Intenta de nuevo.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar. Intenta de nuevo.');
+            }
+        });
+    }
+});
 </script>
 
 

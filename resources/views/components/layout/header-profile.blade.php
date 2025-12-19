@@ -6,15 +6,30 @@
         @if($logoUrl)
             <img src="{{ $logoUrl }}" alt="{{ $altText }}" class="header-logo">
         @else
-            <i class="fas fa-users"></i>
+            <a href="{{ route('groups.index') }}" style="color: #00deb0; font-size: 20px; text-decoration: none;">
+                <i class="fas fa-arrow-left"></i>
+            </a>
         @endif
     </div>
+
+    <!-- Center Title - Show if we're in a group page -->
+    @if(View::hasSection('navigation-logo'))
+        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);">
+            <img src="@yield('navigation-logo')" style="width: 32px; height: 32px; border-radius: 50%; background-color: white; object-fit: cover;"/>
+        </div>
+    @elseif(View::hasSection('navigation-title'))
+        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1rem; font-weight: 600; color: #333;">
+            @yield('navigation-title', '')
+        </div>
+    @endif
 
     <!-- Profile Button Right -->
     <div class="header-profile-btn">
         <button
             class="profile-btn"
             title="Perfil de usuario"
+            id="user-menu"
+            onclick="document.querySelector('.profile-dropdown').classList.toggle('hidden')"
         >
             @auth
                 @if(Auth::user()->avatar)
@@ -28,7 +43,7 @@
         </button>
 
         <!-- Dropdown Menu -->
-        <div class="profile-dropdown">
+        <div class="profile-dropdown hidden">
             <a href="{{ route('profile.edit') }}" class="dropdown-item">
                 <i class="fas fa-user"></i>
                 <span>Ver Perfil</span>
@@ -37,8 +52,26 @@
                 <i class="fas fa-cog"></i>
                 <span>Configuración</span>
             </a>
+            <form method="POST" action="{{ route('logout') }}" class="block w-full">
+                @csrf
+                <button type="submit" class="dropdown-item w-full text-left" style="border: none;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Cerrar sesión</span>
+                </button>
+            </form>
         </div>
     </div>
 
+    <script>
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function(e) {
+            const header = document.querySelector('.header');
+            const dropdown = document.querySelector('.profile-dropdown');
+            const btn = document.getElementById('user-menu');
 
+            if (header && dropdown && !header.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
 </div>

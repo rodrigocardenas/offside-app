@@ -24,12 +24,12 @@ body {
 
 /* ==================== Header ==================== */
 .header {
-    background: #fff;
+    background: #fff !important;
     padding: 10px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0 !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     height: 60px;
     width: 100%;
@@ -37,7 +37,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 900;
+    z-index: 900 !important;
 }
 
 /* Header Profile Button & Dropdown */
@@ -130,9 +130,11 @@ body {
 }
 
 .header-logo {
-    height: 40px;
-    width: auto;
-    object-fit: contain;
+    height: 32px !important;
+    width: auto !important;
+    max-width: 90px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
 }
 
 /* Legacy support */

@@ -1,15 +1,27 @@
-<div class="bg-offside-primary bg-opacity-99 p-1 mb-4 fixed left-0 right-0 w-full" style="z-index: 1000; margin-top: 2.2rem;">
-    <a href="{{ route('rankings.group', $group) }}" class="text-offside-light">
-        <marquee behavior="scroll" direction="left" scrollamount="5">
-            @foreach($group->users->sortByDesc('total_points')->take(3) as $index => $user)
-                <span class="font-bold text-offside-light">
-                    @if($index === 0) 🥇 @elseif($index === 1) 🥈 @elseif($index === 2) 🥉 @endif
-                    {{ $user->name }} ({{ $user->total_points ?? 0 }} puntos)
-                </span>
-                @if(!$loop->last)
-                    <span class="mx-2">|</span>
-                @endif
-            @endforeach
-        </marquee>
+@php
+    $themeColors = $themeColors ?? [];
+    $bgPrimary = $themeColors['bgPrimary'] ?? '#0a2e2c';
+    $bgSecondary = $themeColors['bgSecondary'] ?? '#0f3d3a';
+    $bgTertiary = $themeColors['bgTertiary'] ?? '#1a524e';
+    $textPrimary = $themeColors['textPrimary'] ?? '#ffffff';
+    $textSecondary = $themeColors['textSecondary'] ?? '#b0b0b0';
+    $borderColor = $themeColors['borderColor'] ?? '#2a4a47';
+    $accentColor = $themeColors['accentColor'] ?? '#00deb0';
+    $accentDark = $themeColors['accentDark'] ?? '#17b796';
+@endphp
+
+<!-- Header del Grupo -->
+<div style="background: {{ $bgSecondary }}; padding: 1.25rem 1rem 1rem; position: relative; border-bottom: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem;">
+    <!-- Botón de retroceso -->
+    <a href="{{ route('groups.index') }}" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: {{ $accentColor }}; font-size: 1.25rem; cursor: pointer; padding: 0.5rem; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+        <i class="fas fa-arrow-left"></i>
     </a>
+
+    <!-- Grupo Info (centrado) -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="width: 2.5rem; height: 2.5rem; background: #ff6b6b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.125rem; font-weight: bold; color: #000;">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <div style="font-size: 1.25rem; font-weight: 600; color: {{ $textPrimary }}; text-align: center;">{{ $group->name }}</div>
+    </div>
 </div>
