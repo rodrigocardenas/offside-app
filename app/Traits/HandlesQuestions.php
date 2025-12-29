@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\Question;
 use App\Models\QuestionOption;
+use App\Models\FootballMatch;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Models\TemplateQuestion;
@@ -118,14 +119,11 @@ trait HandlesQuestions
 
     private function checkIfAllMatchesFinished($group)
     {
-        return \App\Models\FootballMatch::where(function($query) use ($group) {
-                $query->where('league', $group->competition->type)
-                    ->orWhere('league', 'world-club-championship')
-                    ->orWhere('competition_id', 4); // Mundial de Clubes
-            })
-            ->where('date', '>=', now()->subDays(5))
-            ->where('date', '<=', now())
+        return FootballMatch::
+            where('date', '>=', now()->subDays(5))
+            ->where('date', '<=', now()->addDays(5))
             ->where('status', '!=', 'FINISHED')
+            ->where('competition_id', $group->competition_id)
             ->doesntExist();
     }
 

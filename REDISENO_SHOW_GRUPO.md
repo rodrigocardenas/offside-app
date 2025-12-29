@@ -227,12 +227,24 @@ Identificar elementos del HTML (si existe) que NO están en show.blade actual:
 - [ ] 3.2.4 Verificar interactividad de respuestas
 - [ ] 3.2.5 Probar en ambos modos
 
-#### 3.3 Preguntas Sociales
-- [ ] 3.3.1 Aplicar colores dinámicos a contenedor
-- [ ] 3.3.2 Aplicar a inputs de respuesta
-- [ ] 3.3.3 Aplicar a botones
-- [ ] 3.3.4 Verificar mensaje "Invita a más miembros" si aplica
-- [ ] 3.3.5 Probar en ambos modos
+#### 3.3 Preguntas Sociales / Invitación Social ✅
+- [x] 3.3.1 Crear componente separado `group-social-invite.blade.php`
+- [x] 3.3.2 Aplicar diseño moderno con icono y estructura clara
+- [x] 3.3.3 Agregar código de invitación con botón copiar
+- [x] 3.3.4 Agregar botón compartir (Web Share API / clipboard)
+- [x] 3.3.5 Aplicar colores dinámicos y tema-aware
+- [x] 3.3.6 Probar en ambos modos
+
+**COMPLETADO:** Nuevo componente `group-social-invite` con:
+  - Diseño moderno con icono de usuarios y badge de miembros
+  - Código de invitación con estilos monospace
+  - Botón copiar código con feedback visual
+  - Botón copiar mensaje completo (similar a index.blade.php)
+  - Botón compartir en WhatsApp (#25D366 color oficial)
+  - Funcionalidad robusta con Clipboard API + fallback
+  - Estructura flexbox responsive
+  - Colores dinámicos aplicados
+  - Instrucciones claras para el usuario
 
 #### 3.4 Chat del Grupo ✅
 - [x] 3.4.1 Aplicar colores a contenedor del chat

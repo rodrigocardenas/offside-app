@@ -5,9 +5,14 @@
         <div class="menu-icon"><i class="fas fa-users"></i></div>
         <div class="menu-label">Grupo</div>
     </a>
-    <a href="{{ route('competitions.index') }}" class="menu-item {{ $activeItem === 'comunidades' ? 'active' : '' }}">
+    {{-- <a href="{{ route('competitions.index') }}" class="menu-item {{ $activeItem === 'comunidades' ? 'active' : '' }}">
         <div class="menu-icon"><i class="fas fa-globe"></i></div>
         <div class="menu-label">Comunidades</div>
+    </a> --}}
+    {{-- add a markets link --}}
+    <a href="" class="menu-item {{ $activeItem === 'mercados' ? 'active' : '' }}">
+        <div class="menu-icon"><i class="fas fa-store"></i></div>
+        <div class="menu-label">Tienda</div>
     </a>
     <button type="button" onclick="openFeedbackModal(event)" class="menu-item">
         <div class="menu-icon"><i class="fas fa-comment"></i></div>

@@ -31,12 +31,12 @@
                 </svg>
                 <span style="font-size: 0.75rem; margin-top: 0.25rem;">Resultados</span>
             </a>
-            <a href="#" id="openFeedbackModal" style="display: flex; flex-direction: column; align-items: center; color: {{ $textSecondary }}; transition: color 0.2s;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
+            <button type="button" id="openFeedbackModal" onclick="openFeedbackModal(event)" style="display: flex; flex-direction: column; align-items: center; color: {{ $textSecondary }}; transition: color 0.2s; background: none; border: none; cursor: pointer; padding: 0;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
                 <svg xmlns="http://www.w3.org/2000/svg" style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 <span style="font-size: 0.75rem; margin-top: 0.25rem;">Tu opinión</span>
-            </a>
+            </button>
             <a href="{{ route('profile.edit') }}" style="display: flex; flex-direction: column; align-items: center; color: {{ $textSecondary }}; transition: color 0.2s;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
                 <svg xmlns="http://www.w3.org/2000/svg" style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

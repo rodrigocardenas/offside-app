@@ -25,41 +25,57 @@
 
     <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
 
-        {{-- <div class="p-1 mb-4 fixed left-0 right-0 w-full" style="z-index: 50; top: 60px; background: {{ $bgSecondary }}; opacity: 0.99;">
-            <marquee behavior="scroll" direction="left" scrollamount="5">
-                @foreach($group->users->sortByDesc('total_points')->take(3) as $index => $user)
-                    <span class="font-bold" style="color: {{ $textSecondary }};">
-                        @if($index === 0) 🥇 @elseif($index === 1) 🥈 @elseif($index === 2) 🥉 @endif
-                        {{ $user->name }} ({{ $user->total_points ?? 0 }} puntos)
-                    </span>
-                    @if(!$loop->last)
-                        <span class="mx-2">|</span>
-                    @endif
-                @endforeach
-            </marquee>
-        </div> --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8" style="margin-top: 60px;">
+        <!-- Ranking Section -->
+        <div style="background: {{ $bgTertiary }}; margin: 16px; border-radius: 16px; padding: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }};">
+                <i class="fas fa-trophy" style="font-size: 16px; color: {{ $accentColor }};"></i>
+                Ranking
+                <a href="{{ url('/groups', $group->id) }}/ranking" style="margin-left: auto; font-size: 12px; color: {{ $textSecondary }}; cursor: pointer; padding: 4px 8px; border-radius: 12px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease;"
+                    onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#f0f0f0' }}'; this.style.color='{{ $textPrimary }}';"
+                    onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
+                    Ver más
+                </a>
+            </div>
+
+            <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-behavior: smooth;" class="hide-scrollbar">
+                @forelse($group->users->sortByDesc('total_points') as $index => $user)
+                    @php
+                        $rankColor = $index === 0 ? '#FFD700' : ($index === 1 ? '#C0C0C0' : ($index === 2 ? '#CD7F32' : '#6c757d'));
+                    @endphp
+                    <div style="display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: {{ $bgSecondary }}; border-radius: 12px; min-width: fit-content; transition: all 0.2s ease; cursor: pointer; border-left: 4px solid {{ $rankColor }}; border: 1px solid {{ $borderColor }}; border-left: 4px solid {{ $rankColor }};"
+                        onmouseover="this.style.background='{{ $isDark ? '#1a524e' : '#f0f0f0' }}'; this.style.borderColor='{{ $accentColor }}'; this.style.transform='translateY(-2px)';"
+                        onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.borderColor='{{ $borderColor }}'; this.style.transform='translateY(0)';">
+                        <div style="text-align: left;">
+                            <div style="font-weight: 600; font-size: 12px; color: {{ $textPrimary }};">
+                                {{ Str::limit($user->name, 12, '') }} <small style="font-weight: bold; color: {{ $accentColor }}; font-size: 11px;">{{ number_format($user->total_points ?? 0, 0, ',', '.') }}</small>
+                            </div>
+                            <div style="font-weight: bold; color: {{ $accentColor }}; font-size: 11px;">
+
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div style="color: {{ $textSecondary }}; font-size: 14px; text-align: center; width: 100%;">
+                        No hay jugadores en el ranking
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
 
                     <!-- Preguntas de Partidos -->
-                    <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
+                    <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :group="$group" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
 
                     <!-- Pregunta Social -->
-                    @if($group->users->count() >= 2)
+                    {{-- @if($group->users->count() >= 2)
                         @if($socialQuestion)
                             <x-groups.group-social-question :social-question="$socialQuestion" :user-answers="$userAnswers" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
                         @endif
                     @else
-                        <div class="rounded-lg p-6 mt-1" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }};">
-                            <div class="text-center">
-                                <h2 class="text-xl font-bold mb-2">Preguntas Sociales</h2>
-                                <p style="color: {{ $textSecondary }};">Invita a más miembros al grupo para desbloquear las preguntas sociales.</p>
-                                <div class="mt-4">
-                                    <p class="text-sm">Código de invitación: <span class="font-mono px-2 py-1 rounded" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }};">{{ $group->code }}</span></p>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+                        <x-groups.group-social-invite :group="$group" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
+                    @endif --}}
                 </div>
 
                 <!-- Chat del Grupo -->
@@ -73,76 +89,80 @@
     </div>
 
     <!-- Modal de Feedback -->
-    <div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="rounded-lg p-6 w-full max-w-md" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }};">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Envíanos tu opinión</h3>
-                <button id="closeFeedbackModal" onclick="document.getElementById('feedbackModal').classList.add('hidden')" style="color: {{ $textSecondary }}; cursor: pointer;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+    <div id="feedbackModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
+        <div style="background: {{ $bgTertiary }}; border-radius: 16px; width: 100%; max-width: 480px; padding: 28px 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); border: 1px solid {{ $borderColor }};">
+
+            {{-- Header --}}
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <h2 style="font-size: 22px; font-weight: 700; color: {{ $textPrimary }}; margin: 0; display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-comments" style="color: {{ $accentColor }};"></i>
+                    Envíanos tu opinión
+                </h2>
+                <button id="closeFeedbackModal" style="background: none; border: none; font-size: 24px; color: {{ $textSecondary }}; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s ease;"
+                    onmouseover="this.style.background='{{ $isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}'; this.style.color='{{ $textPrimary }}';"
+                    onmouseout="this.style.background='none'; this.style.color='{{ $textSecondary }}';">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-            <form id="feedbackForm">
+
+            {{-- Descripción --}}
+            <p style="color: {{ $textSecondary }}; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
+                Tu opinión nos ayuda a mejorar. Comparte tus sugerencias, reporta errores o envíanos un elogio.
+            </p>
+
+            {{-- Formulario --}}
+            <form id="feedbackForm" style="display: flex; flex-direction: column; gap: 16px;">
                 @csrf
-                <div class="mb-4">
-                    <label for="type" class="block text-sm font-medium mb-2">Tipo de comentario</label>
-                    <select id="type" name="type" class="w-full rounded-md p-2" style="background: {{ $bgTertiary }}; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};">
-                        <option value="suggestion">Sugerencia</option>
-                        <option value="bug">Reportar un error</option>
-                        <option value="compliment">Elogio</option>
-                        <option value="other">Otro</option>
+
+                {{-- Tipo de comentario --}}
+                <div>
+                    <label for="type" style="display: block; font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; margin-bottom: 8px;">Tipo de comentario</label>
+                    <select id="type" name="type" style="width: 100%; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 10px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; cursor: pointer; transition: all 0.3s ease; box-sizing: border-box;"
+                        onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px {{ $isDark ? 'rgba(0, 222, 176, 0.1)' : 'rgba(0, 222, 176, 0.08)' }}';"
+                        onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none';">
+                        <option value="suggestion" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">📝 Sugerencia</option>
+                        <option value="bug" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">🐛 Reportar un error</option>
+                        <option value="compliment" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">⭐ Elogio</option>
+                        <option value="other" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">💬 Otro</option>
                     </select>
                 </div>
-                <div class="mb-4">
-                    <label for="message" class="block text-sm font-medium mb-2">Mensaje</label>
-                    <textarea id="message" name="message" rows="4" class="w-full rounded-md p-2" style="background: {{ $bgTertiary }}; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};" required></textarea>
+
+                {{-- Mensaje --}}
+                <div>
+                    <label for="message" style="display: block; font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; margin-bottom: 8px;">Mensaje</label>
+                    <textarea id="message" name="message" rows="4" required placeholder="Cuéntanos qué piensas..."
+                        style="width: 100%; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 10px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; font-family: inherit; resize: vertical; box-sizing: border-box; transition: all 0.3s ease;"
+                        onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px {{ $isDark ? 'rgba(0, 222, 176, 0.1)' : 'rgba(0, 222, 176, 0.08)' }}';"
+                        onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none';"></textarea>
                 </div>
-                <div class="mb-4 flex items-center">
-                    <input type="checkbox" id="is_anonymous" name="is_anonymous" class="rounded" style="border-color: {{ $borderColor }}; background: {{ $bgTertiary }}; accent-color: {{ $accentColor }};">
-                    <label for="is_anonymous" class="ml-2 text-sm">Enviar como anónimo</label>
+
+                {{-- Opción anónima --}}
+                <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: {{ $bgSecondary }}; border-radius: 8px; border: 1px solid {{ $borderColor }};">
+                    <input type="checkbox" id="is_anonymous" name="is_anonymous" style="width: 18px; height: 18px; cursor: pointer; accent-color: {{ $accentColor }};">
+                    <label for="is_anonymous" style="font-size: 14px; color: {{ $textPrimary }}; cursor: pointer; margin: 0; flex: 1;">
+                        <i class="fas fa-mask" style="margin-right: 6px; color: {{ $accentColor }};"></i> Enviar como anónimo
+                    </label>
                 </div>
-                <div class="flex justify-end space-x-2">
-                    <button type="button" id="cancelFeedback" class="px-4 py-2 rounded-md" style="background: #666; color: {{ $textPrimary }};">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 text-white rounded-md" style="background: {{ $accentColor }}; color: #000;">Enviar</button>
+
+                {{-- Botones --}}
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <button type="button" id="cancelFeedback" style="flex: 1; padding: 12px 16px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 10px; color: {{ $textPrimary }}; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px;"
+                        onmouseover="this.style.background='{{ $isDark ? '#1a524e' : '#f0f0f0' }}';"
+                        onmouseout="this.style.background='{{ $bgSecondary }}';">
+                        Cancelar
+                    </button>
+                    <button type="submit" style="flex: 1; padding: 12px 16px; background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); border: none; border-radius: 10px; color: #000; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                        onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';"
+                        onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
+                        <i class="fas fa-paper-plane"></i> Enviar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Premio/Penitencia -->
-    @if($group->created_by === auth()->id())
-    <div id="rewardPenaltyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="rounded-lg p-6 w-full max-w-md" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }};">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Premio o Penitencia</h3>
-                <button id="closeRewardPenaltyModal" style="color: {{ $textSecondary }}; cursor: pointer;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <form id="rewardPenaltyForm">
-                @csrf
-                <div class="mb-4">
-                    <label for="reward_or_penalty" class="block text-sm font-medium mb-2">Escribe el premio para el ganador o la penitencia para el perdedor:</label>
-                    <textarea id="reward_or_penalty" name="reward_or_penalty" rows="4" class="w-full rounded-md p-2" style="background: {{ $bgTertiary }}; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};" required>{{ $group->reward_or_penalty }}</textarea>
-                </div>
-                <div class="flex justify-end space-x-2">
-                    <button type="button" id="cancelRewardPenalty" class="px-4 py-2 rounded-md" style="background: #666; color: {{ $textPrimary }};">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 text-white rounded-md" style="background: {{ $accentColor }}; color: #000;">Guardar</button>
-                </div>
-            </form>
-            <div id="rewardPenaltySuccess" class="hidden mt-4 font-bold" style="color: #00ff00;">¡Guardado correctamente!</div>
-        </div>
-    </div>
-    @endif
 
-    <!-- Mostrar el premio/penitencia actual si existe -->
-    @if($group->reward_or_penalty)
-        <div class="max-w-2xl mx-auto my-4 p-4 rounded-lg text-center" style="background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }};">
-            <span class="font-bold" style="color: {{ $textSecondary }};">Premio/Penitencia del grupo:</span><br>
-            <span style="color: {{ $textPrimary }};">{{ $group->reward_or_penalty }}</span>
-        </div>
-    @endif
+
 
 </x-app-layout>
 <style>

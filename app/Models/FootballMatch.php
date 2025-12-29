@@ -46,7 +46,7 @@ class FootballMatch extends Model
         'away_team_score' => 'integer',
         'home_team_penalties' => 'integer',
         'away_team_penalties' => 'integer',
-        'matchday' => 'integer',
+        'matchday' => 'string',
         'is_featured' => 'boolean',
         'match_date' => 'datetime',
     ];

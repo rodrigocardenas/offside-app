@@ -14,6 +14,9 @@ use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionControll
 use App\Http\Controllers\Admin\TemplateQuestionController;
 use App\Http\Controllers\TestAvatarController;
 use App\Http\Controllers\SettingsController;
+use App\Models\FootballMatch;
+use App\Models\Group;
+use App\Http\Controllers\MatchGroupsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +48,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('groups/{group}/leave', [GroupController::class, 'leave'])->name('groups.leave');
     Route::get('groups/{group}/predictive-results', [GroupController::class, 'showPredictiveResults'])->name('groups.predictive-results');
     Route::get('groups/{group}/ranking', [GroupController::class, 'getRanking'])->name('groups.ranking');
+    Route::get('groups/by-match/{matchId}', [GroupController::class, 'getGroupsByMatch']);
+
 
     // Preguntas
     Route::resource('questions', QuestionController::class);
@@ -84,6 +89,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Update reward or penalty
     Route::post('/groups/{group}/reward-or-penalty', [\App\Http\Controllers\GroupController::class, 'updateRewardOrPenalty'])->name('groups.updateRewardOrPenalty');
+
+    // API endpoints for modal
+    Route::get('groups/by-match/{matchId}', [GroupController::class, 'getGroupsByMatch']);
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

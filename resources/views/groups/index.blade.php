@@ -13,6 +13,8 @@
         <script src="{{ asset('js/groups/notification-checker.js') }}"></script>
     @endpush
 
+    @section('navigation-title', 'Offside Club')
+
     <div class="main-container">
         {{-- 1. HEADER CON LOGO --}}
         <x-layout.header-profile
@@ -218,6 +220,55 @@
         </div>
     </div>
 
+    {{-- INVITE MODAL --}}
+    @php
+        $inviteModalBg = $isDarkModal ? '#ffffff' : '#ffffff';
+        $inviteModalText = $isDarkModal ? '#333333' : '#333333';
+        $inviteModalBorder = $isDarkModal ? '#e0e0e0' : '#e0e0e0';
+        $inviteTextarea = $isDarkModal ? '#f5f5f5' : '#f5f5f5';
+    @endphp
+
+    <div id="inviteModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
+        <div style="background: {{ $inviteModalBg }}; border-radius: 16px; width: 100%; max-width: 420px; padding: 28px 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);">
+
+            {{-- Header --}}
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <h2 style="font-size: 24px; font-weight: 700; color: {{ $inviteModalText }}; margin: 0;">Compartir grupo</h2>
+                <button onclick="document.getElementById('inviteModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            {{-- Contenido --}}
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label for="inviteMessage" style="display: block; font-size: 14px; font-weight: 600; color: {{ $inviteModalText }}; margin-bottom: 8px;">Mensaje de invitación</label>
+                    <textarea id="inviteMessage" rows="4" readonly
+                        style="width: 100%; background: {{ $inviteTextarea }}; border: 1px solid {{ $inviteModalBorder }}; border-radius: 8px; padding: 12px 16px; color: {{ $inviteModalText }}; font-size: 14px; font-family: 'Courier New', monospace; resize: none; box-sizing: border-box;">
+                    </textarea>
+                </div>
+
+                {{-- Botones --}}
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <button type="button" onclick="copyInviteText()"
+                            style="flex: 1; padding: 12px 16px; background: #17b796; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                            onmouseover="this.style.background='#00deb0'"
+                            onmouseout="this.style.background='#17b796'">
+                        <i class="fas fa-copy"></i>
+                        <span>Copiar</span>
+                    </button>
+                    <button type="button" onclick="shareOnWhatsApp()"
+                            style="flex: 1; padding: 12px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                            onmouseover="this.style.background='#20ba5a'"
+                            onmouseout="this.style.background='#25D366'">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Cerrar modal al hacer click fuera
         document.getElementById('joinGroupModal').addEventListener('click', function(e) {
@@ -225,6 +276,80 @@
                 this.style.display = 'none';
             }
         });
+
+        document.getElementById('inviteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+
+        // Función para mostrar modal de invitación
+        window.showInviteModal = function(groupName, inviteUrl) {
+            const modal = document.getElementById('inviteModal');
+            const messageArea = document.getElementById('inviteMessage');
+            const message = `¡Únete al grupo "${groupName}" en Offside Club!\n\n${inviteUrl}\n\n¡Ven a competir con nosotros!`;
+            messageArea.value = message;
+            modal.style.display = 'flex';
+        };
+
+        // Función para copiar mensaje
+        window.copyInviteText = function() {
+            const messageArea = document.getElementById('inviteMessage');
+            const text = messageArea.value;
+
+            // Usar Clipboard API si está disponible
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopyFeedback();
+                }).catch(() => {
+                    // Fallback
+                    copyToClipboardFallback(text);
+                });
+            } else {
+                copyToClipboardFallback(text);
+            }
+        };
+
+        // Fallback para copiar
+        function copyToClipboardFallback(text) {
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showCopyFeedback();
+            } catch (err) {
+                console.error('Error al copiar:', err);
+            }
+        }
+
+        // Feedback visual
+        function showCopyFeedback() {
+            const button = event.target.closest('button') || event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> <span>¡Copiado!</span>';
+            button.style.background = '#00c800';
+            button.disabled = true;
+
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.disabled = false;
+            }, 2000);
+        }
+
+        // Función para compartir en WhatsApp
+        window.shareOnWhatsApp = function() {
+            const messageArea = document.getElementById('inviteMessage');
+            const text = messageArea.value;
+            const encodedMessage = encodeURIComponent(text);
+            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        };
     </script>
 
 </x-dynamic-layout>

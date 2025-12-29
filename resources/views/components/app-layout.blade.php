@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $userTheme === 'light' ? 'light-theme' : 'dark-theme' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ auth()->user()->theme_mode === 'light' ? 'light-theme' : 'dark-theme' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -180,6 +180,13 @@
             right: 0 !important;
         }
 
+        /* Dark theme header */
+        .dark-theme .header {
+            background: #0f3d3a !important;
+            border-bottom-color: #2a4a47 !important;
+            color: #fff !important;
+        }
+
         .header-logo {
             height: 32px !important;
             width: auto !important;
@@ -215,6 +222,11 @@
             transition: all 0.3s ease;
         }
 
+        .dark-theme .profile-btn {
+            border-color: #2a4a47 !important;
+            background: #1a524e !important;
+        }
+
         .profile-avatar {
             width: 100% !important;
             height: 100% !important;
@@ -247,6 +259,11 @@
             min-width: 180px;
         }
 
+        .dark-theme .profile-dropdown {
+            background: #0f3d3a !important;
+            border-color: #2a4a47 !important;
+        }
+
         .dropdown-item {
             display: flex;
             align-items: center;
@@ -258,6 +275,11 @@
             border-bottom: 1px solid #f0f0f0;
         }
 
+        .dark-theme .dropdown-item {
+            color: #b0b0b0 !important;
+            border-bottom-color: #1a524e !important;
+        }
+
         .dropdown-item:last-child {
             border-bottom: none;
         }
@@ -265,6 +287,11 @@
         .dropdown-item:hover {
             background: #f5f5f5;
             color: #00857B;
+        }
+
+        .dark-theme .dropdown-item:hover {
+            background: #1a524e;
+            color: #00deb0;
         }
 
         .dropdown-item i {

@@ -324,6 +324,7 @@ class GroupController extends Controller
 
             // Obtener preguntas y respuestas
             $matchQuestions = $this->getMatchQuestions($group, $roles);
+            // dd($matchQuestions);
             $socialQuestion = $this->getSocialQuestion($group, $roles);
             $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
@@ -1225,6 +1226,24 @@ class GroupController extends Controller
                 'user_position' => $currentUser['rank'] ?? null,
                 'user_points' => $currentUser['total_points'] ?? 0
             ]
+        ]);
+    }
+
+    function getGroupsByMatch($matchId)
+    {
+        $match = FootballMatch::findOrFail($matchId);
+
+        $groups = Group::where('competition_id', $match->competition_id)
+            ->with(['users', 'competition'])
+            // and auth user is member
+            ->whereHas('users', function($q) {
+                $q->where('user_id', auth()->id());
+            })
+            ->get();
+
+        return response()->json([
+            'match' => $match,
+            'groups' => $groups
         ]);
     }
 }

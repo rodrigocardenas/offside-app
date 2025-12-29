@@ -1,20 +1,25 @@
 @php
-    $themeColors = $themeColors ?? [];
-    $bgPrimary = $themeColors['bgPrimary'] ?? '#0a2e2c';
-    $bgSecondary = $themeColors['bgSecondary'] ?? '#0f3d3a';
-    $bgTertiary = $themeColors['bgTertiary'] ?? '#1a524e';
-    $textPrimary = $themeColors['textPrimary'] ?? '#ffffff';
-    $textSecondary = $themeColors['textSecondary'] ?? '#b0b0b0';
-    $borderColor = $themeColors['borderColor'] ?? '#2a4a47';
-    $accentColor = $themeColors['accentColor'] ?? '#00deb0';
-    $accentDark = $themeColors['accentDark'] ?? '#17b796';
+    // Las variables de tema ya están compartidas globalmente por el middleware
+    // Solo validar que existan en caso de que se use el componente sin middleware
+    $isDark = $isDark ?? true;
+    $bgPrimary = $bgPrimary ?? '#1a1a1a';
+    $bgSecondary = $bgSecondary ?? '#2a2a2a';
+    $bgTertiary = $bgTertiary ?? '#333333';
+    $textPrimary = $textPrimary ?? '#ffffff';
+    $textSecondary = $textSecondary ?? '#b0b0b0';
+    $borderColor = $borderColor ?? '#333333';
+    $buttonBgHover = $buttonBgHover ?? '#2a2a2a';
+    $accentColor = $accentColor ?? '#00deb0';
+    $accentDark = $accentDark ?? '#003b2f';
 @endphp
 
-<div style="background: {{ $bgTertiary }}; border-radius: 0.5rem; padding: 1.5rem; margin-top: 0.25rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+    {{-- <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
         <h2 style="font-size: 0.875rem; font-weight: bold; color: {{ $textPrimary }};">PREGUNTA DEL DÍA</h2>
-    </div>
-    <div style="background: {{ $bgSecondary }}; border-radius: 0.5rem; padding: 1.5rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }};">
+    </div> --}}
+    <div style="background: {{ $bgPrimary }}; border-radius: 1.2rem; padding: 1.5rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; margin: 0.5rem 2rem; text-align: center;">
+        <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3" style="background: {{ $accentColor }}; color: #000;">
+            PREGUNTA DEL DÍA
+        </div>
         <div style="margin-bottom: 1rem;">
             <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: {{ $accentColor }};">{{ $socialQuestion->title }}</h3>
             @if($socialQuestion->description)
@@ -29,9 +34,9 @@
                 @csrf
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
                     @foreach($socialQuestion->options as $option)
-                        <label style="width: 100%; display: flex; justify-content: space-between; align-items: center; background: {{ $bgPrimary }}; cursor: pointer; padding: 1rem; border-radius: 0.5rem; user-select: none; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; transition: opacity 0.2s;" class="hover:opacity-80 social-option-btn" onmouseover="this.style.borderColor='{{ $accentColor }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'">
-                            <input type="radio" name="question_option_id" value="{{ $option->id }}" style="display: none;" required>
-                            <span style="flex: 1; text-align: center;">{{ $option->text }}</span>
+                        <label class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $buttonBgHover }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgTertiary }}'">
+                            <input type="radio" name="question_option_id" value="{{ $option->id }}" style="display: none;" onchange="this.closest('form').submit();">
+                            <span style="flex: 1; text-align: center; pointer-events: none;">{{ $option->text }}</span>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
                                     @if($answer->user->avatar)
@@ -60,18 +65,11 @@
                     @endforeach
                 </div>
             </form>
-            <script>
-            document.querySelectorAll('.group-social-form .social-option-btn input[type=radio]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    this.form.submit();
-                });
-            });
-            </script>
         @else
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 @foreach($socialQuestion->options as $option)
                     @php
-                        $optionBg = $bgPrimary;
+                        $optionBg = $bgTertiary;
                         $optionColor = $textPrimary;
                         if ($socialQuestion->available_until->addHours(4) > now()) {
                             if (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id) {
@@ -88,7 +86,7 @@
                             }
                         }
                     @endphp
-                    <div style="padding: 1rem; border-radius: 0.5rem; background: {{ $optionBg }}; border: 1px solid {{ $borderColor }}; color: {{ $optionColor }};">
+                    <div class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="color: {{ $optionColor }};">{{ $option->text }}</span>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -142,4 +140,3 @@
             </button>
         </div>
     </div>
-</div>

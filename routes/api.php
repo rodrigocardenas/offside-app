@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PushTokenController;
+use App\Http\Controllers\GroupController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,7 @@ Route::get('/competitions/{competition}/teams', function (App\Models\Competition
         ->select('teams.id', 'teams.name')
         ->get();
 });
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);

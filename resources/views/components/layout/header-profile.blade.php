@@ -18,8 +18,8 @@
             <img src="@yield('navigation-logo')" style="width: 32px; height: 32px; border-radius: 50%; background-color: white; object-fit: cover;"/>
         </div>
     @elseif(View::hasSection('navigation-title'))
-        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1rem; font-weight: 600; color: #333;">
-            @yield('navigation-title', '')
+        <div style="position: sticky; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1rem; font-weight: 600; color: #333;">
+            @yield('navigation-title', 'Offside Club')
         </div>
     @endif
 
@@ -52,13 +52,13 @@
                 <i class="fas fa-cog"></i>
                 <span>Configuración</span>
             </a>
-            <form method="POST" action="{{ route('logout') }}" class="block w-full">
+            {{-- <form method="POST" action="{{ route('logout') }}" class="block w-full">
                 @csrf
                 <button type="submit" class="dropdown-item w-full text-left" style="border: none;">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Cerrar sesión</span>
                 </button>
-            </form>
+            </form> --}}
         </div>
     </div>
 
