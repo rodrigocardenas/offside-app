@@ -47,10 +47,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('groups', GroupController::class);
     Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
     Route::delete('groups/{group}/leave', [GroupController::class, 'leave'])->name('groups.leave');
-    Route::get('groups/{group}/predictive-results', [GroupController::class, 'showPredictiveResults'])->name('groups.predictive-results');
-    Route::get('groups/{group}/ranking', [GroupController::class, 'getRanking'])->name('groups.ranking');
     Route::get('groups/by-match/{matchId}', [GroupController::class, 'getGroupsByMatch']);
-
 
     // Preguntas
     Route::resource('questions', QuestionController::class);

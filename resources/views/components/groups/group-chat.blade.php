@@ -12,6 +12,7 @@
 @endphp
 
 <!-- Chat Section - New Design -->
+<div style="display: flex; flex-direction: column; min-height: 100%;">
 <div id="chatSection" class="chat-section"
     style="margin: 5px; background: {{ $isDark ? '#1a1a1a' : '#fff' }}; border-radius: 16px; display: flex; flex-direction: column; max-height: 400px; border: 1px solid {{ $isDark ? '#333' : '#e0e0e0' }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: {{ $isDark ? '#fff' : '#333' }};">
     <!-- Chat Title -->
@@ -87,15 +88,14 @@
         </button>
     </div>
 @endif --}}
-
 </div>
 @if ($group->created_by === auth()->id())
-    <div class="flex justify-center mb-32">
+    <div class="flex justify-center mt-8">
         @if ($group->reward_or_penalty)
             <div class="flex justify-center mt-2 mb-2">
                 <div class="px-4 py-1 text-white rounded-lg text-center accentColor" style="background-color: #00deb0;">
                     <span class="font-bold">Recompensa/Penitencia:</span><br>
-                    <span class="reward-or-penalty-text">{{ $group->reward_or_penalty }}</span> <button
+                    <span class="reward-or-penalty-text" style="font-style: italic">{{ $group->reward_or_penalty }}</span> <button
                         id="openRewardPenaltyModal"
                         class=" text-white rounded-lg hover:bg-offside-secondary transition-colors focus:outline-none">
                         <i class="fa-solid fa-edit ml-2"></i>
@@ -105,14 +105,14 @@
             </div>
         @else
             <button id="openRewardPenaltyModal"
-                class="flex items-center px-4 py-2 bg-offside-primary text-white rounded-lg hover:bg-offside-secondary mt-4" style="background-color: #00deb0;">
+                class="flex items-center px-4 py-2  rounded-lg  mt-4" style="background-color: #00deb0;">
                 <i class="fa-solid fa-plus"></i>
                 Agregar recompensa/penitencia
             </button>
         @endif
     </div>
 @elseif($group->reward_or_penalty)
-    <div style="margin-top: 32px; margin-bottom: 128px; display: flex; justify-content: center;">
+    <div style="margin-top: 32px; margin-bottom: 20px; display: flex; justify-content: center;">
         <button id="openRewardPenaltyBtn" class="btn btn-primary" style="background-color: #00deb0;"
             onclick="document.getElementById('rewardPenaltyModal').classList.remove('hidden')">
             <i class="fas fa-plus"></i>
