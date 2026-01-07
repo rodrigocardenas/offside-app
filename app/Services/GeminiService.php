@@ -129,9 +129,16 @@ class GeminiService
                 ]
             ];
 
-            // Nota: Por ahora, grounding se maneja via system prompt
-            // La API de Gemini requiere un setup específico que varía por versión
-            // Se puede habilitar via generationConfig con "groundingConfig" en versiones futuras
+            // Implementar grounding (web search) si está habilitado
+            // Solo disponible en algunos modelos (gemini-2.5-flash, gemini-pro, etc.)
+            if ($useGrounding && $this->groundingEnabled) {
+                $payload['tools'] = [
+                    [
+                        'googleSearch' => new \stdClass() // Habilitar búsqueda web
+                    ]
+                ];
+                Log::debug("Grounding (web search) habilitado para esta llamada");
+            }
 
             if (config('gemini.logging.log_requests')) {
                 Log::debug("Payload enviado a Gemini", ['payload' => $payload]);
