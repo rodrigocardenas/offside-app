@@ -23,13 +23,8 @@
 
     <!-- Carrusel de preguntas -->
     <div class="relative flex items-center">
-        <!-- Flecha Izquierda -->
-        <button class="flex-shrink-0 z-10 rounded-full p-2 shadow-md hover:shadow-lg transition-all mr-2" style="background: {{ $bgTertiary }}; color: {{ $accentColor }};" onclick="document.getElementById('predictiveQuestionsCarousel').scrollBy({left: -300, behavior: 'smooth'})">
-            <i class="fas fa-chevron-left text-lg"></i>
-        </button>
-
         <!-- Carrusel -->
-        <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 flex-1 px-1 pb-4" id="predictiveQuestionsCarousel">
+        <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 flex-1 px-12 pb-4" id="predictiveQuestionsCarousel">
             @forelse($matchQuestions->where('type', 'predictive') as $question)
                 <!-- Prediction Section (Similar to HTML design) -->
                 <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" id="question{{ $question->id }}" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px; {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-60;' : '' }}">
@@ -49,20 +44,28 @@
                 <!-- Match Info -->
                 @if($question->football_match)
                     @if($question->templateQuestion->homeTeam)
-                        <div class="flex items-center justify-center gap-2 mb-5">
-                            <span class="text-sm font-medium" style="color: {{ $textPrimary }};">{{ $question->templateQuestion->homeTeam->name }}</span>
-                            <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-6 h-6 object-contain" title="{{ $question->templateQuestion->homeTeam?->name }}">
-                            <span class="text-sm font-bold mx-2" style="color: {{ $accentDark }};">{{ $question->available_until->format('H:i') }}</span>
-                            <img src="{{ $question->templateQuestion->awayTeam?->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->name }}" class="w-6 h-6 object-contain" title="{{ $question->templateQuestion->awayTeam->name }}">
-                            <span class="text-sm font-medium" style="color: {{ $textPrimary }};">{{ $question->templateQuestion->awayTeam->name }}</span>
+                        <div class="flex items-center justify-center gap-4 mb-5">
+                            <div class="flex flex-col items-center gap-1">
+                                <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->homeTeam?->name }}">
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->homeTeam->name, 10, '') }}</span>
+                            </div>
+                            <span class="text-sm font-bold" style="color: {{ $accentDark }};">{{ $question->available_until->format('H:i') }}</span>
+                            <div class="flex flex-col items-center gap-1">
+                                <img src="{{ $question->templateQuestion->awayTeam?->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->awayTeam->name }}">
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->awayTeam->name, 10, '') }}</span>
+                            </div>
                         </div>
                     @else
-                        <div class="flex items-center justify-center gap-2 mb-5">
-                            <span class="text-sm font-medium" style="color: {{ $textPrimary }};">{{ $question->football_match->homeTeam?->name }}</span>
-                            <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-6 h-6 object-contain" title="{{ $question->football_match->homeTeam?->name }}">
-                            <span class="text-sm font-bold mx-2" style="color: {{ $accentDark }};">{{ $question->available_until->format('H:i') }}</span>
-                            <img src="{{ $question->football_match->awayTeam?->crest_url }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-6 h-6 object-contain" title="{{ $question->football_match->awayTeam?->name }}">
-                            <span class="text-sm font-medium" style="color: {{ $textPrimary }};">{{ $question->football_match->awayTeam?->name }}</span>
+                        <div class="flex items-center justify-center gap-4 mb-5">
+                            <div class="flex flex-col items-center gap-1">
+                                <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->homeTeam?->name }}">
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->homeTeam?->name, 10, '') }}</span>
+                            </div>
+                            <span class="text-sm font-bold" style="color: {{ $accentDark }};">{{ $question->available_until->format('H:i') }}</span>
+                            <div class="flex flex-col items-center gap-1">
+                                <img src="{{ $question->football_match->awayTeam?->crest_url }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->awayTeam?->name }}">
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->awayTeam?->name, 10, '') }}</span>
+                            </div>
                         </div>
                     @endif
                 @endif
@@ -228,10 +231,55 @@
                 <p class="text-sm">No hay preguntas disponibles para los próximos partidos</p>
             </div>
         @endforelse
+
+            <!-- Pregunta Social o Invitación de Miembros -->
+            @if($group->users->count() >= 2)
+                @if($socialQuestion ?? false)
+                    <div class="snap-center flex-none w-full" style="min-width: 300px;">
+                        <x-groups.group-social-question :social-question="$socialQuestion" :user-answers="$userAnswers" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
+                    </div>
+                @endif
+            @else
+                <!-- Slide de Invitación para Agregar Miembros -->
+                <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px;">
+                    <div class="text-center mb-5">
+                        <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3" style="background: {{ $accentColor }}; color: #000;">
+                            Preguntas Sociales
+                        </div>
+                        <div class="text-xs mb-4" style="color: {{ $textSecondary }};">
+                            <i class="fas fa-circle" style="color: {{ $accentColor }}; font-size: 3px;"></i>
+                            Próximamente
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center gap-4 py-8">
+                        <div class="text-5xl" style="color: {{ $accentColor }};">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-center mb-2" style="color: {{ $textPrimary }};">
+                                Agrupa a más miembros
+                            </h3>
+                            <p class="text-xs text-center" style="color: {{ $textSecondary }};">
+                                Necesitas al menos 2 miembros en el grupo para desbloquear las preguntas sociales y competir con tus amigos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 rounded-lg text-xs font-medium text-center" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }}; border: 1px solid {{ $borderColor }};">
+                        Miembros actuales: <span style="color: {{ $accentColor }}; font-bold;">{{ $group->users->count() }}/2</span>
+                    </div>
+                </div>
+            @endif
         </div>
 
+        <!-- Flecha Izquierda -->
+        <button class="absolute left-0 z-10 rounded-full p-2 shadow-md hover:shadow-lg transition-all" style="background: {{ $bgTertiary }}; color: {{ $accentColor }}; top: 50%; transform: translateY(-50%);" onclick="document.getElementById('predictiveQuestionsCarousel').scrollBy({left: -300, behavior: 'smooth'})">
+            <i class="fas fa-chevron-left text-lg"></i>
+        </button>
+
         <!-- Flecha Derecha -->
-        <button class="flex-shrink-0 z-10 rounded-full p-2 shadow-md hover:shadow-lg transition-all ml-2" style="background: {{ $bgTertiary }}; color: {{ $accentColor }};" onclick="document.getElementById('predictiveQuestionsCarousel').scrollBy({left: 300, behavior: 'smooth'})">
+        <button class="absolute right-0 z-10 rounded-full p-2 shadow-md hover:shadow-lg transition-all" style="background: {{ $bgTertiary }}; color: {{ $accentColor }}; top: 50%; transform: translateY(-50%);" onclick="document.getElementById('predictiveQuestionsCarousel').scrollBy({left: 300, behavior: 'smooth'})">
             <i class="fas fa-chevron-right text-lg"></i>
         </button>
     </div>
@@ -241,6 +289,8 @@
             @foreach($matchQuestions as $index => $question)
                 <button class="w-2 h-2 rounded-full question-indicator transition-all" style="background: {{ $borderColor }};" data-index="{{ $index }}"></button>
             @endforeach
+            <!-- Indicador para la pregunta social -->
+            <button class="w-2 h-2 rounded-full question-indicator transition-all" style="background: {{ $borderColor }};" data-index="{{ $matchQuestions->count() }}"></button>
         </div>
     </div>
 </div>

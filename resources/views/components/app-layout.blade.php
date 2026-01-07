@@ -386,5 +386,6 @@
 
     <!-- Navigation Module (UX Redesign) -->
     <script src="{{ asset('js/common/navigation.js') }}" defer></script>
+    <script src="{{ asset('js/common/modal-handler.js') }}" defer></script>
 </body>
 </html>

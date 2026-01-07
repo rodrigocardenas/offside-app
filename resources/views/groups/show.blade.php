@@ -26,8 +26,8 @@
     <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
 
         <!-- Ranking Section -->
-        <div style="background: {{ $bgTertiary }}; margin: 16px; border-radius: 16px; padding: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }};">
+        <div style="background: {{ $bgTertiary }}; padding: 5px; border-radius: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 32px;">
+            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }}; padding: 16px;">
                 <i class="fas fa-trophy" style="font-size: 16px; color: {{ $accentColor }};"></i>
                 Ranking
                 <a href="{{ url('/groups', $group->id) }}/ranking" style="margin-left: auto; font-size: 12px; color: {{ $textSecondary }}; cursor: pointer; padding: 4px 8px; border-radius: 12px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease;"
@@ -66,7 +66,7 @@
                 <div>
 
                     <!-- Preguntas de Partidos -->
-                    <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :group="$group" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
+                    <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :group="$group" :social-question="$socialQuestion ?? null" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
 
                     <!-- Pregunta Social -->
                     {{-- @if($group->users->count() >= 2)
@@ -84,7 +84,18 @@
         </div>
 
         <!-- Menú inferior fijo -->
-        <x-groups.group-bottom-menu :group="$group" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
+        <x-layout.bottom-navigation active-item="grupo" />
+         <!-- Botón flotante del chat -->
+    @if (request()->route()->getName() !== 'groups.predictive-results')
+        <button id="chatToggle" style="position: fixed; bottom: 6rem; right: 2rem; background: {{ $accentColor }}; color: #000; border-radius: 50%; padding: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); transition: all 0.3s; display: flex; align-items: center; justify-content: center; z-index: 50; border: none; cursor: pointer;" class="hover:opacity-90">
+            <svg xmlns="http://www.w3.org/2000/svg" style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span id="unreadCount" style="position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; font-size: 0.75rem; border-radius: 50%; height: 20px; width: 20px; display: flex; align-items: center; justify-content: center;">
+                {{ $group->chatMessages()->count() }}
+            </span>
+        </button>
+    @endif
 
     </div>
 

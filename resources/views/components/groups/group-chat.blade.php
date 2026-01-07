@@ -90,7 +90,7 @@
 
 </div>
 @if ($group->created_by === auth()->id())
-    <div class="flex justify-center mb-2">
+    <div class="flex justify-center mb-32">
         @if ($group->reward_or_penalty)
             <div class="flex justify-center mt-2 mb-2">
                 <div class="px-4 py-1 text-white rounded-lg text-center accentColor" style="background-color: #00deb0;">
@@ -112,7 +112,7 @@
         @endif
     </div>
 @elseif($group->reward_or_penalty)
-    <div style="margin-top: 32px; display: flex; justify-content: center;">
+    <div style="margin-top: 32px; margin-bottom: 128px; display: flex; justify-content: center;">
         <button id="openRewardPenaltyBtn" class="btn btn-primary" style="background-color: #00deb0;"
             onclick="document.getElementById('rewardPenaltyModal').classList.remove('hidden')">
             <i class="fas fa-plus"></i>

@@ -250,7 +250,7 @@
     </div>
 
     <!-- Menú inferior fijo -->
-    <x-groups.group-bottom-menu :group="$group" />
+    <x-layout.bottom-navigation active-item="grupo" />
 
     <!-- Modal de Feedback -->
     <x-feedback-modal />

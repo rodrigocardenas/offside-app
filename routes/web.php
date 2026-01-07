@@ -6,6 +6,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\MarketController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
@@ -69,6 +70,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('rankings/daily', [RankingController::class, 'dailyRanking'])->name('rankings.daily');
     Route::get('questions/{question}/ranking', [RankingController::class, 'questionRanking'])->name('rankings.question');
     Route::get('users/{user}/stats', [RankingController::class, 'userStats'])->name('rankings.user-stats');
+
+    // Market
+    Route::get('market', [MarketController::class, 'index'])->name('market.index');
+    Route::get('market/{id}', [MarketController::class, 'show'])->name('market.show');
 
     // Rutas de perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
