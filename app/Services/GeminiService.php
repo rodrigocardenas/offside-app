@@ -144,7 +144,12 @@ class GeminiService
 
             if ($response->failed()) {
                 if ($response->status() === 429) { // Rate limited
-                    throw new Exception("Rate limited por API de Gemini");
+                    Log::warning("Rate limited por Gemini (429), reintentando en " . (35 * $attempt) . "s...");
+                    if ($attempt < $this->maxRetries) {
+                        sleep(35 * $attempt); // Esperar más tiempo en cada intento
+                        return $this->callGemini($userMessage, $useGrounding, $attempt + 1);
+                    }
+                    throw new Exception("Rate limited por API de Gemini - máximo de reintentos alcanzado");
                 }
 
                 throw new Exception("Gemini API error: " . $response->body());
