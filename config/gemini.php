@@ -62,11 +62,9 @@ return [
     */
     'prompts' => [
         'fixtures' => [
-            'system' => 'Eres un experto en fútbol. Proporciona información sobre el calendario (fixtures) de fútbol. Responde SIEMPRE en JSON válido.',
-            'template' => 'Busca y proporciona el calendario de partidos para la liga {league} de los próximos 7 días. '
-                . 'Responde ÚNICAMENTE con un JSON con esta estructura exacta (SIN texto adicional): '
-                . '{"matches": [{"home_team": "string", "away_team": "string", "date": "YYYY-MM-DD HH:mm", "status": "scheduled|live|finished", "stadium": "string o null", "stage": "string o null"}]} '
-                . 'Si no hay datos suficientes, retorna fixtures ficticios o aproximados basados en calendarios conocidos de 2024-2025.',
+            'system' => 'Eres un experto en fútbol. Responde SIEMPRE únicamente en JSON válido sin texto adicional.',
+            'template' => 'Hoy es {current_date}. Proporciona el calendario de partidos de {league} para los próximos 7 días (desde hoy hasta {next_7_days}). SOLO partidos con fechas en 2026. Responde ÚNICAMENTE con: '
+                . '{"matches":[{"home_team":"X","away_team":"Y","date":"YYYY-MM-DD HH:mm","status":"scheduled","stadium":"Z"}]}',
         ],
         'results' => [
             'system' => 'Eres un experto en análisis de fútbol. Proporciona resultados y estadísticas de partidos. Responde SIEMPRE en JSON válido.',

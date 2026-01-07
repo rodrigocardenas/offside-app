@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
 use Exception;
 
 class GeminiService
@@ -123,8 +124,8 @@ class GeminiService
                     ]
                 ],
                 'generationConfig' => [
-                    'temperature' => 0.7,
-                    'maxOutputTokens' => 2048,
+                    'temperature' => 0.5,
+                    'maxOutputTokens' => 4096,
                 ]
             ];
 
@@ -172,6 +173,10 @@ class GeminiService
                 }
                 $content = trim($content);
 
+                // Limpiar caracteres de control que causan problemas en JSON
+                // Preservar saltos de línea (\n) pero remover otros caracteres de control
+                $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $content);
+
                 // Intentar parsear como JSON
                 $parsed = json_decode($content, true);
                 if ($parsed) {
@@ -201,8 +206,18 @@ class GeminiService
      */
     protected function buildFixturesPrompt($league)
     {
+        $today = \Carbon\Carbon::now();
         $template = config('gemini.prompts.fixtures.template');
-        return str_replace('{league}', $league, $template);
+        
+        return str_replace(
+            ['{league}', '{current_date}', '{next_7_days}'],
+            [
+                $league,
+                $today->format('d de F de Y'),
+                $today->copy()->addDays(7)->format('d de F de Y')
+            ],
+            $template
+        );
     }
 
     /**
