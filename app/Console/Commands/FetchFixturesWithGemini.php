@@ -73,10 +73,10 @@ class FetchFixturesWithGemini extends Command
     private function saveFixtures($data, $league): int
     {
         $saved = 0;
-        
+
         // Parsear estructura de datos según lo que retorne Gemini
         $matches = $data['matches'] ?? $data['fixtures'] ?? $data;
-        
+
         if (!is_array($matches)) {
             $this->warn("Estructura de datos no reconocida");
             return 0;
@@ -95,7 +95,7 @@ class FetchFixturesWithGemini extends Command
         foreach ($matches as $match) {
             try {
                 $bar->advance();
-                
+
                 // Validar datos mínimos
                 if (!isset($match['home_team']) || !isset($match['away_team']) || !isset($match['date'])) {
                     continue;
@@ -119,7 +119,7 @@ class FetchFixturesWithGemini extends Command
                 // Buscar por home_team, away_team y rango de fecha (mismo día aproximadamente)
                 $dateRangeStart = $matchDate->copy()->startOfDay();
                 $dateRangeEnd = $matchDate->copy()->endOfDay();
-                
+
                 $footballMatch = FootballMatch::whereBetween('date', [$dateRangeStart, $dateRangeEnd])
                     ->where('home_team', $match['home_team'])
                     ->where('away_team', $match['away_team'])

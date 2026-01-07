@@ -70,12 +70,12 @@ class RealLaLigaFixturesSeeder extends Seeder
             ['home' => 'Athletic Club', 'away' => 'Villarreal', 'date' => '2026-01-08 21:00', 'stadium' => 'San Mamés'],
             ['home' => 'Real Sociedad', 'away' => 'Getafe', 'date' => '2026-01-08 22:00', 'stadium' => 'Anoeta'],
             ['home' => 'Osasuna', 'away' => 'Rayo Vallecano', 'date' => '2026-01-08 22:00', 'stadium' => 'El Sadar'],
-            
+
             // Viernes 9 enero
             ['home' => 'Girona', 'away' => 'Mallorca', 'date' => '2026-01-09 19:30', 'stadium' => 'Estadi Montilivi'],
             ['home' => 'Celta Vigo', 'away' => 'Las Palmas', 'date' => '2026-01-09 20:45', 'stadium' => 'Balaídos'],
             ['home' => 'Real Valladolid', 'away' => 'Leganés', 'date' => '2026-01-09 21:30', 'stadium' => 'José Zorrilla'],
-            
+
             // Sábado 10 enero
             ['home' => 'Villarreal', 'away' => 'Oviedo', 'date' => '2026-01-10 17:00', 'stadium' => 'La Cerámica'],
             ['home' => 'Almería', 'away' => 'Cádiz', 'date' => '2026-01-10 19:00', 'stadium' => 'Estadio de Almería'],

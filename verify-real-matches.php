@@ -27,7 +27,7 @@ foreach ($partidos_buscados as $buscado) {
         ->where('away_team', $buscado['away'])
         ->whereDate('date', $buscado['date'])
         ->first();
-    
+
     if ($match) {
         $date = Carbon::parse($match->date);
         echo "✓ " . $buscado['home'] . " vs " . $buscado['away'] . "\n";

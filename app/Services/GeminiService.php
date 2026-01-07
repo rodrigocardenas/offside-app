@@ -21,11 +21,11 @@ class GeminiService
     public function __construct()
     {
         $this->apiKey = config('gemini.api_key');
-        $this->model = config('gemini.model', 'gemini-2.5-flash');
-        $this->maxRetries = config('gemini.max_retries', 3);
+        $this->model = config('gemini.model', 'gemini-3-pro-preview');
+        $this->maxRetries = config('gemini.max_retries', 5);
         $this->retryDelay = config('gemini.retry_delay', 2);
         $this->groundingEnabled = config('gemini.grounding_enabled', true);
-        $this->timeout = config('gemini.timeout', 30);
+        $this->timeout = config('gemini.timeout', 60);
 
         if (!$this->apiKey) {
             throw new Exception('GEMINI_API_KEY no configurada en .env');
@@ -144,15 +144,16 @@ class GeminiService
 
             if ($response->failed()) {
                 if ($response->status() === 429) { // Rate limited
-                    Log::warning("Rate limited por Gemini (429), reintentando en " . (35 * $attempt) . "s...");
+                    $wait_time = 60 * $attempt; // 60s, 120s, 180s, etc.
+                    Log::warning("Rate limited por Gemini (429), intento {$attempt}/{$this->maxRetries}, esperando {$wait_time}s...");
                     if ($attempt < $this->maxRetries) {
-                        sleep(35 * $attempt); // Esperar más tiempo en cada intento
+                        sleep($wait_time);
                         return $this->callGemini($userMessage, $useGrounding, $attempt + 1);
                     }
                     throw new Exception("Rate limited por API de Gemini - máximo de reintentos alcanzado");
                 }
 
-                throw new Exception("Gemini API error: " . $response->body());
+                throw new Exception("Gemini API error (HTTP " . $response->status() . "): " . substr($response->body(), 0, 200));
             }
 
             $data = $response->json();
@@ -213,7 +214,7 @@ class GeminiService
     {
         $today = \Carbon\Carbon::now();
         $template = config('gemini.prompts.fixtures.template');
-        
+
         return str_replace(
             ['{league}', '{current_date}', '{next_7_days}'],
             [
