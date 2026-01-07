@@ -151,13 +151,14 @@ class GeminiService
 
             if ($response->failed()) {
                 if ($response->status() === 429) { // Rate limited
-                    $wait_time = 60 * $attempt; // 60s, 120s, 180s, etc.
+                    $wait_time = 90 * $attempt; // 90s, 180s, 270s, etc. (más tolerante)
                     Log::warning("Rate limited por Gemini (429), intento {$attempt}/{$this->maxRetries}, esperando {$wait_time}s...");
                     if ($attempt < $this->maxRetries) {
+                        echo "\n⏳ Rate limitado por Gemini. Esperando {$wait_time} segundos (intento {$attempt}/{$this->maxRetries})...\n";
                         sleep($wait_time);
                         return $this->callGemini($userMessage, $useGrounding, $attempt + 1);
                     }
-                    throw new Exception("Rate limited por API de Gemini - máximo de reintentos alcanzado");
+                    throw new Exception("Rate limited por API de Gemini - máximo de reintentos alcanzado (después de " . ($this->maxRetries * 90) . " segundos total)");
                 }
 
                 throw new Exception("Gemini API error (HTTP " . $response->status() . "): " . substr($response->body(), 0, 200));
