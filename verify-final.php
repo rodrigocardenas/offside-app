@@ -33,7 +33,7 @@ foreach ($partidos_clave as $partido) {
         })
         ->whereDate('date', '2026-' . $partido['fecha'])
         ->first();
-    
+
     if ($matches) {
         $date = Carbon::parse($matches->date);
         echo "✅ " . $matches->home_team . " vs " . $matches->away_team . "\n";

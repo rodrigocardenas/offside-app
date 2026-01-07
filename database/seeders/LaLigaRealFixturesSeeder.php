@@ -18,7 +18,7 @@ class LaLigaRealFixturesSeeder extends Seeder
         echo "🔄 Obteniendo fixtures REALES de Football-Data.org...\n\n";
 
         $apiKey = '0b23cb843ac746dab2dc3d66604f54e8'; // Tu clave actual
-        
+
         try {
             // Obtener partidos de La Liga para enero 2026
             $response = Http::withoutVerifying()
@@ -58,7 +58,7 @@ class LaLigaRealFixturesSeeder extends Seeder
                     $home_team = $match['homeTeam']['name'] ?? null;
                     $away_team = $match['awayTeam']['name'] ?? null;
                     $date = Carbon::parse($match['utcDate']);
-                    
+
                     if (!$home_team || !$away_team) {
                         continue;
                     }
