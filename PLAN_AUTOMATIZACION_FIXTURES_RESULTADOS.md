@@ -69,415 +69,362 @@ Automatizar el ciclo completo de predicciones:
 
 ---
 
-## 📦 FASES DE IMPLEMENTACIÓN
+## 📦 FASES DE IMPLEMENTACIÓN (REVISADAS)
 
-### FASE 1: Comandos Cron (Scheduling)
-**Objetivo:** Automatizar descarga de fixtures y resultados
+> **IMPORTANTE:** 70% de la funcionalidad YA EXISTE.  
+> Este plan describe REFACTORES y CREACIONES MÍNIMAS.
 
-#### 1.1 CreateScheduledCommandsJob
-- [ ] `UpdateFixturesCommand` - Descargar fixtures noche
-- [ ] `UpdateMatchResultsCommand` - Actualizar resultados cada hora
-- [ ] Registrar en `schedule()` de `console/Kernel.php`
+### FASE 1: Obtener Fixtures (REFACTOR)
+**Objetivo:** Cambiar de Gemini → Football-Data.org
 
-#### 1.2 Services de Football Data
-- [ ] `FootballDataService::getCompetitionMatches()` - Obtener partidos
-- [ ] `FootballDataService::getMatchDetails()` - Detalles completos
-- [ ] Manejo de errores y retry logic
+#### 1.1 Refactor UpdateFootballData.php
+- [ ] Cambiar de `FootballService::getNextMatches()` (Gemini)
+- [ ] A: `FootballDataService::getMatchesByCompetition()` (Real)
+- [ ] Mantener estructura `updateOrCreate()`
+- [ ] Mantener logging
 
----
+#### 1.2 Crear UpdateFixturesNightly.php
+- [ ] Comando: `app:update-fixtures-nightly`
+- [ ] Obtener: La Liga, Premier, Champions, Serie A
+- [ ] Ejecutar: 23:00 cada noche
+- [ ] Usar mismo patrón que UpdateFootballData
 
-### FASE 2: Procesamiento de Datos
-**Objetivo:** Guardar y procesar info de partidos
+#### 1.3 Registrar en Kernel
+- [ ] Agregar a `schedule()` en `console/Kernel.php`
+- [ ] `$schedule->command('app:update-fixtures-nightly')->dailyAt('23:00')`
 
-#### 2.1 Guardar Fixtures
-- [ ] Validar que no exista (por external_id)
-- [ ] Crear/Actualizar FootballMatch
-- [ ] Asociar equipos correctamente
-- [ ] Manejar transacciones
-
-#### 2.2 Guardar Resultados
-- [ ] Actualizar estado del match
-- [ ] Guardar scores (home_team_score, away_team_score)
-- [ ] Guardar eventos: goles, tarjetas, cambios
-- [ ] JSON events + statistics columns
-
-#### 2.3 Detección de Cambios
-- [ ] Comparar estado anterior vs actual
-- [ ] Sólo encolar job si hay cambio
-- [ ] Evitar procesamiento duplicado
-
----
-
-### FASE 3: Evaluación de Preguntas
-**Objetivo:** Determinar respuestas correctas y calificar
-
-#### 3.1 EvaluateQuestionAnswersService
-- [ ] `determineCorrectOption(Question $q, Match $m)` - Lógica de evaluación
-- [ ] Tipos de preguntas soportadas:
-  - `"winner"` - ¿Quién gana? (1/X/2)
-  - `"first_goal"` - ¿Quién hace primer gol?
-  - `"goals_over_under"` - ¿Total de goles > X?
-  - `"both_teams_score"` - ¿Ambos equipos anotan?
-  - `"exact_score"` - ¿Resultado exacto?
-  - `"social"` - Preguntas sociales (sin evaluar)
-  - Otros según templates
-
-#### 3.2 Lógica por Tipo de Pregunta
-```php
-// Ejemplo: "winner"
-if ($match->home_team_score > $match->away_team_score)
-    $correctOption = "home_wins"
-else if ($match->away_team_score > $match->home_team_score)
-    $correctOption = "away_wins"
-else
-    $correctOption = "draw"
+**Archivos a modificar:**
+```
+app/Console/Commands/UpdateFootballData.php [REFACTOR]
+app/Console/Commands/UpdateFixturesNightly.php [CREAR]
+app/Console/Kernel.php [ACTUALIZAR]
 ```
 
-#### 3.3 Puntuación
-- [ ] `Answer::points_earned` - Guardar puntos obtenidos
-- [ ] `Answer::is_correct` - Booleano si fue correcta
-- [ ] `Question::result_verified_at` - Timestamp de verificación
-- [ ] Actualizar puntuación total del usuario
-
 ---
 
-### FASE 4: Jobs & Queue
-**Objetivo:** Procesar en background
+### FASE 2: Evaluar Preguntas (REFACTOR)
+**Objetivo:** Cambiar de OpenAI → Lógica Determinística
 
-#### 4.1 ProcessQuestionResultsJob
+#### 2.1 Crear QuestionEvaluationService
+- [ ] `determineCorrectOption(Question $q, FootballMatch $m)` - Retorna option ID
+- [ ] Tipos de preguntas:
+  - `"winner"` - Comparar scores
+  - `"first_goal"` - ¿Hay goles?
+  - `"goals_over_under"` - Contar total
+  - `"both_teams_score"` - Ambos > 0
+  - `"exact_score"` - Match exacto
+  - `"social"` - Retornar null (no evaluar)
+
+#### 2.2 Lógica por Tipo
 ```php
-// Trigger: Cuando match termina
-ProcessQuestionResultsJob::dispatch($matchId);
+case 'winner':
+    return $match->home_team_score > $match->away_team_score ? 'home_wins'
+         : ($match->away_team_score > $match->home_team_score ? 'away_wins'
+         : 'draw');
 
-// Job:
-- Obtener preguntas del match
-- Evaluar cada una
-- Procesar respuestas de usuarios
-- Actualizar Answer table
-- Actualizar User puntos
-- Actualizar Group ranking
+case 'first_goal':
+    return isset($match->events['goals']) && count($match->events['goals']) > 0
+         ? $match->events['goals'][0]['player'] : null;
+
+case 'both_teams_score':
+    return $match->home_team_score > 0 && $match->away_team_score > 0
+         ? 'yes' : 'no';
 ```
 
-#### 4.2 Configuration
-- [ ] Queue driver: database (ya configurado)
-- [ ] Retry: 3 intentos
-- [ ] Timeout: 120 segundos
-- [ ] Logging de resultados
+#### 2.3 Refactor VerifyQuestionResultsJob
+- [ ] Reemplazar `$openAIService->verifyMatchResults()`
+- [ ] Con `QuestionEvaluationService::determineCorrectOption()`
+- [ ] Mantener estructura de bucles y Answer updates
+- [ ] Misma funcionalidad, sin OpenAI
+
+**Archivos a modificar:**
+```
+app/Services/QuestionEvaluationService.php [CREAR]
+app/Jobs/VerifyQuestionResultsJob.php [REFACTOR - cambio interno]
+```
 
 ---
 
-### FASE 5: API Endpoints (Opcional para ahora)
-**Objetivo:** Consultar estado de predicciones
+### FASE 3: Actualizar Kernel (COMPLETAR)
+**Objetivo:** Tener ambos schedulers funcionando
 
-#### 5.1 Controllers
-- [ ] GET `/api/matches/upcoming` - Próximos partidos
-- [ ] GET `/api/matches/{id}/results` - Resultados de un match
-- [ ] GET `/api/questions/{id}/result` - Estado de pregunta
-- [ ] GET `/api/user/points` - Puntuación actual
+#### 3.1 Kernel.php
+```php
+// Obtener fixtures cada noche
+$schedule->command('app:update-fixtures-nightly')
+    ->dailyAt('23:00')
+    ->onFailure(fn() => Log::error('Error updating fixtures'));
 
-#### 5.2 Responses
-- [ ] Match con status
-- [ ] Preguntas con resultado verificado
-- [ ] Puntos del usuario
+// Actualizar resultados cada hora
+$schedule->command('matches:process-recently-finished')
+    ->hourly()
+    ->onFailure(fn() => Log::error('Error processing matches'));
+```
+
+**Archivos a modificar:**
+```
+app/Console/Kernel.php [ACTUALIZAR]
+```
 
 ---
 
-## 🗂️ ARCHIVOS A CREAR/MODIFICAR
+### FASE 4: Testing & Validación
+**Objetivo:** Asegurar que todo funciona
+
+#### 4.1 Test UpdateFootballData con Football-Data.org
+- [ ] Ejecutar manual: `php artisan app:update-football-data`
+- [ ] Verificar que usa Football-Data.org (no Gemini)
+- [ ] Verificar que guarda en BD correctamente
+
+#### 4.2 Test UpdateFixturesNightly
+- [ ] Ejecutar: `php artisan app:update-fixtures-nightly`
+- [ ] Verificar 4 ligas importadas
+- [ ] Verificar timestamps
+
+#### 4.3 Test QuestionEvaluationService
+- [ ] Crear match FINISHED con scores 2-1
+- [ ] Crear pregunta tipo "winner"
+- [ ] Evaluar → debe retornar "home_wins"
+
+#### 4.4 Test VerifyQuestionResultsJob
+- [ ] Ejecutar job manualmente
+- [ ] Verificar que NO llama OpenAI
+- [ ] Verificar que Answer.is_correct se actualiza
+- [ ] Verificar que points_earned se calcula
+
+#### 4.5 Test Schedule
+- [ ] Monitorear cron jobs en próximas horas
+- [ ] Ver que UpdateFixturesNightly corre a las 23:00
+- [ ] Ver que ProcessRecentlyFinishedMatches corre cada hora
+
+**Archivos a crear:**
+```
+tests/Unit/Services/QuestionEvaluationServiceTest.php
+tests/Feature/Jobs/VerifyQuestionResultsJobTest.php
+tests/Feature/Commands/UpdateFixturesNightlyTest.php
+```
+
+---
+
+## 🗂️ ARCHIVOS A CREAR/MODIFICAR (REVISADOS)
 
 ### CREAR
 
 ```
 app/
-├─ Console/
-│  └─ Commands/
-│     ├─ UpdateFixturesCommand.php          [FASE 1]
-│     └─ UpdateMatchResultsCommand.php      [FASE 1]
-│
 ├─ Services/
-│  ├─ QuestionEvaluationService.php         [FASE 3]
-│  ├─ FootballDataMatchService.php          [FASE 2]
-│  └─ MatchResultProcessingService.php      [FASE 2]
+│  └─ QuestionEvaluationService.php         [FASE 2]
 │
-├─ Jobs/
-│  └─ ProcessQuestionResultsJob.php         [FASE 4]
-│
-└─ Http/
-   └─ Controllers/ (opcional)
-      └─ MatchResultController.php          [FASE 5]
+└─ Console/
+   └─ Commands/
+      └─ UpdateFixturesNightly.php          [FASE 1]
 
-database/
-└─ migrations/
-   ├─ add_events_to_football_matches.php    [FASE 2]
-   └─ add_verified_at_to_questions.php      [FASE 3]
+tests/
+├─ Unit/
+│  └─ Services/
+│     └─ QuestionEvaluationServiceTest.php  [FASE 4]
+└─ Feature/
+   ├─ Jobs/
+   │  └─ VerifyQuestionResultsJobTest.php   [FASE 4]
+   └─ Commands/
+      └─ UpdateFixturesNightlyTest.php      [FASE 4]
 ```
 
 ### MODIFICAR
 
 ```
-app/Console/Kernel.php                      [FASE 1] - Registrar crons
-app/Models/Question.php                     [FASE 3] - Scopes para verificadas
-app/Models/Answer.php                       [Verificar estructura]
-app/Models/FootballMatch.php                [FASE 2] - Métodos helper
-routes/api.php                              [FASE 5] - Nuevas rutas
+app/
+├─ Console/
+│  ├─ Commands/
+│  │  └─ UpdateFootballData.php             [FASE 1] - Cambiar Gemini → Football-Data.org
+│  └─ Kernel.php                            [FASE 3] - Agregar schedule nocturno
+│
+└─ Jobs/
+   └─ VerifyQuestionResultsJob.php          [FASE 2] - Cambiar OpenAI → QuestionEvaluationService
+```
+
+### NO MODIFICAR
+
+```
+✅ app/Jobs/UpdateFinishedMatchesJob.php
+✅ app/Jobs/ProcessMatchBatchJob.php
+✅ app/Jobs/UpdateAnswersPoints.php
+✅ app/Jobs/CreatePredictiveQuestionsJob.php
+✅ app/Jobs/ProcessRecentlyFinishedMatchesJob.php
+✅ app/Console/Commands/ProcessRecentlyFinishedMatches.php
+✅ app/Traits/HandlesQuestions.php (generación de preguntas)
 ```
 
 ---
 
-## 📋 DETALLE POR FASE
+## 📋 DETALLE POR FASE (REVISADO)
 
-### FASE 1: Comandos Cron
+### FASE 1: Fixtures (REFACTOR UpdateFootballData.php)
 
-**UpdateFixturesCommand.php**
+**UpdateFootballData.php (MODIFICADO)**
 ```php
-// Ejecución: Noche (23:00)
-// Logica:
-1. Obtener La Liga, Premier, Champions, Serie A
-2. Football-Data.org API
-3. Para cada partido:
-   - Si external_id no existe → Crear
-   - Si existe → Actualizar
-4. Log de cantidad importada
+// ANTES: Usa Gemini
+$matches = $footballService->getNextMatches($league, 1);
+
+// AHORA: Usa Football-Data.org
+$matches = $footballDataService->getMatchesByCompetition($league);
 ```
 
-**UpdateMatchResultsCommand.php**
+**UpdateFixturesNightly.php (NUEVO)**
 ```php
-// Ejecución: Cada hora (0 * * * *)
-// Logica:
-1. Obtener matches con status IN_PLAY o FINISHED
-2. Consultar Football-Data.org para actualizaciones
-3. Para cada match con cambios:
-   - Actualizar status, scores, events
-   - Encolar ProcessQuestionResultsJob
-4. Log de cambios procesados
+// Ejecución: 23:00 cada noche
+// Lógica:
+1. Para cada liga (La Liga, Premier, Champions, Serie A)
+   - Llamar Football-Data.org
+   - Guardar con updateOrCreate
+2. Log de cantidad importada
 ```
 
 ---
 
-### FASE 2: Procesamiento de Datos
+### FASE 2: Evaluación (REFACTOR VerifyQuestionResultsJob.php)
 
-**FootballDataMatchService.php**
+**ANTES: Usa OpenAI**
 ```php
-public function getMatchesByLeague($league, $dateFrom, $dateTo)
-// Retorna matches de una liga en rango de fechas
-
-public function getMatchDetails($matchId)
-// Detalles completos: goles, tarjetas, cambios, etc.
-
-public function parseMatchData($apiData)
-// Transforma respuesta API → datos de BD
+$correctAnswers = $openAIService->verifyMatchResults($matchData, $questionData);
 ```
 
-**MatchResultProcessingService.php**
+**AHORA: Usa lógica determinística**
 ```php
-public function updateMatchResult($match, $newData)
-// Detecta cambios y actualiza
-
-public function parseEventData($events)
-// Estructura: goles, tarjetas, cambios
-// Guardar en JSON en column 'events'
-
-public function shouldProcessQuestions($match, $oldStatus)
-// Retorna true si pasa de IN_PLAY a FINISHED
+$correctOption = $questionEvaluationService->determineCorrectOption($question, $match);
 ```
 
----
-
-### FASE 3: Evaluación
-
-**QuestionEvaluationService.php**
+**QuestionEvaluationService.php (NUEVO)**
 ```php
-public function evaluateQuestion(Question $q, FootballMatch $m)
-// Retorna: ['correct_option_id' => X, 'type' => 'winner']
-
-// Por tipo:
-- winner: comparar scores
-- first_goal: si hay goles en events
-- goals_over_under: contar total goles
-- both_teams_score: ambos > 0
-- exact_score: comparar exacto
-- social: null (no evaluar)
-```
-
-**Answer Evaluation**
-```php
-// Para cada Answer de la pregunta:
-$correct = determineCorrect();
-$answer->update([
-    'is_correct' => $answer->option_id === $correct,
-    'points_earned' => $isCorrect ? $question->points : 0
-]);
-
-// Actualizar usuario:
-$user->points += $answer->points_earned;
-```
-
----
-
-### FASE 4: Queue Job
-
-**ProcessQuestionResultsJob.php**
-```php
-public function handle()
+public function determineCorrectOption(Question $q, FootballMatch $m): ?QuestionOption
 {
-    // 1. Obtener match
-    // 2. Obtener preguntas asociadas
-    // 3. Para cada pregunta:
-    //    - Evaluar
-    //    - Procesar respuestas
-    //    - Actualizar puntos
-    // 4. Marcar Question::result_verified_at
-    // 5. Log exitoso
+    // Lógica determinística según tipo de pregunta
+    // Retorna la opción correcta basada en datos del match
 }
 ```
 
 ---
 
-### FASE 5: API Endpoints
+### FASE 3: Kernel (ACTUALIZAR schedule)
 
-**GET `/api/matches/upcoming`**
-```json
+**Kernel.php (MODIFICADO)**
+```php
+protected function schedule(Schedule $schedule): void
 {
-  "data": [
-    {
-      "id": 1,
-      "home_team": "Girona FC",
-      "away_team": "CA Osasuna",
-      "date": "2026-01-10 17:30",
-      "status": "TIMED",
-      "questions_count": 5
-    }
-  ]
-}
-```
+    // Obtener fixtures cada noche
+    $schedule->command('app:update-fixtures-nightly')
+        ->dailyAt('23:00')
+        ->onFailure(fn() => Log::error('Error updating fixtures'));
 
-**GET `/api/matches/1/results`**
-```json
-{
-  "data": {
-    "id": 1,
-    "status": "FINISHED",
-    "score": {
-      "home": 2,
-      "away": 1
-    },
-    "events": {
-      "goals": [...],
-      "cards": [...],
-      "substitutions": [...]
-    },
-    "questions": [
-      {
-        "id": 10,
-        "title": "¿Quién gana?",
-        "correct_option_id": 15,
-        "user_answer_id": 15,
-        "is_correct": true,
-        "points_earned": 100
-      }
-    ]
-  }
+    // Actualizar resultados cada hora
+    $schedule->command('matches:process-recently-finished')
+        ->hourly()
+        ->onFailure(fn() => Log::error('Error processing matches'));
 }
 ```
 
 ---
 
-## ✅ CHECKLIST DE IMPLEMENTACIÓN
+### FASE 4: Testing
 
-### FASE 1
-- [ ] UpdateFixturesCommand creado
-- [ ] UpdateMatchResultsCommand creado
-- [ ] Registrados en Kernel::schedule()
-- [ ] Test manual de ambos
-- [ ] Verificar imports en BD
+Test para cada componente nuevo/modificado.
 
-### FASE 2
-- [ ] FootballDataMatchService implementado
-- [ ] MatchResultProcessingService implementado
-- [ ] Parseador de eventos funcional
-- [ ] Transacciones BD correctas
-- [ ] Test de actualización
 
-### FASE 3
-- [ ] QuestionEvaluationService con todos los tipos
-- [ ] Lógica correcta por tipo de pregunta
-- [ ] Answer update con is_correct y points
-- [ ] User points incremento correcto
-- [ ] Test de evaluación
-
-### FASE 4
-- [ ] ProcessQuestionResultsJob creado
-- [ ] Dispatch funciona desde comando
-- [ ] Queue procesa correctamente
-- [ ] Puntos finales correctos
-- [ ] Logging funcional
-
-### FASE 5
-- [ ] Endpoints API creados
-- [ ] Responses JSON correctas
-- [ ] Autenticación Sanctum
-- [ ] Rate limiting si needed
-- [ ] Test de endpoints
 
 ---
 
-## 🔄 DEPENDENCIAS ENTRE FASES
+## ✅ CHECKLIST DE IMPLEMENTACIÓN (REVISADO)
+
+### FASE 1: Refactor Fixtures
+- [ ] Refactor UpdateFootballData.php (Gemini → Football-Data.org)
+- [ ] Crear UpdateFixturesNightly.php command
+- [ ] Registrar en Kernel schedule (23:00)
+- [ ] Test manual: obtener fixtures de 4 ligas
+- [ ] Verificar en BD que se guardaron
+
+### FASE 2: Refactor Evaluación
+- [ ] Crear QuestionEvaluationService con todos los tipos de preguntas
+- [ ] Refactor VerifyQuestionResultsJob (OpenAI → QuestionEvaluationService)
+- [ ] Verificar que Answer.is_correct se actualiza
+- [ ] Verificar que points_earned se calcula correctamente
+
+### FASE 3: Actualizar Scheduler
+- [ ] Verificar UpdateFixturesNightly en schedule (23:00)
+- [ ] Verificar ProcessRecentlyFinishedMatches en schedule (hourly)
+- [ ] Test de ejecución
+
+### FASE 4: Tests
+- [ ] Test QuestionEvaluationService
+- [ ] Test VerifyQuestionResultsJob refactored
+- [ ] Test UpdateFixturesNightly command
+- [ ] Test schedule en Kernel
+
+---
+
+## 🔄 DEPENDENCIAS ENTRE FASES (REVISADO)
 
 ```
-FASE 1 ──┐
-         ├─→ FASE 2 ──┐
-         │            ├─→ FASE 4 ──→ FASE 5
-         │            │
-         └────────────┤
-                      └─→ FASE 3 ──┘
+FASE 1: Fixtures
+  ↓ (proporciona datos)
+FASE 2: Evaluación (cambio interno)
+  ↓ (actualiza preguntas)
+FASE 3: Kernel scheduler
+  ↓
+FASE 4: Tests y validación
 ```
 
 **Notas:**
-- FASE 1 es independiente (cron puro)
-- FASE 2 necesita FASE 1 (datos para procesar)
-- FASE 3 y 4 dependen de FASE 2
-- FASE 5 es la API que consulta todos
+- FASE 1 es independiente (obtiene nuevos fixtures)
+- FASE 2 depende de FASE 1 (tiene datos para evaluar)
+- FASE 3 solo registra los crons
+- FASE 4 valida todo funciona
+- NO HAY NUEVA LÓGICA DE JOBS (ya existen)
 
 ---
 
-## 🚀 ORDEN RECOMENDADO DE DESARROLLO
+## 🚀 ORDEN RECOMENDADO DE DESARROLLO (REVISADO)
 
-1. **FASE 1** - Asegurar datos en BD
-2. **FASE 2** - Procesar esos datos
-3. **FASE 3** - Evaluar preguntas
-4. **FASE 4** - Queue jobs
-5. **FASE 5** - API (si needed)
+1. **FASE 1** - Cambiar Gemini → Football-Data.org en fixtures
+2. **FASE 2** - Cambiar OpenAI → Lógica determinística en evaluación
+3. **FASE 3** - Registrar ambos crons en Kernel
+4. **FASE 4** - Validar con tests
 
 ---
 
-## 📝 NOTAS IMPORTANTES
+## 📝 NOTAS IMPORTANTES (REVISADAS)
 
-### Sobre Gemini
-- No usaremos Gemini para EVALUAR respuestas (determinístico)
-- La evaluación es lógica simple (quien anotó más, etc)
-- Gemini se usa SOLO en: GenerateQuestionsService (ya implementado)
+### Sobre Estructura Existente
+- ✅ 70% del código YA EXISTE y FUNCIONA
+- ✅ UpdateFinishedMatchesJob ya procesa lotes
+- ✅ CreatePredictiveQuestionsJob ya genera preguntas
+- ✅ ProcessRecentlyFinishedMatchesJob ya orquesta todo
+- ❌ Solo necesita: Fixtures de Football-Data.org + Evaluación determinística
 
-### Sobre Football-Data.org
-- Actualmente: scores básicos
-- Futuro: eventos completos (cuando se pague)
-- Por ahora: guardar events/stats como JSON vacío o parsed
+### Sobre Fuentes de Datos
+- ✅ Football-Data.org API funciona perfecto para fixtures/resultados
+- ✅ Para detalles complejos (Gemini) puede agregarse en futuro
+- ✅ Actualmente: scores básicos es suficiente
 
 ### Sobre Performance
-- Actualizar resultados cada hora (no cada minuto)
-- Queue jobs en background (no bloqueante)
-- Cachear datos de partidos 5 minutos
+- ✅ Batch processing de 5 partidos (ya implementado)
+- ✅ Delays entre requests (2s entre partidos)
+- ✅ Delays entre jobs (5min entre cada fase)
+- ✅ Cron cada hora es razonable
 
-### Sobre Errores
-- Logging detallado de cada fase
-- Retry automático para fallos de API
-- Alertas si falla el job
+### Sobre Costos
+- ✅ Football-Data.org: GRATIS en tiempos de clase
+- ❌ NO usaremos OpenAI para evaluación (innecesario)
+- ✅ Evaluación es determinística (sin IA)
 
 ---
 
-## 📞 SIGUIENTES PASOS
+## 📞 SIGUIENTES PASOS (REVISADOS)
 
-1. ✅ Confirmar plan
-2. ⬜ Comenzar FASE 1: UpdateFixturesCommand
-3. ⬜ Completar FASE 1: UpdateMatchResultsCommand
-4. ⬜ Proceder a FASE 2...
+1. ✅ Análisis completado
+2. ✅ Plan revisado (4 fases simplificadas)
+3. ⬜ Comenzar FASE 1: Refactor UpdateFootballData.php + Crear UpdateFixturesNightly.php
+4. ⬜ Continuar FASE 2: Crear QuestionEvaluationService + Refactor VerifyQuestionResultsJob
+5. ⬜ Completar FASE 3: Actualizar Kernel schedule
+6. ⬜ Validar FASE 4: Tests
 
 **¿Procedemos con FASE 1?**
