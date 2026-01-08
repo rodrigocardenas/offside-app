@@ -49,7 +49,7 @@ class UpdateFootballData extends Command
 
     private function updateLeagueFixtures($competitionCode, $daysAhead)
     {
-        $apiKey = env('FOOTBALL_DATA_API_KEY') 
+        $apiKey = env('FOOTBALL_DATA_API_KEY')
             ?? config('services.football_data.api_token')
             ?? config('services.football.key');
 
