@@ -43,7 +43,7 @@ Por favor:
    - Últimos resultados y forma de ambos equipos
    - Jugadores estrella actuales
    - Racha de goles (últimos 5 partidos)
-   
+
 2. Analiza:
    - Quién es favorito según las estadísticas actuales
    - Posibles alineaciones probables
@@ -75,10 +75,10 @@ echo "   Max Retries: 5\n\n";
 try {
     // Llamar con useGrounding = true
     $result = $geminiService->callGemini($analysisPrompt, true);
-    
+
     echo "✅ Respuesta recibida de Gemini:\n";
     echo "───────────────────────────────────────────────────────\n";
-    
+
     if (is_array($result) && isset($result['content'])) {
         echo $result['content'] . "\n";
     } elseif (is_array($result)) {
@@ -86,17 +86,17 @@ try {
     } else {
         echo $result . "\n";
     }
-    
+
     echo "───────────────────────────────────────────────────────\n\n";
-    
+
     // Intentar parsear si es JSON
     if (is_array($result) && isset($result['partido'])) {
         echo "✅ ANÁLISIS PARSEADO CORRECTAMENTE:\n";
         echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
     }
-    
+
     echo "\n✅ TEST EXITOSO - Grounding está funcionando con gemini-2.5-flash\n";
-    
+
 } catch (\Exception $e) {
     echo "❌ Error: " . $e->getMessage() . "\n";
     echo "   Código: " . $e->getCode() . "\n";

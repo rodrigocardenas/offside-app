@@ -17,14 +17,14 @@ $payload_CON_grounding = [
             ]
         ]
     ],
-    
+
     // ← ESTO FALTA en el código actual
     'tools' => [
         [
             'googleSearch' => (object)[]
         ]
     ],
-    
+
     'generationConfig' => [
         'temperature' => 0.5,
         'maxOutputTokens' => 4096,

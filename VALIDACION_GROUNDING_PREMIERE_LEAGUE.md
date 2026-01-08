@@ -88,6 +88,6 @@ Una vez validado el grounding:
 
 ---
 
-**Fuente de verdad**: Football-Data.org API v4  
-**Fecha de este documento**: 7 de enero de 2026  
+**Fuente de verdad**: Football-Data.org API v4
+**Fecha de este documento**: 7 de enero de 2026
 **Hora de consulta**: Cuando ejecutaste `validate-premier-league-data.php`

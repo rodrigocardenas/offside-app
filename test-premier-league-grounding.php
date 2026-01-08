@@ -63,21 +63,21 @@ echo "────────────────────────�
 
 try {
     $geminiService = new GeminiService();
-    
+
     // Llamar CON grounding habilitado
     $result = $geminiService->callGemini($prompt, true);
-    
+
     echo "✅ RESPUESTA RECIBIDA DE GEMINI:\n\n";
-    
+
     if (is_array($result)) {
         // Si es JSON parseado
         if (isset($result['partidos'])) {
             echo "📊 PARTIDOS DE PREMIER LEAGUE - JORNADA 21\n";
             echo "═══════════════════════════════════════════════════════════════\n\n";
-            
+
             echo "Fecha de consulta: " . ($result['fecha_consulta'] ?? 'N/A') . "\n";
             echo "Total partidos: " . ($result['total_partidos'] ?? count($result['partidos'] ?? [])) . "\n\n";
-            
+
             foreach ($result['partidos'] as $i => $partido) {
                 echo "PARTIDO " . ($i + 1) . ":\n";
                 echo "  🏠 Local:     " . $partido['local'] . "\n";
@@ -88,14 +88,14 @@ try {
                 echo "  ℹ️  Estado:    " . $partido['estado'] . "\n";
                 echo "\n";
             }
-            
+
             echo "═══════════════════════════════════════════════════════════════\n";
             echo "\n✅ VALIDACIÓN DE GROUNDING:\n";
             echo "   ✓ Gemini BUSCÓ EN INTERNET\n";
             echo "   ✓ Encontró datos de enero 2026\n";
             echo "   ✓ Datos estructurados correctamente\n";
             echo "   ✓ JSON parseado sin errores\n\n";
-            
+
         } else {
             echo "JSON COMPLETO RECIBIDO:\n";
             echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n\n";
@@ -105,37 +105,37 @@ try {
         echo "RESPUESTA CRUDA:\n";
         echo $result . "\n\n";
     }
-    
+
     // Análisis de confiabilidad
     echo "═══════════════════════════════════════════════════════════════\n";
     echo "📋 ANÁLISIS DE CONFIABILIDAD:\n";
     echo "═══════════════════════════════════════════════════════════════\n\n";
-    
+
     if (is_array($result) && isset($result['nota'])) {
         echo "✅ Gemini CONFIRMÓ que usó búsqueda web:\n";
         echo "   \"" . $result['nota'] . "\"\n\n";
     }
-    
+
     echo "Conclusiones:\n";
     echo "1. ✅ Grounding ESTÁ FUNCIONANDO - Gemini buscó en internet\n";
     echo "2. ✅ Puede acceder a datos de enero 2026\n";
     echo "3. ✅ Información estructurada y parseada\n";
     echo "4. ✅ Listo para usar en análisis de partidos\n\n";
-    
+
     echo "Próximos pasos:\n";
     echo "1. Validar estos datos contra Football-Data.org\n";
     echo "2. Usar grounding en analyzeMatch() para análisis\n";
     echo "3. Cachear resultados (son costosos en API)\n\n";
-    
+
 } catch (\Exception $e) {
     echo "❌ ERROR: " . $e->getMessage() . "\n\n";
-    
+
     if (strpos($e->getMessage(), 'Rate limited') !== false) {
         echo "ℹ️  Parece que Gemini está rate limitado.\n";
         echo "    Espera unos minutos e intenta de nuevo.\n";
         echo "    El error de rate limiting prueba que Gemini SÍ intentó procesar.\n\n";
     }
-    
+
     exit(1);
 }
 
