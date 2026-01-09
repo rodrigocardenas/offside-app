@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Servicio de evaluación de respuestas a preguntas de predicción.
  * Reemplaza OpenAI con lógica determinística basada en datos del partido.
- * 
+ *
  * Tipos soportados:
  * - winner: ¿Quién ganará? (Victoria home, Victoria away, Empate)
  * - first_goal: ¿Quién anotará el primer gol?
@@ -29,7 +29,7 @@ class QuestionEvaluationService
 {
     /**
      * Evalúa una pregunta y determina las opciones correctas.
-     * 
+     *
      * @param Question $question Pregunta a evaluar
      * @param FootballMatch $match Partido finalizado con datos
      * @return array IDs de opciones correctas
@@ -151,7 +151,7 @@ class QuestionEvaluationService
     {
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
-        
+
         // Encontrar primer gol
         $firstGoalTeam = null;
         foreach ($events as $event) {
@@ -189,7 +189,7 @@ class QuestionEvaluationService
     {
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
-        
+
         // Encontrar último gol
         $lastGoalTeam = null;
         foreach (array_reverse($events) as $event) {

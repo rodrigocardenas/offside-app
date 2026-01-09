@@ -20,7 +20,7 @@ class VerifyQuestionResultsJob implements ShouldQueue
 
     /**
      * Execute the job.
-     * 
+     *
      * Evalúa preguntas de partidos finalizados usando lógica determinística
      * en lugar de OpenAI, asegurando resultados consistentes y predecibles.
      */

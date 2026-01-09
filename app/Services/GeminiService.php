@@ -20,14 +20,22 @@ class GeminiService
 
     public function __construct()
     {
-        $this->apiKey = config('gemini.api_key');
-        $this->model = config('gemini.model', 'gemini-3-pro-preview');
+        // En testing, allow no API key
+        if (app()->environment('testing')) {
+            $this->apiKey = config('gemini.api_key', 'test_key');
+            $this->model = config('gemini.model', 'gemini-2.5-flash');
+            $this->groundingEnabled = false;
+        } else {
+            $this->apiKey = config('gemini.api_key');
+            $this->model = config('gemini.model', 'gemini-3-pro-preview');
+        }
+
         $this->maxRetries = config('gemini.max_retries', 5);
         $this->retryDelay = config('gemini.retry_delay', 2);
         $this->groundingEnabled = config('gemini.grounding_enabled', true);
         $this->timeout = config('gemini.timeout', 60);
 
-        if (!$this->apiKey) {
+        if (!app()->environment('testing') && !$this->apiKey) {
             throw new Exception('GEMINI_API_KEY no configurada en .env');
         }
     }
