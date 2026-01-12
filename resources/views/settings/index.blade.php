@@ -63,10 +63,10 @@
 
                         <div class="theme-section">
                             <label style="display: block; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">
-                                Modo de Tema
+                                {{ __('views.settings.theme_mode') }}
                             </label>
                             <p style="color: {{ $descColor }}; font-size: 13px; margin-bottom: 16px;">
-                                Elige entre modo claro, oscuro o automático
+                                {{ __('views.settings.theme_mode_desc') }}
                             </p>
 
                             <div class="theme-selector">
@@ -121,10 +121,10 @@
                         <div class="language-section" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid {{ $isDark ? '#404040' : '#e0e0e0' }};">
                             <label style="display: block; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">
                                 <i class="fas fa-globe"></i>
-                                {{ __('messages.language') }}
+                                {{ __('views.settings.language') }}
                             </label>
                             <p style="color: {{ $descColor }}; font-size: 13px; margin-bottom: 16px;">
-                                Selecciona tu idioma preferido
+                                {{ __('views.settings.language_desc') }}
                             </p>
 
                             <select name="language" class="language-select" style="padding: 10px 12px; border-radius: 8px; border: 1px solid {{ $isDark ? '#505050' : '#ddd' }}; background: {{ $isDark ? '#2a2a2a' : '#fff' }}; color: {{ $labelColor }}; font-size: 14px; width: 100%;">
@@ -154,11 +154,11 @@
                 <div class="settings-section">
                     <div class="section-title">
                         <i class="fas fa-bell"></i>
-                        Notificaciones
+                        {{ __('views.settings.notifications') }}
                     </div>
                     <div class="coming-soon">
                         <i class="fas fa-rocket" style="font-size: 48px; color: #ccc;"></i>
-                        <p style="color: #999; margin: 0;">Esta sección estará disponible pronto</p>
+                        <p style="color: #999; margin: 0;">{{ __('views.settings.coming_soon') }}</p>
                     </div>
                 </div>
             </div>
@@ -168,11 +168,11 @@
                 <div class="settings-section">
                     <div class="section-title">
                         <i class="fas fa-lock"></i>
-                        Privacidad
+                        {{ __('views.settings.privacy') }}
                     </div>
                     <div class="coming-soon">
                         <i class="fas fa-rocket" style="font-size: 48px; color: #ccc;"></i>
-                        <p style="color: #999; margin: 0;">Esta sección estará disponible pronto</p>
+                        <p style="color: #999; margin: 0;">{{ __('views.settings.coming_soon') }}</p>
                     </div>
                 </div>
             </div>
