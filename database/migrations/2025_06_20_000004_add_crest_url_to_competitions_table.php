@@ -9,7 +9,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('competitions', function (Blueprint $table) {
-            $table->string('crest_url')->nullable()->after('name');
+            if (!Schema::hasColumn('competitions', 'crest_url')) {
+                $table->string('crest_url')->nullable()->after('name');
+            }
         });
     }
 
