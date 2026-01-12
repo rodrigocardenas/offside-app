@@ -18,7 +18,7 @@
     <!-- Chat Title -->
     <div class="chat-title"
         style="display: flex; align-items: center; gap: 8px; padding: 16px; font-size: 16px; font-weight: 600; color: {{ $isDark ? '#fff' : '#333' }}; border-bottom: 1px solid {{ $isDark ? '#333' : '#e0e0e0' }}; flex-shrink: 0;">
-        <i class="fas fa-comments"></i> Chat del Grupo
+        <i class="fas fa-comments"></i> {{ __('views.chat.title') }}
     </div>
 
     <!-- Chat Messages Container (Scrollable) -->
@@ -55,7 +55,7 @@
             </div>
         @empty
             <div style="text-align: center; padding: 20px; color: {{ $isDark ? '#999' : '#6c757d' }};">
-                <p>No hay mensajes aún. ¡Sé el primero en escribir!</p>
+                <p>{{ __('views.chat.no_messages_yet') }}</p>
             </div>
         @endforelse
     </div>
@@ -68,11 +68,11 @@
             @csrf
             <input type="text" name="message" id="chatMessage"
                 style="flex: 1; padding: 10px 12px; border: 1px solid {{ $isDark ? '#444' : '#dee2e6' }}; border-radius: 20px; font-size: 14px; outline: none; background: {{ $isDark ? '#222' : '#f8f9fa' }}; color: {{ $isDark ? '#fff' : '#333' }};"
-                placeholder="Escribe un mensaje..." required>
-            <button type="submit" id="sendMessageBtn" title="Enviar mensaje"
+                placeholder="{{ __('views.chat.type_message') }}" required>
+            <button type="submit" id="sendMessageBtn" title="{{ __('views.chat.send') }}"
                 style="padding: 10px 16px; background: {{ $accentColor }}; color: {{ $isDark ? '#000' : '#003b2f' }}; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; flex-shrink: 0;"
                 class="hover:opacity-80">
-                <span class="hidden sm:block">Enviar</span>
+                <span class="hidden sm:block">{{ __('views.chat.send') }}</span>
                 <i class="fas fa-paper-plane sm:hidden"></i>
             </button>
         </form>

@@ -6,12 +6,12 @@
 
 <div class="stats-bar">
     <div class="stat-item">
-        <i class="fas fa-trophy"></i> Racha: <span class="stat-value">{{ $streak }} días</span>
+        <i class="fas fa-trophy"></i> {{ __('views.groups.streak') }}: <span class="stat-value">{{ $streak }} {{ __('messages.days') }}</span>
     </div>
     <div class="stat-item">
-        <i class="fas fa-bullseye"></i> Aciertos: <span class="stat-value">{{ $accuracy }}%</span>
+        <i class="fas fa-bullseye"></i> {{ __('views.rankings.accuracy') }}: <span class="stat-value">{{ $accuracy }}%</span>
     </div>
     <div class="stat-item">
-        <i class="fas fa-users"></i> Grupos: <span class="stat-value">{{ $groupsCount }}</span>
+        <i class="fas fa-users"></i> {{ __('views.groups.groups_count') }}: <span class="stat-value">{{ $groupsCount }}</span>
     </div>
 </div>

@@ -60,6 +60,6 @@
 <div id="prediction-feedback-{{ $question->id }}" class="mt-3 text-center hidden">
     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-offside-primary text-white text-sm font-semibold">
         <i class="fas fa-check-circle"></i>
-        <span>¡Predicción guardada!</span>
+        <span>{{ __('views.questions.prediction_saved') }}</span>
     </div>
 </div>

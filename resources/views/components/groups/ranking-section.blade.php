@@ -16,7 +16,7 @@
             <button
                 onclick="expandRanking()"
                 class="text-xs px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 hover:border-offside-primary transition-all cursor-pointer">
-                Ver todos
+                {{ __('messages.view_all') }}
             </button>
         @endif
     </div>
@@ -24,7 +24,7 @@
     @if($players->isEmpty())
         <div class="text-center py-8 text-gray-500">
             <i class="fas fa-users text-3xl mb-2"></i>
-            <p class="text-sm">No hay jugadores en el ranking aún</p>
+            <p class="text-sm">{{ __('views.rankings.no_players_yet') }}</p>
         </div>
     @else
         <div class="ranking-list">

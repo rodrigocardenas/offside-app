@@ -22,7 +22,7 @@
     {{-- Player Info --}}
     <div class="text-center">
         <div class="text-xs font-semibold text-gray-800 mb-0.5 truncate max-w-[70px]" title="{{ $player->name }}">
-            {{ $isCurrentUser ? 'Tú' : $player->name }}
+            {{ $isCurrentUser ? __('messages.you') : $player->name }}
         </div>
         <div class="text-xs font-bold text-offside-primary">
             {{ $player->total_points ?? 0 }}

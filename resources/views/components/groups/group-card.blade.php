@@ -38,7 +38,7 @@
                 <h3>
                     {{ $group->name }}
                     @if($hasPending)
-                        <span title="Tienes predicciones pendientes" style="color: red; margin-left: 8px;">
+                        <span title="{{ __('views.groups.pending_predictions') }}" style="color: red; margin-left: 8px;">
                             <small><i class="fas fa-circle"></i></small>
                         </span>
                     @endif
@@ -46,11 +46,11 @@
 
                 <div class="group-stats">
                     @if($showMembers)
-                        <span><i class="fas fa-users"></i> {{ $group->users_count ?? $group->users->count() }} miembros</span>
+                        <span><i class="fas fa-users"></i> {{ $group->users_count ?? $group->users->count() }} {{ __('views.groups.members') }}</span>
                     @endif
                     @if($userRank)
                         <div class="ranking-badge">
-                            <i class="fas fa-trophy"></i> Ranking: #{{ $userRank }}
+                            <i class="fas fa-trophy"></i> {{ __('views.rankings.title') }}: #{{ $userRank }}
                         </div>
                     @endif
                 </div>
@@ -77,7 +77,7 @@
                     onmouseover="this.style.background='{{ $hoverBg }}'"
                     onmouseout="this.style.background='none'">
                 <i class="fas fa-share-alt" style="width: 16px; color: #00deb0;"></i>
-                <span>Compartir grupo</span>
+                <span>{{ __('messages.share') }}</span>
             </button>
 
             <!-- Opción Salir (si es miembro) -->
@@ -89,9 +89,9 @@
                             style="width: 100%; text-align: left; padding: 12px 16px; background: none; border: none; color: {{ $textColor }}; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 12px; transition: background 0.2s ease;"
                             onmouseover="this.style.background='{{ $hoverBg }}'"
                             onmouseout="this.style.background='none'"
-                            onclick="event.stopPropagation(); return confirm('¿Estás seguro de que quieres salir de este grupo?');">
+                            onclick="event.stopPropagation(); return confirm('{{ __('views.groups.confirm_leave') }}');">
                         <i class="fas fa-sign-out-alt" style="width: 16px; color: #ffa500;"></i>
-                        <span>Salir del grupo</span>
+                        <span>{{ __('views.groups.leave_group') }}</span>
                     </button>
                 </form>
             @endif

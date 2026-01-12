@@ -26,6 +26,7 @@ return [
         'no_groups' => 'You have no groups',
         'join_group' => 'Join Group',
         'leave_group' => 'Leave Group',
+        'confirm_leave' => 'Are you sure you want to leave this group?',
         'group_members' => 'Group Members',
         'total_members' => 'Total Members',
         'created_by' => 'Created by',
@@ -36,6 +37,8 @@ return [
         'official_groups' => 'Official Groups',
         'amateur_groups' => 'Amateur Groups',
         'my_groups' => 'My Groups',
+        'streak' => 'Streak',
+        'groups_count' => 'Groups',
     ],
     'questions' => [
         'title' => 'Questions',
@@ -52,6 +55,7 @@ return [
         'answered' => 'Answered',
         'make_prediction' => 'Make Your Prediction',
         'view_results' => 'View Results',
+        'prediction_saved' => 'Prediction saved!',
     ],
     'rankings' => [
         'title' => 'Rankings',
@@ -67,12 +71,14 @@ return [
         'accuracy' => 'Accuracy',
         'view_complete' => 'View Complete Ranking',
         'no_players' => 'No players in the ranking',
+        'no_players_yet' => 'No players in the ranking yet',
     ],
     'chat' => [
         'title' => 'Chat',
         'type_message' => 'Type a message...',
         'send' => 'Send',
         'no_messages' => 'No messages',
+        'no_messages_yet' => 'No messages yet. Be the first to write!',
         'no_chat' => 'Select a group to start chatting',
     ],
 ];

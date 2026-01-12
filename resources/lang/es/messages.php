@@ -38,4 +38,8 @@ return [
     'auto' => 'Automático',
     'yes' => 'Sí',
     'no' => 'No',
+    'share' => 'Compartir',
+    'days' => 'días',
+    'view_all' => 'Ver todos',
+    'you' => 'Tú',
 ];
