@@ -167,13 +167,13 @@
                         style="flex: 1; padding: 12px 16px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 10px; color: {{ $textPrimary }}; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px;"
                         onmouseover="this.style.background='{{ $isDark ? '#1a524e' : '#f0f0f0' }}';"
                         onmouseout="this.style.background='{{ $bgSecondary }}';">
-                        Cancelar
+                        {{ __('views.settings.cancel') }}
                     </button>
                     <button type="submit"
                         style="flex: 1; padding: 12px 16px; background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); border: none; border-radius: 10px; color: #000; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;"
                         onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';"
                         onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
-                        <i class="fas fa-check"></i> Guardar
+                        <i class="fas fa-check"></i> {{ __('views.settings.save') }}
                     </button>
                 </div>
 

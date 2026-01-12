@@ -118,7 +118,7 @@
 
             {{-- Descripción --}}
             <p style="color: {{ $textSecondary }}; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
-                Tu opinión nos ayuda a mejorar. Comparte tus sugerencias, reporta errores o envíanos un elogio.
+                {{ __('views.feedback.description') }}
             </p>
 
             {{-- Formulario --}}
@@ -127,21 +127,21 @@
 
                 {{-- Tipo de comentario --}}
                 <div>
-                    <label for="type" style="display: block; font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; margin-bottom: 8px;">Tipo de comentario</label>
+                    <label for="type" style="display: block; font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; margin-bottom: 8px;">{{ __('views.feedback.type_label') }}</label>
                     <select id="type" name="type" style="width: 100%; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 10px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; cursor: pointer; transition: all 0.3s ease; box-sizing: border-box;"
                         onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px {{ $isDark ? 'rgba(0, 222, 176, 0.1)' : 'rgba(0, 222, 176, 0.08)' }}';"
                         onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none';">
-                        <option value="suggestion" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">📝 Sugerencia</option>
-                        <option value="bug" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">🐛 Reportar un error</option>
-                        <option value="compliment" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">⭐ Elogio</option>
-                        <option value="other" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">💬 Otro</option>
+                        <option value="suggestion" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">{{ __('views.feedback.suggestion') }}</option>
+                        <option value="bug" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">{{ __('views.feedback.bug') }}</option>
+                        <option value="compliment" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">{{ __('views.feedback.compliment') }}</option>
+                        <option value="other" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }};">{{ __('views.feedback.other') }}</option>
                     </select>
                 </div>
 
                 {{-- Mensaje --}}
                 <div>
-                    <label for="message" style="display: block; font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; margin-bottom: 8px;">Mensaje</label>
-                    <textarea id="message" name="message" rows="4" required placeholder="Cuéntanos qué piensas..."
+                    <label for="message" style="display: block; font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; margin-bottom: 8px;">{{ __('views.feedback.message_label') }}</label>
+                    <textarea id="message" name="message" rows="4" required placeholder="{{ __('views.feedback.message_placeholder') }}"
                         style="width: 100%; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 10px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; font-family: inherit; resize: vertical; box-sizing: border-box; transition: all 0.3s ease;"
                         onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px {{ $isDark ? 'rgba(0, 222, 176, 0.1)' : 'rgba(0, 222, 176, 0.08)' }}';"
                         onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none';"></textarea>
@@ -151,7 +151,7 @@
                 <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: {{ $bgSecondary }}; border-radius: 8px; border: 1px solid {{ $borderColor }};">
                     <input type="checkbox" id="is_anonymous" name="is_anonymous" style="width: 18px; height: 18px; cursor: pointer; accent-color: {{ $accentColor }};">
                     <label for="is_anonymous" style="font-size: 14px; color: {{ $textPrimary }}; cursor: pointer; margin: 0; flex: 1;">
-                        <i class="fas fa-mask" style="margin-right: 6px; color: {{ $accentColor }};"></i> Enviar como anónimo
+                        <i class="fas fa-mask" style="margin-right: 6px; color: {{ $accentColor }};"></i> {{ __('views.feedback.anonymous') }}
                     </label>
                 </div>
 
@@ -160,12 +160,12 @@
                     <button type="button" id="cancelFeedback" style="flex: 1; padding: 12px 16px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 10px; color: {{ $textPrimary }}; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px;"
                         onmouseover="this.style.background='{{ $isDark ? '#1a524e' : '#f0f0f0' }}';"
                         onmouseout="this.style.background='{{ $bgSecondary }}';">
-                        Cancelar
+                        {{ __('views.settings.cancel') }}
                     </button>
                     <button type="submit" style="flex: 1; padding: 12px 16px; background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); border: none; border-radius: 10px; color: #000; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;"
                         onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';"
                         onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
-                        <i class="fas fa-paper-plane"></i> Enviar
+                        <i class="fas fa-paper-plane"></i> {{ __('views.feedback.submit') }}
                     </button>
                 </div>
             </form>

@@ -177,7 +177,7 @@
 
             {{-- Header --}}
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-                <h2 style="font-size: 24px; font-weight: 700; color: {{ $modalText }}; margin: 0;">Unirse a grupo</h2>
+                <h2 style="font-size: 24px; font-weight: 700; color: {{ $modalText }}; margin: 0;">{{ __('views.settings.join_group_title') }}</h2>
                 <button onclick="document.getElementById('joinGroupModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -188,12 +188,12 @@
                 @csrf
 
                 <div>
-                    <label for="joinCode" style="display: block; font-size: 14px; font-weight: 600; color: {{ $modalLabel }}; margin-bottom: 8px;">Código del grupo</label>
+                    <label for="joinCode" style="display: block; font-size: 14px; font-weight: 600; color: {{ $modalLabel }}; margin-bottom: 8px;">{{ __('views.settings.group_code') }}</label>
                     <input id="joinCode" type="text" name="code" required
                         style="width: 100%; background: #ffffff; border: 1px solid {{ $modalBorder }}; border-radius: 8px; padding: 12px 16px; color: {{ $modalText }}; font-size: 15px; transition: all 0.3s ease; box-sizing: border-box;"
                         onfocus="this.style.borderColor='#00deb0'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
                         onblur="this.style.borderColor='{{ $modalBorder }}'; this.style.boxShadow='none'"
-                        placeholder="Ej: ABC123" />
+                        placeholder="{{ __('views.settings.group_code_placeholder') }}" />
                 </div>
 
                 {{-- Botones --}}
@@ -202,13 +202,13 @@
                             style="flex: 1; padding: 12px 16px; background: #f5f5f5; border: none; border-radius: 8px; color: #333; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
                             onmouseover="this.style.background='#e8e8e8'"
                             onmouseout="this.style.background='#f5f5f5'">
-                        Cancelar
+                        {{ __('views.settings.cancel') }}
                     </button>
                     <button type="submit"
                             style="flex: 1; padding: 12px 16px; background: linear-gradient(135deg, #17b796, #00deb0); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
                             onmouseover="this.style.opacity='0.9'"
                             onmouseout="this.style.opacity='1'">
-                        Unirse
+                        {{ __('views.settings.join') }}
                     </button>
                 </div>
             </form>

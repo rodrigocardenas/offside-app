@@ -19,7 +19,7 @@
         <div style="max-width: 600px; margin: 0 auto;">
             <div style="background: {{ $bgPrimary }}; border: 1px solid {{ $borderColor }}; border-radius: 16px; padding: 32px 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, {{ $isDark ? '0.3' : '0.1' }});">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px;">
-                    <h2 style="font-size: 28px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">Crear nuevo grupo</h2>
+                    <h2 style="font-size: 28px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">{{ __('views.groups.create_new_group') }}</h2>
                     <i class="fas fa-users" style="font-size: 32px; color: {{ $accentColor }};"></i>
                 </div>
 
@@ -28,33 +28,33 @@
                     <input type="hidden" name="form_submitted" value="1">
 
                     <div>
-                        <label for="name" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">Nombre del grupo</label>
+                        <label for="name" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.group_name_label') }}</label>
                         <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
                             style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease;"
                             onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
                             onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'"
-                            placeholder="Ej: Grupo de amigos" />
+                            placeholder="{{ __('views.groups.group_name_placeholder') }}" />
                         @error('name')
                             <p style="margin-top: 6px; font-size: 13px; color: #ef4444;">{{ $message }}</p>
                         @enderror
                     </div>
                     {{-- category --}}
                     <div>
-                        <label for="category" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">Categoría</label>
+                        <label for="category" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.category_label') }}</label>
                         <select id="category" name="category" required readonly
                             style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; cursor: pointer;">
-                            <option value="official" selected>Oficial</option>
-                            <option value="aficionado">Mis partidos</option>
+                            <option value="official" selected>{{ __('views.groups.category_official') }}</option>
+                            <option value="aficionado">{{ __('views.groups.category_amateur') }}</option>
                         </select>
                     </div>
 
                     <div>
-                        <label for="competition_id" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">Competición</label>
+                        <label for="competition_id" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.competition_label') }}</label>
                         <select id="competition_id" name="competition_id" required
                             style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; cursor: pointer;"
                             onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
                             onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'">
-                            <option value="">Selecciona una competición</option>
+                            <option value="">{{ __('views.groups.select_competition') }}</option>
                             @foreach($competitions as $competition)
                                 <option value="{{ $competition->id }}" {{ old('competition_id') == $competition->id ? 'selected' : '' }}>
                                     {{ $competition->name }} ({{ $competition->type }})
@@ -67,12 +67,12 @@
                     </div>
                     {{-- recompensa o penalización --}}
                     <div>
-                        <label for="reward_or_penalty" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">Recompensa o penalización</label>
+                        <label for="reward_or_penalty" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.reward_penalty_label') }}</label>
                         <textarea id="reward_or_penalty" name="reward_or_penalty" rows="4"
                             style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; resize: vertical; font-family: inherit;"
                             onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
                             onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'"
-                            placeholder="Escribe el premio para el ganador o la penitencia para el perdedor">{{ old('reward_or_penalty') }}</textarea>
+                            placeholder="{{ __('views.groups.reward_penalty_placeholder') }}">{{ old('reward_or_penalty') }}</textarea>
                     </div>
 
                     <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 12px; margin-top: 12px; border-top: 1px solid {{ $borderColor }};">
@@ -80,14 +80,14 @@
                            style="font-size: 14px; color: {{ $textSecondary }}; text-decoration: none; transition: color 0.3s ease;"
                            onmouseover="this.style.color='{{ $textPrimary }}'"
                            onmouseout="this.style.color='{{ $textSecondary }}'">
-                            Cancelar
+                            {{ __('views.groups.cancel') }}
                         </a>
                         <button type="submit"
                                 style="background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); color: white; padding: 12px 24px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;"
                                 onmouseover="this.style.opacity='0.9'"
                                 onmouseout="this.style.opacity='1'"
                                 id="submitButton">
-                            <span id="buttonText">Crear grupo</span>
+                            <span id="buttonText">{{ __('views.groups.create_group_button') }}</span>
                             <span id="loadingSpinner" style="display: none;">
                                 <i class="fas fa-spinner" style="animation: spin 1s linear infinite;"></i>
                             </span>
