@@ -42,7 +42,7 @@ class FeedbackController extends Controller
         $feedback->is_anonymous = $request->boolean('is_anonymous', false);
         $feedback->save();
 
-        return redirect()->back()->with('success', 'Feedback enviado correctamente');
+        return redirect()->back()->with('success', __('controllers.feedback.sent_successfully'));
     }
 
     /**

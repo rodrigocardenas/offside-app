@@ -92,4 +92,10 @@ return [
         'no_messages_yet' => 'No messages yet. Be the first to write!',
         'no_chat' => 'Select a group to start chatting',
     ],
-];
+    'profile' => [
+        'title' => 'User Profile',
+        'view_profile' => 'View Profile',
+    ],
+    'market' => [
+        'title' => 'Store',
+    ],

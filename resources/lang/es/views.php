@@ -92,4 +92,10 @@ return [
         'no_messages_yet' => 'No hay mensajes aún. ¡Sé el primero en escribir!',
         'no_chat' => 'Selecciona un grupo para comenzar a chatear',
     ],
-];
+    'profile' => [
+        'title' => 'Perfil de usuario',
+        'view_profile' => 'Ver Perfil',
+    ],
+    'market' => [
+        'title' => 'Tienda',
+    ],

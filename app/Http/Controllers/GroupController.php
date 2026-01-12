@@ -158,7 +158,7 @@ class GroupController extends Controller
 
         if ($recentGroup) {
             return redirect()->route('groups.show', $recentGroup)
-                ->with('success', 'Grupo creado exitosamente.');
+                ->with('success', __('controllers.groups.created_successfully'));
         }
 
         $request->validate([
@@ -178,7 +178,7 @@ class GroupController extends Controller
 
             if ($existingGroup) {
                 return redirect()->route('groups.show', $existingGroup)
-                    ->with('success', 'Grupo creado exitosamente.');
+                    ->with('success', __('controllers.groups.created_successfully'));
             }
 
             // Generar un código único
@@ -204,7 +204,7 @@ class GroupController extends Controller
             Cache::forget('groups_list');
 
             return redirect()->route('groups.show', $group)
-                ->with('success', 'Grupo creado exitosamente.');
+                ->with('success', __('controllers.groups.created_successfully'));
         });
     }
 
@@ -381,7 +381,7 @@ class GroupController extends Controller
                     'userAnswers' => $userAnswers,
                     'socialQuestion' => $socialQuestion,
                     'currentMatchday' => null
-                ])->with('success', 'Te has unido al grupo oficial exitosamente.');
+                ])->with('success', __('controllers.groups.joined_official_successfully'));
             }
             throw new GroupAccessException(
                 "No tienes acceso a este grupo",
@@ -504,7 +504,7 @@ class GroupController extends Controller
             ]);
 
             return redirect()->route('groups.index')
-                ->with('error', 'El código del grupo no existe o es incorrecto.');
+                ->with('error', __('controllers.groups.invalid_code'));
         }
 
         return DB::transaction(function () use ($request, $group) {
@@ -523,7 +523,7 @@ class GroupController extends Controller
                 ]);
 
                 return redirect()->route('groups.show', $group)
-                    ->with('error', 'Ya eres miembro de este grupo.');
+                    ->with('error', __('controllers.groups.already_member'));
             }
 
             // Verificar si hay una solicitud reciente del mismo usuario para el mismo grupo
@@ -541,7 +541,7 @@ class GroupController extends Controller
                 ]);
 
                 return redirect()->route('groups.show', $group)
-                    ->with('success', 'Te has unido al grupo exitosamente.');
+                    ->with('success', __('controllers.groups.joined_successfully'));
             }
 
             // Agregar usuario al grupo
@@ -561,7 +561,7 @@ class GroupController extends Controller
             Cache::forget('groups_list');
 
             return redirect()->route('groups.show', $group)
-                ->with('success', 'Te has unido al grupo exitosamente.');
+                ->with('success', __('controllers.groups.joined_successfully'));
         });
     }
 
@@ -570,20 +570,20 @@ class GroupController extends Controller
         // Verificar que el usuario sea miembro del grupo
         if (!$group->users()->where('user_id', auth()->id())->exists()) {
             return redirect()->route('groups.index')
-                ->with('error', 'No eres miembro de este grupo.');
+                ->with('error', __('controllers.groups.not_member'));
         }
 
         // Verificar que no sea el creador del grupo
         if ($group->created_by === auth()->id()) {
             return redirect()->route('groups.index')
-                ->with('error', 'No puedes abandonar un grupo que has creado.');
+                ->with('error', __('controllers.groups.cannot_leave_owned'));
         }
 
         // Remover solo al usuario actual
         $group->users()->detach(auth()->id());
 
         return redirect()->route('groups.index')
-            ->with('success', 'Has abandonado el grupo exitosamente.');
+            ->with('success', __('controllers.groups.left_successfully'));
     }
 
     public function joinByInvite($code)
@@ -605,7 +605,7 @@ class GroupController extends Controller
             ]);
 
             return redirect()->route('groups.index')
-                ->with('error', 'El enlace de invitación es inválido o ha expirado.');
+                ->with('error', __('controllers.groups.invalid_invitation'));
         }
 
         return DB::transaction(function () use ($code, $group) {
@@ -641,7 +641,7 @@ class GroupController extends Controller
                 ]);
 
                 return redirect()->route('groups.show', $group)
-                    ->with('success', 'Te has unido al grupo exitosamente.');
+                    ->with('success', __('controllers.groups.joined_successfully'));
             }
 
             // Agregar usuario al grupo
@@ -662,7 +662,7 @@ class GroupController extends Controller
             Cache::forget("group_{$group->id}_show_data");
 
             return redirect()->route('groups.show', $group)
-                ->with('success', 'Te has unido al grupo exitosamente.');
+                ->with('success', __('controllers.groups.joined_successfully'));
         });
     }
 

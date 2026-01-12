@@ -55,7 +55,7 @@ class TemplateQuestionController extends Controller
         ]);
 
         return redirect()->route('admin.template-questions.index')
-            ->with('success', 'Plantilla de pregunta creada exitosamente');
+            ->with('success', __('controllers.template_questions.created_successfully'));
     }
 
     /**
@@ -100,10 +100,10 @@ class TemplateQuestionController extends Controller
             }
 
             return redirect()->route('admin.template-questions.index')
-                ->with('success', 'Plantilla de pregunta actualizada exitosamente');
+                ->with('success', __('controllers.template_questions.updated_successfully'));
         } catch (\Exception $e) {
             Log::error('Error al actualizar la plantilla de pregunta: ' . $e->getMessage());
-            return back()->with('error', 'Error al actualizar la plantilla de pregunta');
+            return back()->with('error', __('controllers.template_questions.update_error'));
         }
     }
 
@@ -115,10 +115,10 @@ class TemplateQuestionController extends Controller
         try {
             $templateQuestion->delete();
             return redirect()->route('admin.template-questions.index')
-                ->with('success', 'Plantilla de pregunta eliminada exitosamente');
+                ->with('success', __('controllers.template_questions.deleted_successfully'));
         } catch (\Exception $e) {
             Log::error('Error al eliminar la plantilla de pregunta: ' . $e->getMessage());
-            return back()->with('error', 'Error al eliminar la plantilla de pregunta');
+            return back()->with('error', __('controllers.template_questions.delete_error'));
         }
     }
 }

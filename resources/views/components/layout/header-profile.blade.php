@@ -27,7 +27,7 @@
     <div class="header-profile-btn">
         <button
             class="profile-btn"
-            title="Perfil de usuario"
+            title="{{ __('views.profile.title') }}"
             id="user-menu"
             onclick="document.querySelector('.profile-dropdown').classList.toggle('hidden')"
         >
@@ -46,11 +46,11 @@
         <div class="profile-dropdown hidden">
             <a href="{{ route('profile.edit') }}" class="dropdown-item">
                 <i class="fas fa-user"></i>
-                <span>Ver Perfil</span>
+                <span>{{ __('views.profile.view_profile') }}</span>
             </a>
             <a href="{{ route('settings.index') }}" class="dropdown-item">
                 <i class="fas fa-cog"></i>
-                <span>Configuración</span>
+                <span>{{ __('messages.settings') }}</span>
             </a>
             {{-- <form method="POST" action="{{ route('logout') }}" class="block w-full">
                 @csrf
@@ -63,7 +63,7 @@
     </div>
 
     <script>
-        // Cerrar dropdown al hacer click fuera
+        // Cerrar dropdown al hacer click fuera / Close dropdown when clicking outside
         document.addEventListener('click', function(e) {
             const header = document.querySelector('.header');
             const dropdown = document.querySelector('.profile-dropdown');

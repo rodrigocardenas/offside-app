@@ -67,7 +67,7 @@ class QuestionAdminController extends Controller
         }
 
         return redirect()->route('admin.questions.index')
-            ->with('success', 'Pregunta creada exitosamente');
+            ->with('success', __('controllers.questions.created_successfully'));
     }
 
     public function edit(Question $question)
@@ -132,14 +132,14 @@ class QuestionAdminController extends Controller
         }
 
         return redirect()->route('admin.questions.index')
-            ->with('success', 'Pregunta actualizada exitosamente');
+            ->with('success', __('controllers.questions.updated_successfully'));
     }
 
     public function destroy(Question $question)
     {
         $question->delete();
         return redirect()->route('admin.questions.index')
-            ->with('success', 'Pregunta eliminada exitosamente');
+            ->with('success', __('controllers.questions.deleted_successfully'));
     }
 
     public function toggleFeatured(Question $question)

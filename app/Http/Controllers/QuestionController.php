@@ -28,11 +28,11 @@ class QuestionController extends Controller
     public function show(Question $question)
     {
         if ($question->available_from > Carbon::now()) {
-            return back()->with('error', 'Esta pregunta aún no está disponible.');
+            return back()->with('error', __('controllers.questions.not_available_yet'));
         }
 
         if ($question->available_until < Carbon::now()) {
-            return back()->with('error', 'Esta pregunta ya no está disponible.');
+            return back()->with('error', __('controllers.questions.no_longer_available'));
         }
 
         $userAnswer = $question->answers()

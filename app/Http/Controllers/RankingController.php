@@ -112,7 +112,7 @@ class RankingController extends Controller
     public function questionRanking(Question $question)
     {
         if ($question->available_until > Carbon::now()) {
-            return back()->with('error', 'Los rankings aún no están disponibles.');
+            return back()->with('error', __('controllers.rankings.not_available_yet'));
         }
 
         $rankings = User::withSum(['answers as total_points' => function($query) use ($question) {
