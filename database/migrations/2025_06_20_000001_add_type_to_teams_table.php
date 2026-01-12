@@ -9,7 +9,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('teams', function (Blueprint $table) {
-            $table->string('type')->default('club')->after('name');
+            if (!Schema::hasColumn('teams', 'type')) {
+                $table->string('type')->default('club')->after('name');
+            }
         });
     }
 
