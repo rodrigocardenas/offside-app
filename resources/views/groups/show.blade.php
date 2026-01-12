@@ -29,11 +29,11 @@
         <div style="background: {{ $bgTertiary }}; padding: 5px; border-radius: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 32px;">
             <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }}; padding: 16px;">
                 <i class="fas fa-trophy" style="font-size: 16px; color: {{ $accentColor }};"></i>
-                Ranking
+                {{ __('views.rankings.title') }}
                 <a href="{{ url('/groups', $group->id) }}/ranking" style="margin-left: auto; font-size: 12px; color: {{ $textSecondary }}; cursor: pointer; padding: 4px 8px; border-radius: 12px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease;"
                     onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#f0f0f0' }}'; this.style.color='{{ $textPrimary }}';"
                     onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
-                    Ver más
+                    {{ __('messages.next') }}
                 </a>
             </div>
 
@@ -56,7 +56,7 @@
                     </div>
                 @empty
                     <div style="color: {{ $textSecondary }}; font-size: 14px; text-align: center; width: 100%;">
-                        No hay jugadores en el ranking
+                        {{ __('views.rankings.no_players') }}
                     </div>
                 @endforelse
             </div>

@@ -66,6 +66,7 @@ return [
         'incorrect' => 'Incorrectas',
         'accuracy' => 'Exactitud',
         'view_complete' => 'Ver Ranking Completo',
+        'no_players' => 'No hay jugadores en el ranking',
     ],
     'chat' => [
         'title' => 'Chat',

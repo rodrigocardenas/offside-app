@@ -66,6 +66,7 @@ return [
         'incorrect' => 'Incorrect',
         'accuracy' => 'Accuracy',
         'view_complete' => 'View Complete Ranking',
+        'no_players' => 'No players in the ranking',
     ],
     'chat' => [
         'title' => 'Chat',
