@@ -9,9 +9,15 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('favorite_competition_id')->nullable()->constrained('competitions')->nullOnDelete();
-            $table->foreignId('favorite_club_id')->nullable()->constrained('teams')->nullOnDelete();
-            $table->foreignId('favorite_national_team_id')->nullable()->constrained('teams')->nullOnDelete();
+            if (!Schema::hasColumn('users', 'favorite_competition_id')) {
+                $table->foreignId('favorite_competition_id')->nullable()->constrained('competitions')->nullOnDelete();
+            }
+            if (!Schema::hasColumn('users', 'favorite_club_id')) {
+                $table->foreignId('favorite_club_id')->nullable()->constrained('teams')->nullOnDelete();
+            }
+            if (!Schema::hasColumn('users', 'favorite_national_team_id')) {
+                $table->foreignId('favorite_national_team_id')->nullable()->constrained('teams')->nullOnDelete();
+            }
         });
     }
 
