@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('language')->default('es')->after('theme');
+            if (!Schema::hasColumn('users', 'language')) {
+                $table->string('language')->default('es')->nullable()->after('theme_mode');
+            }
         });
     }
 
