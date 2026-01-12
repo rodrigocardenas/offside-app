@@ -233,7 +233,7 @@
 
             {{-- Header --}}
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-                <h2 style="font-size: 24px; font-weight: 700; color: {{ $inviteModalText }}; margin: 0;">Compartir grupo</h2>
+                <h2 style="font-size: 24px; font-weight: 700; color: {{ $inviteModalText }}; margin: 0;">{{ __('views.groups.share_group') }}</h2>
                 <button onclick="document.getElementById('inviteModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -242,7 +242,7 @@
             {{-- Contenido --}}
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <div>
-                    <label for="inviteMessage" style="display: block; font-size: 14px; font-weight: 600; color: {{ $inviteModalText }}; margin-bottom: 8px;">Mensaje de invitación</label>
+                    <label for="inviteMessage" style="display: block; font-size: 14px; font-weight: 600; color: {{ $inviteModalText }}; margin-bottom: 8px;">{{ __('views.groups.invitation_message') }}</label>
                     <textarea id="inviteMessage" rows="4" readonly
                         style="width: 100%; background: {{ $inviteTextarea }}; border: 1px solid {{ $inviteModalBorder }}; border-radius: 8px; padding: 12px 16px; color: {{ $inviteModalText }}; font-size: 14px; font-family: 'Courier New', monospace; resize: none; box-sizing: border-box;">
                     </textarea>
@@ -255,14 +255,14 @@
                             onmouseover="this.style.background='#00deb0'"
                             onmouseout="this.style.background='#17b796'">
                         <i class="fas fa-copy"></i>
-                        <span>Copiar</span>
+                        <span>{{ __('views.groups.copy') }}</span>
                     </button>
                     <button type="button" onclick="shareOnWhatsApp()"
                             style="flex: 1; padding: 12px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
                             onmouseover="this.style.background='#20ba5a'"
                             onmouseout="this.style.background='#25D366'">
                         <i class="fab fa-whatsapp"></i>
-                        <span>WhatsApp</span>
+                        <span>{{ __('views.groups.whatsapp') }}</span>
                     </button>
                 </div>
             </div>
