@@ -14,7 +14,7 @@
 @endphp
 
     {{-- <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-        <h2 style="font-size: 0.875rem; font-weight: bold; color: {{ $textPrimary }};">PREGUNTA DEL DÍA</h2>
+        <h2 style="font-size: 0.875rem; font-weight: bold; color: {{ $textPrimary }};">{{ __('views.groups.question_of_the_day') }}</h2>
     </div> --}}
     <div style="background: {{ $bgPrimary }}; border-radius: 1.2rem; padding: 1.5rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; text-align: center;">
         <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3" style="background: {{ $accentColor }}; color: #000;">

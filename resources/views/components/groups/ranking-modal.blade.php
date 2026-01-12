@@ -26,7 +26,7 @@
             {{-- Loading state --}}
             <div id="ranking-loading" class="text-center py-8">
                 <i class="fas fa-spinner fa-spin text-3xl text-offside-primary mb-2"></i>
-                <p class="text-gray-600">Cargando ranking...</p>
+                <p class="text-gray-600">{{ __('views.groups.loading_ranking') }}</p>
             </div>
 
             {{-- Ranking list (will be populated by JS) --}}

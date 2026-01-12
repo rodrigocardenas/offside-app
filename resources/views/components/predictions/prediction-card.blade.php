@@ -10,14 +10,14 @@
     {{-- Header --}}
     <div class="text-center mb-5">
         <div class="prediction-badge">
-            Predicción del Día
+            {{ __('views.groups.prediction_of_the_day') }}
         </div>
 
         @if($match)
             <div class="text-xs text-gray-600 mt-3">
                 <i class="fas fa-circle text-offside-primary" style="font-size: 6px;"></i>
                 {{ $match->competition->name ?? 'Competición' }} •
-                Jornada {{ $match->matchday ?? '-' }}
+                {{ __('views.groups.matchday') }} {{ $match->matchday ?? '-' }}
             </div>
         @endif
     </div>
@@ -71,7 +71,7 @@
         <div class="timer" id="prediction-timer-{{ $question->id }}"
              data-end-time="{{ $question->available_until }}">
             <i class="fas fa-clock"></i>
-            <span class="timer-text">Calculando...</span>
+            <span class="timer-text">{{ __('views.groups.calculating') }}</span>
         </div>
     @endif
 
@@ -89,11 +89,11 @@
             <div class="text-center">
                 @if($userAnswer && $userAnswer->is_correct)
                     <i class="fas fa-check-circle text-green-600 text-2xl mb-2"></i>
-                    <p class="text-green-800 font-semibold">¡Respuesta Correcta!</p>
-                    <p class="text-sm text-green-700">+{{ $userAnswer->points_earned ?? 0 }} puntos</p>
+                    <p class="text-green-800 font-semibold">{{ __('views.groups.correct_answer') }}</p>
+                    <p class="text-sm text-green-700">{{ str_replace('{points}', ($userAnswer->points_earned ?? 0), __('views.groups.points_earned')) }}</p>
                 @else
                     <i class="fas fa-times-circle text-red-600 text-2xl mb-2"></i>
-                    <p class="text-red-800 font-semibold">Respuesta Incorrecta</p>
+                    <p class="text-red-800 font-semibold">{{ __('views.groups.incorrect_answer') }}</p>
                 @endif
             </div>
         </div>

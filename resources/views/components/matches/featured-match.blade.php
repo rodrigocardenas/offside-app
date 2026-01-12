@@ -1,6 +1,6 @@
 @props([
     'match' => null,
-    'title' => 'Partido Destacado del Día'
+    'title' => __('views.groups.featured_match_title')
 ])
 
 @php
@@ -28,10 +28,10 @@
         <div class="match-league">
             @if(isset($match->competition))
                 <i class="fas fa-circle" style="color: white; font-size: 4px; vertical-align: middle;"></i>
-                {{ $match->competition->name ?? 'Liga' }} • Jornada {{ $match->matchday ?? '-' }}
+                {{ $match->competition->name ?? 'Liga' }} • {{ __('views.groups.matchday') }} {{ $match->matchday ?? '-' }}
             @endif
             {{-- <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px; color: #00deb0; font-size: 13px; font-weight: 600;">
-                <i class="fas fa-mouse"></i> Haz clic para ver grupos
+                <i class="fas fa-mouse"></i> {{ __('views.groups.click_to_see_groups') }}
             </div> --}}
         </div>
     </div>

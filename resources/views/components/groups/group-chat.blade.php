@@ -94,7 +94,7 @@
         @if ($group->reward_or_penalty)
             <div class="flex justify-center mt-2 mb-2">
                 <div class="px-4 py-1 text-white rounded-lg text-center accentColor" style="background-color: #00deb0;">
-                    <span class="font-bold">Recompensa/Penitencia:</span><br>
+                    <span class="font-bold">{{ __('views.groups.reward_punishment_label') }}:</span><br>
                     <span class="reward-or-penalty-text" style="font-style: italic">{{ $group->reward_or_penalty }}</span> <button
                         id="openRewardPenaltyModal"
                         class=" text-white rounded-lg hover:bg-offside-secondary transition-colors focus:outline-none">
@@ -107,7 +107,7 @@
             <button id="openRewardPenaltyModal"
                 class="flex items-center px-4 py-2  rounded-lg  mt-4" style="background-color: #00deb0;">
                 <i class="fa-solid fa-plus"></i>
-                Agregar recompensa/penitencia
+                {{ __('views.groups.add_reward_punishment') }}
             </button>
         @endif
     </div>
@@ -116,7 +116,7 @@
         <button id="openRewardPenaltyBtn" class="btn btn-primary" style="background-color: #00deb0;"
             onclick="document.getElementById('rewardPenaltyModal').classList.remove('hidden')">
             <i class="fas fa-plus"></i>
-            <span>Agregar recompensa/penitencia</span>
+            <span>{{ __('views.groups.add_reward_punishment') }}</span>
         </button>
     </div>
 @endif
@@ -133,7 +133,7 @@
                 <h2
                     style="font-size: 22px; font-weight: 700; color: {{ $textPrimary }}; margin: 0; display: flex; align-items: center; gap: 12px;">
                     <i class="fas fa-trophy" style="color: {{ $accentColor }};"></i>
-                    Premio o Penitencia
+                    {{ __('views.groups.reward_punishment') }}
                 </h2>
                 <button id="closeRewardPenaltyModal"
                     style="background: none; border: none; font-size: 24px; color: {{ $textSecondary }}; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s ease;"
@@ -145,7 +145,7 @@
 
             {{-- Descripción --}}
             <p style="color: {{ $textSecondary }}; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
-                Define el premio para el ganador o la penitencia para el perdedor de este grupo.
+                {{ __('views.groups.reward_punishment_description') }}
             </p>
 
             {{-- Formulario --}}
@@ -154,7 +154,7 @@
 
                 <div>
                     <label for="reward_or_penalty"
-                        style="display: block; font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; margin-bottom: 8px;">Premio/Penitencia</label>
+                        style="display: block; font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; margin-bottom: 8px;">{{ __('views.groups.reward_punishment_label') }}</label>
                     <textarea id="reward_or_penalty" name="reward_or_penalty" rows="4" required
                         style="width: 100%; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 10px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; font-family: inherit; resize: vertical; box-sizing: border-box; transition: all 0.3s ease;"
                         onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px {{ $isDark ? 'rgba(0, 222, 176, 0.1)' : 'rgba(0, 222, 176, 0.08)' }}';"
@@ -180,7 +180,7 @@
                 {{-- Mensaje de éxito --}}
                 <div id="rewardPenaltySuccess"
                     style="display: none; margin-top: 12px; padding: 12px 16px; background: rgba(0, 200, 0, 0.1); border: 1px solid #00c800; border-radius: 8px; color: #00c800; font-weight: 600; text-align: center; font-size: 14px;">
-                    <i class="fas fa-check-circle" style="margin-right: 8px;"></i> ¡Guardado correctamente!
+                    <i class="fas fa-check-circle" style="margin-right: 8px;"></i> {{ __('views.groups.saved_successfully') }}
                 </div>
             </form>
         </div>
@@ -350,11 +350,11 @@
                             }, 1200);
                         }
                     } else {
-                        alert('Error al guardar. Intenta de nuevo.');
+                        alert('{{ __('views.groups.error_save') }}');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Error al guardar. Intenta de nuevo.');
+                    alert('{{ __('views.groups.error_save') }}');
                 }
             });
         }

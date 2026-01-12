@@ -18,7 +18,7 @@
     <!-- Título de Preguntas -->
     {{-- <div class="flex items-center gap-2 mb-6 px-4">
         <i class="fas fa-star" style="color: {{ $accentColor }};"></i>
-        <h2 class="text-base font-semibold" style="color: {{ $textPrimary }};">Preguntas Disponibles</h2>
+        <h2 class="text-base font-semibold" style="color: {{ $textPrimary }};">{{ __('views.groups.available_questions') }}</h2>
     </div> --}}
 
     <!-- Carrusel de preguntas -->
@@ -32,11 +32,11 @@
                 <!-- Prediction Header -->
                 <div class="text-center mb-5">
                     <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3" style="background: {{ $accentColor }}; color: #000;">
-                        Predicción del Día
+                        {{ __('views.groups.prediction_of_the_day') }}
                     </div>
                     <div class="text-xs mb-4" style="color: {{ $textSecondary }};">
                         <i class="fas fa-circle" style="color: {{ $accentColor }}; font-size: 3px;"></i>
-                        {{ $group->competition->name }} • Jornada {{ $question->football_match->matchday }}
+                        {{ $group->competition->name }} • {{ __('views.groups.matchday') }} {{ $question->football_match->matchday }}
 
                     </div>
                 </div>
@@ -131,11 +131,11 @@
                     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
                         <i class="fas fa-clock"></i>
                         @if($question->is_disabled)
-                            Pregunta deshabilitada
+                            {{ __('views.groups.question_disabled') }}
                         @elseif($question->available_until->addHours(4) > now())
                             <span class="countdown" data-time="{{ $question->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
                         @else
-                            Partido finalizado
+                            {{ __('views.groups.match_finished') }}
                         @endif
                     </div>
                 @else
@@ -206,11 +206,11 @@
                     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
                         <i class="fas fa-clock"></i>
                         @if($question->is_disabled)
-                            Pregunta deshabilitada
+                            {{ __('views.groups.question_disabled') }}
                         @elseif($question->available_until->addHours(4) > now())
                             <span class="countdown" data-time="{{ $question->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
                         @else
-                            Partido finalizado
+                            {{ __('views.groups.match_finished') }}
                         @endif
                     </div>
                 @endif
@@ -228,7 +228,7 @@
         @empty
             <div class="text-center py-12 px-4" style="color: {{ $textSecondary }};">
                 <i class="fas fa-inbox text-4xl mb-3" style="color: {{ $borderColor }};"></i>
-                <p class="text-sm">No hay preguntas disponibles para los próximos partidos</p>
+                <p class="text-sm">{{ __('views.groups.no_available_questions') }}</p>
             </div>
         @endforelse
 
@@ -244,11 +244,11 @@
                 <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px;">
                     <div class="text-center mb-5">
                         <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3" style="background: {{ $accentColor }}; color: #000;">
-                            Preguntas Sociales
+                            {{ __('views.groups.social_questions') }}
                         </div>
                         <div class="text-xs mb-4" style="color: {{ $textSecondary }};">
                             <i class="fas fa-circle" style="color: {{ $accentColor }}; font-size: 3px;"></i>
-                            Próximamente
+                            {{ __('views.groups.coming_soon') }}
                         </div>
                     </div>
 
@@ -258,16 +258,16 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-center mb-2" style="color: {{ $textPrimary }};">
-                                Agrupa a más miembros
+                                {{ __('views.groups.add_more_members') }}
                             </h3>
                             <p class="text-xs text-center" style="color: {{ $textSecondary }};">
-                                Necesitas al menos 2 miembros en el grupo para desbloquear las preguntas sociales y competir con tus amigos.
+                                {{ __('views.groups.social_questions_description') }}
                             </p>
                         </div>
                     </div>
 
                     <div class="mt-4 p-3 rounded-lg text-xs font-medium text-center" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }}; border: 1px solid {{ $borderColor }};">
-                        Miembros actuales: <span style="color: {{ $accentColor }}; font-bold;">{{ $group->users->count() }}/2</span>
+                        {{ __('views.groups.current_members') }}: <span style="color: {{ $accentColor }}; font-bold;">{{ $group->users->count() }}/2</span>
                     </div>
                 </div>
             @endif

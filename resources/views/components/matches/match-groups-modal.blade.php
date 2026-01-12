@@ -36,7 +36,7 @@
         <div style="padding: 24px; border-bottom: 1px solid {{ $borderColor }}; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background: {{ $bgSecondary }}; z-index: 10;">
             <div style="flex: 1;">
                 <h3 id="modalTitle" style="margin: 0; font-size: 18px; font-weight: 700; color: {{ $textPrimary }}; margin-bottom: 4px;">
-                    <i class="fas fa-users"></i> Grupos Disponibles
+                    <i class="fas fa-users"></i> {{ __('views.groups.available_groups') }}
                 </h3>
                 <p id="matchInfo" style="margin: 0; font-size: 13px; color: {{ $textSecondary }};"></p>
             </div>
@@ -51,7 +51,7 @@
             <!-- Loading State -->
             <div id="loadingState" style="text-align: center; padding: 40px 20px;">
                 <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid {{ $borderColor }}; border-top-color: {{ $accentColor }}; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                <p style="color: {{ $textSecondary }}; margin-top: 16px; font-size: 14px;">Cargando grupos...</p>
+                <p style="color: {{ $textSecondary }}; margin-top: 16px; font-size: 14px;">{{ __('views.groups.loading_groups') }}</p>
             </div>
 
             <!-- Groups List (hidden initially) -->
@@ -62,11 +62,11 @@
                 <div style="width: 60px; height: 60px; background: {{ $accentBg }}; border-radius: 12px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
                     <i class="fas fa-inbox" style="font-size: 28px; color: {{ $accentColor }};"></i>
                 </div>
-                <h4 style="color: {{ $textPrimary }}; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">No hay grupos en esta competición</h4>
-                <p style="color: {{ $textSecondary }}; font-size: 13px; margin: 0 0 24px 0;">Sé el primero en crear un grupo y responde preguntas sobre este partido.</p>
+                <h4 style="color: {{ $textPrimary }}; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">{{ __('views.groups.no_groups_found') }}</h4>
+                <p style="color: {{ $textSecondary }}; font-size: 13px; margin: 0 0 24px 0;">{{ __('views.groups.no_groups_description') }}</p>
                 <a id="createGroupBtn" href="#" style="display: inline-block; padding: 12px 24px; background: {{ $accentColor }}; color: #000; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s ease;"
                    onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                    <i class="fas fa-plus" style="margin-right: 6px;"></i> Crear Grupo
+                    <i class="fas fa-plus" style="margin-right: 6px;"></i> {{ __('views.groups.create_group') }}
                 </a>
             </div>
 
@@ -75,7 +75,7 @@
                 <div style="width: 60px; height: 60px; background: rgba(255, 100, 100, 0.1); border-radius: 12px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center;">
                     <i class="fas fa-exclamation-circle" style="font-size: 28px; color: #ff6464;"></i>
                 </div>
-                <h4 style="color: {{ $textPrimary }}; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">Error al cargar grupos</h4>
+                <h4 style="color: {{ $textPrimary }}; font-size: 16px; font-weight: 600; margin: 0 0 8px 0;">{{ __('views.groups.error_loading_groups') }}</h4>
                 <p id="errorMessage" style="color: {{ $textSecondary }}; font-size: 13px; margin: 0;"></p>
             </div>
         </div>
@@ -200,7 +200,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showErrorState('No pudimos cargar los grupos. Intenta de nuevo.');
+                    showErrorState('{{ __('views.groups.error_loading_groups_retry') }}');
                 });
         };
 
@@ -226,7 +226,7 @@
                             ${group.name}
                         </p>
                         <p class="group-members">
-                            <i class="fas fa-users"></i> ${group.members_count} miembros
+                            <i class="fas fa-users"></i> ${group.members_count} {{ __('views.groups.members_count') }}
                         </p>
                     </div>
                     <a href="/groups/${group.id}" class="group-action">

@@ -368,9 +368,9 @@
             banner.style.textAlign = 'center';
             banner.style.zIndex = '9999';
             banner.innerHTML = `
-                ¡Nueva versión disponible!
+                {{ __('views.groups.new_version_available') }}
                 <button id="reload-btn" style="margin-left:16px;padding:8px 16px;background:#fff;color:#e0850c;border:none;border-radius:4px;cursor:pointer;font-weight:bold;">
-                    Actualizar ahora
+                    {{ __('views.groups.update_now') }}
                 </button>
             `;
             document.body.appendChild(banner);

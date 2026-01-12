@@ -12,7 +12,9 @@
 
     // Generar URL de invitación
     $inviteUrl = route('groups.invite', $group->code);
-    $inviteMessage = "¡Únete al grupo \"{$group->name}\" en Offside Club!\n\n{$inviteUrl}\n\n¡Ven a competir con nosotros!";
+    $joinGroupText = __('views.groups.join_group_invite', ['group' => $group->name]);
+    $competeText = __('views.groups.compete_with_us');
+    $inviteMessage = "{$joinGroupText}\n\n{$inviteUrl}\n\n{$competeText}";
 @endphp
 
 <!-- Invitación Social Section -->
@@ -31,7 +33,7 @@
     <!-- Contenido principal -->
     <div style="background: {{ $bgSecondary }}; border-radius: 12px; padding: 20px; border: 1px solid {{ $borderColor }}; margin-bottom: 16px;">
         <p style="color: {{ $textSecondary }}; font-size: 14px; line-height: 1.6; margin: 0 0 16px 0;">
-            Invita a más miembros al grupo para desbloquear las preguntas sociales y competir juntos.
+            {{ __('views.groups.invite_more_members') }}
         </p>
 
         <!-- Indicador de miembros -->
@@ -157,7 +159,7 @@
                     }, 2000);
                 }).catch(err => {
                     console.error('Error al copiar:', err);
-                    alert('No se pudo copiar el link. Por favor, intenta manualmente.');
+                    alert('{{ __('views.groups.copy_link_failed') }}');
                 });
             });
         }
@@ -185,7 +187,7 @@
                     }, 2000);
                 }).catch(err => {
                     console.error('Error al copiar:', err);
-                    alert('No se pudo copiar el mensaje. Por favor, intenta manualmente.');
+                    alert('{{ __('views.groups.copy_message_failed') }}');
                 });
             });
         }
