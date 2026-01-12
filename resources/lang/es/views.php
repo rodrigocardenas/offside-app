@@ -98,4 +98,21 @@ return [
     ],
     'market' => [
         'title' => 'Tienda',
+    ],    'wizard' => [
+        'welcome' => '¡Bienvenido!',
+        'welcome_text' => '¡Prepárate para vivir el fútbol como nunca! Predice resultados, reta a tus amigos y demuestra quién sabe más de fútbol.',
+        'earn_points' => 'Acierta y gana puntos',
+        'correct_300' => '+300 puntos por cada acierto',
+        'correct_600' => '+600 puntos por preguntas destacadas',
+        'scale_ranking' => 'Escala posiciones en el ranking',
+        'predict_friends' => 'Predice y reta a tus amigos',
+        'predict_text' => 'Opina sobre los temas más candentes del fútbol. Interactúa con likes y comentarios. Demuestra que también dominas el fútbol fuera del campo.',
+        'league_awaits' => '¡Tu liga te espera!',
+        'unique_experience' => '¿Quieres una experiencia única y personalizada? Completa tu perfil',
+        'complete_profile' => 'Completar perfil',
+        'connect_friends' => 'Conecta con tus amigos, crea tu propio grupo o únete a uno existente',
+        'join_group' => 'Únirme a un grupo',
+        'create_group' => 'Crear un grupo',
+        'step' => 'Paso',
     ],
+];

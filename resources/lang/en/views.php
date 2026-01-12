@@ -98,4 +98,21 @@ return [
     ],
     'market' => [
         'title' => 'Store',
+    ],    'wizard' => [
+        'welcome' => 'Welcome!',
+        'welcome_text' => 'Get ready to experience football like never before! Predict results, challenge your friends and prove who knows the most about football.',
+        'earn_points' => 'Get it right and earn points',
+        'correct_300' => '+300 points for each correct prediction',
+        'correct_600' => '+600 points for featured questions',
+        'scale_ranking' => 'Climb positions in the ranking',
+        'predict_friends' => 'Predict and challenge your friends',
+        'predict_text' => 'Share your opinion on the hottest topics in football. Interact with likes and comments. Show that you also master football off the field.',
+        'league_awaits' => 'Your league awaits!',
+        'unique_experience' => 'Want a unique and personalized experience? Complete your profile',
+        'complete_profile' => 'Complete profile',
+        'connect_friends' => 'Connect with your friends, create your own group or join an existing one',
+        'join_group' => 'Join a group',
+        'create_group' => 'Create a group',
+        'step' => 'Step',
     ],
+];

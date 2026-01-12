@@ -23,9 +23,9 @@
                 <div style="font-size: 80px; margin-bottom: 24px; line-height: 1;">
                     <img src="{{ asset('images/logo_white_bg.png') }}" alt="" style="width: 60%">
                 </div>
-                <h2 style="font-size: 28px; font-weight: 700; color: #333; margin: 0 0 12px 0;">¡Bienvenido!</h2>
+                <h2 style="font-size: 28px; font-weight: 700; color: #333; margin: 0 0 12px 0;">{{ __('views.wizard.welcome') }}</h2>
                 <p style="color: #999; font-size: 15px; margin: 0; line-height: 1.7;">
-                    ¡Prepárate para vivir el fútbol como nunca! Predice resultados, reta a tus amigos y demuestra quién sabe más de fútbol.
+                    {{ __('views.wizard.welcome_text') }}
                 </p>
             </div>
 
@@ -34,11 +34,11 @@
                 <div style="font-size: 80px; margin-bottom: 24px; line-height: 1;">
                     <img src="{{ asset('images/ranking.svg') }}" alt="" style="width: 60%">
                 </div>
-                <h2 style="font-size: 28px; font-weight: 700; color: #333; margin: 0 0 16px 0;">Acierta y gana puntos</h2>
+                <h2 style="font-size: 28px; font-weight: 700; color: #333; margin: 0 0 16px 0;">{{ __('views.wizard.earn_points') }}</h2>
                 <div style="color: #999; font-size: 14px; margin: 0; line-height: 1.8;">
-                    <div style="margin-bottom: 10px;"><strong style="color: #333;">+300 puntos</strong> por cada acierto</div>
-                    <div style="margin-bottom: 10px;"><strong style="color: #333;">+600 puntos</strong> por preguntas destacadas</div>
-                    <div><strong style="color: #333;">Escala</strong> posiciones en el ranking</div>
+                    <div style="margin-bottom: 10px;"><strong style="color: #333;">{{ __('views.wizard.correct_300') }}</strong></div>
+                    <div style="margin-bottom: 10px;"><strong style="color: #333;">{{ __('views.wizard.correct_600') }}</strong></div>
+                    <div><strong style="color: #333;">{{ __('views.wizard.scale_ranking') }}</strong></div>
                 </div>
             </div>
 
@@ -47,9 +47,9 @@
                 <div style="font-size: 80px; margin-bottom: 24px; line-height: 1;">
                     <img src="{{ asset('images/wizard_1.png') }}" alt="" style="width: 60%">
                 </div>
-                <h2 style="font-size: 28px; font-weight: 700; color: #333; margin: 0 0 16px 0;">Predice y reta a tus amigos</h2>
+                <h2 style="font-size: 28px; font-weight: 700; color: #333; margin: 0 0 16px 0;">{{ __('views.wizard.predict_friends') }}</h2>
                 <p style="color: #999; font-size: 15px; margin: 0; line-height: 1.7;">
-                    Opina sobre los temas más candentes del fútbol. Interactúa con likes y comentarios. Demuestra que también dominas el fútbol fuera del campo.
+                    {{ __('views.wizard.predict_text') }}
                 </p>
             </div>
 
@@ -58,28 +58,28 @@
                 {{-- <div style="font-size: 80px; margin-bottom: 24px; line-height: 1;">
                     <i class="fas fa-user-circle" style="color: #00deb0;"></i>
                 </div> --}}
-                <h2 style="font-size: 28px; font-weight: 700; color: #333; margin: 0 0 20px 0;">¡Tu liga te espera!</h2>
+                <h2 style="font-size: 28px; font-weight: 700; color: #333; margin: 0 0 20px 0;">{{ __('views.wizard.league_awaits') }}</h2>
 
                 <div style="margin-bottom: 24px;">
-                    <p style="color: #999; font-size: 13px; margin: 0 0 12px 0; line-height: 1.6;">¿Quieres una experiencia única y personalizada? Completa tu perfil</p>
+                    <p style="color: #999; font-size: 13px; margin: 0 0 12px 0; line-height: 1.6;">{{ __('views.wizard.unique_experience') }}</p>
                     <button onclick="closeWizardAndGoTo('/profile')" style="width: 100%; padding: 12px 16px; background: #00deb0; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;">
                         <i class="fas fa-user-circle"></i>
-                        Completar perfil
+                        {{ __('views.wizard.complete_profile') }}
                     </button>
                 </div>
 
                 <div style="padding: 16px 0; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px;">
-                    <p style="color: #999; font-size: 13px; margin: 0; line-height: 1.6;">Conecta con tus amigos, crea tu propio grupo o únete a uno existente</p>
+                    <p style="color: #999; font-size: 13px; margin: 0; line-height: 1.6;">{{ __('views.wizard.connect_friends') }}</p>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <button onclick="closeWizardAndGoTo('/groups/create')" style="width: 100%; padding: 12px 16px; background: #00deb0; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;">
                         <i class="fas fa-users"></i>
-                        Únirme a un grupo
+                        {{ __('views.wizard.join_group') }}
                     </button>
                     <button onclick="closeWizard()" style="width: 100%; padding: 12px 16px; background: transparent; border: 2px solid #00deb0; border-radius: 8px; color: #00deb0; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px;">
                         <i class="fas fa-plus"></i>
-                        Crear un grupo
+                        {{ __('views.wizard.create_group') }}
                     </button>
                 </div>
             </div>
