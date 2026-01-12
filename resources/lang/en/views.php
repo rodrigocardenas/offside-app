@@ -8,7 +8,7 @@ return [
         'daily_ranking' => 'Daily Ranking',
         'no_groups' => 'You do not belong to any group.',
         'create_group' => 'Create Group',
-        'no_questions' => 'No questions available at this moment.',
+        'no_questions' => 'No questions available at the moment.',
         'available_until' => 'Available until:',
         'view_ranking' => 'View Complete Ranking',
         'pts' => 'pts',
@@ -102,7 +102,8 @@ return [
     ],
     'market' => [
         'title' => 'Store',
-    ],    'wizard' => [
+    ],
+    'wizard' => [
         'welcome' => 'Welcome!',
         'welcome_text' => 'Get ready to experience football like never before! Predict results, challenge your friends and prove who knows the most about football.',
         'earn_points' => 'Get it right and earn points',
@@ -118,5 +119,23 @@ return [
         'join_group' => 'Join a group',
         'create_group' => 'Create a group',
         'step' => 'Step',
+    ],
+    'settings' => [
+        'appearance' => 'Appearance',
+        'notifications' => 'Notifications',
+        'privacy' => 'Privacy',
+        'personalize' => 'Customize how Offside Club looks',
+        'light' => 'Light',
+        'dark' => 'Dark',
+        'auto' => 'Automatic',
+        'coming_soon' => 'This section will be available soon',
+        'join_group_title' => 'Join group',
+        'group_code' => 'Group code',
+        'cancel' => 'Cancel',
+        'join' => 'Join',
+        'comment_type' => 'Comment type',
+        'message' => 'Message',
+        'send_message' => 'Send',
+        'save' => 'Save',
     ],
 ];

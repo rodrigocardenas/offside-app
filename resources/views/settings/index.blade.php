@@ -36,15 +36,15 @@
             <div class="settings-tabs">
                 <button class="settings-tab-btn active" data-tab="appearance">
                     <i class="fas fa-palette"></i>
-                    <span>Apariencia</span>
+                    <span>{{ __('views.settings.appearance') }}</span>
                 </button>
                 <button class="settings-tab-btn" data-tab="notifications">
                     <i class="fas fa-bell"></i>
-                    <span>Notificaciones</span>
+                    <span>{{ __('views.settings.notifications') }}</span>
                 </button>
                 <button class="settings-tab-btn" data-tab="privacy">
                     <i class="fas fa-lock"></i>
-                    <span>Privacidad</span>
+                    <span>{{ __('views.settings.privacy') }}</span>
                 </button>
             </div>
 
@@ -53,9 +53,9 @@
                 <div class="settings-section">
                     <div class="section-title" style="color: {{ $labelColor }};">
                         <i class="fas fa-palette"></i>
-                        Apariencia
+                        {{ __('views.settings.appearance') }}
                     </div>
-                    <p style="color: {{ $descColor }}; font-size: 14px; margin-bottom: 20px;">Personaliza cómo se ve Offside Club</p>
+                    <p style="color: {{ $descColor }}; font-size: 14px; margin-bottom: 20px;">{{ __('views.settings.personalize') }}</p>
 
                     <form action="{{ route('settings.update') }}" method="POST" id="appearanceForm">
                         @csrf
@@ -80,7 +80,7 @@
                                     >
                                     <div class="theme-card light-card">
                                         <i class="fas fa-sun"></i>
-                                        <span>Claro</span>
+                                        <span>{{ __('views.settings.light') }}</span>
                                     </div>
                                 </label>
 
@@ -94,7 +94,7 @@
                                     >
                                     <div class="theme-card dark-card">
                                         <i class="fas fa-moon"></i>
-                                        <span>Oscuro</span>
+                                        <span>{{ __('views.settings.dark') }}</span>
                                     </div>
                                 </label>
 
@@ -108,7 +108,7 @@
                                     >
                                     <div class="theme-card auto-card">
                                         <i class="fas fa-circle-half-stroke"></i>
-                                        <span>Automático</span>
+                                        <span>{{ __('views.settings.auto') }}</span>
                                     </div>
                                 </label>
                             </div>

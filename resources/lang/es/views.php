@@ -102,7 +102,8 @@ return [
     ],
     'market' => [
         'title' => 'Tienda',
-    ],    'wizard' => [
+    ],
+    'wizard' => [
         'welcome' => '¡Bienvenido!',
         'welcome_text' => '¡Prepárate para vivir el fútbol como nunca! Predice resultados, reta a tus amigos y demuestra quién sabe más de fútbol.',
         'earn_points' => 'Acierta y gana puntos',
@@ -118,5 +119,23 @@ return [
         'join_group' => 'Únirme a un grupo',
         'create_group' => 'Crear un grupo',
         'step' => 'Paso',
+    ],
+    'settings' => [
+        'appearance' => 'Apariencia',
+        'notifications' => 'Notificaciones',
+        'privacy' => 'Privacidad',
+        'personalize' => 'Personaliza cómo se ve Offside Club',
+        'light' => 'Claro',
+        'dark' => 'Oscuro',
+        'auto' => 'Automático',
+        'coming_soon' => 'Esta sección estará disponible pronto',
+        'join_group_title' => 'Unirse a grupo',
+        'group_code' => 'Código del grupo',
+        'cancel' => 'Cancelar',
+        'join' => 'Unirse',
+        'comment_type' => 'Tipo de comentario',
+        'message' => 'Mensaje',
+        'send_message' => 'Enviar',
+        'save' => 'Guardar',
     ],
 ];
