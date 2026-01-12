@@ -14,4 +14,10 @@ return [
     'name' => 'Name',
     'already_registered' => 'Already registered?',
     'agree_terms' => 'I agree to the terms of service',
+    'nickname_label' => 'Your nickname',
+    'login_button' => 'Play now',
+    'register_new_account' => 'Create a new account',
+    'app_description' => 'Your prediction app',
+    'confirm_password_label' => 'Confirm password',
+    'register_button' => 'Register',
 ];

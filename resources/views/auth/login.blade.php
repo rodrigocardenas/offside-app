@@ -23,13 +23,13 @@
                     <img src="{{ asset('images/logo_alone.png') }}" alt="Offside Club" style="width: 60px; height: 60px; margin: 0 auto; display: block;">
                 </div>
                 <h1 style="font-size: 28px; font-weight: 700; color: {{ $textColor }}; margin: 0 0 8px 0;">Offside Club</h1>
-                <p style="color: #999; font-size: 14px; margin: 0;">Tu app de predicciones</p>
+                <p style="color: #999; font-size: 14px; margin: 0;">{{ __('auth.app_description') }}</p>
             </div>
 
             <!-- Formulario de Login -->
             <div style="background: {{ $bgCard }}; border-radius: 12px; padding: 20px; border: 1px solid {{ $borderColor }}; margin-bottom: 24px;">
                 <h2 style="font-size: 20px; font-weight: 600; color: {{ $textColor }}; margin: 0 0 20px 0; text-align: center;">
-                    Iniciar sesión
+                    {{ __('auth.login') }}
                 </h2>
 
                 <form method="POST" action="{{ route('login') }}" style="display: flex; flex-direction: column; gap: 16px;">
@@ -39,7 +39,7 @@
                     <div>
                         <label for="name" style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
                             <i class="fas fa-user" style="color: {{ $accentColor }}; margin-right: 6px;"></i>
-                            Tu nickname
+                            {{ __('auth.nickname_label') }}
                         </label>
                         <input
                             id="name"
@@ -60,14 +60,14 @@
                         type="submit"
                         style="width: 100%; padding: 12px 16px; background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
                         <i class="fas fa-sign-in-alt"></i>
-                        Jugar ahora
+                        {{ __('auth.login_button') }}
                     </button>
 
                     <!-- Enlaces alternativos -->
                     @if (Route::has('register'))
                         <div style="text-align: center; margin-top: 12px; font-size: 13px;">
                             <a href="{{ route('register') }}" style="color: {{ $accentColor }}; text-decoration: none; transition: color 0.3s ease;">
-                                Crear una nueva cuenta
+                                {{ __('auth.register_new_account') }}
                             </a>
                         </div>
                     @endif

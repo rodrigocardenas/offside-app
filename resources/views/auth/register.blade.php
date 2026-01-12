@@ -23,7 +23,7 @@
                     </div>
 
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-400 mb-2">Correo electrónico</label>
+                        <label for="email" class="block text-sm font-medium text-gray-400 mb-2">{{ __('auth.email') }}</label>
                         <input id="email" type="email" name="email" value="{{ old('email') }}" required
                             class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('email') border-red-500 @enderror">
                         @error('email')
@@ -32,7 +32,7 @@
                     </div>
 
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-400 mb-2">Contraseña</label>
+                        <label for="password" class="block text-sm font-medium text-gray-400 mb-2">{{ __('auth.password_confirm') }}</label>
                         <input id="password" type="password" name="password" required
                             class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary @error('password') border-red-500 @enderror">
                         @error('password')
@@ -41,7 +41,7 @@
                     </div>
 
                     <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-400 mb-2">Confirmar contraseña</label>
+                        <label for="password_confirmation" class="block text-sm font-medium text-gray-400 mb-2">{{ __('auth.confirm_password_label') }}</label>
                         <input id="password_confirmation" type="password" name="password_confirmation" required
                             class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-offside-primary">
                     </div>
@@ -53,7 +53,7 @@
                     </div>
 
                     <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-500 transition-all">
-                        Registrarse
+                        {{ __('auth.register_button') }}
                     </button>
                 </form>
             </div>
