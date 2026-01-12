@@ -2,10 +2,10 @@
 
 /**
  * SCRIPT SETUP: Poblador de Competiciones
- * 
+ *
  * Carga las competiciones principales en la BD
  * Ejecutar antes de usar test-complete-cycle.php
- * 
+ *
  * Uso: php scripts/setup-competitions.php
  */
 
@@ -102,7 +102,7 @@ foreach ($competitions as $compData) {
             ['type' => $compData['type']],
             $compData
         );
-        
+
         if ($competition->wasRecentlyCreated) {
             print_success("Competición creada: {$compData['name']}");
             $createdCount++;

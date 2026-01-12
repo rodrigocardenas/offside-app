@@ -2,7 +2,7 @@
 
 /**
  * SCRIPT DE PRUEBA: CICLO COMPLETO DE LA APLICACIÓN
- * 
+ *
  * Este script realiza un ciclo completo de la aplicación:
  * 1. Obtiene partidos próximos de las APIs (datos reales)
  * 2. Los guarda en la base de datos
@@ -12,7 +12,7 @@
  * 6. Obtiene los resultados de los partidos
  * 7. Verifica las respuestas y asigna puntos
  * 8. Genera un reporte del ciclo
- * 
+ *
  * Uso: php scripts/test-complete-cycle.php
  */
 
@@ -125,7 +125,7 @@ print_info("Obteniendo partidos para competición: {$selectedCompetition->type} 
 
 try {
     $upcomingMatches = $footballService->getNextMatchesByCompetition($competitionId);
-    
+
     if (empty($upcomingMatches)) {
         print_warning("No hay partidos próximos disponibles en la API");
         print_info("Usando datos de prueba...");
@@ -148,7 +148,7 @@ try {
             ],
         ];
     }
-    
+
     print_success("Se obtuvieron " . count($upcomingMatches) . " partidos próximos");
     foreach ($upcomingMatches as $match) {
         $homeTeam = is_array($match['homeTeam']) ? $match['homeTeam']['name'] : $match['homeTeam'];
@@ -172,7 +172,7 @@ foreach (array_slice($upcomingMatches, 0, 2) as $matchData) {
         $homeTeamName = is_array($matchData['homeTeam']) ? $matchData['homeTeam']['name'] : $matchData['homeTeam'];
         $awayTeamName = is_array($matchData['awayTeam']) ? $matchData['awayTeam']['name'] : $matchData['awayTeam'];
         $externalId = $matchData['id'] ?? 'test-' . uniqid();
-        
+
         $match = FootballMatch::updateOrCreate(
             ['external_id' => $externalId],
             [
@@ -186,7 +186,7 @@ foreach (array_slice($upcomingMatches, 0, 2) as $matchData) {
                 'league' => $selectedCompetition->type,
             ]
         );
-        
+
         $savedMatches[] = $match;
         print_success("Partido guardado: {$homeTeamName} vs {$awayTeamName}");
     } catch (\Exception $e) {
@@ -206,12 +206,12 @@ print_section("PASO 5: Crear un grupo");
 
 try {
     $groupName = 'Grupo Prueba ' . now()->format('Y-m-d H:i:s');
-    
+
     // Generar código único
     do {
         $code = \Illuminate\Support\Str::random(6);
     } while (Group::where('code', $code)->exists());
-    
+
     $group = Group::create([
         'name' => $groupName,
         'code' => $code,
@@ -219,10 +219,10 @@ try {
         'competition_id' => $selectedCompetition->id,
         'category' => 'amateur',
     ]);
-    
+
     // Añadir usuario al grupo
     $group->users()->attach($testUser->id);
-    
+
     print_success("Grupo creado: {$group->name}");
     print_info("Código del grupo: {$group->code}");
 } catch (\Exception $e) {
@@ -260,7 +260,7 @@ foreach ($savedMatches as $match) {
                 [$match->home_team, $match->away_team],
                 $template
             );
-            
+
             $question = Question::create([
                 'group_id' => $group->id,
                 'title' => $title,
@@ -269,7 +269,7 @@ foreach ($savedMatches as $match) {
                 'category' => 'predicción',
                 'points' => 10,
             ]);
-            
+
             // Crear opciones
             $optionsText = array_map(function($opt) use ($match) {
                 return str_replace(
@@ -278,7 +278,7 @@ foreach ($savedMatches as $match) {
                     $opt
                 );
             }, $templateData['options']);
-            
+
             foreach ($optionsText as $index => $optionText) {
                 QuestionOption::create([
                     'question_id' => $question->id,
@@ -286,7 +286,7 @@ foreach ($savedMatches as $match) {
                     'is_correct' => $index === 0 ? true : false, // Por ahora, la primera opción es correcta
                 ]);
             }
-            
+
             $questions[] = $question;
             print_success("Pregunta creada: {$title}");
         } catch (\Exception $e) {
@@ -313,7 +313,7 @@ foreach ($questions as $question) {
         // Seleccionar una opción al azar
         $options = $question->options()->get();
         $selectedOption = $options->random();
-        
+
         $answer = Answer::updateOrCreate(
             [
                 'user_id' => $testUser->id,
@@ -326,7 +326,7 @@ foreach ($questions as $question) {
                 'category' => 'predictive',
             ]
         );
-        
+
         $answers[] = $answer;
         print_success("Respuesta guardada para pregunta: {$question->title}");
         print_info("  Opción seleccionada: {$selectedOption->text}");
@@ -347,7 +347,7 @@ foreach ($savedMatches as $match) {
     try {
         $homeScore = rand(0, 3);
         $awayScore = rand(0, 3);
-        
+
         // Determinar ganador
         if ($homeScore > $awayScore) {
             $winner = 'HOME';
@@ -356,21 +356,21 @@ foreach ($savedMatches as $match) {
         } else {
             $winner = 'DRAW';
         }
-        
+
         $match->update([
             'status' => 'FINISHED',
             'home_team_score' => $homeScore,
             'away_team_score' => $awayScore,
             'winner' => $winner,
         ]);
-        
+
         $results[] = [
             'match' => $match,
             'home_score' => $homeScore,
             'away_score' => $awayScore,
             'winner' => $winner,
         ];
-        
+
         print_success("Resultado guardado: {$match->home_team} {$homeScore} - {$awayScore} {$match->away_team}");
     } catch (\Exception $e) {
         print_error("Error guardando resultado: " . $e->getMessage());
@@ -387,26 +387,26 @@ foreach ($questions as $question) {
     try {
         // Obtener la respuesta del usuario
         $userAnswer = $question->answers()->where('user_id', $testUser->id)->first();
-        
+
         if (!$userAnswer) {
             print_warning("No hay respuesta para: {$question->title}");
             continue;
         }
-        
+
         // Verificar si la respuesta es correcta
         $correctOption = $question->options()->where('is_correct', true)->first();
         $isCorrect = $userAnswer->question_option_id == $correctOption->id;
-        
+
         // Asignar puntos
         $pointsEarned = $isCorrect ? 10 : 0;
-        
+
         $userAnswer->update([
             'is_correct' => $isCorrect,
             'points_earned' => $pointsEarned,
         ]);
-        
+
         $totalPoints += $pointsEarned;
-        
+
         $status = $isCorrect ? '✓ CORRECTA' : '✗ INCORRECTA';
         print_info("{$status}: {$question->title}");
         print_info("  Respuesta del usuario: {$userAnswer->questionOption->text}");

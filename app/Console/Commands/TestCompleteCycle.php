@@ -27,22 +27,22 @@ class TestCompleteCycle extends Command
     public function handle()
     {
         $this->info('🚀 Starting Complete Test Cycle...');
-        
+
         // Determine which script to use
-        $script = $this->option('advanced') 
+        $script = $this->option('advanced')
             ? 'scripts/test-complete-cycle-advanced.php'
             : 'scripts/test-complete-cycle.php';
-        
+
         if ($this->option('advanced')) {
             $this->info('📋 Using advanced version with options');
-            
+
             // Build command arguments
             $args = [];
             $args[] = '--users=' . $this->option('users');
             $args[] = '--matches=' . $this->option('matches');
             $args[] = '--competitions=' . $this->option('competitions');
             $args[] = '--templates=' . $this->option('templates');
-            
+
             if ($this->option('verbose')) {
                 $args[] = '--verbose';
             }
@@ -52,16 +52,16 @@ class TestCompleteCycle extends Command
             if ($this->option('clean')) {
                 $args[] = '--clean';
             }
-            
+
             $this->executeAdvanced($script, $args);
         } else {
             $this->executeBasic($script);
         }
-        
+
         $this->info('✅ Test cycle completed successfully!');
         $this->info('📄 Check storage/logs/ for detailed reports');
     }
-    
+
     protected function executeBasic($script)
     {
         $process = new Process(['php', $script]);
@@ -69,14 +69,14 @@ class TestCompleteCycle extends Command
         $process->run(function ($type, $buffer) {
             $this->output->write($buffer);
         });
-        
+
         if (!$process->isSuccessful()) {
             $this->error('❌ Test cycle failed!');
             $this->error($process->getErrorOutput());
             exit(1);
         }
     }
-    
+
     protected function executeAdvanced($script, $args)
     {
         $command = ['php', $script, ...$args];
@@ -85,7 +85,7 @@ class TestCompleteCycle extends Command
         $process->run(function ($type, $buffer) {
             $this->output->write($buffer);
         });
-        
+
         if (!$process->isSuccessful()) {
             $this->error('❌ Test cycle failed!');
             $this->error($process->getErrorOutput());
