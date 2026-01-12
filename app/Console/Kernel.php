@@ -14,16 +14,15 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('app:update-football-data')
-        //     ->dailyAt('03:00')
-        //     ->onFailure(function () {
-        //         Log::error('Error en la actualización diaria de datos de fútbol');
-        //     });
+        // Obtener fixtures de múltiples ligas cada noche a las 23:00
+        $schedule->command('app:update-fixtures-nightly')
+            ->dailyAt('23:00')
+            ->timezone('America/Mexico_City')
+            ->onFailure(function () {
+                Log::error('Error en la actualización nocturna de fixtures');
+            });
 
-        // $schedule->command('social-questions:renew')
-        //     ->dailyAt('15:00')
-        //     ->timezone('America/Mexico_City');
-
+        // Procesar partidos finalizados recientemente cada hora
         $schedule->command('matches:process-recently-finished')
             ->hourly()
             ->onFailure(function () {

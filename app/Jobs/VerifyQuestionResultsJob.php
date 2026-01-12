@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Question;
-use App\Services\OpenAIService;
+use App\Services\QuestionEvaluationService;
 use Illuminate\Support\Facades\Log;
 
 class VerifyQuestionResultsJob implements ShouldQueue
@@ -20,103 +20,73 @@ class VerifyQuestionResultsJob implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * Evalúa preguntas de partidos finalizados usando lógica determinística
+     * en lugar de OpenAI, asegurando resultados consistentes y predecibles.
      */
-    public function handle(OpenAIService $openAIService)
+    public function handle(QuestionEvaluationService $evaluationService)
     {
-        Log::info('Iniciando verificación de resultados de preguntas');
+        Log::info('Iniciando verificación de resultados de preguntas (determinística)');
 
-        // Verificar resultados de preguntas de partidos finalizados
+        // Obtener preguntas pendientes de partidos finalizados
         $pendingQuestions = Question::whereNull('result_verified_at')
             ->whereHas('football_match', function($query) {
                 $query->whereIn('status', ['FINISHED', 'Match Finished']);
             })
+            ->with('football_match', 'options', 'answers')
             ->get();
 
         Log::info('Preguntas pendientes de verificación encontradas: ' . $pendingQuestions->count());
 
+        $processedCount = 0;
+        $errorCount = 0;
+
         foreach ($pendingQuestions as $question) {
             try {
                 $match = $question->football_match;
-                $answers = $question->answers;
 
-                // Verificar resultados usando OpenAI
-                $correctAnswers = $openAIService->verifyMatchResults(
-                    [
-                        'homeTeam' => $match->home_team,
-                        'awayTeam' => $match->away_team,
-                        'score' => $match->score,
-                        'events' => $match->events
-                    ],
-                    [
-                        [
-                            'title' => $question->title,
-                            'options' => $question->options->pluck('text')->toArray()
-                        ]
-                    ]
-                );
-
-                // Convertir las respuestas correctas de texto a IDs de opciones
-                $correctOptionIds = [];
-                $correctOptions = [];
-
-                Log::info('Respuesta de OpenAI:', [
-                    'question_id' => $question->id,
-                    'openai_response' => $correctAnswers->toArray(),
-                    'available_options' => $question->options->pluck('text')->toArray()
-                ]);
-
-                foreach ($correctAnswers as $correctAnswerText) {
-                    // Buscar coincidencias exactas primero
-                    $exactMatch = $question->options->first(function($option) use ($correctAnswerText) {
-                        return strtolower(trim($option->text)) === strtolower(trim($correctAnswerText));
-                    });
-
-                    if ($exactMatch) {
-                        $correctOptionIds[] = $exactMatch->id;
-                        $correctOptions[] = $exactMatch->text;
-                        Log::info("Coincidencia exacta encontrada: '{$exactMatch->text}'");
-                        continue;
-                    }
-
-                    // Si no hay coincidencia exacta, buscar coincidencias parciales
-                    $partialMatch = $question->options->first(function($option) use ($correctAnswerText) {
-                        return stripos(trim($option->text), trim($correctAnswerText)) !== false ||
-                               stripos(trim($correctAnswerText), trim($option->text)) !== false;
-                    });
-
-                    if ($partialMatch) {
-                        $correctOptionIds[] = $partialMatch->id;
-                        $correctOptions[] = $partialMatch->text;
-                        Log::info("Coincidencia parcial encontrada: '{$partialMatch->text}' para '{$correctAnswerText}'");
-                    } else {
-                        Log::warning("No se encontró coincidencia para: '{$correctAnswerText}'");
-                    }
+                if (!$match || !in_array($match->status, ['FINISHED', 'Match Finished'])) {
+                    Log::warning('Match not ready for evaluation', [
+                        'question_id' => $question->id,
+                        'match_id' => $match?->id,
+                        'match_status' => $match?->status
+                    ]);
+                    continue;
                 }
 
-                Log::info('Verificación completada', [
-                    'question_id' => $question->id,
-                    'correct_answers_text' => $correctAnswers->toArray(),
-                    'correct_options_found' => $correctOptions,
-                    'correct_option_ids' => $correctOptionIds
-                ]);
+                // Evaluar pregunta usando lógica determinística
+                $correctOptionIds = $evaluationService->evaluateQuestion($question, $match);
 
-                // Actualizar las opciones correctas en question_options
+                if (empty($correctOptionIds)) {
+                    Log::warning('No correct options found for question', [
+                        'question_id' => $question->id,
+                        'question_title' => $question->title,
+                        'match_id' => $match->id
+                    ]);
+                }
+
+                // Actualizar opciones correctas
                 foreach ($question->options as $option) {
                     $wasCorrect = $option->is_correct;
                     $option->is_correct = in_array($option->id, $correctOptionIds);
                     $option->save();
 
                     if ($wasCorrect !== $option->is_correct) {
-                        Log::info("Opción actualizada: '{$option->text}' - is_correct: " . ($option->is_correct ? 'true' : 'false'));
+                        Log::info("Opción actualizada", [
+                            'question_id' => $question->id,
+                            'option_id' => $option->id,
+                            'option_text' => $option->text,
+                            'is_correct' => $option->is_correct
+                        ]);
                     }
                 }
 
-                // Actualizar las respuestas correctas en answers
+                // Actualizar respuestas de usuarios
                 $updatedAnswers = 0;
-                foreach ($answers as $answer) {
+                foreach ($question->answers as $answer) {
                     $wasCorrect = $answer->is_correct;
                     $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
-                    $answer->points_earned = $answer->is_correct ? 300 : 0;
+                    $answer->points_earned = $answer->is_correct ? $question->points ?? 300 : 0;
                     $answer->save();
 
                     if ($wasCorrect !== $answer->is_correct) {
@@ -124,26 +94,37 @@ class VerifyQuestionResultsJob implements ShouldQueue
                     }
                 }
 
-                // Marcar la pregunta como verificada
+                // Marcar pregunta como verificada
                 $question->result_verified_at = now();
                 $question->save();
 
-                Log::info('Pregunta verificada correctamente: ' . $question->id, [
-                    'match_date' => $match->date,
-                    'match_teams' => $match->home_team . ' vs ' . $match->away_team,
-                    'correct_options' => $correctOptions,
+                $processedCount++;
+
+                Log::info('Pregunta verificada correctamente', [
+                    'question_id' => $question->id,
+                    'question_type' => $question->type,
+                    'question_title' => $question->title,
+                    'match' => $match->home_team . ' vs ' . $match->away_team,
+                    'correct_options_count' => count($correctOptionIds),
                     'answers_updated' => $updatedAnswers,
-                    'total_answers' => $answers->count()
+                    'total_answers' => $question->answers->count()
                 ]);
 
             } catch (\Exception $e) {
-                Log::error('Error al verificar resultados para la pregunta ' . $question->id, [
-                    'error' => $e->getMessage()
+                $errorCount++;
+                Log::error('Error al verificar resultados para la pregunta', [
+                    'question_id' => $question->id,
+                    'error' => $e->getMessage(),
+                    'exception' => get_class($e)
                 ]);
                 continue;
             }
         }
 
-        Log::info('Finalizada verificación de resultados de preguntas');
+        Log::info('Finalizada verificación de resultados de preguntas', [
+            'total_processed' => $processedCount,
+            'total_errors' => $errorCount,
+            'total_questions' => $pendingQuestions->count()
+        ]);
     }
 }

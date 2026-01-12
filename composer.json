@@ -9,6 +9,7 @@
         "doctrine/dbal": "^3.9",
         "fabpot/goutte": "^4.0",
         "guzzlehttp/guzzle": "^7.2",
+        "hosseinhezami/laravel-gemini": "^1.0",
         "illuminate/notifications": "*",
         "intervention/image": "*",
         "intervention/image-laravel": "*",

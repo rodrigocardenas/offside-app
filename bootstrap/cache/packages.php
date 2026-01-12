@@ -10,6 +10,17 @@
       0 => 'Barryvdh\\Debugbar\\ServiceProvider',
     ),
   ),
+  'hosseinhezami/laravel-gemini' => 
+  array (
+    'aliases' => 
+    array (
+      'Gemini' => 'HosseinHezami\\LaravelGemini\\Facades\\Gemini',
+    ),
+    'providers' => 
+    array (
+      0 => 'HosseinHezami\\LaravelGemini\\GeminiServiceProvider',
+    ),
+  ),
   'intervention/image-laravel' => 
   array (
     'aliases' => 

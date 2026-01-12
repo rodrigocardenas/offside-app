@@ -21,13 +21,24 @@
         <env name="APP_ENV" value="testing"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite_testing"/>
-        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_HOST" value="127.0.0.1"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_DATABASE" value="offside2"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="DB_PASSWORD" value="root"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="DB_FOREIGN_KEYS" value="true"/>
+        <!-- API Keys para Testing -->
+        <env name="GEMINI_API_KEY" value="test_gemini_key_12345"/>
+        <env name="GEMINI_MODEL" value="gemini-2.5-flash"/>
+        <env name="GEMINI_GROUNDING_ENABLED" value="false"/>
+        <env name="FOOTBALL_DATA_API_KEY" value="test_football_api_key_12345"/>
+        <env name="FOOTBALL_DATA_API_TOKEN" value="test_football_api_key_12345"/>
+        <env name="OPENAI_API_KEY" value="test_openai_key_12345"/>
+        <env name="OPENAI_ORGANIZATION" value="test_org"/>
     </php>
 </phpunit>
