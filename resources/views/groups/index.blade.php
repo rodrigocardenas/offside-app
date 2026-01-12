@@ -64,7 +64,7 @@
         {{-- 3. BANNER DE NOTIFICACIONES --}}
         <x-common.notification-banner
             :show="$hasPendingPredictions"
-            message="Tienes predicciones pendientes en algunos grupos"
+            message="{{ __('views.groups.pending_predictions') }}"
             type="warning"
         />
 
@@ -72,14 +72,14 @@
         @if($featuredMatch)
             <x-matches.featured-match
                 :match="$featuredMatch"
-                title="Partido Destacado del Día"
+                title="{{ __('views.groups.featured_match') }}"
             />
         @endif
 
         {{-- 5. SECCIÓN DE GRUPOS --}}
         <div class="groups-section">
             <div class="section-title">
-                <i class="fas fa-users"></i> Mis Grupos
+                <i class="fas fa-users"></i> {{ __('views.groups.my_groups') }}
             </div>
 
             {{-- Official Groups --}}
@@ -106,8 +106,8 @@
             @if($officialGroups->isEmpty() && $amateurGroups->isEmpty())
                 <div style="text-align: center; padding: 40px 20px; color: #999;">
                     <i class="fas fa-users" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                    <p style="font-size: 16px; margin-bottom: 8px;">No tienes grupos aún</p>
-                    <p style="font-size: 14px;">Únete a un grupo o crea uno nuevo</p>
+                    <p style="font-size: 16px; margin-bottom: 8px;">{{ __('views.groups.no_groups') }}</p>
+                    <p style="font-size: 14px;">{{ __('messages.search') }} o crea uno nuevo</p>
                 </div>
             @endif
         </div>
@@ -130,7 +130,7 @@
                onmouseover="this.style.opacity='0.9'; this.style.transform='scale(1.02)'"
                onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'">
                 <i class="fas fa-plus"></i>
-                Crear grupo
+                {{ __('views.groups.create') }}
             </a>
 
             {{-- Divider --}}
@@ -146,7 +146,7 @@
                     onmouseover="this.style.background='{{ $isDarkMode ? 'rgba(0, 222, 176, 0.1)' : 'rgba(0, 222, 176, 0.05)' }}';"
                     onmouseout="this.style.background='transparent';">
                 <i class="fas fa-sign-in-alt"></i>
-                Unirse a un grupo
+                {{ __('views.groups.join_group') }}
             </button>
         </div>
 
