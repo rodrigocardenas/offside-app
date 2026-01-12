@@ -8,14 +8,16 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('competition_team', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('competition_id')->constrained()->onDelete('cascade');
-            $table->foreignId('team_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
+        if (!Schema::hasTable('competition_team')) {
+            Schema::create('competition_team', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('competition_id')->constrained()->onDelete('cascade');
+                $table->foreignId('team_id')->constrained()->onDelete('cascade');
+                $table->timestamps();
 
-            $table->unique(['competition_id', 'team_id']);
-        });
+                $table->unique(['competition_id', 'team_id']);
+            });
+        }
     }
 
     public function down()
