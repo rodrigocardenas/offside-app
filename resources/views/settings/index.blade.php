@@ -118,9 +118,32 @@
                             @enderror
                         </div>
 
+                        <div class="language-section" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid {{ $isDark ? '#404040' : '#e0e0e0' }};">
+                            <label style="display: block; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">
+                                <i class="fas fa-globe"></i>
+                                {{ __('messages.language') }}
+                            </label>
+                            <p style="color: {{ $descColor }}; font-size: 13px; margin-bottom: 16px;">
+                                Selecciona tu idioma preferido
+                            </p>
+
+                            <select name="language" class="language-select" style="padding: 10px 12px; border-radius: 8px; border: 1px solid {{ $isDark ? '#505050' : '#ddd' }}; background: {{ $isDark ? '#2a2a2a' : '#fff' }}; color: {{ $labelColor }}; font-size: 14px; width: 100%;">
+                                <option value="es" {{ auth()->user()->language === 'es' || is_null(auth()->user()->language) ? 'selected' : '' }}>
+                                    {{ __('messages.spanish') }}
+                                </option>
+                                <option value="en" {{ auth()->user()->language === 'en' ? 'selected' : '' }}>
+                                    {{ __('messages.english') }}
+                                </option>
+                            </select>
+
+                            @error('language')
+                                <span style="color: #dc3545; font-size: 13px;">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         <button type="submit" class="btn-submit" style="margin-top: 20px;">
                             <i class="fas fa-save"></i>
-                            Guardar Cambios
+                            {{ __('messages.save') }}
                         </button>
                     </form>
                 </div>

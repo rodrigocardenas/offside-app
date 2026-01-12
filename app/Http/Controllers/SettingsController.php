@@ -25,6 +25,7 @@ class SettingsController extends Controller
 
         $validated = $request->validate([
             'theme_mode' => 'nullable|in:light,dark,auto',
+            'language' => 'nullable|in:es,en',
         ]);
 
         // Guardar preferencia de tema
@@ -32,8 +33,14 @@ class SettingsController extends Controller
             $user->update(['theme_mode' => $validated['theme_mode']]);
         }
 
+        // Guardar preferencia de idioma
+        if ($request->has('language')) {
+            $user->update(['language' => $validated['language']]);
+            session(['locale' => $validated['language']]);
+        }
+
         return redirect()
             ->route('settings.index')
-            ->with('success', 'Configuración actualizada exitosamente.');
+            ->with('success', __('messages.success'));
     }
 }

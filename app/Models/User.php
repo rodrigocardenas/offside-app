@@ -32,6 +32,7 @@ class User extends Authenticatable
         'favorite_competition_id',
         'favorite_club_id',
         'favorite_national_team_id',
+        'language',
     ];
 
     /**
