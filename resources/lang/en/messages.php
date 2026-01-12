@@ -42,4 +42,5 @@ return [
     'days' => 'days',
     'view_all' => 'View all',
     'you' => 'You',
+    'profile' => 'Profile',
 ];

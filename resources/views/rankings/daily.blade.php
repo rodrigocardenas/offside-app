@@ -3,15 +3,15 @@
         <div class="max-w-4xl mx-auto">
             <!-- Encabezado -->
             <div class="mb-8 text-center">
-                <h1 class="text-3xl font-bold mb-2">Ranking Diario</h1>
-                <p class="text-offside-light">Clasificación de hoy, {{ now()->format('d/m/Y') }}</p>
+                <h1 class="text-3xl font-bold mb-2">{{ __('views.rankings.daily') }}</h1>
+                <p class="text-offside-light">{{ __('views.rankings.classification_of') }} {{ now()->format('d/m/Y') }}</p>
             </div>
 
             <!-- Lista de clasificación -->
             <div class="bg-offside-primary bg-opacity-20 rounded-lg p-6">
                 @if($rankings->isEmpty())
                     <div class="text-center py-8">
-                        <p class="text-offside-light">Aún no hay puntuaciones para mostrar.</p>
+                        <p class="text-offside-light">{{ __('views.rankings.no_scores_yet') }}</p>
                     </div>
                 @else
                     <div class="space-y-4">
@@ -44,7 +44,7 @@
                                 <!-- Puntuación -->
                                 <div class="text-right">
                                     <span class="text-2xl font-bold text-offside-primary">{{ $user->total_points ?? 0 }}</span>
-                                    <p class="text-xs text-offside-light">puntos</p>
+                                    <p class="text-xs text-offside-light">{{ __('views.rankings.points') }}</p>
                                 </div>
                             </div>
                         @endforeach
@@ -58,7 +58,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Volver
+                    {{ __('messages.back') }}
                 </a>
             </div>
         </div>
@@ -72,25 +72,25 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <span class="text-xs mt-1">Grupos</span>
+                    <span class="text-xs mt-1">{{ __('views.groups.title') }}</span>
                 </a>
                 <a href="{{ route('rankings.daily') }}" class="flex flex-col items-center text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
-                    <span class="text-xs mt-1">Ranking</span>
+                    <span class="text-xs mt-1">{{ __('views.rankings.title') }}</span>
                 </a>
                 <a href="#" id="openFeedbackModal" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span class="text-xs mt-1">Tu opinión</span>
+                    <span class="text-xs mt-1">{{ __('views.rankings.your_opinion') }}</span>
                 </a>
                 <a href="{{ route('profile.edit') }}" class="flex flex-col items-center text-offside-light hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span class="text-xs mt-1">Perfil</span>
+                    <span class="text-xs mt-1">{{ __('messages.profile') }}</span>
                 </a>
             </div>
         </div>
