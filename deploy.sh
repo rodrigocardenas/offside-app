@@ -42,7 +42,7 @@ ssh -T $SERVER_ALIAS << EOF
     cd $REMOTE_PATH
     sudo git checkout -- .
     echo "� Actualizando código desde Git..."
-    sudo -u git pull origin $REQUIRED_BRANCH
+    sudo -u www-data git pull origin $REQUIRED_BRANCH
 
     echo "�🚧 Entrando en modo mantenimiento..."
     sudo -u www-data php artisan down --retry=60
