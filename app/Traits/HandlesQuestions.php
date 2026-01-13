@@ -116,10 +116,11 @@ trait HandlesQuestions
 
     private function checkIfUpcomingMatchesExist($group)
     {
+        // Comparar en UTC ya que los partidos están en UTC
         return FootballMatch::
             where('status', 'Not Started')
-            ->where('date', '>=', now())
-            ->where('date', '<=', now()->addDays(7))
+            ->where('date', '>=', now()->utc())
+            ->where('date', '<=', now()->utc()->addDays(7))
             ->exists();
     }
 
@@ -208,8 +209,9 @@ trait HandlesQuestions
         }
 
         // 2. Buscar partidos próximos en el calendario
+        // IMPORTANTE: Los partidos están en UTC, así que comparamos con now()->utc()
         $matches = \App\Models\FootballMatch::where('status', 'Not Started')
-            ->where('date', '>=', now())
+            ->where('date', '>=', now()->utc())
             ->orderBy('date')
             ->get();
 
