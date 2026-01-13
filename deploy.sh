@@ -39,7 +39,10 @@ ssh -T $SERVER_ALIAS << EOF
     set -e
     cd $REMOTE_PATH
 
-    echo "🚧 Entrando en modo mantenimiento..."
+    echo "� Actualizando código desde Git..."
+    sudo -u www-data git pull origin $REQUIRED_BRANCH
+
+    echo "�🚧 Entrando en modo mantenimiento..."
     sudo -u www-data php artisan down --retry=60
 
     echo "🧹 Limpiando y extrayendo..."
