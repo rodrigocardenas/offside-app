@@ -19,7 +19,7 @@
             @if(isset($match->homeTeam->crest_url))
                 <img src="{{ $match->homeTeam->crest_url }}" class="team-logo" alt="Home">
             @endif
-            <span class="match-time-inline">{{ \Carbon\Carbon::parse($match->utc_date)->format('H:i') }}</span>
+            <span class="match-time-inline">{{ @userTime($match->date, 'H:i') }}</span>
             @if(isset($match->awayTeam->crest_url))
                 <img src="{{ $match->awayTeam->crest_url }}" class="team-logo" alt="Away">
             @endif

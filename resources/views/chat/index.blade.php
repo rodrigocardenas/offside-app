@@ -28,7 +28,7 @@
                                             </div>
                                         @endif
                                         <div class="text-xs text-gray-500">
-                                            {{ $message->created_at->format('d/m/Y H:i') }}
+                                            {{ @userTime($message->created_at) }}
                                         </div>
                                     </div>
                                 </div>

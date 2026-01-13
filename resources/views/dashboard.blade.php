@@ -58,7 +58,7 @@
                                         <div>
                                             <span class="text-white block">{{ $question->title }}</span>
                                             <span class="text-sm text-gray-400">
-                                                {{ __('views.dashboard.available_until') }} {{ $question->available_until->format('d/m/Y H:i') }}
+                                                {{ __('views.dashboard.available_until') }} {{ @userTime($question->available_until) }}
                                             </span>
                                         </div>
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-offside-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">

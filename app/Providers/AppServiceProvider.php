@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Blade;
+use App\Helpers\DateTimeHelper;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,5 +33,15 @@ class AppServiceProvider extends ServiceProvider
         if (File::exists($viteManifestPath) && !File::exists($manifestPath)) {
             File::copy($viteManifestPath, $manifestPath);
         }
+
+        // Registrar Blade directive para convertir fechas a zona horaria del usuario
+        Blade::directive('userTime', function ($expression) {
+            return "<?php echo \\App\\Helpers\\DateTimeHelper::toUserTimezone({$expression}); ?>";
+        });
+
+        // Blade directive para mostrar hora UTC
+        Blade::directive('utcTime', function ($expression) {
+            return "<?php echo \\App\\Helpers\\DateTimeHelper::toUTC({$expression}); ?>";
+        });
     }
 }

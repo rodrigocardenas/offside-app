@@ -15,7 +15,7 @@
                             <p class="text-gray-600">{{ $question->description }}</p>
                         </div>
                         <div class="mt-4 text-sm text-gray-500">
-                            <p>{{ __('views.dashboard.available_until') }} {{ $question->available_until->format('d/m/Y H:i') }}</p>
+                            <p>{{ __('views.dashboard.available_until') }} {{ @userTime($question->available_until) }}</p>
                             <p>{{ __('views.questions.points') }}: {{ $question->points }}</p>
                         </div>
                     </div>

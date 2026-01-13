@@ -33,6 +33,7 @@ class User extends Authenticatable
         'favorite_club_id',
         'favorite_national_team_id',
         'language',
+        'timezone',
     ];
 
     /**

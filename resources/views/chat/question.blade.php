@@ -20,7 +20,7 @@
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <p class="text-gray-600">{{ $question->description }}</p>
                             <p class="text-sm text-gray-500 mt-2">
-                                Disponible hasta: {{ $question->available_until->format('d/m/Y H:i') }}
+                                Disponible hasta: {{ @userTime($question->available_until) }}
                             </p>
                         </div>
                     </div>
@@ -34,7 +34,7 @@
                                         <div class="font-medium">{{ $message->user->name }}</div>
                                         <div class="text-gray-600">{{ $message->message }}</div>
                                         <div class="text-xs text-gray-500">
-                                            {{ $message->created_at->format('d/m/Y H:i') }}
+                                            {{ @userTime($message->created_at) }}
                                         </div>
                                     </div>
                                 </div>

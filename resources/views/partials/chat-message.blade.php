@@ -4,7 +4,7 @@
             <div class="font-medium text-sm">{{ $message->user->name }}</div>
             <div class="text-white">{{ $message->message }}</div>
             <div class="text-xs text-gray-400 mt-1">
-                {{ $message->created_at->format('d/m/Y H:i') }}
+                {{ @userTime($message->created_at) }}
             </div>
         </div>
     </div>
