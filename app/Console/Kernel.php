@@ -22,9 +22,12 @@ class Kernel extends ConsoleKernel
                 Log::error('Error en la actualización nocturna de fixtures');
             });
 
-        // Procesar partidos finalizados recientemente cada hora
+        // Procesar partidos finalizados recientemente UNA SOLA VEZ AL DÍA en off-peak (3 AM)
+        // IMPORTANTE: Se cambió de ->hourly() a ->dailyAt() para evitar bloquear el servidor
+        // Cada ejecución toma hasta 10 minutos y consume muchos recursos
         $schedule->command('matches:process-recently-finished')
-            ->hourly()
+            ->dailyAt('03:00')
+            ->timezone('America/Mexico_City')
             ->onFailure(function () {
                 Log::error('Error en el procesamiento de partidos finalizados');
             });

@@ -41,12 +41,9 @@ class ProcessMatchBatchJob implements ShouldQueue
 
         foreach ($matches as $index => $match) {
             try {
-                // Agregar delay entre requests para evitar rate limiting
-                if ($index > 0) {
-                    $delaySeconds = 2; // 2 segundos entre cada partido
-                    sleep($delaySeconds);
-                }
-
+                // NO usar sleep() - bloquea el worker completamente
+                // Los delays entre lotes ya están configurados en UpdateFinishedMatchesJob
+                
                 // Actualizar el partido usando la API
                 $updatedMatch = $footballService->updateMatchFromApi($match->id);
 

@@ -19,43 +19,62 @@
         $accentDark = '#17b796';
     @endphp
 
-    <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
+    <div class="min-h-screen p-4 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
         <!-- Header -->
-        <div style="margin-bottom: 2rem;">
-            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">{{ __('views.settings.in_app_purchases') }}</h1>
-            <p style="color: {{ $textSecondary }}; font-size: 0.95rem;">
+        <div class="text-center mb-8">
+            {{-- <h1 class="text-3xl md:text-4xl font-bold mb-4 text-{{ $isDark ? 'white' : 'gray-900' }}">{{ __('views.settings.in_app_purchases') }}</h1> --}}
+            <p class="text-lg" style="color: {{ $textSecondary }};">
                 {{ __('views.settings.in_app_purchases_desc') }}
             </p>
         </div>
 
         <!-- Coming Soon Banner -->
-        <div style="background: linear-gradient(135deg, {{ $accentColor }}cc, {{ $accentDark }}cc); padding: 3rem 2rem; border-radius: 16px; margin-bottom: 2rem; border: 1px solid {{ $accentColor }}; position: relative; overflow: hidden; text-align: center;">
-            <div style="position: relative; z-index: 2;">
-                <i class="fas fa-rocket" style="font-size: 48px; color: #000; margin-bottom: 1rem; display: block;"></i>
-                <h2 style="font-size: 1.75rem; font-weight: 700; color: #000; margin-bottom: 1rem;">{{ __('messages.coming_soon') }}</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+        <div class="bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl p-8 mb-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+            <div class="relative z-10 text-center">
+                {{-- <div class="mb-6">
+                    <i class="fas fa-rocket text-6xl text-black animate-bounce"></i>
+                </div> --}}
+                {{-- <h2 class="text-2xl md:text-3xl font-bold text-black mb-8">{{ __('messages.coming_soon') }}</h2> --}}
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-4">
                     <!-- Battle Pass -->
-                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1.5rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                        <i class="fas fa-shield-alt" style="font-size: 32px; color: #000; margin-bottom: 0.5rem; display: block;"></i>
-                        <h3 style="font-size: 1rem; font-weight: 600; color: #000; margin-bottom: 0.5rem;">{{ __('messages.battle_pass') ?? 'Pases de Batalla' }}</h3>
-                        <p style="color: rgba(0,0,0,0.7); font-size: 0.85rem;">Desbloquea recompensas exclusivas y contenido premium</p>
+                    <div class="bg-white bg-opacity-20 backdrop-blur-md rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="text-center">
+                            <i class="fas fa-shield-alt text-4xl text-black mb-4"></i>
+                            <h3 class="text-xl font-semibold text-black mb-2">{{ __('messages.battle_pass') }}</h3>
+                            <p class="text-black text-opacity-80">{{ __('messages.battle_pass_desc') }}</p>
+                        </div>
                     </div>
 
                     <!-- Unlock Features -->
-                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1.5rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                        <i class="fas fa-unlock" style="font-size: 32px; color: #000; margin-bottom: 0.5rem; display: block;"></i>
-                        <h3 style="font-size: 1rem; font-weight: 600; color: #000; margin-bottom: 0.5rem;">{{ __('messages.unlock_features') ?? 'Características' }}</h3>
-                        <p style="color: rgba(0,0,0,0.7); font-size: 0.85rem;">Desbloquea herramientas y análisis avanzados</p>
+                    <div class="bg-white bg-opacity-20 backdrop-blur-md rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="text-center">
+                            <i class="fas fa-unlock text-4xl text-black mb-4"></i>
+                            <h3 class="text-xl font-semibold text-black mb-2">{{ __('messages.unlock_features') }}</h3>
+                            <p class="text-black text-opacity-80">{{ __('messages.unlock_features_desc') }}</p>
+                        </div>
                     </div>
 
-                    <!-- More Features -->
-                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1.5rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                        <i class="fas fa-star" style="font-size: 32px; color: #000; margin-bottom: 0.5rem; display: block;"></i>
-                        <h3 style="font-size: 1rem; font-weight: 600; color: #000; margin-bottom: 0.5rem;">{{ __('messages.special_items') ?? 'Artículos Especiales' }}</h3>
-                        <p style="color: rgba(0,0,0,0.7); font-size: 0.85rem;">Acceso exclusivo a contenido limitado</p>
+                    <!-- Special Items -->
+                    <div class="bg-white bg-opacity-20 backdrop-blur-md rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="text-center">
+                            <i class="fas fa-star text-4xl text-black mb-4"></i>
+                            <h3 class="text-xl font-semibold text-black mb-2">{{ __('messages.special_items') }}</h3>
+                            <p class="text-black text-opacity-80">{{ __('messages.special_items_desc') }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-8 shadow-2xl text-center">
+            <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">{{ __('messages.contact_businesses') }}</h3>
+            <p class="text-white text-lg mb-6">{{ __('messages.contact_businesses_desc') }}</p>
+            <a href="mailto:contact@offsideclub.com" class="inline-block bg-white text-purple-600 font-semibold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <i class="fas fa-envelope mr-2"></i>{{ __('messages.contact_us') }}
+            </a>
         </div>
     </div>
 

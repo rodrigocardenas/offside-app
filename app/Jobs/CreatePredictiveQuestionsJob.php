@@ -20,51 +20,73 @@ class CreatePredictiveQuestionsJob implements ShouldQueue
 
     /**
      * Execute the job.
+     * 
+     * OPTIMIZACIÓN: Utiliza chunking para procesar grupos de manera más eficiente
+     * sin sobrecargar la memoria ni la base de datos.
      */
     public function handle()
     {
-        Log::info('Iniciando creación de preguntas predictivas');
+        Log::info('Iniciando creación de preguntas predictivas (chunking)');
 
-        $groups = Group::with('competition')
+        $chunkSize = 50; // Procesar 50 grupos a la vez
+        $totalGroupsProcessed = 0;
+        $totalQuestionsCreated = 0;
+
+        Group::with('competition')
             ->whereNotNull('competition_id')
-            ->get();
+            ->chunk($chunkSize, function ($groups) use (&$totalGroupsProcessed, &$totalQuestionsCreated) {
+                
+                Log::info('Procesando chunk de ' . $groups->count() . ' grupos');
 
-        Log::info('Procesando ' . $groups->count() . ' grupos para nuevas preguntas predictivas');
+                foreach ($groups as $group) {
+                    try {
+                        // Contar preguntas activas actuales
+                        $activeCount = $group->questions()
+                            ->where('type', 'predictive')
+                            ->where('available_until', '>', now())
+                            ->count();
 
-        foreach ($groups as $group) {
-            try {
-                // Contar preguntas activas actuales
-                $activeCount = $group->questions()
-                    ->where('type', 'predictive')
-                    ->where('available_until', '>', now())
-                    ->count();
+                        Log::info("Grupo {$group->id} tiene {$activeCount} preguntas activas");
 
-                Log::info("Grupo {$group->id} tiene {$activeCount} preguntas activas");
+                        // Solo crear nuevas preguntas si hay menos de 5 activas
+                        if ($activeCount < 5) {
+                            // Usar el método del trait HandlesQuestions
+                            $allQuestions = $this->fillGroupPredictiveQuestions($group);
+                            $newQuestionsCount = $allQuestions->count() - $activeCount;
 
-                // Solo crear nuevas preguntas si hay menos de 5 activas
-                if ($activeCount < 5) {
-                    // Usar el método del trait HandlesQuestions
-                    $allQuestions = $this->fillGroupPredictiveQuestions($group);
-                    $newQuestionsCount = $allQuestions->count() - $activeCount;
+                            if ($newQuestionsCount > 0) {
+                                // Notificar a los usuarios del grupo
+                                \App\Jobs\SendNewPredictiveQuestionsPushNotification::dispatch($group->id, $newQuestionsCount);
 
-                    if ($newQuestionsCount > 0) {
-                        // Notificar a los usuarios del grupo
-                        \App\Jobs\SendNewPredictiveQuestionsPushNotification::dispatch($group->id, $newQuestionsCount);
+                                Log::info("Nuevas preguntas predictivas creadas y notificación enviada al grupo {$group->id}", [
+                                    'new_questions_count' => $newQuestionsCount,
+                                    'total_active' => $allQuestions->count()
+                                ]);
 
-                        Log::info("Nuevas preguntas predictivas creadas y notificación enviada al grupo {$group->id}", [
-                            'new_questions_count' => $newQuestionsCount,
-                            'total_active' => $allQuestions->count()
+                                $totalQuestionsCreated += $newQuestionsCount;
+                            }
+                        }
+
+                        $totalGroupsProcessed++;
+
+                    } catch (\Exception $e) {
+                        Log::error('Error al procesar grupo ' . $group->id . ' para nuevas preguntas', [
+                            'error' => $e->getMessage()
                         ]);
+                        continue;
                     }
                 }
-            } catch (\Exception $e) {
-                Log::error('Error al procesar grupo ' . $group->id . ' para nuevas preguntas', [
-                    'error' => $e->getMessage()
-                ]);
-                continue;
-            }
-        }
 
-        Log::info('Finalizada creación de preguntas predictivas');
+                Log::info('Chunk completado', [
+                    'groups_processed' => $groups->count(),
+                    'total_groups' => $totalGroupsProcessed,
+                    'total_questions_created' => $totalQuestionsCreated
+                ]);
+            });
+
+        Log::info('Finalizada creación de preguntas predictivas', [
+            'total_groups_processed' => $totalGroupsProcessed,
+            'total_questions_created' => $totalQuestionsCreated
+        ]);
     }
 }

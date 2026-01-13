@@ -45,7 +45,8 @@ class UpdateFinishedMatchesJob implements ShouldQueue
         Log::info('Dividiendo en ' . count($batches) . ' lotes de máximo 5 partidos cada uno');
 
         foreach ($batches as $batchNumber => $batch) {
-            // Despachar cada lote con un delay progresivo
+            // Despachar cada lote con un delay progresivo (SIN sleep())
+            // Los delays están en la cola, no bloquean el worker
             $delay = now()->addSeconds(($batchNumber + 1) * 10); // 10 segundos entre lotes
 
             ProcessMatchBatchJob::dispatch($batch, $batchNumber + 1)
