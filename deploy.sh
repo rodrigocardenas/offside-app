@@ -35,7 +35,7 @@ tar -czf build.tar.gz public/build
 scp build.tar.gz $SERVER_ALIAS:$REMOTE_PATH
 
 # 6. Operaciones en servidor
-ssh $SERVER_ALIAS << EOF
+ssh -T $SERVER_ALIAS << EOF
     set -e
     cd $REMOTE_PATH
 
