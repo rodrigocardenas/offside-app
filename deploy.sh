@@ -40,7 +40,7 @@ ssh -T $SERVER_ALIAS << EOF
     echo "🔄 Desplegando en servidor remoto..."
     set -e
     cd $REMOTE_PATH
-
+    sudo git checkout -- .
     echo "� Actualizando código desde Git..."    sudo -u www-data git config --global --add safe.directory $REMOTE_PATH    sudo -u www-data git pull origin $REQUIRED_BRANCH
 
     echo "�🚧 Entrando en modo mantenimiento..."
