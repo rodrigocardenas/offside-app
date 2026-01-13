@@ -38,7 +38,7 @@
 
             {{-- Time --}}
             <span class="match-time-inline">
-                {{ @userTime($match->date, 'H:i') }}
+                @userTime($match->date, 'H:i')
             </span>
 
             @if($match->awayTeam && $match->awayTeam->crest_url)
