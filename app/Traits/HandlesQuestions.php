@@ -15,19 +15,16 @@ trait HandlesQuestions
     {
         $matchQuestionsCacheKey = "group_{$group->id}_match_questions";
         return Cache::remember($matchQuestionsCacheKey, now()->addMinutes(5), function () use ($group, $roles) {
-            if (!$group->competition) {
-                return collect();
-            }
-
-            // Verificar si todos los partidos de la jornada actual han terminado
-            $allMatchesFinished = $this->checkIfAllMatchesFinished($group);
-
             $questions = $this->getExistingQuestions($group);
 
-            if ($allMatchesFinished || $questions->isEmpty()) {
-                $createdQuestions = $this->createPredictiveQuestion($group);
-                if ($createdQuestions) {
-                    $questions = $questions->merge($createdQuestions);
+            // Verificar si hay partidos próximos disponibles
+            $hasUpcomingMatches = $this->checkIfUpcomingMatchesExist($group);
+
+            // Crear preguntas si no hay suficientes o si hay partidos disponibles y menos de 5 preguntas
+            if ($questions->isEmpty() || ($hasUpcomingMatches && $questions->count() < 5)) {
+                $createdQuestions = $this->fillGroupPredictiveQuestions($group);
+                if ($createdQuestions && $createdQuestions->count() > $questions->count()) {
+                    $questions = $createdQuestions;
                 }
             }
 
@@ -117,14 +114,13 @@ trait HandlesQuestions
         });
     }
 
-    private function checkIfAllMatchesFinished($group)
+    private function checkIfUpcomingMatchesExist($group)
     {
         return FootballMatch::
-            where('date', '>=', now()->subDays(5))
-            ->where('date', '<=', now()->addDays(5))
-            ->where('status', '!=', 'FINISHED')
-            ->where('competition_id', $group->competition_id)
-            ->doesntExist();
+            where('status', 'Not Started')
+            ->where('date', '>=', now())
+            ->where('date', '<=', now()->addDays(7))
+            ->exists();
     }
 
     private function getExistingQuestions($group)
@@ -211,12 +207,8 @@ trait HandlesQuestions
             return $vigentes;
         }
 
-        // 2. Buscar partidos próximos de la competición del grupo
-        $matches = \App\Models\FootballMatch::where(function($q) use ($group) {
-                $q->where('competition_id', $group->competition_id ?? 4)
-                  ->orWhere('competition_id', 4);
-            })
-            ->where('status', 'Not Started')
+        // 2. Buscar partidos próximos en el calendario
+        $matches = \App\Models\FootballMatch::where('status', 'Not Started')
             ->where('date', '>=', now())
             ->orderBy('date')
             ->get();
@@ -338,7 +330,7 @@ trait HandlesQuestions
                 'type' => $template->type,
                 'title' => $questionText,
                 'description' => $questionText,
-                'competition_id' => $group->competition_id,
+                'competition_id' => $match->competition_id,
                 'group_id' => $group->id,
                 'match_id' => $match->id,
                 'available_until' => $availableUntil,

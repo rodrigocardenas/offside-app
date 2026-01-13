@@ -211,13 +211,7 @@ class GroupController extends Controller
     protected function createPredictiveQuestion(Group $group)
     {
         try {
-            $matches = FootballMatch::where(function($query) use ($group) {
-                    $query->where('competition_id', $group->competition_id)
-                        ->orWhere('competition_id', 4) // Mundial de Clubes
-                        ->orWhere('league', $group->competition->type)
-                        ->orWhere('league', 'world-club-championship');
-                })
-                ->where('status', 'Not Started')
+            $matches = FootballMatch::where('status', 'Not Started')
                 ->where('date', '>=', now())
                 ->where('date', '<=', now()->addDays(5))
                 ->orderBy('is_featured', 'desc')
@@ -226,14 +220,11 @@ class GroupController extends Controller
                 ->get();
 
             if ($matches->isEmpty()) {
-                Log::warning('No se encontraron partidos para la competición:', [
-                    'competition_type' => $group->competition->type
-                ]);
+                Log::warning('No se encontraron partidos próximos en el calendario');
                 return collect();
             }
 
-            $competitionType = $group->competition->type;
-            $matchesData = collect($matches)->map(function($match) use ($competitionType) {
+            $matchesData = collect($matches)->map(function($match) {
                 if (!isset($match['id']) || !isset($match['home_team']) || !isset($match['away_team'])) {
                     Log::warning('Partido con datos incompletos:', ['match' => $match]);
                     return null;
@@ -244,7 +235,7 @@ class GroupController extends Controller
                     'home_team' => is_array($match['home_team']) ? $match['home_team']['name'] : $match['home_team'],
                     'away_team' => is_array($match['away_team']) ? $match['away_team']['name'] : $match['away_team'],
                     'date' => $match['date'] ?? now(),
-                    'competition' => $match['competition_id'] ?? $competitionType
+                    'competition' => $match['competition_id'] ?? null
                 ];
             })->filter()->values()->toArray();
 
@@ -778,10 +769,6 @@ class GroupController extends Controller
 
         $predictiveTemplates = \App\Models\TemplateQuestion::where('type', 'predictive')
             ->whereNull('used_at')
-            ->where(function ($query) use ($group) {
-                $query->where('competition_id', $group->competition_id)
-                    ->orWhere('competition_id', null);
-            })
             ->orderBy('is_featured', 'desc')
             ->orderBy('id')
             ->take(5)

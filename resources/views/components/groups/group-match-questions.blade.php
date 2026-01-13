@@ -36,7 +36,7 @@
                     </div>
                     <div class="text-xs mb-4" style="color: {{ $textSecondary }};">
                         <i class="fas fa-circle" style="color: {{ $accentColor }}; font-size: 3px;"></i>
-                        {{ $group->competition->name }} • {{ __('views.groups.matchday') }} {{ $question->football_match->matchday }}
+                        {{ $group->competition?->name }} • {{ __('views.groups.matchday') }} {{ $question->football_match->matchday }}
 
                     </div>
                 </div>
