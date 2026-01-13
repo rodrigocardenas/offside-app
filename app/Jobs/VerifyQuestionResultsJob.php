@@ -23,7 +23,7 @@ class VerifyQuestionResultsJob implements ShouldQueue
      *
      * Evalúa preguntas de partidos finalizados usando lógica determinística
      * en lugar de OpenAI, asegurando resultados consistentes y predecibles.
-     * 
+     *
      * OPTIMIZACIÓN: Utiliza chunking para procesar de 50 en 50 y evitar
      * cargar todas las preguntas en memoria.
      */
@@ -42,7 +42,7 @@ class VerifyQuestionResultsJob implements ShouldQueue
             })
             ->with('football_match', 'options', 'answers')
             ->chunk($chunkSize, function ($questions) use ($evaluationService, &$processedCount, &$errorCount) {
-                
+
                 Log::info('Procesando chunk de ' . $questions->count() . ' preguntas');
 
                 foreach ($questions as $question) {

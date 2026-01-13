@@ -20,7 +20,7 @@ class CreatePredictiveQuestionsJob implements ShouldQueue
 
     /**
      * Execute the job.
-     * 
+     *
      * OPTIMIZACIÓN: Utiliza chunking para procesar grupos de manera más eficiente
      * sin sobrecargar la memoria ni la base de datos.
      */
@@ -35,7 +35,7 @@ class CreatePredictiveQuestionsJob implements ShouldQueue
         Group::with('competition')
             ->whereNotNull('competition_id')
             ->chunk($chunkSize, function ($groups) use (&$totalGroupsProcessed, &$totalQuestionsCreated) {
-                
+
                 Log::info('Procesando chunk de ' . $groups->count() . ' grupos');
 
                 foreach ($groups as $group) {

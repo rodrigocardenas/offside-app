@@ -43,7 +43,7 @@ class ProcessMatchBatchJob implements ShouldQueue
             try {
                 // NO usar sleep() - bloquea el worker completamente
                 // Los delays entre lotes ya están configurados en UpdateFinishedMatchesJob
-                
+
                 // Actualizar el partido usando la API
                 $updatedMatch = $footballService->updateMatchFromApi($match->id);
 
