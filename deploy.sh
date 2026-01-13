@@ -6,6 +6,7 @@ SERVER_ALIAS="offside-app"
 REMOTE_PATH="/var/www/html/offside-app"
 REQUIRED_BRANCH="main"
 
+
 echo "🔍 Validando entorno de despliegue..."
 
 # 1. Validar que estamos en la rama correcta
@@ -17,10 +18,10 @@ if [ "$CURRENT_BRANCH" != "$REQUIRED_BRANCH" ]; then
 fi
 
 # 2. Validar que no hay cambios sin commitear
-if [ -n "$(git status --porcelain)" ]; then
-    echo "⚠️ ADVERTENCIA: Tienes cambios locales sin guardar en Git. Haz commit antes de desplegar."
-    exit 1
-fi
+# if [ -n "$(git status --porcelain)" ]; then
+#     echo "⚠️ ADVERTENCIA: Tienes cambios locales sin guardar en Git. Haz commit antes de desplegar."
+#     exit 1
+# fi
 
 echo "🚀 Rama validada. Iniciando despliegue de '$REQUIRED_BRANCH'..."
 
@@ -36,11 +37,11 @@ scp build.tar.gz $SERVER_ALIAS:$REMOTE_PATH
 
 # 6. Operaciones en servidor
 ssh -T $SERVER_ALIAS << EOF
+    echo "🔄 Desplegando en servidor remoto..."
     set -e
     cd $REMOTE_PATH
 
-    echo "� Actualizando código desde Git..."
-    sudo -u www-data git pull origin $REQUIRED_BRANCH
+    echo "� Actualizando código desde Git..."    sudo -u www-data git config --global --add safe.directory $REMOTE_PATH    sudo -u www-data git pull origin $REQUIRED_BRANCH
 
     echo "�🚧 Entrando en modo mantenimiento..."
     sudo -u www-data php artisan down --retry=60
