@@ -22,6 +22,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Registrar Blade directives SIEMPRE (antes de cualquier condición)
+        Blade::directive('userTime', function ($expression) {
+            return "<?php echo \\App\\Helpers\\DateTimeHelper::toUserTimezone({$expression}); ?>";
+        });
+
+        // Blade directive para mostrar hora UTC
+        Blade::directive('utcTime', function ($expression) {
+            return "<?php echo \\App\\Helpers\\DateTimeHelper::toUTC({$expression}); ?>";
+        });
+
         if ($this->app->runningInConsole()) {
             return;
         }
@@ -33,15 +43,5 @@ class AppServiceProvider extends ServiceProvider
         if (File::exists($viteManifestPath) && !File::exists($manifestPath)) {
             File::copy($viteManifestPath, $manifestPath);
         }
-
-        // Registrar Blade directive para convertir fechas a zona horaria del usuario
-        Blade::directive('userTime', function ($expression) {
-            return "<?php echo \\App\\Helpers\\DateTimeHelper::toUserTimezone({$expression}); ?>";
-        });
-
-        // Blade directive para mostrar hora UTC
-        Blade::directive('utcTime', function ($expression) {
-            return "<?php echo \\App\\Helpers\\DateTimeHelper::toUTC({$expression}); ?>";
-        });
     }
 }
