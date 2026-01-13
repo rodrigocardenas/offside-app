@@ -17,11 +17,11 @@
         <div class="match-teams">
             <span class="team-name">{{ $match->homeTeam->name ?? $match->home_team }}</span>
             @if(isset($match->homeTeam->crest_url))
-                <img src="{{ asset('images/teams/' . $match->homeTeam->crest_url) }}" class="team-logo" alt="Home">
+                <img src="{{ $match->homeTeam->crest_url }}" class="team-logo" alt="Home">
             @endif
             <span class="match-time-inline">{{ \Carbon\Carbon::parse($match->utc_date)->format('H:i') }}</span>
             @if(isset($match->awayTeam->crest_url))
-                <img src="{{ asset('images/teams/' . $match->awayTeam->crest_url) }}" class="team-logo" alt="Away">
+                <img src="{{ $match->awayTeam->crest_url }}" class="team-logo" alt="Away">
             @endif
             <span class="team-name">{{ $match->awayTeam->name ?? $match->away_team }}</span>
         </div>
