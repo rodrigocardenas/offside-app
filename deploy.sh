@@ -40,7 +40,6 @@ ssh -T $SERVER_ALIAS << EOF
     echo "🔄 Desplegando en servidor remoto..."
     set -e
     cd $REMOTE_PATH
-    sudo git clean -fd
     sudo git checkout -- .
     echo "� Actualizando código desde Git..."
     sudo git pull origin $REQUIRED_BRANCH
