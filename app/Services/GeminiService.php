@@ -129,7 +129,7 @@ class GeminiService
         // Construir prompt para obtener resultado
         $dateFormatted = Carbon::parse($date)->format('d de F de Y');
         $leagueInfo = $league ? " en la liga de {$league}" : "";
-        
+
         $prompt = "¿Cuál fue el resultado final del partido entre {$homeTeam} y {$awayTeam} que se jugó el {$dateFormatted}{$leagueInfo}? "
                 . "Responde SOLO con el marcador en formato: 'HOME_GOALS - AWAY_GOALS' (ejemplo: '3 - 2'). "
                 . "Si el partido no ha terminado, responde con 'NO_JUGADO'. "
@@ -144,21 +144,21 @@ class GeminiService
 
         try {
             $response = $this->callGemini($prompt, true); // true = usar grounding (web search)
-            
+
             if ($response) {
                 // Procesar la respuesta para extraer los goles
                 $result = $this->parseMatchResult($response, $homeTeam, $awayTeam);
-                
+
                 if ($result && isset($result['home_score']) && isset($result['away_score'])) {
                     $ttl = config('gemini.cache.results_ttl', 48 * 60);
                     Cache::put($cacheKey, $result, now()->addMinutes($ttl));
-                    
+
                     Log::info("Resultado obtenido de Gemini", [
                         'home_team' => $homeTeam,
                         'away_team' => $awayTeam,
                         'score' => "{$result['home_score']} - {$result['away_score']}"
                     ]);
-                    
+
                     return $result;
                 }
             }
@@ -171,6 +171,164 @@ class GeminiService
         }
 
         return null;
+    }
+
+    /**
+     * 🆕 Obtener datos DETALLADOS del partido desde Gemini
+     * Extrae: score, eventos (goles, tarjetas, autogoles, penales), etc.
+     * Permite verificar preguntas basadas en eventos
+     */
+    public function getDetailedMatchData($homeTeam, $awayTeam, $date, $league = null, $forceRefresh = false)
+    {
+        $cacheKey = "gemini_detailed_match_" . md5("{$homeTeam}_{$awayTeam}_{$date}");
+
+        if (!$forceRefresh && Cache::has($cacheKey)) {
+            Log::info("Datos detallados en caché para {$homeTeam} vs {$awayTeam}");
+            return Cache::get($cacheKey);
+        }
+
+        // Construir prompt para obtener datos detallados
+        $dateFormatted = Carbon::parse($date)->format('d de F de Y');
+        $leagueInfo = $league ? " en {$league}" : "";
+
+        $prompt = <<<EOT
+Busca información DETALLADA del partido entre {$homeTeam} y {$awayTeam} que se jugó el {$dateFormatted}{$leagueInfo}.
+
+Proporciona la información en formato JSON con esta estructura exacta:
+{
+    "final_score": "3-0",
+    "home_goals": 3,
+    "away_goals": 0,
+    "first_goal_scorer": "nombre_jugador",
+    "first_goal_team": "HOME",
+    "last_goal_scorer": "nombre_jugador", 
+    "last_goal_team": "HOME",
+    "both_teams_scored": false,
+    "events": [
+        {"minute": "15", "type": "GOAL", "team": "HOME", "player": "Jugador 1"},
+        {"minute": "35", "type": "YELLOW_CARD", "team": "AWAY", "player": "Jugador 2"},
+        {"minute": "45", "type": "RED_CARD", "team": "HOME", "player": "Jugador 3"},
+        {"minute": "60", "type": "OWN_GOAL", "team": "AWAY", "player": "Jugador 4"},
+        {"minute": "70", "type": "PENALTY_GOAL", "team": "HOME", "player": "Jugador 5"}
+    ],
+    "home_possession": 55,
+    "away_possession": 45,
+    "home_fouls": 12,
+    "away_fouls": 14,
+    "total_goals": 3,
+    "total_yellow_cards": 2,
+    "total_red_cards": 1,
+    "total_own_goals": 0,
+    "total_penalty_goals": 1
+}
+
+IMPORTANTE: 
+- Devuelve SOLO el JSON, sin explicaciones
+- Si el partido no se jugó, devuelve: {"status": "NOT_PLAYED"}
+- Si no encuentras información, devuelve: {"status": "NOT_FOUND"}
+- Los tipos de evento válidos: GOAL, YELLOW_CARD, RED_CARD, OWN_GOAL, PENALTY_GOAL
+- Los teams válidos: HOME, AWAY
+EOT;
+
+        Log::info("Consultando Gemini para datos detallados del partido", [
+            'home_team' => $homeTeam,
+            'away_team' => $awayTeam,
+            'date' => $date
+        ]);
+
+        try {
+            $response = $this->callGemini($prompt, true); // true = usar grounding (web search)
+
+            if ($response) {
+                $matchData = $this->parseDetailedMatchData($response, $homeTeam, $awayTeam);
+
+                if ($matchData && isset($matchData['home_goals']) && isset($matchData['away_goals'])) {
+                    $ttl = config('gemini.cache.results_ttl', 48 * 60);
+                    Cache::put($cacheKey, $matchData, now()->addMinutes($ttl));
+
+                    Log::info("✅ Datos detallados del partido obtenidos de Gemini", [
+                        'home_team' => $homeTeam,
+                        'away_team' => $awayTeam,
+                        'score' => "{$matchData['home_goals']} - {$matchData['away_goals']}",
+                        'events_count' => count($matchData['events'] ?? [])
+                    ]);
+
+                    return $matchData;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Error al consultar Gemini para datos detallados", [
+                'error' => $e->getMessage(),
+                'home_team' => $homeTeam,
+                'away_team' => $awayTeam
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Parsear datos detallados del partido desde respuesta de Gemini
+     */
+    protected function parseDetailedMatchData($response, $homeTeam, $awayTeam)
+    {
+        try {
+            // Si es un array (Gemini lo retorna así a veces), convertir a string
+            if (is_array($response)) {
+                $response = json_encode($response);
+            }
+
+            $responseStr = (string)$response;
+
+            // Limpiar la respuesta (remover markdown code blocks si existen)
+            $responseStr = preg_replace('/```json\s*/', '', $responseStr);
+            $responseStr = preg_replace('/```\s*/', '', $responseStr);
+
+            // Intentar parsear como JSON
+            $data = json_decode($responseStr, true);
+
+            if (!$data || !is_array($data)) {
+                Log::warning("No se pudo parsear datos detallados como JSON", [
+                    'response_preview' => substr($responseStr, 0, 500)
+                ]);
+                return null;
+            }
+
+            // Validar que tenemos los campos mínimos requeridos
+            if (!isset($data['home_goals']) || !isset($data['away_goals'])) {
+                Log::warning("Datos JSON incompletos - faltan home_goals o away_goals", [
+                    'data' => $data
+                ]);
+                return null;
+            }
+
+            // Limpiar y validar datos
+            $cleanData = [
+                'home_goals' => (int)($data['home_goals'] ?? 0),
+                'away_goals' => (int)($data['away_goals'] ?? 0),
+                'first_goal_scorer' => $data['first_goal_scorer'] ?? null,
+                'first_goal_team' => $data['first_goal_team'] ?? null,
+                'last_goal_scorer' => $data['last_goal_scorer'] ?? null,
+                'last_goal_team' => $data['last_goal_team'] ?? null,
+                'both_teams_scored' => (bool)($data['both_teams_scored'] ?? false),
+                'home_possession' => (int)($data['home_possession'] ?? 0),
+                'away_possession' => (int)($data['away_possession'] ?? 0),
+                'home_fouls' => (int)($data['home_fouls'] ?? 0),
+                'away_fouls' => (int)($data['away_fouls'] ?? 0),
+                'total_yellow_cards' => (int)($data['total_yellow_cards'] ?? 0),
+                'total_red_cards' => (int)($data['total_red_cards'] ?? 0),
+                'total_own_goals' => (int)($data['total_own_goals'] ?? 0),
+                'total_penalty_goals' => (int)($data['total_penalty_goals'] ?? 0),
+                'events' => is_array($data['events'] ?? null) ? $data['events'] : []
+            ];
+
+            return $cleanData;
+        } catch (\Exception $e) {
+            Log::error("Error al parsear datos detallados del partido", [
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
     }
 
     /**

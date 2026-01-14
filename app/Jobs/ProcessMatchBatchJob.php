@@ -33,12 +33,12 @@ class ProcessMatchBatchJob implements ShouldQueue
 
     /**
      * Execute the job.
-     * 
+     *
      * POLÍTICA DE DATOS VERIFICADOS ÚNICAMENTE:
      * ✅ Solo actualiza con resultados de API Football o Gemini (con verificación web)
      * ❌ NUNCA genera/usa datos aleatorios o ficticios
      * ❌ NUNCA usa rand(), fabricación de scores, o fallbacks no verificados
-     * 
+     *
      * Si ambas fuentes fallan: El partido NO se actualiza (permanece "Not Started")
      */
     public function handle(FootballService $footballService, GeminiService $geminiService = null)
@@ -77,19 +77,39 @@ class ProcessMatchBatchJob implements ShouldQueue
 
                 // PASO 2: Si API falla, intentar Gemini (con verificación web real)
                 Log::info("⚠️  API no devolvió datos para {$match->id}, intentando con Gemini web search");
-                
+
                 $geminiResult = null;
+                $geminiDetailedData = null;
                 $geminiError = null;
-                
+
                 if ($geminiService) {
                     try {
-                        $geminiResult = $geminiService->getMatchResult(
+                        // 🆕 Primero intentar obtener datos DETALLADOS (incluye eventos)
+                        $geminiDetailedData = $geminiService->getDetailedMatchData(
                             $match->home_team,
                             $match->away_team,
                             $match->date,
                             $match->league,
                             false // no force refresh
                         );
+
+                        if ($geminiDetailedData) {
+                            // Usamos los datos detallados
+                            $geminiResult = [
+                                'home_score' => $geminiDetailedData['home_goals'],
+                                'away_score' => $geminiDetailedData['away_goals']
+                            ];
+                            Log::info("✅ Datos DETALLADOS de Gemini obtenidos con {count($geminiDetailedData['events'] ?? [])} eventos");
+                        } else {
+                            // Si no hay datos detallados, intentar solo el score
+                            $geminiResult = $geminiService->getMatchResult(
+                                $match->home_team,
+                                $match->away_team,
+                                $match->date,
+                                $match->league,
+                                false
+                            );
+                        }
                     } catch (\Exception $e) {
                         $geminiError = $e->getMessage();
                         Log::warning("❌ Error al consultar Gemini para {$match->id}: {$geminiError}");
@@ -103,25 +123,53 @@ class ProcessMatchBatchJob implements ShouldQueue
                 if ($geminiResult && isset($geminiResult['home_score']) && isset($geminiResult['away_score'])) {
                     $homeScore = (int) $geminiResult['home_score'];
                     $awayScore = (int) $geminiResult['away_score'];
-                    
+
                     // Validar que los scores sean números válidos
                     if ($homeScore >= 0 && $awayScore >= 0 && $homeScore <= 20 && $awayScore <= 20) {
-                        $match->update([
+                        // Preparar datos del partido
+                        $updateData = [
                             'status' => 'Match Finished',
                             'home_team_score' => $homeScore,
                             'away_team_score' => $awayScore,
                             'score' => "{$homeScore} - {$awayScore}",
-                            'events' => "✅ Resultado verificado desde Gemini (web search): {$homeScore} goles del local, {$awayScore} del visitante",
                             'statistics' => json_encode([
                                 'source' => 'Gemini (web search - VERIFIED)',
                                 'verified' => true,
                                 'verification_method' => 'grounding_search',
+                                'has_detailed_events' => !empty($geminiDetailedData),
                                 'timestamp' => now()->toIso8601String()
                             ])
-                        ]);
-                        
-                        Log::info("✅ Partido {$match->id} actualizado desde Gemini (VERIFICADO)", [
-                            'score' => "{$homeScore} - {$awayScore}"
+                        ];
+
+                        // Si tenemos datos detallados, guardarlos como eventos JSON
+                        if ($geminiDetailedData && !empty($geminiDetailedData['events'])) {
+                            $updateData['events'] = json_encode($geminiDetailedData['events']);
+                            $eventCount = count($geminiDetailedData['events']);
+                            $updateData['statistics'] = json_encode([
+                                'source' => 'Gemini (web search - VERIFIED)',
+                                'verified' => true,
+                                'verification_method' => 'grounding_search',
+                                'has_detailed_events' => true,
+                                'detailed_event_count' => $eventCount,
+                                'first_goal_scorer' => $geminiDetailedData['first_goal_scorer'] ?? null,
+                                'last_goal_scorer' => $geminiDetailedData['last_goal_scorer'] ?? null,
+                                'total_yellow_cards' => $geminiDetailedData['total_yellow_cards'] ?? 0,
+                                'total_red_cards' => $geminiDetailedData['total_red_cards'] ?? 0,
+                                'total_own_goals' => $geminiDetailedData['total_own_goals'] ?? 0,
+                                'total_penalty_goals' => $geminiDetailedData['total_penalty_goals'] ?? 0,
+                                'home_possession' => $geminiDetailedData['home_possession'] ?? null,
+                                'away_possession' => $geminiDetailedData['away_possession'] ?? null,
+                                'timestamp' => now()->toIso8601String()
+                            ]);
+                        } else {
+                            $updateData['events'] = "✅ Resultado verificado desde Gemini (web search): {$homeScore} goles del local, {$awayScore} del visitante";
+                        }
+
+                        $match->update($updateData);
+
+                        Log::info("✅ Partido {$match->id} actualizado desde Gemini" . ($geminiDetailedData ? " CON DATOS DETALLADOS" : ""), [
+                            'score' => "{$homeScore} - {$awayScore}",
+                            'detailed_events' => $geminiDetailedData ? count($geminiDetailedData['events'] ?? []) : 0
                         ]);
                         continue;
                     } else {
@@ -140,7 +188,7 @@ class ProcessMatchBatchJob implements ShouldQueue
                     'gemini_failed' => !$geminiService || $geminiResult === null,
                     'gemini_error' => $geminiError
                 ]);
-                
+
                 // Registrar el intento de procesamiento (sin actualizar scores)
                 $match->update([
                     'statistics' => json_encode([
@@ -153,7 +201,7 @@ class ProcessMatchBatchJob implements ShouldQueue
                         'gemini_error' => $geminiError
                     ])
                 ]);
-                
+
                 Log::info("✓ Partido {$match->id} marcado como no procesable (sin datos verificados)");
 
             } catch (\Exception $e) {
