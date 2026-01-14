@@ -53,7 +53,7 @@ if (strtolower($response) !== 's' && $response !== 'yes') {
 $cleanedCount = 0;
 foreach ($fictionalMatches as $match) {
     $originalScore = $match->score;
-    
+
     $match->update([
         'status' => 'Not Started',
         'home_team_score' => null,
@@ -70,14 +70,14 @@ foreach ($fictionalMatches as $match) {
             'reason' => 'Fallback random scores removed - data not from verified sources'
         ])
     ]);
-    
+
     $cleanedCount++;
     Log::warning("Datos ficticios limpiados para partido {$match->id}", [
         'home_team' => $match->home_team,
         'away_team' => $match->away_team,
         'original_score' => $originalScore
     ]);
-    
+
     echo "✓ ID {$match->id}: {$match->home_team} vs {$match->away_team} - Limpiado\n";
 }
 

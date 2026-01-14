@@ -404,7 +404,7 @@ class FootballService
                 if ($league) {
                     $competitions[] = $league;
                 }
-                
+
                 // Luego agregar las competiciones por defecto
                 $defaultCompetitions = ['liga-colombia', 'champions-league', 'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'fa-cup', 'league-cup', 'copa-del-rey'];
                 foreach ($defaultCompetitions as $comp) {

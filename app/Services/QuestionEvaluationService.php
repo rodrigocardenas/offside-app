@@ -46,7 +46,7 @@ class QuestionEvaluationService
 
         // ⚠️ CHECK: Detectar si el partido tiene datos verificados o ficticios/fallback
         $hasVerifiedData = $this->hasVerifiedMatchData($match);
-        
+
         if (!$hasVerifiedData) {
             Log::warning('Match has unverified/fictional data - skipping detailed event verification', [
                 'match_id' => $match->id,
@@ -132,15 +132,15 @@ class QuestionEvaluationService
 
     /**
      * Verifica si un partido tiene datos verificados (no ficticios/fallback)
-     * 
+     *
      * ✅ Datos verificados: API Football o Gemini con grounding
      * ❌ Datos ficticios: Fallback, random, sin verificación
      */
     private function hasVerifiedMatchData(FootballMatch $match): bool
     {
         // Verificar statistics JSON
-        $statistics = is_string($match->statistics) 
-            ? json_decode($match->statistics, true) 
+        $statistics = is_string($match->statistics)
+            ? json_decode($match->statistics, true)
             : $match->statistics;
 
         if (!is_array($statistics)) {
@@ -149,8 +149,8 @@ class QuestionEvaluationService
 
         // Si tiene source "Fallback" o "random" o "Simulated" → NO verificado
         $source = $statistics['source'] ?? '';
-        if (stripos($source, 'fallback') !== false || 
-            stripos($source, 'random') !== false || 
+        if (stripos($source, 'fallback') !== false ||
+            stripos($source, 'random') !== false ||
             stripos($source, 'simulated') !== false) {
             return false;
         }
@@ -161,7 +161,7 @@ class QuestionEvaluationService
         }
 
         // Si el source es API Football o Gemini → VERIFICADO
-        if (stripos($source, 'api football') !== false || 
+        if (stripos($source, 'api football') !== false ||
             stripos($source, 'gemini') !== false) {
             return true;
         }

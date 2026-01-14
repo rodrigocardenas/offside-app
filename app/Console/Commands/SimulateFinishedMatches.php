@@ -32,7 +32,7 @@ class SimulateFinishedMatches extends Command
         // ⚠️ ADVERTENCIA: Este comando solo debe usarse en desarrollo para testing
         // En producción, SIEMPRE usa: matches:process-recently-finished
         // que obtiene resultados verificados de API Football o Gemini
-        
+
         if (app()->environment('production')) {
             $this->error('❌ Este comando NO debe ejecutarse en PRODUCCIÓN');
             $this->info('Usa: php artisan matches:process-recently-finished');
