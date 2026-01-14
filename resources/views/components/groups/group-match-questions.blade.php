@@ -48,24 +48,24 @@
                         <div class="flex items-center justify-center gap-4 mb-5">
                             <div class="flex flex-col items-center gap-1">
                                 <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->homeTeam?->name }}">
-                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->homeTeam->name, 10, '') }}</span>
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->home_team, 15, '') }}</span>
                             </div>
                                 <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->templateQuestion->awayTeam?->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->awayTeam->name }}">
-                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->awayTeam->name, 10, '') }}</span>
+                                <img src="{{ $question->templateQuestion->awayTeam?->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->awayTeam?->name }}">
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->away_team, 15, '') }}</span>
                             </div>
                         </div>
                     @else
                         <div class="flex items-center justify-center gap-4 mb-5">
                             <div class="flex flex-col items-center gap-1">
                                 <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->homeTeam?->name }}">
-                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->homeTeam?->name, 10, '') }}</span>
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->home_team, 15, '') }}</span>
                             </div>
                             <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
                             <div class="flex flex-col items-center gap-1">
                                 <img src="{{ $question->football_match->awayTeam?->crest_url }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->awayTeam?->name }}">
-                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->awayTeam?->name, 10, '') }}</span>
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->away_team, 15, '') }}</span>
                             </div>
                         </div>
                     @endif
