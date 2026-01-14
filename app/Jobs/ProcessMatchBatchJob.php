@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\FootballMatch;
 use App\Services\FootballService;
+use App\Services\GeminiService;
 use Illuminate\Support\Facades\Log;
 
 class ProcessMatchBatchJob implements ShouldQueue
@@ -33,11 +34,21 @@ class ProcessMatchBatchJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(FootballService $footballService)
+    public function handle(FootballService $footballService, GeminiService $geminiService = null)
     {
         Log::info("Procesando lote {$this->batchNumber} con " . count($this->matchIds) . " partidos");
 
         $matches = FootballMatch::whereIn('id', $this->matchIds)->get();
+
+        // Si no se inyecta GeminiService, intentar obtenerlo de la aplicación
+        if (!$geminiService) {
+            try {
+                $geminiService = app(GeminiService::class);
+            } catch (\Exception $e) {
+                Log::warning("No se pudo inicializar GeminiService: " . $e->getMessage());
+                $geminiService = null;
+            }
+        }
 
         foreach ($matches as $index => $match) {
             try {
@@ -53,25 +64,51 @@ class ProcessMatchBatchJob implements ShouldQueue
                         'score' => $updatedMatch->score
                     ]);
                 } else {
-                    // FALLBACK: Si la API no retorna datos, simular resultado
-                    Log::warning("API no devolvió datos para {$match->id}, usando fallback de simulación");
+                    // FALLBACK: Intentar obtener resultado real de Gemini
+                    Log::warning("API no devolvió datos para {$match->id}, intentando con Gemini");
                     
-                    $homeScore = rand(0, 4);
-                    $awayScore = rand(0, 4);
+                    $geminiResult = null;
+                    if ($geminiService) {
+                        try {
+                            $geminiResult = $geminiService->getMatchResult(
+                                $match->home_team,
+                                $match->away_team,
+                                $match->date,
+                                $match->league,
+                                false // no force refresh
+                            );
+                        } catch (\Exception $e) {
+                            Log::warning("Error al consultar Gemini para {$match->id}: " . $e->getMessage());
+                        }
+                    }
+
+                    if ($geminiResult && isset($geminiResult['home_score']) && isset($geminiResult['away_score'])) {
+                        // Resultado obtenido de Gemini - usar valores reales
+                        $homeScore = $geminiResult['home_score'];
+                        $awayScore = $geminiResult['away_score'];
+                        $source = "Gemini (web search)";
+                    } else {
+                        // Si Gemini tampoco funciona, usar fallback aleatorio
+                        Log::warning("Gemini no pudo obtener resultado para {$match->id}, usando fallback aleatorio");
+                        $homeScore = rand(0, 4);
+                        $awayScore = rand(0, 4);
+                        $source = "Fallback (random)";
+                    }
                     
                     $match->update([
                         'status' => 'Match Finished',
                         'home_team_score' => $homeScore,
                         'away_team_score' => $awayScore,
                         'score' => "{$homeScore} - {$awayScore}",
-                        'events' => "Partido actualizado (fallback): {$homeScore} goles del local, {$awayScore} del visitante",
+                        'events' => "Partido actualizado desde {$source}: {$homeScore} goles del local, {$awayScore} del visitante",
                         'statistics' => json_encode([
-                            'fallback' => true,
+                            'source' => $source,
+                            'gemini_used' => $geminiResult !== null,
                             'timestamp' => now()->toIso8601String()
                         ])
                     ]);
                     
-                    Log::info("Partido {$match->id} actualizado con fallback", [
+                    Log::info("Partido {$match->id} actualizado ({$source})", [
                         'score' => $match->score
                     ]);
                 }
@@ -86,3 +123,4 @@ class ProcessMatchBatchJob implements ShouldQueue
         Log::info("Lote {$this->batchNumber} completado");
     }
 }
+

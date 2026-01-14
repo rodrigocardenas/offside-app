@@ -7,6 +7,7 @@ use App\Jobs\UpdateFinishedMatchesJob;
 use App\Jobs\VerifyQuestionResultsJob;
 use App\Jobs\CreatePredictiveQuestionsJob;
 use App\Services\FootballService;
+use App\Services\GeminiService;
 use App\Services\QuestionEvaluationService;
 use Illuminate\Support\Facades\Log;
 
@@ -37,6 +38,15 @@ class ProcessFinishedMatchesSync extends Command
             // 1. Actualizar partidos
             $this->info("\n1️⃣ Actualizando partidos finalizados...");
             $footballService = app(FootballService::class);
+            $geminiService = null;
+            
+            // Intentar inicializar GeminiService
+            try {
+                $geminiService = app(GeminiService::class);
+                $this->info("   ℹ️  GeminiService disponible - se usará para obtener resultados reales");
+            } catch (\Exception $e) {
+                $this->warn("   ⚠️  GeminiService no disponible: " . $e->getMessage());
+            }
             
             // Encontrar partidos que necesitan actualización
             $hoursBack = env('APP_ENV') === 'production' ? 24 : 72;
@@ -55,7 +65,7 @@ class ProcessFinishedMatchesSync extends Command
                 foreach ($batches as $batchNumber => $batch) {
                     $this->info("  → Procesando lote " . ($batchNumber + 1) . " (" . count($batch) . " partidos)");
                     $processJob = new \App\Jobs\ProcessMatchBatchJob($batch, $batchNumber + 1);
-                    $processJob->handle($footballService);
+                    $processJob->handle($footballService, $geminiService);
                     
                     if ($batchNumber < count($batches) - 1) {
                         sleep(1); // Pequeña pausa entre lotes

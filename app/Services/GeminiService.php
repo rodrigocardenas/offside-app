@@ -114,6 +114,100 @@ class GeminiService
     }
 
     /**
+     * Obtener el resultado real de un partido específico
+     * Usa Gemini con grounding para buscar el resultado en internet
+     */
+    public function getMatchResult($homeTeam, $awayTeam, $date, $league = null, $forceRefresh = false)
+    {
+        $cacheKey = "gemini_match_result_" . md5("{$homeTeam}_{$awayTeam}_{$date}");
+
+        if (!$forceRefresh && Cache::has($cacheKey)) {
+            Log::info("Resultado en caché para {$homeTeam} vs {$awayTeam} ({$date})");
+            return Cache::get($cacheKey);
+        }
+
+        // Construir prompt para obtener resultado
+        $dateFormatted = Carbon::parse($date)->format('d de F de Y');
+        $leagueInfo = $league ? " en la liga de {$league}" : "";
+        
+        $prompt = "¿Cuál fue el resultado final del partido entre {$homeTeam} y {$awayTeam} que se jugó el {$dateFormatted}{$leagueInfo}? "
+                . "Responde SOLO con el marcador en formato: 'HOME_GOALS - AWAY_GOALS' (ejemplo: '3 - 2'). "
+                . "Si el partido no ha terminado, responde con 'NO_JUGADO'. "
+                . "Si no encuentras información, responde con 'NO_ENCONTRADO'.";
+
+        Log::info("Consultando Gemini para obtener resultado", [
+            'home_team' => $homeTeam,
+            'away_team' => $awayTeam,
+            'date' => $date,
+            'league' => $league
+        ]);
+
+        try {
+            $response = $this->callGemini($prompt, true); // true = usar grounding (web search)
+            
+            if ($response) {
+                // Procesar la respuesta para extraer los goles
+                $result = $this->parseMatchResult($response, $homeTeam, $awayTeam);
+                
+                if ($result && isset($result['home_score']) && isset($result['away_score'])) {
+                    $ttl = config('gemini.cache.results_ttl', 48 * 60);
+                    Cache::put($cacheKey, $result, now()->addMinutes($ttl));
+                    
+                    Log::info("Resultado obtenido de Gemini", [
+                        'home_team' => $homeTeam,
+                        'away_team' => $awayTeam,
+                        'score' => "{$result['home_score']} - {$result['away_score']}"
+                    ]);
+                    
+                    return $result;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Error al consultar Gemini para resultado del partido", [
+                'error' => $e->getMessage(),
+                'home_team' => $homeTeam,
+                'away_team' => $awayTeam
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Parsear respuesta de Gemini para extraer marcador
+     */
+    protected function parseMatchResult($response, $homeTeam, $awayTeam)
+    {
+        // Buscar patrones como "3 - 2" o "3-2" en la respuesta
+        if (preg_match('/(\d+)\s*-\s*(\d+)/', $response, $matches)) {
+            return [
+                'home_score' => (int)$matches[1],
+                'away_score' => (int)$matches[2],
+                'raw_response' => $response
+            ];
+        }
+
+        // Si la respuesta dice que no fue jugado o no se encontró
+        if (stripos($response, 'NO_JUGADO') !== false || stripos($response, 'no se ha jugado') !== false) {
+            Log::warning("Partido no ha sido jugado según Gemini", [
+                'home_team' => $homeTeam,
+                'away_team' => $awayTeam
+            ]);
+            return null;
+        }
+
+        if (stripos($response, 'NO_ENCONTRADO') !== false) {
+            Log::warning("No se encontró información del partido en Gemini", [
+                'home_team' => $homeTeam,
+                'away_team' => $awayTeam
+            ]);
+            return null;
+        }
+
+        return null;
+    }
+
+    /**
      * Llamada principal a la API de Gemini con retry logic
      */
     public function callGemini($userMessage, $useGrounding = false, $attempt = 1)
