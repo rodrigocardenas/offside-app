@@ -48,6 +48,45 @@ return [
     'battle_pass_desc' => 'Unlock exclusive rewards and premium content',
     'unlock_features' => 'Unlock Features',
     'unlock_features_desc' => 'Unlock advanced tools and analysis',
+
+    // Error pages
+    'errors' => [
+        '500' => [
+            'title' => 'Yellow card to the server!',
+            'message' => 'Something went wrong on our end. Our technical team is already working to fix it.',
+            'submessage' => 'Please try again in a few moments.',
+            'reload' => 'Try again',
+            'home' => 'Back to home',
+            'footer' => 'If the problem persists, contact us for assistance.',
+        ],
+        '404' => [
+            'title' => 'Offside!',
+            'message' => 'Sorry, the page you are looking for does not exist or has been moved.',
+            'submessage' => 'But don\'t worry! We can take you back to the field.',
+            'back' => 'Go back',
+            'home' => 'Back to home',
+        ],
+        '403' => [
+            'title' => 'Red card!',
+            'message' => 'You do not have permission to access this area of the field.',
+            'submessage' => 'Contact your coach (administrator) if you think this is an error.',
+            'back' => 'Go back',
+            'home' => 'Back to home',
+        ],
+        '503' => [
+            'title' => 'Half-time!',
+            'message' => 'We are performing maintenance tasks to improve your experience.',
+            'submessage' => 'We\'ll be back shortly. Thank you for your patience!',
+            'reload' => 'Try again',
+        ],
+        '419' => [
+            'title' => 'Full time!',
+            'message' => 'Your session has expired for security.',
+            'submessage' => 'Don\'t worry, you just need to reload the page to continue.',
+            'reload' => 'Reload page',
+            'home' => 'Go to home',
+        ],
+    ],
     'special_items' => 'Special Items',
     'special_items_desc' => 'Exclusive access to limited content',
     'contact_businesses' => 'Contact Us for Business Partnerships',

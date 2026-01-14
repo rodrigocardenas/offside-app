@@ -48,6 +48,45 @@ return [
     'battle_pass_desc' => 'Desbloquea recompensas exclusivas y contenido premium',
     'unlock_features' => 'Desbloquear Características',
     'unlock_features_desc' => 'Desbloquea herramientas y análisis avanzados',
+
+    // Error pages
+    'errors' => [
+        '500' => [
+            'title' => '¡Tarjeta amarilla al servidor!',
+            'message' => 'Algo ha salido mal de nuestro lado. Nuestro equipo técnico ya está trabajando para solucionarlo.',
+            'submessage' => 'Por favor, intenta de nuevo en unos momentos.',
+            'reload' => 'Intentar de nuevo',
+            'home' => 'Volver al inicio',
+            'footer' => 'Si el problema persiste, contáctanos para ayudarte.',
+        ],
+        '404' => [
+            'title' => '¡Fuera de juego!',
+            'message' => 'Lo sentimos, la página que buscas no existe o ha sido movida.',
+            'submessage' => '¡Pero no te preocupes! Podemos llevarte de vuelta al campo.',
+            'back' => 'Volver atrás',
+            'home' => 'Volver al inicio',
+        ],
+        '403' => [
+            'title' => '¡Tarjeta roja!',
+            'message' => 'No tienes permiso para acceder a esta zona del campo.',
+            'submessage' => 'Contacta con tu entrenador (administrador) si crees que esto es un error.',
+            'back' => 'Volver atrás',
+            'home' => 'Volver al inicio',
+        ],
+        '503' => [
+            'title' => '¡Tiempo de descanso!',
+            'message' => 'Estamos realizando tareas de mantenimiento para mejorar tu experiencia.',
+            'submessage' => 'Volveremos enseguida. ¡Gracias por tu paciencia!',
+            'reload' => 'Intentar de nuevo',
+        ],
+        '419' => [
+            'title' => '¡Fin del tiempo reglamentario!',
+            'message' => 'Tu sesión ha expirado por seguridad.',
+            'submessage' => 'No te preocupes, solo necesitas recargar la página para continuar.',
+            'reload' => 'Recargar página',
+            'home' => 'Ir al inicio',
+        ],
+    ],
     'special_items' => 'Artículos Especiales',
     'special_items_desc' => 'Acceso exclusivo a contenido limitado',
     'contact_businesses' => 'Contáctanos para Asociaciones Empresariales',

@@ -1,79 +1,210 @@
+@php
+    // Detectar tema: por defecto light (sin usuario autenticado)
+    $isDark = false;
+
+    // Colores basados en groups/index
+    $bgPrimary = $isDark ? '#0a2e2c' : '#f5f5f5';
+    $bgSecondary = $isDark ? '#0f3d3a' : '#ffffff';
+    $textPrimary = $isDark ? '#ffffff' : '#333333';
+    $textSecondary = $isDark ? '#b0b0b0' : '#666666';
+    $accentColor = '#00deb0';
+    $accentDark = '#00b890';
+    $borderColor = $isDark ? '#1a524e' : '#e0e0e0';
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Error Interno del Servidor - {{ config('app.name', 'Laravel') }}</title>
-
-    <!-- Fonts -->
+    <title>Error del servidor - {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Figtree', sans-serif;
+            background: {{ $bgPrimary }};
+            color: {{ $textPrimary }};
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+        .card {
+            background: {{ $bgSecondary }};
+            border-radius: 16px;
+            padding: 48px 32px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            color: {{ $accentColor }};
+        }
+        .error-code {
+            font-size: 72px;
+            font-weight: bold;
+            color: {{ $accentColor }};
+            margin-bottom: 16px;
+            line-height: 1;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: {{ $textPrimary }};
+            margin-bottom: 16px;
+        }
+        p {
+            font-size: 16px;
+            color: {{ $textSecondary }};
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .trace-box {
+            background: {{ $isDark ? '#1a524e' : '#e6faf8' }};
+            border: 1px solid {{ $borderColor }};
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .trace-label {
+            font-size: 14px;
+            color: {{ $textSecondary }};
+            margin-bottom: 8px;
+        }
+        .trace-code {
+            background: {{ $isDark ? '#0a2e2c' : '#ffffff' }};
+            color: {{ $accentColor }};
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .trace-help {
+            font-size: 12px;
+            color: {{ $textSecondary }};
+            margin-top: 8px;
+        }
+        .buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: {{ $accentColor }};
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: {{ $accentDark }};
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 222, 176, 0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: {{ $accentColor }};
+            border: 2px solid {{ $accentColor }};
+        }
+        .btn-secondary:hover {
+            background: {{ $accentColor }};
+            color: #ffffff;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: {{ $textSecondary }};
+        }
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+        @media (max-width: 640px) {
+            .card {
+                padding: 32px 24px;
+            }
+            .error-code {
+                font-size: 56px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .buttons {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-<body class="antialiased">
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-        <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-            <div class="text-center">
-                <div class="mb-4">
-                    <svg class="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+<body>
+    <div class="container">
+        <div class="card">
+            <!-- Icono -->
+            <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.964-1.333-2.732 0L4.082 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+
+            <!-- Error 500 -->
+            <div class="error-code">500</div>
+
+            <!-- Mensaje principal -->
+            <h1>{{ __('messages.errors.500.title') }}</h1>
+
+            <p>
+                {{ __('messages.errors.500.message') }}
+                <br>{{ __('messages.errors.500.submessage') }}
+            </p>
+
+            <!-- Botones de acción -->
+            <div class="buttons">
+                <button onclick="window.location.reload()" class="btn btn-primary">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                </div>
+                    {{ __('messages.errors.500.reload') }}
+                </button>
 
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Error Interno del Servidor
-                </h1>
-
-                <p class="text-gray-600 dark:text-gray-400 mb-4">
-                    {{ $message ?? 'Ha ocurrido un error interno del servidor. Por favor, inténtalo de nuevo más tarde.' }}
-                </p>
-
-                @if(isset($error_code))
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded p-3 mb-4">
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
-                            Código de error: <code class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-xs">{{ $error_code }}</code>
-                        </p>
-                    </div>
-                @endif
-
-                @if(isset($trace_id))
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded p-3 mb-4">
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
-                            ID de seguimiento: <code class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-xs">{{ $trace_id }}</code>
-                        </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                            Por favor, proporciona este ID si contactas al soporte técnico.
-                        </p>
-                    </div>
-                @endif
-
-                @if(config('app.debug'))
-                    @if(isset($context) && is_array($context) && count($context) > 0)
-                        <div class="bg-yellow-50 dark:bg-yellow-900 rounded p-3 mb-4 text-left">
-                            <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-100 mb-2">Contexto (Desarrollo):</p>
-                            <pre class="text-xs text-yellow-700 dark:text-yellow-200 overflow-x-auto">{{ json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                        </div>
-                    @endif
-
-                    @if(isset($trace))
-                        <div class="bg-red-50 dark:bg-red-900 rounded p-3 mb-4 text-left">
-                            <p class="text-sm font-semibold text-red-800 dark:text-red-100 mb-2">Stack Trace (Desarrollo):</p>
-                            <pre class="text-xs text-red-700 dark:text-red-200 overflow-x-auto">{{ $trace }}</pre>
-                        </div>
-                    @endif
-                @endif
-
-                <div class="flex space-x-4 justify-center">
-                    <a href="{{ route('home') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        Ir al Inicio
-                    </a>
-                    <button onclick="window.location.reload()" class="inline-flex items-center px-4 py-2 bg-gray-300 dark:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-400 dark:hover:bg-gray-600 focus:bg-gray-400 dark:focus:bg-gray-600 active:bg-gray-500 dark:active:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        Recargar Página
-                    </button>
-                </div>
+                <a href="{{ url('/') }}" class="btn btn-secondary">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    {{ __('messages.errors.500.home') }}
+                </a>
             </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            {{ __('messages.errors.500.footer') }}
         </div>
     </div>
 </body>
