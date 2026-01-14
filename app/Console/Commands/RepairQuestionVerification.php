@@ -76,7 +76,7 @@ class RepairQuestionVerification extends Command
                 $minTime = $now->copy()->subHours($minHours);
                 $maxTime = $now->copy()->subHours($maxHours);
 
-                $matchQuery->whereBetween('finished_at', [$maxTime, $minTime]);
+                $matchQuery->whereBetween('updated_at', [$maxTime, $minTime]);
                 $this->line("   Filtro: Finalizados entre {$minHours} y {$maxHours} horas atrás");
             }
 
