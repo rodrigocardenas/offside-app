@@ -1,14 +1,16 @@
 @php
     $themeColors = $themeColors ?? [];
-    $bgPrimary = $themeColors['bgPrimary'] ?? '#0a2e2c';
-    $bgSecondary = $themeColors['bgSecondary'] ?? '#0f3d3a';
-    $bgTertiary = $themeColors['bgTertiary'] ?? '#1a524e';
-    $textPrimary = $themeColors['textPrimary'] ?? '#ffffff';
-    $textSecondary = $themeColors['textSecondary'] ?? '#b0b0b0';
-    $borderColor = $themeColors['borderColor'] ?? '#2a4a47';
+    $isDark = $themeColors['isDark'] ?? ($isDark ?? true);
+    $bgPrimary = $themeColors['bgPrimary'] ?? ($isDark ? '#0a2e2c' : '#f5f5f5');
+    $bgSecondary = $themeColors['bgSecondary'] ?? ($isDark ? '#0f3d3a' : '#f5f5f5');
+    $bgTertiary = $themeColors['bgTertiary'] ?? ($isDark ? '#1a524e' : '#ffffff');
+    $componentsBackground = $themeColors['componentsBackground'] ?? ($isDark ? '#1a524e' : '#ffffff');
+    $textPrimary = $themeColors['textPrimary'] ?? ($isDark ? '#ffffff' : '#333333');
+    $textSecondary = $themeColors['textSecondary'] ?? ($isDark ? '#b0b0b0' : '#999999');
+    $borderColor = $themeColors['borderColor'] ?? ($isDark ? '#2a4a47' : '#e0e0e0');
     $accentColor = $themeColors['accentColor'] ?? '#00deb0';
     $accentDark = $themeColors['accentDark'] ?? '#17b796';
-    $isDark = $textPrimary === '#ffffff';
+@endphp
 
     // Generar URL de invitación
     $inviteUrl = route('groups.invite', $group->code);
@@ -18,7 +20,7 @@
 @endphp
 
 <!-- Invitación Social Section -->
-<div style="background: {{ $bgTertiary }}; border-radius: 16px; padding: 24px; margin-top: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+<div style="background: {{ $componentsBackground }}; border-radius: 16px; padding: 24px; margin-top: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
     <!-- Header con icono -->
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
         <div style="width: 40px; height: 40px; background: {{ $accentColor }}; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">

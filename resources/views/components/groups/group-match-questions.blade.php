@@ -1,17 +1,18 @@
 @php
     // Las variables de tema ya están compartidas globalmente por el middleware
     // Solo validar que existan en caso de que se use el componente sin middleware
-    $isDark = $isDark ?? true;
-    $bgPrimary = $bgPrimary ?? '#1a1a1a';
-    $bgSecondary = $bgSecondary ?? '#2a2a2a';
-    $bgTertiary = $bgTertiary ?? '#333333';
-    $textPrimary = $textPrimary ?? '#ffffff';
-    $textSecondary = $textSecondary ?? '#b0b0b0';
-    $borderColor = $borderColor ?? '#333333';
-    $componentsBackground = $componentsBackground ?? '#1a524e';
-    $buttonBgHover = $buttonBgHover ?? '#2a2a2a';
-    $accentColor = $accentColor ?? '#00deb0';
-    $accentDark = $accentDark ?? '#003b2f';
+    $themeColors = $themeColors ?? [];
+    $isDark = $themeColors['isDark'] ?? ($isDark ?? true);
+    $bgPrimary = $themeColors['bgPrimary'] ?? ($bgPrimary ?? ($isDark ? '#0a2e2c' : '#f5f5f5'));
+    $bgSecondary = $themeColors['bgSecondary'] ?? ($bgSecondary ?? ($isDark ? '#0f3d3a' : '#f5f5f5'));
+    $bgTertiary = $themeColors['bgTertiary'] ?? ($bgTertiary ?? ($isDark ? '#1a524e' : '#ffffff'));
+    $textPrimary = $themeColors['textPrimary'] ?? ($textPrimary ?? ($isDark ? '#ffffff' : '#333333'));
+    $textSecondary = $themeColors['textSecondary'] ?? ($textSecondary ?? ($isDark ? '#b0b0b0' : '#999999'));
+    $borderColor = $themeColors['borderColor'] ?? ($borderColor ?? ($isDark ? '#2a4a47' : '#e0e0e0'));
+    $componentsBackground = $themeColors['componentsBackground'] ?? ($componentsBackground ?? ($isDark ? '#1a524e' : '#ffffff'));
+    $buttonBgHover = $themeColors['buttonBgHover'] ?? ($buttonBgHover ?? ($isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)'));
+    $accentColor = $themeColors['accentColor'] ?? ($accentColor ?? '#00deb0');
+    $accentDark = $themeColors['accentDark'] ?? ($accentDark ?? '#003b2f');
 @endphp
 
 <div class="mt-1">
@@ -24,7 +25,7 @@
     <!-- Carrusel de preguntas -->
     <div class="relative flex items-center">
         <!-- Carrusel -->
-        <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 flex-1 px-12 pb-4" id="predictiveQuestionsCarousel">
+        <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 flex-1 px-1 pb-4" id="predictiveQuestionsCarousel">
             @forelse($matchQuestions->where('type', 'predictive') as $question)
                 <!-- Prediction Section (Similar to HTML design) -->
                 <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" id="question{{ $question->id }}" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px; {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-60;' : '' }}">
@@ -86,7 +87,7 @@
                                     $isStacked = $answers->count() > 2;
                                     $allNames = $answers->pluck('user.name')->implode(', ');
                                 @endphp
-                                <label class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $buttonBgHover }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgSecondary }}'">
+                                <label class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $buttonBgHover }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgSecondary }}'">
                                     <input type="radio" name="question_option_id" value="{{ $option->id }}" style="display: none;" onchange="this.closest('form').submit();">
                                     <span style="pointer-events: none; flex: 1; text-align: center;">{{ $option->text }}</span>
                                     <div style="display: flex; align-items: center;">
@@ -147,11 +148,11 @@
                                 $isStacked = $answers->count() > 2;
                                 $allNames = $answers->pluck('user.name')->implode(', ');
                                 $optionBg = $bgSecondary;
-                                $optionColor = $textSecondary;
+                                $optionColor = $textPrimary;
                                 if ($question->available_until->addHours(4) > now() && !$question->is_disabled) {
                                     if ($userHasAnswered && $userHasAnswered->id == $option->id) {
-                                        $optionBg = '#003b2f';
-                                        $optionColor = '#c1ff72';
+                                        $optionBg = $accentDark;
+                                        $optionColor = '#ffffff';
                                     }
                                 } else {
                                     if ($option->is_correct) {
@@ -236,7 +237,7 @@
             @if($group->users->count() >= 2)
                 @if($socialQuestion ?? false)
                     <div class="snap-center flex-none w-full" style="min-width: 300px;">
-                        <x-groups.group-social-question :social-question="$socialQuestion" :user-answers="$userAnswers" :theme-colors="compact('bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark')" />
+                        <x-groups.group-social-question :social-question="$socialQuestion" :user-answers="$userAnswers" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
                     </div>
                 @endif
             @else

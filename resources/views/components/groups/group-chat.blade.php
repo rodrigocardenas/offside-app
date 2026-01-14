@@ -8,27 +8,29 @@
     $borderColor = $themeColors['borderColor'] ?? '#2a4a47';
     $accentColor = $themeColors['accentColor'] ?? '#00deb0';
     $accentDark = $themeColors['accentDark'] ?? '#17b796';
-    $isDark = $textPrimary === '#ffffff'; // Si textPrimary es blanco, es modo oscuro
+    $isDark = $themeColors['isDark'] ?? ($textPrimary === '#ffffff');
+    $componentsBackground = $themeColors['componentsBackground'] ?? ($isDark ? '#1a524e' : '#ffffff');
+    $buttonBgHover = $themeColors['buttonBgHover'] ?? ($isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)');
 @endphp
 
 <!-- Chat Section - New Design -->
 <div style="display: flex; flex-direction: column; min-height: 100%;">
 <div id="chatSection" class="chat-section"
-    style="margin: 5px; background: {{ $isDark ? '#1a1a1a' : '#fff' }}; border-radius: 16px; display: flex; flex-direction: column; max-height: 400px; border: 1px solid {{ $isDark ? '#333' : '#e0e0e0' }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: {{ $isDark ? '#fff' : '#333' }};">
+    style="margin: 5px; background: {{ $componentsBackground }}; border-radius: 16px; display: flex; flex-direction: column; max-height: 400px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: {{ $textPrimary }};">
     <!-- Chat Title -->
     <div class="chat-title"
-        style="display: flex; align-items: center; gap: 8px; padding: 16px; font-size: 16px; font-weight: 600; color: {{ $isDark ? '#fff' : '#333' }}; border-bottom: 1px solid {{ $isDark ? '#333' : '#e0e0e0' }}; flex-shrink: 0;">
+        style="display: flex; align-items: center; gap: 8px; padding: 16px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }}; border-bottom: 1px solid {{ $borderColor }}; flex-shrink: 0;">
         <i class="fas fa-comments"></i> {{ __('views.chat.title') }}
     </div>
 
     <!-- Chat Messages Container (Scrollable) -->
     <div class="chat-messages" id="chatMessages"
-        style="display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow-y: auto; flex: 1;">
+        style="display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow-y: auto; flex: 1; background: {{ $bgSecondary }}; border-bottom: 1px solid {{ $borderColor }};">
         @forelse($group->chatMessages->reverse() as $message)
-            <div class="message" style="display: flex; gap: 8px; align-items: flex-start;">
+                <div class="message" style="display: flex; gap: 8px; align-items: flex-start;">
                 <!-- Avatar -->
-                <div class="message-avatar"
-                    style="width: 32px; height: 32px; border-radius: 50%; background: {{ $accentColor }}; display: flex; align-items: center; justify-content: center; color: {{ $isDark ? '#fff' : '#003b2f' }}; font-size: 12px; font-weight: bold; flex-shrink: 0;">
+                    <div class="message-avatar"
+                    style="width: 32px; height: 32px; border-radius: 50%; background: {{ $accentColor }}; display: flex; align-items: center; justify-content: center; color: {{ $isDark ? '#003b2f' : '#003b2f' }}; font-size: 12px; font-weight: bold; flex-shrink: 0;">
                     {{ strtoupper(substr($message->user->name, 0, 1)) }}
                 </div>
 
@@ -38,23 +40,23 @@
                     <div class="message-header"
                         style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                         <div class="message-name"
-                            style="font-size: 12px; font-weight: 600; color: {{ $isDark ? '#fff' : '#333' }};">
+                            style="font-size: 12px; font-weight: 600; color: {{ $textPrimary }};">
                             {{ $message->user->name }}
                         </div>
-                        <div class="message-time" style="font-size: 11px; color: {{ $isDark ? '#999' : '#6c757d' }};">
+                        <div class="message-time" style="font-size: 11px; color: {{ $textSecondary }};">
                             {{ $message->created_at->diffForHumans() }}
                         </div>
                     </div>
 
                     <!-- Message Text -->
                     <div class="message-text"
-                        style="font-size: 14px; line-height: 1.4; color: {{ $isDark ? '#ddd' : '#495057' }};">
+                        style="font-size: 14px; line-height: 1.4; color: {{ $textPrimary }};">
                         {{ $message->message }}
                     </div>
                 </div>
             </div>
         @empty
-            <div style="text-align: center; padding: 20px; color: {{ $isDark ? '#999' : '#6c757d' }};">
+            <div style="text-align: center; padding: 20px; color: {{ $textSecondary }};">
                 <p>{{ __('views.chat.no_messages_yet') }}</p>
             </div>
         @endforelse
@@ -62,16 +64,18 @@
 
     <!-- Chat Input (Fixed at bottom) -->
     <div class="chat-input"
-        style="padding: 12px 16px; border-top: 1px solid {{ $isDark ? '#333' : '#e0e0e0' }}; display: flex; gap: 8px; flex-shrink: 0; background: {{ $isDark ? '#1a1a1a' : '#fff' }};">
+        style="padding: 12px 16px; border-top: 1px solid {{ $borderColor }}; display: flex; gap: 8px; flex-shrink: 0; background: {{ $componentsBackground }};">
         <form action="{{ route('chat.store', $group) }}" method="POST" style="display: flex; gap: 8px; width: 100%;"
             id="chatForm">
             @csrf
             <input type="text" name="message" id="chatMessage"
-                style="flex: 1; padding: 10px 12px; border: 1px solid {{ $isDark ? '#444' : '#dee2e6' }}; border-radius: 20px; font-size: 14px; outline: none; background: {{ $isDark ? '#222' : '#f8f9fa' }}; color: {{ $isDark ? '#fff' : '#333' }};"
+                style="flex: 1; padding: 10px 12px; border: 1px solid {{ $borderColor }}; border-radius: 20px; font-size: 14px; outline: none; background: {{ $isDark ? '#08201d' : '#fdfdfd' }}; color: {{ $textPrimary }};"
                 placeholder="{{ __('views.chat.type_message') }}" required>
             <button type="submit" id="sendMessageBtn" title="{{ __('views.chat.send') }}"
-                style="padding: 10px 16px; background: {{ $accentColor }}; color: {{ $isDark ? '#000' : '#003b2f' }}; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; flex-shrink: 0;"
-                class="hover:opacity-80">
+                style="padding: 10px 16px; background: {{ $accentColor }}; color: {{ $isDark ? '#003b2f' : '#003b2f' }}; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; flex-shrink: 0;"
+                class="hover:opacity-80"
+                onmouseover="this.style.opacity='0.9'"
+                onmouseout="this.style.opacity='1'">
                 <span class="hidden sm:block">{{ __('views.chat.send') }}</span>
                 <i class="fas fa-paper-plane sm:hidden"></i>
             </button>
@@ -81,7 +85,7 @@
 <!-- Botón de Premio/Penitencia (solo para creador) -->
 {{-- @if ($group->created_by === auth()->id())
     <div style="margin-top: 32px; display: flex; justify-content: center;">
-        <button id="openRewardPenaltyBtn" class="btn btn-primary" style="background-color: #00deb0;"
+        <button id="openRewardPenaltyBtn" class="btn btn-primary" style="background-color: {{ $accentColor }};"
             onclick="document.getElementById('rewardPenaltyModal').classList.remove('hidden')">
             <i class="fas fa-plus"></i>
             <span>Agregar recompensa/penitencia</span>
@@ -93,7 +97,7 @@
     <div class="flex justify-center mt-8">
         @if ($group->reward_or_penalty)
             <div class="flex justify-center mt-2 mb-2">
-                <div class="px-4 py-1 text-white rounded-lg text-center accentColor" style="background-color: #00deb0;">
+                <div class="px-4 py-1 text-white rounded-lg text-center accentColor" style="background-color: {{ $accentColor }};">
                     <span class="font-bold">{{ __('views.groups.reward_punishment_label') }}:</span><br>
                     <span class="reward-or-penalty-text" style="font-style: italic">{{ $group->reward_or_penalty }}</span> <button
                         id="openRewardPenaltyModal"
@@ -105,7 +109,7 @@
             </div>
         @else
             <button id="openRewardPenaltyModal"
-                class="flex items-center px-4 py-2  rounded-lg  mt-4" style="background-color: #00deb0;">
+                class="flex items-center px-4 py-2  rounded-lg  mt-4" style="background-color: {{ $accentColor }};">
                 <i class="fa-solid fa-plus"></i>
                 {{ __('views.groups.add_reward_punishment') }}
             </button>
@@ -113,7 +117,7 @@
     </div>
 @elseif($group->reward_or_penalty)
     <div style="margin-top: 32px; margin-bottom: 20px; display: flex; justify-content: center;">
-        <button id="openRewardPenaltyBtn" class="btn btn-primary" style="background-color: #00deb0;"
+        <button id="openRewardPenaltyBtn" class="btn btn-primary" style="background-color: {{ $accentColor }};"
             onclick="document.getElementById('rewardPenaltyModal').classList.remove('hidden')">
             <i class="fas fa-plus"></i>
             <span>{{ __('views.groups.add_reward_punishment') }}</span>
@@ -245,19 +249,19 @@
                             .toUpperCase();
                         const newMessageHTML = `
                         <div class="message" style="display: flex; gap: 8px; align-items: flex-start;">
-                            <div class="message-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #00deb0; display: flex; align-items: center; justify-content: center; color: #333; font-size: 12px; font-weight: bold; flex-shrink: 0;">
+                            <div class="message-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: {{ $accentColor }}; display: flex; align-items: center; justify-content: center; color: {{ $isDark ? '#003b2f' : '#003b2f' }}; font-size: 12px; font-weight: bold; flex-shrink: 0;">
                                 ${firstLetter}
                             </div>
                             <div class="message-content" style="flex: 1;">
                                 <div class="message-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                    <div class="message-name" style="font-size: 12px; font-weight: 600;">
+                                    <div class="message-name" style="font-size: 12px; font-weight: 600; color: {{ $textPrimary }};">
                                         ${(data.message.user.name || 'Usuario').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                                     </div>
-                                    <div class="message-time" style="font-size: 11px; color: #999;">
+                                    <div class="message-time" style="font-size: 11px; color: {{ $textSecondary }};">
                                         hace unos segundos
                                     </div>
                                 </div>
-                                <div class="message-text" style="font-size: 14px; line-height: 1.4;">
+                                <div class="message-text" style="font-size: 14px; line-height: 1.4; color: {{ $textPrimary }};">
                                     ${(data.message.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                                 </div>
                             </div>

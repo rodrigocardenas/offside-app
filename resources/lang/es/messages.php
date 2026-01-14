@@ -92,4 +92,5 @@ return [
     'contact_businesses' => 'Contáctanos para Asociaciones Empresariales',
     'contact_businesses_desc' => '¿Eres una empresa interesada en ofrecer tus productos a través de nuestra plataforma? ¡Ponte en contacto con nosotros!',
     'contact_us' => 'Contáctanos',
+    'more' => 'Ver Más',
 ];

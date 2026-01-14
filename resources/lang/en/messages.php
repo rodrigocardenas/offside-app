@@ -92,4 +92,5 @@ return [
     'contact_businesses' => 'Contact Us for Business Partnerships',
     'contact_businesses_desc' => 'Are you a company interested in offering your products through our platform? Get in touch with us!',
     'contact_us' => 'Contact Us',
+    'more' => 'More',
 ];

@@ -123,7 +123,7 @@ return [
         'view_results_when_available' => 'Ver resultados cuando estén disponibles',
     ],
     'rankings' => [
-        'title' => 'Rankings',
+        'title' => 'Ranking',
         'daily' => 'Ranking Diario',
         'weekly' => 'Ranking Semanal',
         'monthly' => 'Ranking Mensual',

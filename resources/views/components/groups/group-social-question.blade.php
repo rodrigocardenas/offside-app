@@ -1,22 +1,24 @@
 @php
     // Las variables de tema ya están compartidas globalmente por el middleware
     // Solo validar que existan en caso de que se use el componente sin middleware
-    $isDark = $isDark ?? true;
-    $bgPrimary = $bgPrimary ?? '#1a1a1a';
-    $bgSecondary = $bgSecondary ?? '#2a2a2a';
-    $bgTertiary = $bgTertiary ?? '#333333';
-    $textPrimary = $textPrimary ?? '#ffffff';
-    $textSecondary = $textSecondary ?? '#b0b0b0';
-    $borderColor = $borderColor ?? '#333333';
-    $buttonBgHover = $buttonBgHover ?? '#2a2a2a';
-    $accentColor = $accentColor ?? '#00deb0';
-    $accentDark = $accentDark ?? '#003b2f';
+    $themeColors = $themeColors ?? [];
+    $isDark = $themeColors['isDark'] ?? ($isDark ?? true);
+    $bgPrimary = $themeColors['bgPrimary'] ?? ($bgPrimary ?? ($isDark ? '#0a2e2c' : '#f5f5f5'));
+    $bgSecondary = $themeColors['bgSecondary'] ?? ($bgSecondary ?? ($isDark ? '#0f3d3a' : '#f5f5f5'));
+    $bgTertiary = $themeColors['bgTertiary'] ?? ($bgTertiary ?? ($isDark ? '#1a524e' : '#ffffff'));
+    $componentsBackground = $themeColors['componentsBackground'] ?? ($componentsBackground ?? ($isDark ? '#1a524e' : '#ffffff'));
+    $textPrimary = $themeColors['textPrimary'] ?? ($textPrimary ?? ($isDark ? '#ffffff' : '#333333'));
+    $textSecondary = $themeColors['textSecondary'] ?? ($textSecondary ?? ($isDark ? '#b0b0b0' : '#999999'));
+    $borderColor = $themeColors['borderColor'] ?? ($borderColor ?? ($isDark ? '#2a4a47' : '#e0e0e0'));
+    $buttonBgHover = $themeColors['buttonBgHover'] ?? ($buttonBgHover ?? ($isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)'));
+    $accentColor = $themeColors['accentColor'] ?? ($accentColor ?? '#00deb0');
+    $accentDark = $themeColors['accentDark'] ?? ($accentDark ?? '#003b2f');
 @endphp
 
     {{-- <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
         <h2 style="font-size: 0.875rem; font-weight: bold; color: {{ $textPrimary }};">{{ __('views.groups.question_of_the_day') }}</h2>
     </div> --}}
-    <div style="background: {{ $bgPrimary }}; border-radius: 1.2rem; padding: 1.5rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; text-align: center;">
+    <div style="background: {{ $componentsBackground }}; border-radius: 1.2rem; padding: 1.5rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; text-align: center;">
         <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3" style="background: {{ $accentColor }}; color: #000;">
             PREGUNTA DEL DÍA
         </div>
@@ -34,7 +36,7 @@
                 @csrf
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
                     @foreach($socialQuestion->options as $option)
-                        <label class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $buttonBgHover }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgTertiary }}'">
+                        <label class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $buttonBgHover }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgSecondary }}'">
                             <input type="radio" name="question_option_id" value="{{ $option->id }}" style="display: none;" onchange="this.closest('form').submit();">
                             <span style="flex: 1; text-align: center; pointer-events: none;">{{ $option->text }}</span>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -69,12 +71,12 @@
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 @foreach($socialQuestion->options as $option)
                     @php
-                        $optionBg = $bgTertiary;
+                        $optionBg = $bgSecondary;
                         $optionColor = $textPrimary;
                         if ($socialQuestion->available_until->addHours(4) > now()) {
                             if (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id) {
-                                $optionBg = '#003b2f';
-                                $optionColor = $accentColor;
+                                $optionBg = $accentDark;
+                                $optionColor = '#ffffff';
                             }
                         } else {
                             if ($option->is_correct) {
@@ -86,7 +88,7 @@
                             }
                         }
                     @endphp
-                    <div class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textSecondary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+                    <div class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="color: {{ $optionColor }};">{{ $option->text }}</span>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -121,7 +123,7 @@
         <!-- Like/Dislike Buttons -->
         <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
             <button type="button"
-                    style="display: flex; align-items: center; cursor: pointer; color: {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? $accentColor : $textSecondary }}; transition: color 0.2s;"
+                style="display: flex; align-items: center; cursor: pointer; color: {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? $accentColor : $textSecondary }}; transition: color 0.2s;"
                     class="like-btn"
                     data-question-id="{{ $socialQuestion->id }}"
                     data-template-question-id="{{ $socialQuestion->template_question_id }}"
@@ -129,7 +131,7 @@
                     onmouseout="this.style.color='{{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? $accentColor : $textSecondary }}'">
                 <i class="fas fa-thumbs-up" style="margin-right: 0.25rem;"></i>
             </button>
-            <button type="button"
+                <button type="button"
                     style="display: flex; align-items: center; cursor: pointer; color: {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty() ? '#ef4444' : $textSecondary }}; transition: color 0.2s;"
                     class="dislike-btn"
                     data-question-id="{{ $socialQuestion->id }}"
