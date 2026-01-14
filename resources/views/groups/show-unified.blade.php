@@ -347,12 +347,22 @@
                                             <i class="fas fa-${isCorrect ? 'check' : 'times'}"></i>
                                         </span>
                                     </div>
-                                    ${!isCorrect ? `
+                                    ${!isCorrect && answer.correct_option ? `
                                         <div class="text-xs">
                                             <span style="color: ${themeConfig.textSecondary};">Respuesta correcta:</span>
                                             <span class="px-2.5 py-0.5 rounded-full text-white bg-green-500 ml-2">
                                                 ${answer.correct_option.text}
                                             </span>
+                                        </div>
+                                    ` : !isCorrect && !answer.correct_option ? `
+                                        <div class="text-xs">
+                                            <span style="color: ${themeConfig.textSecondary};">Estado:</span>
+                                            <span class="px-2.5 py-0.5 rounded-full text-white bg-yellow-500 ml-2">
+                                                Pendiente de verificación
+                                            </span>
+                                            <p style="color: ${themeConfig.textSecondary}; margin-top: 4px;">
+                                                Este partido aún no tiene datos verificados para evaluar esta pregunta.
+                                            </p>
                                         </div>
                                     ` : ''}
                                 </div>

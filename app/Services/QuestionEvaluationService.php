@@ -36,12 +36,25 @@ class QuestionEvaluationService
      */
     public function evaluateQuestion(Question $question, FootballMatch $match): array
     {
-        if ($match->status !== 'FINISHED') {
+        if (!in_array($match->status, ['FINISHED', 'Match Finished'])) {
             Log::warning('Match not finished', [
                 'match_id' => $match->id,
                 'status' => $match->status
             ]);
             return [];
+        }
+
+        // ⚠️ CHECK: Detectar si el partido tiene datos verificados o ficticios/fallback
+        $hasVerifiedData = $this->hasVerifiedMatchData($match);
+        
+        if (!$hasVerifiedData) {
+            Log::warning('Match has unverified/fictional data - skipping detailed event verification', [
+                'match_id' => $match->id,
+                'home_team' => $match->home_team,
+                'away_team' => $match->away_team,
+                'score' => $match->score,
+                'statistics' => $match->statistics
+            ]);
         }
 
         try {
@@ -50,37 +63,59 @@ class QuestionEvaluationService
 
             // Determinar tipo de pregunta y evaluar
             if ($this->isQuestionAbout($questionText, 'resultado|ganador|victoria|gana|ganará')) {
+                // ✅ Score-based: Siempre se puede verificar
                 $correctOptions = $this->evaluateWinner($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'primer gol|anotará.*primer')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'primer gol|anotará.*primer')) {
+                // ❌ Event-based: Solo si hay datos verificados
                 $correctOptions = $this->evaluateFirstGoal($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'ultimo gol|anotará.*último')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'ultimo gol|anotará.*último')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluateLastGoal($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'más.*faltas|faltas')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'más.*faltas|faltas')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluateFouls($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'tarjetas amarillas|amarillas')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tarjetas amarillas|amarillas')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluateYellowCards($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'tarjetas rojas|rojas')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tarjetas rojas|rojas')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluateRedCards($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'autogol|auto gol')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'autogol|auto gol')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluateOwnGoal($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'penal|penalty')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'penal|penalty')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluatePenaltyGoal($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'tiro libre|free kick')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tiro libre|free kick')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluateFreeKickGoal($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'córner|corner')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'córner|corner')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluateCornerGoal($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'posesión|possession')) {
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'posesión|possession')) {
+                // ❌ Event-based
                 $correctOptions = $this->evaluatePossession($question, $match);
             } elseif ($this->isQuestionAbout($questionText, 'ambos.*anotan|both.*score')) {
+                // ✅ Score-based: Siempre se puede verificar
                 $correctOptions = $this->evaluateBothScore($question, $match);
             } elseif ($this->isQuestionAbout($questionText, 'score.*exacto|exact|marcador')) {
+                // ✅ Score-based: Siempre se puede verificar
                 $correctOptions = $this->evaluateExactScore($question, $match);
             } elseif ($this->isQuestionAbout($questionText, 'goles.*over|goles.*under|total.*goles')) {
+                // ✅ Score-based: Siempre se puede verificar
                 $correctOptions = $this->evaluateGoalsOverUnder($question, $match);
             } else {
                 Log::warning('Unknown question type for evaluation', [
                     'question_id' => $question->id,
                     'question_text' => $question->title
+                ]);
+            }
+
+            if (empty($correctOptions)) {
+                Log::warning('No correct options found - cannot verify with available data', [
+                    'question_id' => $question->id,
+                    'match_id' => $match->id,
+                    'has_verified_data' => $hasVerifiedData
                 ]);
             }
 
@@ -93,6 +128,46 @@ class QuestionEvaluationService
             ]);
             return [];
         }
+    }
+
+    /**
+     * Verifica si un partido tiene datos verificados (no ficticios/fallback)
+     * 
+     * ✅ Datos verificados: API Football o Gemini con grounding
+     * ❌ Datos ficticios: Fallback, random, sin verificación
+     */
+    private function hasVerifiedMatchData(FootballMatch $match): bool
+    {
+        // Verificar statistics JSON
+        $statistics = is_string($match->statistics) 
+            ? json_decode($match->statistics, true) 
+            : $match->statistics;
+
+        if (!is_array($statistics)) {
+            return false;
+        }
+
+        // Si tiene source "Fallback" o "random" o "Simulated" → NO verificado
+        $source = $statistics['source'] ?? '';
+        if (stripos($source, 'fallback') !== false || 
+            stripos($source, 'random') !== false || 
+            stripos($source, 'simulated') !== false) {
+            return false;
+        }
+
+        // Si tiene "verified" = false → NO verificado
+        if (isset($statistics['verified']) && $statistics['verified'] === false) {
+            return false;
+        }
+
+        // Si el source es API Football o Gemini → VERIFICADO
+        if (stripos($source, 'api football') !== false || 
+            stripos($source, 'gemini') !== false) {
+            return true;
+        }
+
+        // Por defecto, si no hay información: NO es verificado
+        return false;
     }
 
     /**
