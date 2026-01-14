@@ -47,7 +47,7 @@
                     @if($question->templateQuestion->homeTeam)
                         <div class="flex items-center justify-center gap-4 mb-5">
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->templateQuestion->homeTeam->crest_url }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->homeTeam?->name }}">
+                                <img src="{{ $question->templateQuestion->homeTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->homeTeam?->name }}">
                                 <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->home_team, 15, '') }}</span>
                             </div>
                                 <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
@@ -59,7 +59,7 @@
                     @else
                         <div class="flex items-center justify-center gap-4 mb-5">
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->football_match->homeTeam?->crest_url }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->homeTeam?->name }}">
+                                <img src="{{ $question->football_match->homeTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->homeTeam?->name }}">
                                 <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->home_team, 15, '') }}</span>
                             </div>
                             <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
