@@ -5,8 +5,8 @@
     @section('navigation-title', __('views.settings.marketplace'))
 
     @php
-        $themeMode = auth()->user()->theme_mode ?? 'auto';
-        $isDark = $themeMode === 'dark' || ($themeMode === 'auto' && false);
+        $themeMode = auth()->user()->theme_mode ?? 'light';
+        $isDark = $themeMode === 'dark';
 
         // Colores dinámicos
         $bgPrimary = $isDark ? '#0a2e2c' : '#f5f5f5';

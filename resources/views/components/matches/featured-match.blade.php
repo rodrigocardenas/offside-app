@@ -4,8 +4,8 @@
 ])
 
 @php
-    $themeMode = auth()->user()->theme_mode ?? 'auto';
-    $isDark = $themeMode === 'dark' || ($themeMode === 'auto' && false);
+    $themeMode = auth()->user()->theme_mode ?? 'light';
+    $isDark = $themeMode === 'dark';
 @endphp
 
 @if($match)

@@ -1,6 +1,6 @@
 @php
-    $themeMode = auth()->user()->theme_mode ?? 'auto';
-    $isDark = $themeMode === 'dark' || ($themeMode === 'auto' && false);
+    $themeMode = auth()->user()->theme_mode ?? 'light';
+    $isDark = $themeMode === 'dark';
     $layout = $isDark ? 'mobile-dark-layout' : 'mobile-light-layout';
     $labelColor = $isDark ? '#ffffff' : '#333';
     $descColor = $isDark ? '#b0b0b0' : '#666';
@@ -75,7 +75,7 @@
                                         type="radio"
                                         name="theme_mode"
                                         value="light"
-                                        {{ auth()->user()->theme_mode === 'light' ? 'checked' : '' }}
+                                        {{ (auth()->user()->theme_mode ?? 'light') === 'light' ? 'checked' : '' }}
                                         class="theme-radio"
                                     >
                                     <div class="theme-card light-card">
@@ -89,7 +89,7 @@
                                         type="radio"
                                         name="theme_mode"
                                         value="dark"
-                                        {{ auth()->user()->theme_mode === 'dark' ? 'checked' : '' }}
+                                        {{ (auth()->user()->theme_mode ?? 'light') === 'dark' ? 'checked' : '' }}
                                         class="theme-radio"
                                     >
                                     <div class="theme-card dark-card">
@@ -98,19 +98,7 @@
                                     </div>
                                 </label>
 
-                                <label class="theme-option">
-                                    <input
-                                        type="radio"
-                                        name="theme_mode"
-                                        value="auto"
-                                        {{ auth()->user()->theme_mode === 'auto' || is_null(auth()->user()->theme_mode) ? 'checked' : '' }}
-                                        class="theme-radio"
-                                    >
-                                    <div class="theme-card auto-card">
-                                        <i class="fas fa-circle-half-stroke"></i>
-                                        <span>{{ __('views.settings.auto') }}</span>
-                                    </div>
-                                </label>
+                                
                             </div>
 
                             @error('theme_mode')
@@ -317,7 +305,7 @@
         /* Theme Selector */
         .theme-selector {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             margin-bottom: 16px;
         }
@@ -391,14 +379,7 @@
             color: #fbbf24;
         }
 
-        /* Auto Theme Card */
-        .auto-card {
-            background: linear-gradient(135deg, #f9fafb 50%, #1f2937 50%);
-        }
-
-        .auto-card i {
-            color: #666;
-        }
+        /* Auto theme card removed */
 
         /* Selected State */
         .theme-radio:checked + .theme-card {

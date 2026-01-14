@@ -24,13 +24,13 @@ class SettingsController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'theme_mode' => 'nullable|in:light,dark,auto',
+            'theme_mode' => 'nullable|in:light,dark',
             'language' => 'nullable|in:es,en',
         ]);
 
         // Guardar preferencia de tema
         if ($request->has('theme_mode')) {
-            $user->update(['theme_mode' => $validated['theme_mode']]);
+            $user->update(['theme_mode' => $validated['theme_mode'] ?? 'light']);
         }
 
         // Guardar preferencia de idioma

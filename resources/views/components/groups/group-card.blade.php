@@ -1,5 +1,5 @@
 @php
-    $themeMode = auth()->user()->theme_mode ?? 'auto';
+    $themeMode = auth()->user()->theme_mode ?? 'light';
     $isDarkMode = $themeMode === 'dark';
     $bgColor = $isDarkMode ? '#1a524e' : '#ffffff';
     $textColor = $isDarkMode ? '#ffffff' : '#333333';

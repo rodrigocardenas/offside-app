@@ -1,6 +1,6 @@
 <x-dynamic-layout>
     @php
-        $themeMode = auth()->user()->theme_mode ?? 'auto';
+        $themeMode = auth()->user()->theme_mode ?? 'light';
         $isDark = $themeMode === 'dark';
 
         // Define color variables

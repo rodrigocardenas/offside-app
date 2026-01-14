@@ -3,8 +3,8 @@
 
     @php
         // Tomar tema del usuario
-        $themeMode = auth()->user()->theme_mode ?? 'auto';
-        $isDark = $themeMode === 'dark' || ($themeMode === 'auto' && false);
+        $themeMode = auth()->user()->theme_mode ?? 'light';
+        $isDark = $themeMode === 'dark';
 
         // Paleta de colores unificada
         $bgPrimary = $isDark ? '#0a2e2c' : '#f5f5f5';

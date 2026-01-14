@@ -1,6 +1,6 @@
 @php
-    $themeMode = auth()->user()->theme_mode ?? 'auto';
-    $isDark = $themeMode === 'dark' || ($themeMode === 'auto' && false);
+    $themeMode = auth()->user()->theme_mode ?? 'light';
+    $isDark = $themeMode === 'dark';
     $layout = $isDark ? 'mobile-dark-layout' : 'mobile-light-layout';
 @endphp
 
@@ -24,7 +24,7 @@
 
         {{-- 1.5 MENSAJES DE SESIÓN --}}
         @php
-            $themeMode = auth()->user()->theme_mode ?? 'auto';
+            $themeMode = auth()->user()->theme_mode ?? 'light';
             $isDarkMsg = $themeMode === 'dark';
             $msgBg = $isDarkMsg ? '#1a524e' : '#d4edda';
             $msgBgError = $isDarkMsg ? '#522a2a' : '#f8d7da';
@@ -114,7 +114,7 @@
 
         {{-- 5.5 BOTONES DE ACCIÓN --}}
         @php
-            $themeMode = auth()->user()->theme_mode ?? 'auto';
+            $themeMode = auth()->user()->theme_mode ?? 'light';
             $isDarkMode = $themeMode === 'dark';
             $bgColor = $isDarkMode ? '#1a524e' : '#f5f5f5';
             $textColor = $isDarkMode ? '#ffffff' : '#333333';
@@ -164,7 +164,7 @@
 
     {{-- JOIN GROUP MODAL --}}
     @php
-        $themeMode = auth()->user()->theme_mode ?? 'auto';
+        $themeMode = auth()->user()->theme_mode ?? 'light';
         $isDarkModal = $themeMode === 'dark';
         $modalBg = $isDarkModal ? '#10302d' : '#ffffff';
         $modalText = $isDarkModal ? '#f1fff8' : '#333333';

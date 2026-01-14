@@ -17,16 +17,16 @@ class ApplyTheme
     {
         if (auth()->check()) {
             $theme = auth()->user()->theme ?? 'dark';
-            $themeMode = auth()->user()->theme_mode ?? 'auto';
+            $themeMode = auth()->user()->theme_mode ?? 'light';
             view()->share('userTheme', $theme);
             view()->share('userThemeMode', $themeMode);
         } else {
             view()->share('userTheme', 'dark');
-            view()->share('userThemeMode', 'auto');
+            view()->share('userThemeMode', 'light');
         }
 
         // Detectar si está en modo dark
-        $isDark = ($themeMode ?? 'auto') === 'dark' || (($themeMode ?? 'auto') === 'auto');
+        $isDark = ($themeMode ?? 'light') === 'dark';
 
         // Colores para tema light
         if (!$isDark) {

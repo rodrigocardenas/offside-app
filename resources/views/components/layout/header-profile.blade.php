@@ -1,8 +1,8 @@
 @props(['logoUrl' => null, 'altText' => 'Offside Club'])
 
 @php
-    $themeMode = auth()->user()->theme_mode ?? 'auto';
-    $isDarkHeader = $themeMode === 'dark' || ($themeMode === 'auto' && false);
+    $themeMode = auth()->user()->theme_mode ?? 'light';
+    $isDarkHeader = $themeMode === 'dark';
     $headerTitleColor = $isDarkHeader ? '#f1fff8' : '#333333';
 @endphp
 
