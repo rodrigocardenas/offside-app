@@ -95,6 +95,7 @@ return [
         'points_earned' => '+{points} puntos',
         'incorrect_answer' => 'Respuesta Incorrecta',
         'calculating' => 'Calculando...',
+        'cancel' => 'Cancelar',
     ],
     'questions' => [
         'title' => 'Preguntas',

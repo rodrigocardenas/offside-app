@@ -1,5 +1,11 @@
 @props(['logoUrl' => null, 'altText' => 'Offside Club'])
 
+@php
+    $themeMode = auth()->user()->theme_mode ?? 'auto';
+    $isDarkHeader = $themeMode === 'dark' || ($themeMode === 'auto' && false);
+    $headerTitleColor = $isDarkHeader ? '#f1fff8' : '#333333';
+@endphp
+
 <div class="header">
     <!-- Logo Left -->
     <div class="logo-container">
@@ -18,7 +24,7 @@
             <img src="@yield('navigation-logo')" style="width: 32px; height: 32px; border-radius: 50%; background-color: white; object-fit: cover;"/>
         </div>
     @elseif(View::hasSection('navigation-title'))
-        <div style="position: sticky; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1rem; font-weight: 600; color: #333;">
+        <div style="position: sticky; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1rem; font-weight: 600; color: {{ $headerTitleColor }};">
             @yield('navigation-title', 'Offside Club')
         </div>
     @endif

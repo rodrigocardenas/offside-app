@@ -229,19 +229,21 @@
 
     {{-- INVITE MODAL --}}
     @php
-        $inviteModalBg = $isDarkModal ? '#ffffff' : '#ffffff';
-        $inviteModalText = $isDarkModal ? '#333333' : '#333333';
-        $inviteModalBorder = $isDarkModal ? '#e0e0e0' : '#e0e0e0';
-        $inviteTextarea = $isDarkModal ? '#f5f5f5' : '#f5f5f5';
+        $inviteModalBg = $modalBg;
+        $inviteModalText = $modalText;
+        $inviteModalBorder = $modalBorder;
+        $inviteTextarea = $isDarkModal ? 'rgba(255,255,255,0.05)' : '#f5f5f5';
+        $inviteModalShadow = $modalSurfaceShadow;
+        $inviteCloseColor = $modalCloseColor;
     @endphp
 
     <div id="inviteModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
-        <div style="background: {{ $inviteModalBg }}; border-radius: 16px; width: 100%; max-width: 420px; padding: 28px 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);">
+        <div style="background: {{ $inviteModalBg }}; border: 1px solid {{ $inviteModalBorder }}; border-radius: 16px; width: 100%; max-width: 420px; padding: 28px 24px; box-shadow: {{ $inviteModalShadow }}; color: {{ $inviteModalText }};">
 
             {{-- Header --}}
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
                 <h2 style="font-size: 24px; font-weight: 700; color: {{ $inviteModalText }}; margin: 0;">{{ __('views.groups.share_group') }}</h2>
-                <button onclick="document.getElementById('inviteModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                <button onclick="document.getElementById('inviteModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: {{ $inviteCloseColor }}; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
