@@ -113,12 +113,15 @@ class ProcessMatchBatchJob implements ShouldQueue
                     // Validar que los scores sean números válidos
                     if ($homeScore >= 0 && $awayScore >= 0 && $homeScore <= 20 && $awayScore <= 20) {
                         // Preparar datos del partido
+                        // 🔄 IMPORTANTE: NO guardar events como texto descriptivo
+                        // ExtractMatchDetailsJob enriquecerá con eventos JSON después
                         $updateData = [
                             'status' => 'Match Finished',
                             'home_team_score' => $homeScore,
                             'away_team_score' => $awayScore,
                             'score' => "{$homeScore} - {$awayScore}",
-                            'events' => "✅ Resultado verificado desde Gemini (web search): {$homeScore} goles del local, {$awayScore} del visitante",
+                            // 🔄 Dejar events vacío para que ExtractMatchDetailsJob lo enriquezca
+                            'events' => null,
                             'statistics' => json_encode([
                                 'source' => 'Gemini (web search - VERIFIED)',
                                 'verified' => true,

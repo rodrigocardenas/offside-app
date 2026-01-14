@@ -36,10 +36,16 @@ class ExtractMatchDetailsJob implements ShouldQueue
 
         try {
             // Buscar partidos que necesitan detalles
+            // Cambiar estrategia: buscar partidos finalizados SIN eventos JSON válido
+            // (independientemente de cuándo se actualizaron)
             $matches = FootballMatch::where('status', 'Match Finished')
-                ->whereDate('updated_at', '>=', now()->subHours(12))
                 ->limit(50) // Procesar máximo 50 partidos por ejecución
                 ->get();
+
+            // Filtrar solo los que no tengan JSON de eventos válido
+            $matches = $matches->filter(function($match) {
+                return !$this->hasValidEventsJSON($match);
+            });
 
             if ($matches->isEmpty()) {
                 Log::info('No hay partidos para enriquecer con detalles');
