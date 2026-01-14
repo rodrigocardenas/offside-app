@@ -334,7 +334,7 @@ EOT;
                     'json_error' => json_last_error_msg(),
                     'response_preview' => substr($responseStr, 0, 500)
                 ]);
-                
+
                 // Intentar extraer el score del texto como fallback
                 Log::debug("Intentando extraer score del texto como fallback...");
                 if (preg_match('/(\d+)\s*-\s*(\d+)/', $responseStr, $matches)) {
@@ -344,7 +344,7 @@ EOT;
                     ]);
                     // No retornar, porque queremos JSON con eventos, no solo score
                 }
-                
+
                 return null;
             }
 
