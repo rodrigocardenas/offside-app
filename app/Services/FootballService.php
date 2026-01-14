@@ -362,9 +362,9 @@ class FootballService
      * 1. Número directo (fixture ID): "123456"
      * 2. Formato con equipos y fecha: "Bucaramanga_Once Caldas_2025-07-22T20:00:00+00:00"
      */
-    public function extraerFixtureIdDelExternalId($externalId, $matchDate = null)
+    public function extraerFixtureIdDelExternalId($externalId, $matchDate = null, $league = null)
     {
-        Log::info("Extrayendo fixtureId del external_id: $externalId, fecha del partido: $matchDate");
+        Log::info("Extrayendo fixtureId del external_id: $externalId, fecha del partido: $matchDate, liga: $league");
 
         // Si el external_id es directamente un número (fixture ID), retornarlo
         if (is_numeric($externalId)) {
@@ -399,8 +399,19 @@ class FootballService
                 // Usar la fecha del partido si está disponible, sino usar la fecha del external_id
                 $searchDate = $matchDate ? $matchDate : $date->format('Y-m-d');
 
-                // Intentar con diferentes competencias en orden de prioridad
-                $competitions = ['liga-colombia', 'champions-league', 'premier-league', 'la-liga'];
+                // Si tenemos la liga, intentar PRIMERO con esa liga
+                $competitions = [];
+                if ($league) {
+                    $competitions[] = $league;
+                }
+                
+                // Luego agregar las competiciones por defecto
+                $defaultCompetitions = ['liga-colombia', 'champions-league', 'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'fa-cup', 'league-cup', 'copa-del-rey'];
+                foreach ($defaultCompetitions as $comp) {
+                    if (!in_array($comp, $competitions)) {
+                        $competitions[] = $comp;
+                    }
+                }
 
                 foreach ($competitions as $competition) {
                     Log::info("Intentando buscar fixture en competencia: $competition con fecha: $searchDate");
@@ -954,13 +965,14 @@ class FootballService
             'home_team' => $match->home_team,
             'away_team' => $match->away_team,
             'date' => $match->date,
+            'league' => $match->league,
             'status' => $match->status
         ]);
 
-        // 3. Extraer el fixtureId del external_id usando la fecha del partido
+        // 3. Extraer el fixtureId del external_id usando la fecha del partido y la liga
         $matchDate = $match->date ? $match->date->format('Y-m-d') : null;
-        $fixtureId = $this->extraerFixtureIdDelExternalId($match->external_id, $matchDate);
-        Log::info('Fixture ID extraído: ' . $fixtureId . ' para fecha: ' . $matchDate);
+        $fixtureId = $this->extraerFixtureIdDelExternalId($match->external_id, $matchDate, $match->league);
+        Log::info('Fixture ID extraído: ' . $fixtureId . ' para fecha: ' . $matchDate . ' en liga: ' . $match->league);
         if (!$fixtureId) {
             return null;
         }
