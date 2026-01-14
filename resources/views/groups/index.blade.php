@@ -123,7 +123,7 @@
             $accentDark = '#17b796';
         @endphp
 
-        <div style="margin-top: 32px; padding: 20px; background: {{ $bgColor }}; border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="margin-top: 32px; margin-left:15px; margin-right:15px; margin-bottom: 15px; padding: 20px; background: {{ $bgColor }}; border-radius: 12px; display: flex; flex-direction: column; gap: 12px;">
             {{-- Botón Crear Grupo --}}
             <a href="{{ route('groups.create') }}"
                style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); border: none; border-radius: 8px; color: white; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.3s ease; font-size: 15px;"
@@ -162,23 +162,30 @@
     {{-- WELCOME WIZARD --}}
     <x-wizard-modal />
 
-    {{-- JOIN GROUP MODAL - VERSIÓN LIGHT --}}
+    {{-- JOIN GROUP MODAL --}}
     @php
         $themeMode = auth()->user()->theme_mode ?? 'auto';
         $isDarkModal = $themeMode === 'dark';
-        $modalBg = $isDarkModal ? '#ffffff' : '#ffffff';
-        $modalText = $isDarkModal ? '#333333' : '#333333';
-        $modalBorder = $isDarkModal ? '#e0e0e0' : '#e0e0e0';
-        $modalLabel = $isDarkModal ? '#333333' : '#333333';
+        $modalBg = $isDarkModal ? '#10302d' : '#ffffff';
+        $modalText = $isDarkModal ? '#f1fff8' : '#333333';
+        $modalBorder = $isDarkModal ? '#1d4f4a' : '#e0e0e0';
+        $modalLabel = $isDarkModal ? '#8de5d5' : '#333333';
+        $modalInputBg = $isDarkModal ? '#08201d' : '#ffffff';
+        $modalSecondaryBg = $isDarkModal ? 'rgba(255,255,255,0.08)' : '#f5f5f5';
+        $modalSecondaryHover = $isDarkModal ? 'rgba(255,255,255,0.18)' : '#e8e8e8';
+        $modalHint = $isDarkModal ? '#9bcfcc' : '#999999';
+        $modalCloseColor = $isDarkModal ? '#d5fdf0' : '#999999';
+        $modalFocusGlow = $isDarkModal ? '0 0 0 3px rgba(0, 222, 176, 0.25)' : '0 0 0 3px rgba(0, 222, 176, 0.1)';
+        $modalSurfaceShadow = $isDarkModal ? '0 14px 40px rgba(0, 0, 0, 0.55)' : '0 10px 40px rgba(0, 0, 0, 0.2)';
     @endphp
 
     <div id="joinGroupModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
-        <div style="background: {{ $modalBg }}; border-radius: 16px; width: 100%; max-width: 420px; padding: 28px 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);">
+        <div style="background: {{ $modalBg }}; border: 1px solid {{ $modalBorder }}; border-radius: 16px; width: 100%; max-width: 420px; padding: 28px 24px; box-shadow: {{ $modalSurfaceShadow }}; color: {{ $modalText }};">
 
             {{-- Header --}}
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
                 <h2 style="font-size: 24px; font-weight: 700; color: {{ $modalText }}; margin: 0;">{{ __('views.settings.join_group_title') }}</h2>
-                <button onclick="document.getElementById('joinGroupModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                <button onclick="document.getElementById('joinGroupModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: {{ $modalCloseColor }}; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -190,18 +197,18 @@
                 <div>
                     <label for="joinCode" style="display: block; font-size: 14px; font-weight: 600; color: {{ $modalLabel }}; margin-bottom: 8px;">{{ __('views.settings.group_code') }}</label>
                     <input id="joinCode" type="text" name="code" required
-                        style="width: 100%; background: #ffffff; border: 1px solid {{ $modalBorder }}; border-radius: 8px; padding: 12px 16px; color: {{ $modalText }}; font-size: 15px; transition: all 0.3s ease; box-sizing: border-box;"
-                        onfocus="this.style.borderColor='#00deb0'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
+                        style="width: 100%; background: {{ $modalInputBg }}; border: 1px solid {{ $modalBorder }}; border-radius: 8px; padding: 12px 16px; color: {{ $modalText }}; font-size: 15px; transition: all 0.3s ease; box-sizing: border-box;"
+                        onfocus="this.style.borderColor='#00deb0'; this.style.boxShadow='{{ $modalFocusGlow }}'"
                         onblur="this.style.borderColor='{{ $modalBorder }}'; this.style.boxShadow='none'"
                         placeholder="{{ __('views.settings.group_code_placeholder') }}" />
                 </div>
 
                 {{-- Botones --}}
                 <div style="display: flex; gap: 12px; margin-top: 8px;">
-                    <button type="button" onclick="document.getElementById('joinGroupModal').style.display = 'none'"
-                            style="flex: 1; padding: 12px 16px; background: #f5f5f5; border: none; border-radius: 8px; color: #333; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
-                            onmouseover="this.style.background='#e8e8e8'"
-                            onmouseout="this.style.background='#f5f5f5'">
+                        <button type="button" onclick="document.getElementById('joinGroupModal').style.display = 'none'"
+                            style="flex: 1; padding: 12px 16px; background: {{ $modalSecondaryBg }}; border: none; border-radius: 8px; color: {{ $modalText }}; font-weight: 600; cursor: pointer; transition: all 0.3s ease;"
+                            onmouseover="this.style.background='{{ $modalSecondaryHover }}'"
+                            onmouseout="this.style.background='{{ $modalSecondaryBg }}'">
                         {{ __('views.settings.cancel') }}
                     </button>
                     <button type="submit"
@@ -214,7 +221,7 @@
             </form>
 
             {{-- Info text --}}
-            <p style="font-size: 12px; color: #999; margin-top: 16px; text-align: center; margin-bottom: 0;">
+            <p style="font-size: 12px; color: {{ $modalHint }}; margin-top: 16px; text-align: center; margin-bottom: 0;">
                 Pídele el código a alguien del grupo
             </p>
         </div>

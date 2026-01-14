@@ -39,7 +39,7 @@
                     {{ $group->name }}
                     @if($hasPending)
                         <span title="{{ __('views.groups.pending_predictions') }}" style="color: red; margin-left: 8px;">
-                            <small><i class="fas fa-circle"></i></small>
+                            <small><i class="fas fa-circle fa-2xs"></i></small>
                         </span>
                     @endif
                 </h3>
@@ -59,7 +59,7 @@
     </div>
 
     <!-- Menú de 3 puntos -->
-    <div style="position: absolute; top: 12px; right: 12px; z-index: 10;">
+    <div style="position: absolute; top: 12px; right: 12px; z-index: 10; overflow: visible;">
         <button class="group-menu-btn" onclick="event.stopPropagation(); toggleGroupMenu(event, 'group-{{ $group->id }}')"
                 style="background: none; border: none; color: {{ $textColor }}; cursor: pointer; font-size: 18px; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s ease;"
                 onmouseover="this.style.background='{{ $hoverBg }}'"
@@ -69,7 +69,7 @@
 
         <!-- Dropdown -->
         <div class="group-menu-dropdown" id="group-{{ $group->id }}"
-             style="display: none; position: absolute; top: 100%; right: 0; background: {{ $bgColor }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 20; margin-top: 4px;">
+             style="display: none; position: absolute; top: 100%; right: 0; background: {{ $bgColor }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; margin-top: 4px;">
 
             <!-- Opción Compartir -->
             <button onclick="event.stopPropagation(); showInviteModal('{{ $group->name }}', '{{ route('groups.invite', $group->code) }}'); closeGroupMenu('group-{{ $group->id }}')"
@@ -103,32 +103,62 @@
 (function() {
     'use strict';
 
+    const MENU_OPEN_CLASS = 'group-card--menu-open';
+
+    function setMenuVisibility(menu, shouldShow) {
+        if (!menu) {
+            return;
+        }
+
+        const card = menu.closest('.group-card');
+
+        if (shouldShow) {
+            menu.style.display = 'flex';
+            menu.style.flexDirection = 'column';
+            if (card) {
+                card.classList.add(MENU_OPEN_CLASS);
+                card.style.zIndex = '60';
+            }
+        } else {
+            menu.style.display = 'none';
+            if (card) {
+                card.classList.remove(MENU_OPEN_CLASS);
+                card.style.zIndex = '';
+            }
+        }
+    }
+
+    function closeAllGroupMenus() {
+        document.querySelectorAll('.group-menu-dropdown').forEach(menu => setMenuVisibility(menu, false));
+    }
+
     window.toggleGroupMenu = function(event, menuId) {
         event.stopPropagation();
         const menu = document.getElementById(menuId);
+        if (!menu) {
+            return;
+        }
+
         const isOpen = menu.style.display === 'flex';
 
         // Cerrar todos los menús abiertos
-        document.querySelectorAll('.group-menu-dropdown').forEach(m => m.style.display = 'none');
+        closeAllGroupMenus();
 
         // Abrir/cerrar el menú actual
         if (!isOpen) {
-            menu.style.display = 'flex';
-            menu.style.flexDirection = 'column';
+            setMenuVisibility(menu, true);
         }
     };
 
     window.closeGroupMenu = function(menuId) {
         const menu = document.getElementById(menuId);
-        if (menu) {
-            menu.style.display = 'none';
-        }
+        setMenuVisibility(menu, false);
     };
 
     // Cerrar menús al hacer clic fuera
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.group-menu-btn') && !e.target.closest('.group-menu-dropdown')) {
-            document.querySelectorAll('.group-menu-dropdown').forEach(m => m.style.display = 'none');
+            closeAllGroupMenus();
         }
     });
 })();

@@ -310,12 +310,23 @@ body {
     transition: all 0.2s ease;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: visible;
 }
 
 .group-card:hover {
     border-color: #00deb0;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.group-card.group-card--menu-open {
+    z-index: 50;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+
+.group-menu-dropdown {
+    position: fixed !important;
+    z-index: 9999 !important;
 }
 
 .group-header {
