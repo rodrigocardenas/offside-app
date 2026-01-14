@@ -178,17 +178,25 @@ class GeminiService
      */
     protected function parseMatchResult($response, $homeTeam, $awayTeam)
     {
+        // Si es un array, convertir a string (Gemini puede retornar array de candidates)
+        if (is_array($response)) {
+            $response = json_encode($response);
+        }
+
+        // Asegurar que es string
+        $responseStr = (string)$response;
+
         // Buscar patrones como "3 - 2" o "3-2" en la respuesta
-        if (preg_match('/(\d+)\s*-\s*(\d+)/', $response, $matches)) {
+        if (preg_match('/(\d+)\s*-\s*(\d+)/', $responseStr, $matches)) {
             return [
                 'home_score' => (int)$matches[1],
                 'away_score' => (int)$matches[2],
-                'raw_response' => $response
+                'raw_response' => substr($responseStr, 0, 200) // Guardar primeros 200 chars
             ];
         }
 
         // Si la respuesta dice que no fue jugado o no se encontró
-        if (stripos($response, 'NO_JUGADO') !== false || stripos($response, 'no se ha jugado') !== false) {
+        if (stripos($responseStr, 'NO_JUGADO') !== false || stripos($responseStr, 'no se ha jugado') !== false) {
             Log::warning("Partido no ha sido jugado según Gemini", [
                 'home_team' => $homeTeam,
                 'away_team' => $awayTeam
@@ -196,7 +204,7 @@ class GeminiService
             return null;
         }
 
-        if (stripos($response, 'NO_ENCONTRADO') !== false) {
+        if (stripos($responseStr, 'NO_ENCONTRADO') !== false) {
             Log::warning("No se encontró información del partido en Gemini", [
                 'home_team' => $homeTeam,
                 'away_team' => $awayTeam
