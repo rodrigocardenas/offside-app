@@ -239,6 +239,12 @@ EOT;
         try {
             $response = $this->callGemini($prompt, true); // true = usar grounding (web search)
 
+            Log::debug("Respuesta recibida de Gemini para datos detallados", [
+                'response_type' => gettype($response),
+                'response_keys' => is_array($response) ? array_keys($response) : 'N/A',
+                'response_sample' => is_string($response) ? substr($response, 0, 200) : (is_array($response) ? json_encode($response) : $response)
+            ]);
+
             if ($response) {
                 $matchData = $this->parseDetailedMatchData($response, $homeTeam, $awayTeam);
 
@@ -254,15 +260,33 @@ EOT;
                     ]);
 
                     return $matchData;
+                } else {
+                    Log::warning("parseDetailedMatchData retornó NULL o datos incompletos", [
+                        'home_team' => $homeTeam,
+                        'away_team' => $awayTeam,
+                        'parsed_data' => $matchData
+                    ]);
                 }
+            } else {
+                Log::warning("callGemini retornó NULL o falsy", [
+                    'home_team' => $homeTeam,
+                    'away_team' => $awayTeam
+                ]);
             }
         } catch (\Exception $e) {
             Log::error("Error al consultar Gemini para datos detallados", [
                 'error' => $e->getMessage(),
                 'home_team' => $homeTeam,
-                'away_team' => $awayTeam
+                'away_team' => $awayTeam,
+                'trace' => $e->getTraceAsString()
             ]);
         }
+
+        Log::warning("getDetailedMatchData retornando NULL", [
+            'home_team' => $homeTeam,
+            'away_team' => $awayTeam,
+            'reason' => 'No se pudieron obtener datos válidos'
+        ]);
 
         return null;
     }
@@ -273,9 +297,23 @@ EOT;
     protected function parseDetailedMatchData($response, $homeTeam, $awayTeam)
     {
         try {
+            Log::debug("parseDetailedMatchData - Input", [
+                'response_type' => gettype($response),
+                'is_array' => is_array($response),
+                'is_string' => is_string($response),
+                'response_keys' => is_array($response) ? array_keys($response) : []
+            ]);
+
+            // Si viene envuelto en {'content': '...'}, extraer el contenido
+            if (is_array($response) && isset($response['content']) && !isset($response['home_goals'])) {
+                Log::debug("Respuesta envuelta en array['content'], extrayendo...");
+                $response = $response['content'];
+            }
+
             // Si es un array (Gemini lo retorna así a veces), convertir a string
             if (is_array($response)) {
                 $response = json_encode($response);
+                Log::debug("Array convertido a JSON string");
             }
 
             $responseStr = (string)$response;
@@ -284,20 +322,45 @@ EOT;
             $responseStr = preg_replace('/```json\s*/', '', $responseStr);
             $responseStr = preg_replace('/```\s*/', '', $responseStr);
 
+            Log::debug("Respuesta limpia (primeros 500 chars)", [
+                'clean_response' => substr($responseStr, 0, 500)
+            ]);
+
             // Intentar parsear como JSON
             $data = json_decode($responseStr, true);
 
             if (!$data || !is_array($data)) {
                 Log::warning("No se pudo parsear datos detallados como JSON", [
+                    'json_error' => json_last_error_msg(),
                     'response_preview' => substr($responseStr, 0, 500)
                 ]);
+                
+                // Intentar extraer el score del texto como fallback
+                Log::debug("Intentando extraer score del texto como fallback...");
+                if (preg_match('/(\d+)\s*-\s*(\d+)/', $responseStr, $matches)) {
+                    Log::warning("Score extraído del texto (fallback)", [
+                        'home_goals' => $matches[1],
+                        'away_goals' => $matches[2]
+                    ]);
+                    // No retornar, porque queremos JSON con eventos, no solo score
+                }
+                
                 return null;
             }
+
+            Log::debug("JSON parseado exitosamente", [
+                'keys' => array_keys($data),
+                'home_goals' => $data['home_goals'] ?? 'MISSING',
+                'away_goals' => $data['away_goals'] ?? 'MISSING'
+            ]);
 
             // Validar que tenemos los campos mínimos requeridos
             if (!isset($data['home_goals']) || !isset($data['away_goals'])) {
                 Log::warning("Datos JSON incompletos - faltan home_goals o away_goals", [
-                    'data' => $data
+                    'data_keys' => array_keys($data),
+                    'has_home_goals' => isset($data['home_goals']),
+                    'has_away_goals' => isset($data['away_goals']),
+                    'full_data' => json_encode($data)
                 ]);
                 return null;
             }
@@ -322,10 +385,16 @@ EOT;
                 'events' => is_array($data['events'] ?? null) ? $data['events'] : []
             ];
 
+            Log::debug("Datos limpios creados exitosamente", [
+                'clean_data_keys' => array_keys($cleanData),
+                'events_count' => count($cleanData['events'])
+            ]);
+
             return $cleanData;
         } catch (\Exception $e) {
             Log::error("Error al parsear datos detallados del partido", [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
             return null;
         }

@@ -75,17 +75,17 @@ class ProcessMatchBatchJob implements ShouldQueue
                     continue; // Pasar al siguiente partido
                 }
 
-                // PASO 2: Si API falla, intentar Gemini (con verificación web real)
+                // PASO 2: Si API falla, intentar Gemini (score básico, sin eventos)
                 Log::info("⚠️  API no devolvió datos para {$match->id}, intentando con Gemini web search");
 
                 $geminiResult = null;
-                $geminiDetailedData = null;
                 $geminiError = null;
 
                 if ($geminiService) {
                     try {
-                        // 🆕 Primero intentar obtener datos DETALLADOS (incluye eventos)
-                        $geminiDetailedData = $geminiService->getDetailedMatchData(
+                        // 🔄 CAMBIO: Solo intentar getMatchResult() (score básico)
+                        // Los eventos serán extraídos después por ExtractMatchDetailsJob
+                        $geminiResult = $geminiService->getMatchResult(
                             $match->home_team,
                             $match->away_team,
                             $match->date,
@@ -93,23 +93,8 @@ class ProcessMatchBatchJob implements ShouldQueue
                             false // no force refresh
                         );
 
-                        if ($geminiDetailedData) {
-                            // Usamos los datos detallados
-                            $geminiResult = [
-                                'home_score' => $geminiDetailedData['home_goals'],
-                                'away_score' => $geminiDetailedData['away_goals']
-                            ];
-                            $eventCount = count($geminiDetailedData['events'] ?? []);
-                            Log::info("✅ Datos DETALLADOS de Gemini obtenidos con {$eventCount} eventos");
-                        } else {
-                            // Si no hay datos detallados, intentar solo el score
-                            $geminiResult = $geminiService->getMatchResult(
-                                $match->home_team,
-                                $match->away_team,
-                                $match->date,
-                                $match->league,
-                                false
-                            );
+                        if ($geminiResult) {
+                            Log::info("✅ Score básico obtenido desde Gemini");
                         }
                     } catch (\Exception $e) {
                         $geminiError = $e->getMessage();
@@ -133,44 +118,21 @@ class ProcessMatchBatchJob implements ShouldQueue
                             'home_team_score' => $homeScore,
                             'away_team_score' => $awayScore,
                             'score' => "{$homeScore} - {$awayScore}",
+                            'events' => "✅ Resultado verificado desde Gemini (web search): {$homeScore} goles del local, {$awayScore} del visitante",
                             'statistics' => json_encode([
                                 'source' => 'Gemini (web search - VERIFIED)',
                                 'verified' => true,
                                 'verification_method' => 'grounding_search',
-                                'has_detailed_events' => !empty($geminiDetailedData),
+                                'has_detailed_events' => false,
                                 'timestamp' => now()->toIso8601String()
                             ])
                         ];
 
-                        // Si tenemos datos detallados, guardarlos como eventos JSON
-                        if ($geminiDetailedData && !empty($geminiDetailedData['events'])) {
-                            $updateData['events'] = json_encode($geminiDetailedData['events']);
-                            $eventCount = count($geminiDetailedData['events']);
-                            $updateData['statistics'] = json_encode([
-                                'source' => 'Gemini (web search - VERIFIED)',
-                                'verified' => true,
-                                'verification_method' => 'grounding_search',
-                                'has_detailed_events' => true,
-                                'detailed_event_count' => $eventCount,
-                                'first_goal_scorer' => $geminiDetailedData['first_goal_scorer'] ?? null,
-                                'last_goal_scorer' => $geminiDetailedData['last_goal_scorer'] ?? null,
-                                'total_yellow_cards' => $geminiDetailedData['total_yellow_cards'] ?? 0,
-                                'total_red_cards' => $geminiDetailedData['total_red_cards'] ?? 0,
-                                'total_own_goals' => $geminiDetailedData['total_own_goals'] ?? 0,
-                                'total_penalty_goals' => $geminiDetailedData['total_penalty_goals'] ?? 0,
-                                'home_possession' => $geminiDetailedData['home_possession'] ?? null,
-                                'away_possession' => $geminiDetailedData['away_possession'] ?? null,
-                                'timestamp' => now()->toIso8601String()
-                            ]);
-                        } else {
-                            $updateData['events'] = "✅ Resultado verificado desde Gemini (web search): {$homeScore} goles del local, {$awayScore} del visitante";
-                        }
-
                         $match->update($updateData);
 
-                        Log::info("✅ Partido {$match->id} actualizado desde Gemini" . ($geminiDetailedData ? " CON DATOS DETALLADOS" : ""), [
+                        Log::info("✅ Partido {$match->id} actualizado desde Gemini", [
                             'score' => "{$homeScore} - {$awayScore}",
-                            'detailed_events' => $geminiDetailedData ? count($geminiDetailedData['events'] ?? []) : 0
+                            'note' => 'Score obtenido. Detalles (eventos) serán extraídos por ExtractMatchDetailsJob'
                         ]);
                         continue;
                     } else {
