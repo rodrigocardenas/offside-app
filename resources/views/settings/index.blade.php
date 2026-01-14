@@ -98,7 +98,7 @@
                                     </div>
                                 </label>
 
-                                
+
                             </div>
 
                             @error('theme_mode')
