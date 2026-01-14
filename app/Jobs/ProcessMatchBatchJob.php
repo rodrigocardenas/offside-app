@@ -33,6 +33,13 @@ class ProcessMatchBatchJob implements ShouldQueue
 
     /**
      * Execute the job.
+     * 
+     * POLÍTICA DE DATOS VERIFICADOS ÚNICAMENTE:
+     * ✅ Solo actualiza con resultados de API Football o Gemini (con verificación web)
+     * ❌ NUNCA genera/usa datos aleatorios o ficticios
+     * ❌ NUNCA usa rand(), fabricación de scores, o fallbacks no verificados
+     * 
+     * Si ambas fuentes fallan: El partido NO se actualiza (permanece "Not Started")
      */
     public function handle(FootballService $footballService, GeminiService $geminiService = null)
     {
@@ -55,87 +62,110 @@ class ProcessMatchBatchJob implements ShouldQueue
                 // NO usar sleep() - bloquea el worker completamente
                 // Los delays entre lotes ya están configurados en UpdateFinishedMatchesJob
 
-                // Actualizar el partido usando la API
+                // PASO 1: Intentar obtener resultado de API Football
+                Log::info("→ Procesando partido {$match->id}: {$match->home_team} vs {$match->away_team}");
                 $updatedMatch = $footballService->updateMatchFromApi($match->id);
 
                 if ($updatedMatch) {
-                    Log::info("Partido {$match->id} actualizado en lote {$this->batchNumber}", [
+                    Log::info("✅ Partido {$match->id} actualizado desde API Football", [
                         'status' => $updatedMatch->status,
                         'score' => $updatedMatch->score,
-                        'source' => 'API Football'
+                        'source' => 'API Football (VERIFIED)'
                     ]);
-                } else {
-                    // Intentar obtener resultado real de Gemini
-                    Log::warning("API no devolvió datos para {$match->id}, intentando con Gemini");
-                    
-                    $geminiResult = null;
-                    if ($geminiService) {
-                        try {
-                            $geminiResult = $geminiService->getMatchResult(
-                                $match->home_team,
-                                $match->away_team,
-                                $match->date,
-                                $match->league,
-                                false // no force refresh
-                            );
-                        } catch (\Exception $e) {
-                            Log::warning("Error al consultar Gemini para {$match->id}: " . $e->getMessage());
-                        }
-                    }
+                    continue; // Pasar al siguiente partido
+                }
 
-                    if ($geminiResult && isset($geminiResult['home_score']) && isset($geminiResult['away_score'])) {
-                        // Resultado obtenido de Gemini - usar valores reales
-                        $homeScore = $geminiResult['home_score'];
-                        $awayScore = $geminiResult['away_score'];
-                        $source = "Gemini (web search)";
-                        
+                // PASO 2: Si API falla, intentar Gemini (con verificación web real)
+                Log::info("⚠️  API no devolvió datos para {$match->id}, intentando con Gemini web search");
+                
+                $geminiResult = null;
+                $geminiError = null;
+                
+                if ($geminiService) {
+                    try {
+                        $geminiResult = $geminiService->getMatchResult(
+                            $match->home_team,
+                            $match->away_team,
+                            $match->date,
+                            $match->league,
+                            false // no force refresh
+                        );
+                    } catch (\Exception $e) {
+                        $geminiError = $e->getMessage();
+                        Log::warning("❌ Error al consultar Gemini para {$match->id}: {$geminiError}");
+                    }
+                } else {
+                    $geminiError = "GeminiService no disponible";
+                    Log::warning("⚠️  GeminiService no inicializado para {$match->id}");
+                }
+
+                // PASO 3: Solo actualizar si Gemini devolvió resultado válido
+                if ($geminiResult && isset($geminiResult['home_score']) && isset($geminiResult['away_score'])) {
+                    $homeScore = (int) $geminiResult['home_score'];
+                    $awayScore = (int) $geminiResult['away_score'];
+                    
+                    // Validar que los scores sean números válidos
+                    if ($homeScore >= 0 && $awayScore >= 0 && $homeScore <= 20 && $awayScore <= 20) {
                         $match->update([
                             'status' => 'Match Finished',
                             'home_team_score' => $homeScore,
                             'away_team_score' => $awayScore,
                             'score' => "{$homeScore} - {$awayScore}",
-                            'events' => "Partido actualizado desde {$source}: {$homeScore} goles del local, {$awayScore} del visitante",
+                            'events' => "✅ Resultado verificado desde Gemini (web search): {$homeScore} goles del local, {$awayScore} del visitante",
                             'statistics' => json_encode([
-                                'source' => $source,
+                                'source' => 'Gemini (web search - VERIFIED)',
                                 'verified' => true,
+                                'verification_method' => 'grounding_search',
                                 'timestamp' => now()->toIso8601String()
                             ])
                         ]);
                         
-                        Log::info("Partido {$match->id} actualizado ({$source})", [
+                        Log::info("✅ Partido {$match->id} actualizado desde Gemini (VERIFICADO)", [
                             'score' => "{$homeScore} - {$awayScore}"
                         ]);
+                        continue;
                     } else {
-                        // NO actualizar si no encontramos resultado verificado
-                        Log::warning("No se pudo obtener resultado verificado para {$match->id}", [
-                            'home_team' => $match->home_team,
-                            'away_team' => $match->away_team,
-                            'date' => $match->date,
-                            'league' => $match->league,
-                            'status_actual' => $match->status
-                        ]);
-                        
-                        // Marcar que se intentó procesar pero no se encontró resultado
-                        $match->update([
-                            'statistics' => json_encode([
-                                'source' => 'NO_ENCONTRADO',
-                                'verified' => false,
-                                'attempted_at' => now()->toIso8601String(),
-                                'api_failed' => true,
-                                'gemini_failed' => !$geminiService || $geminiResult === null
-                            ])
-                        ]);
+                        Log::error("❌ Scores inválidos de Gemini para {$match->id}: {$homeScore}-{$awayScore}");
                     }
                 }
+
+                // PASO 4: Si AMBAS FUENTES FALLAN - NO ACTUALIZAR (política verificada-only)
+                Log::warning("❌ NO SE PUEDE VERIFICAR RESULTADO para {$match->id}", [
+                    'home_team' => $match->home_team,
+                    'away_team' => $match->away_team,
+                    'date' => $match->date,
+                    'league' => $match->league,
+                    'status_actual' => $match->status,
+                    'api_failed' => true,
+                    'gemini_failed' => !$geminiService || $geminiResult === null,
+                    'gemini_error' => $geminiError
+                ]);
+                
+                // Registrar el intento de procesamiento (sin actualizar scores)
+                $match->update([
+                    'statistics' => json_encode([
+                        'source' => 'NO_ENCONTRADO',
+                        'verified' => false,
+                        'attempted_at' => now()->toIso8601String(),
+                        'api_failed' => true,
+                        'gemini_failed' => !$geminiService || $geminiResult === null,
+                        'policy' => 'VERIFIED_ONLY - NO FAKE DATA',
+                        'gemini_error' => $geminiError
+                    ])
+                ]);
+                
+                Log::info("✓ Partido {$match->id} marcado como no procesable (sin datos verificados)");
+
             } catch (\Exception $e) {
-                Log::error("Error al actualizar partido {$match->id} en lote {$this->batchNumber}", [
-                    'error' => $e->getMessage()
+                Log::error("❌ ERROR CRÍTICO al actualizar partido {$match->id} en lote {$this->batchNumber}", [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
                 ]);
                 continue;
             }
         }
 
-        Log::info("Lote {$this->batchNumber} completado");
+        Log::info("Lote {$this->batchNumber} completado ✓");
     }
 }
 
