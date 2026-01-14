@@ -75,32 +75,23 @@ class Handler extends ExceptionHandler
             return $e->render($request);
         });
 
+        // show custom error page for 500 errors if not in debug mode
         $this->renderable(function (Throwable $e, Request $request) {
-            // Enhanced error logging for unhandled exceptions
-            Log::error('Unhandled Exception', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => auth()->id(),
-                'url' => $request->fullUrl(),
-                'method' => $request->method(),
-                'user_agent' => $request->userAgent(),
-                'ip' => $request->ip(),
-            ]);
-
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'error' => 'Internal Server Error',
-                    'message' => 'Ha ocurrido un error interno del servidor. Por favor, inténtalo de nuevo más tarde.',
-                    'trace_id' => uniqid('error_')
-                ], 500);
+            if (app()->bound('debugbar') && app('debugbar')->isEnabled()) {
+                // Si Debugbar está habilitado, usar el manejo de errores predeterminado
+                return null;
             }
+            if ($this->isHttpException($e) && $e->getStatusCode() === Response::HTTP_INTERNAL_SERVER_ERROR) {
+                Log::error('Internal Server Error: ' . $e->getMessage(), [
+                    'exception' => get_class($e),
+                    'stack_trace' => $e->getTraceAsString(),
+                ]);
 
-            return response()->view('errors.500', [
-                'message' => 'Ha ocurrido un error interno del servidor. Por favor, inténtalo de nuevo más tarde.',
-                'trace_id' => uniqid('error_')
-            ], 500);
+                return response()->view('errors.500', [], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            return null;
         });
+
+
     }
 }
