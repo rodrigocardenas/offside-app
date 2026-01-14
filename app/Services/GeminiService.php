@@ -201,7 +201,7 @@ Proporciona la información en formato JSON con esta estructura exacta:
     "away_goals": 0,
     "first_goal_scorer": "nombre_jugador",
     "first_goal_team": "HOME",
-    "last_goal_scorer": "nombre_jugador", 
+    "last_goal_scorer": "nombre_jugador",
     "last_goal_team": "HOME",
     "both_teams_scored": false,
     "events": [
@@ -222,7 +222,7 @@ Proporciona la información en formato JSON con esta estructura exacta:
     "total_penalty_goals": 1
 }
 
-IMPORTANTE: 
+IMPORTANTE:
 - Devuelve SOLO el JSON, sin explicaciones
 - Si el partido no se jugó, devuelve: {"status": "NOT_PLAYED"}
 - Si no encuentras información, devuelve: {"status": "NOT_FOUND"}

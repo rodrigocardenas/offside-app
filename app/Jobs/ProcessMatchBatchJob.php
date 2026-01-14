@@ -99,7 +99,8 @@ class ProcessMatchBatchJob implements ShouldQueue
                                 'home_score' => $geminiDetailedData['home_goals'],
                                 'away_score' => $geminiDetailedData['away_goals']
                             ];
-                            Log::info("✅ Datos DETALLADOS de Gemini obtenidos con {count($geminiDetailedData['events'] ?? [])} eventos");
+                            $eventCount = count($geminiDetailedData['events'] ?? []);
+                            Log::info("✅ Datos DETALLADOS de Gemini obtenidos con {$eventCount} eventos");
                         } else {
                             // Si no hay datos detallados, intentar solo el score
                             $geminiResult = $geminiService->getMatchResult(
