@@ -59,7 +59,7 @@ class VerifyQuestionAnswers extends Command
 
             // Si se especifica match-id, filtrar por ese partido
             if ($matchId) {
-                $query->where('football_match_id', $matchId);
+                $query->where('match_id', $matchId);
                 $this->line("   Filtro: Match ID = {$matchId}");
             }
 
