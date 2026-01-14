@@ -15,7 +15,7 @@ class RepairQuestionVerification extends Command
      *
      * @var string
      */
-    protected $signature = 'questions:repair 
+    protected $signature = 'questions:repair
                             {--match-id= : Reparar solo un partido}
                             {--status=Match\ Finished : Estado del partido a buscar}
                             {--min-hours=1 : Partidos finalizados hace al menos N horas}
@@ -103,8 +103,8 @@ class RepairQuestionVerification extends Command
                 $this->line("   Match ID: {$match->id} | Status: {$match->status}");
 
                 // Mostrar información del partido
-                $statistics = is_string($match->statistics) 
-                    ? json_decode($match->statistics, true) 
+                $statistics = is_string($match->statistics)
+                    ? json_decode($match->statistics, true)
                     : $match->statistics;
 
                 if (is_array($statistics)) {
@@ -156,7 +156,7 @@ class RepairQuestionVerification extends Command
                         foreach ($question->options as $option) {
                             $wasCorrect = $option->is_correct;
                             $option->is_correct = in_array($option->id, $correctOptionIds);
-                            
+
                             if ($wasCorrect !== $option->is_correct) {
                                 $option->save();
                             }
@@ -167,7 +167,7 @@ class RepairQuestionVerification extends Command
                             $wasCorrect = $answer->is_correct;
                             $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
                             $answer->points_earned = $answer->is_correct ? ($question->points ?? 300) : 0;
-                            
+
                             if ($wasCorrect !== $answer->is_correct) {
                                 $answer->save();
                                 $totalPointsAssigned += $answer->points_earned;
@@ -188,7 +188,7 @@ class RepairQuestionVerification extends Command
 
                     } catch (\Exception $e) {
                         $errorQuestions++;
-                        
+
                         if ($showDetails) {
                             $this->line("      ❌ {$question->title} - Error: " . $e->getMessage());
                         }
