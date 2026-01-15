@@ -88,7 +88,7 @@
 
     <!-- Chat Input (Fixed at bottom) -->
     <div class="chat-input"
-        style="padding: 12px 16px; border-top: 1px solid {{ $borderColor }}; display: flex; gap: 8px; flex-shrink: 0; background: {{ $componentsBackground }};">
+        style="padding: 12px 16px; border-top: 1px solid {{ $borderColor }}; display: flex; gap: 8px; flex-shrink: 0; background: {{ $componentsBackground }}; border-radius: 0 0 16px 16px;">
         <form action="{{ route('chat.store', $group) }}" method="POST" style="display: flex; gap: 8px; width: 100%;"
             id="chatForm">
             @csrf

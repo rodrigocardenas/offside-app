@@ -136,6 +136,7 @@ class NationalTeamsSeeder extends Seeder
         ];
 
         foreach ($nationalTeams as $teamData) {
+            $teamData['external_id'] = $teamData['external_id'] ?? ('national-' . strtolower($teamData['tla']));
             $team = Team::updateOrCreate(
                 ['tla' => $teamData['tla']],
                 $teamData
