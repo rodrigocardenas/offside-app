@@ -27,12 +27,36 @@
     <div class="chat-messages" id="chatMessages"
         style="display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow-y: auto; flex: 1; background: {{ $bgSecondary }}; border-bottom: 1px solid {{ $borderColor }};">
         @forelse($group->chatMessages->reverse() as $message)
-                <div class="message" style="display: flex; gap: 8px; align-items: flex-start;">
+            @php
+                $chatUser = $message->user;
+                $chatName = $chatUser->name ?? 'Usuario';
+                $initials = '';
+                if ($chatName) {
+                    $parts = explode(' ', $chatName);
+                    foreach ($parts as $part) {
+                        $initials .= strtoupper(substr($part, 0, 1));
+                    }
+                }
+                $initials = $initials !== '' ? substr($initials, 0, 1) : '?';
+                $avatarPalette = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                $paletteIndex = $chatUser
+                    ? crc32($chatUser->id . $chatName) % count($avatarPalette)
+                    : array_rand($avatarPalette);
+                $avatarColor = $avatarPalette[$paletteIndex];
+            @endphp
+            <div class="message" style="display: flex; gap: 8px; align-items: flex-start;">
                 <!-- Avatar -->
+                @if($chatUser && $chatUser->avatar)
+                    <img src="{{ $chatUser->avatar_url }}"
+                        alt="{{ $chatName }}"
+                        class="message-avatar"
+                        style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid {{ $borderColor }}; flex-shrink: 0;">
+                @else
                     <div class="message-avatar"
-                    style="width: 32px; height: 32px; border-radius: 50%; background: {{ $accentColor }}; display: flex; align-items: center; justify-content: center; color: {{ $isDark ? '#003b2f' : '#003b2f' }}; font-size: 12px; font-weight: bold; flex-shrink: 0;">
-                    {{ strtoupper(substr($message->user->name, 0, 1)) }}
-                </div>
+                        style="width: 32px; height: 32px; border-radius: 50%; background: {{ $avatarColor }}; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: bold; flex-shrink: 0;">
+                        {{ $initials }}
+                    </div>
+                @endif
 
                 <!-- Message Content -->
                 <div class="message-content" style="flex: 1;">
