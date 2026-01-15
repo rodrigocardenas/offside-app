@@ -62,6 +62,9 @@
                             <a href="{{ route('admin.dashboard') }}" class="text-white hover:text-gray-300 font-semibold">
                                 Admin Panel
                             </a>
+                            <a href="{{ route('admin.app-health-dashboard') }}" class="px-3 py-1 rounded-full bg-sky-500/10 text-sky-200 hover:bg-sky-500/20 transition-colors">
+                                Dashboard general
+                            </a>
                             <a href="{{ route('admin.verification-dashboard') }}" class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-colors">
                                 Dashboard de verificación
                             </a>

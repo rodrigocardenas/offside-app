@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AppHealthDashboardController;
 use App\Http\Controllers\Admin\QuestionAdminController;
 use App\Http\Controllers\Admin\TemplateQuestionController;
 use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionController;
@@ -14,6 +15,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         ->name('verification-dashboard');
     Route::get('/verification-dashboard/data', [VerificationDashboardController::class, 'data'])
         ->name('verification-dashboard.data');
+    Route::get('/app-health', [AppHealthDashboardController::class, 'index'])
+        ->name('app-health-dashboard');
+    Route::get('/app-health/data', [AppHealthDashboardController::class, 'data'])
+        ->name('app-health-dashboard.data');
 
     // Questions Management
     Route::resource('questions', QuestionAdminController::class)->except(['show']);

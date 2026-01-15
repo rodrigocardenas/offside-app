@@ -31,5 +31,11 @@ class DatabaseSeeder extends Seeder
             TemplateQuestionSeeder::class,
             NationalTeamsSeeder::class,
         ]);
+
+        if (app()->environment(['local', 'testing'])) {
+            $this->call([
+                UserLoginSeeder::class,
+            ]);
+        }
     }
 }
