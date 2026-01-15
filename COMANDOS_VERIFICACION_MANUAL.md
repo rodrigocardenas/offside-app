@@ -21,6 +21,9 @@ php artisan questions:verify-answers --match-id=123
 # Forzar reverificación (incluso si ya están verificadas)
 php artisan questions:verify-answers --force
 
+# Descargar eventos antes de verificar (por defecto se activa si usas --match-id)
+php artisan questions:verify-answers --match-id=123 --hydrate-events
+
 # Procesar máximo 100 preguntas (por defecto 50)
 php artisan questions:verify-answers --limit=100
 

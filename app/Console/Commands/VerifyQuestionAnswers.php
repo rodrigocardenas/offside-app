@@ -5,7 +5,9 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\FootballMatch;
 use App\Models\Question;
+use App\Services\GeminiService;
 use App\Services\QuestionEvaluationService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class VerifyQuestionAnswers extends Command
@@ -18,7 +20,8 @@ class VerifyQuestionAnswers extends Command
     protected $signature = 'questions:verify-answers
                             {--match-id= : Verificar solo un partido específico}
                             {--force : Forzar reverificación aunque ya esté verificada}
-                            {--limit=50 : Máximo número de preguntas a procesar}';
+                            {--limit=50 : Máximo número de preguntas a procesar}
+                            {--hydrate-events : Intentar descargar eventos antes de verificar (usa Gemini)}';
 
     /**
      * The description of the console command.
@@ -28,14 +31,16 @@ class VerifyQuestionAnswers extends Command
     protected $description = 'Verificar respuestas de preguntas y asignar puntos manualmente. Útil si los jobs no terminan.';
 
     protected QuestionEvaluationService $evaluationService;
+    protected GeminiService $geminiService;
 
     /**
      * Create a new command instance.
      */
-    public function __construct(QuestionEvaluationService $evaluationService)
+    public function __construct(QuestionEvaluationService $evaluationService, GeminiService $geminiService)
     {
         parent::__construct();
         $this->evaluationService = $evaluationService;
+        $this->geminiService = $geminiService;
     }
 
     /**
@@ -50,6 +55,7 @@ class VerifyQuestionAnswers extends Command
         $matchId = $this->option('match-id');
         $force = $this->option('force');
         $limit = (int) $this->option('limit');
+        $hydrateEvents = $this->option('hydrate-events') || (bool) $matchId;
 
         try {
             // ==================== PASO 1: Buscar preguntas ====================
@@ -84,6 +90,23 @@ class VerifyQuestionAnswers extends Command
 
             $this->info("✅ Encontradas {$questions->count()} preguntas");
 
+            if ($hydrateEvents) {
+                $this->info("\n🛰  PASO 1B: Hidratando eventos faltantes antes de verificar...");
+                $matches = $questions
+                    ->pluck('football_match')
+                    ->filter()
+                    ->unique(fn ($match) => $match->id);
+
+                if ($matches->isEmpty()) {
+                    $this->line('   No hay partidos asociados para hidratar eventos.');
+                } else {
+                    $hydrationStats = $this->hydrateMissingEvents($matches, $force);
+                    $this->line("   Partidos con request: {$hydrationStats['candidates']}");
+                    $this->line("   Eventos actualizados: {$hydrationStats['updated']}");
+                    $this->line("   Fallos al hidratar: {$hydrationStats['failed']}");
+                }
+            }
+
             // ==================== PASO 2: Verificar cada pregunta ====================
             $this->info("\n📊 PASO 2: Verificando preguntas y asignando puntos...\n");
 
@@ -117,6 +140,121 @@ class VerifyQuestionAnswers extends Command
                         if ($wasCorrect !== $option->is_correct) {
                             $option->save();
                         }
+
+                            /**
+                             * Intentar enriquecer partidos que no tienen eventos estructurados.
+                             */
+                            private function hydrateMissingEvents(Collection $matches, bool $forceRefresh): array
+                            {
+                                $stats = [
+                                    'candidates' => 0,
+                                    'updated' => 0,
+                                    'failed' => 0,
+                                ];
+
+                                foreach ($matches as $match) {
+                                    if (!$this->needsEventHydration($match)) {
+                                        continue;
+                                    }
+
+                                    $stats['candidates']++;
+
+                                    try {
+                                        $details = $this->geminiService->getDetailedMatchData(
+                                            $match->home_team,
+                                            $match->away_team,
+                                            $match->date ?? $match->match_date,
+                                            $match->league,
+                                            $forceRefresh
+                                        );
+
+                                        if (!$details || empty($details['events'])) {
+                                            $stats['failed']++;
+                                            continue;
+                                        }
+
+                                        $this->updateMatchWithDetails($match, $details);
+                                        $stats['updated']++;
+
+                                    } catch (\Throwable $e) {
+                                        $stats['failed']++;
+                                        Log::error('Error hidratando eventos desde VerifyQuestionAnswers', [
+                                            'match_id' => $match->id,
+                                            'error' => $e->getMessage()
+                                        ]);
+                                    }
+                                }
+
+                                return $stats;
+                            }
+
+                            private function needsEventHydration(?FootballMatch $match): bool
+                            {
+                                if (!$match || !$match->events) {
+                                    return true;
+                                }
+
+                                $events = $match->events;
+
+                                if (is_string($events)) {
+                                    $decoded = json_decode($events, true);
+                                    if (json_last_error() === JSON_ERROR_NONE) {
+                                        $events = $decoded;
+                                    }
+                                }
+
+                                if (!is_array($events) || empty($events)) {
+                                    return true;
+                                }
+
+                                $first = $events[0];
+                                return !(is_array($first) && isset($first['type'], $first['team']));
+                            }
+
+                            private function updateMatchWithDetails(FootballMatch $match, array $details): void
+                            {
+                                $statistics = $this->mergeStatistics($match, [
+                                    'source' => 'Gemini (web search - VERIFIED)',
+                                    'verified' => true,
+                                    'verification_method' => 'manual_hydration',
+                                    'has_detailed_events' => true,
+                                    'detailed_event_count' => isset($details['events']) ? count($details['events']) : 0,
+                                    'first_goal_scorer' => $details['first_goal_scorer'] ?? null,
+                                    'last_goal_scorer' => $details['last_goal_scorer'] ?? null,
+                                    'total_yellow_cards' => $details['total_yellow_cards'] ?? null,
+                                    'total_red_cards' => $details['total_red_cards'] ?? null,
+                                    'total_own_goals' => $details['total_own_goals'] ?? null,
+                                    'total_penalty_goals' => $details['total_penalty_goals'] ?? null,
+                                    'home_possession' => $details['home_possession'] ?? null,
+                                    'away_possession' => $details['away_possession'] ?? null,
+                                    'enriched_at' => now()->toIso8601String(),
+                                ]);
+
+                                $match->update([
+                                    'home_team_score' => $details['home_goals'] ?? $match->home_team_score,
+                                    'away_team_score' => $details['away_goals'] ?? $match->away_team_score,
+                                    'events' => isset($details['events']) ? json_encode($details['events']) : $match->events,
+                                    'statistics' => json_encode($statistics),
+                                ]);
+                            }
+
+                            private function mergeStatistics(FootballMatch $match, array $newData): array
+                            {
+                                $current = $match->statistics;
+
+                                if (is_string($current)) {
+                                    $decoded = json_decode($current, true);
+                                    if (json_last_error() === JSON_ERROR_NONE) {
+                                        $current = $decoded;
+                                    }
+                                }
+
+                                if (!is_array($current)) {
+                                    $current = [];
+                                }
+
+                                return array_merge($current, $newData);
+                            }
                     }
 
                     // Actualizar respuestas de usuarios y asignar puntos
