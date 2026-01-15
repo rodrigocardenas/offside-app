@@ -86,8 +86,8 @@ class CreateQuestionsForFinishedMatches extends Command
 
                 try {
                     // Validar que tenga datos verificados
-                    $stats = is_string($match->statistics) 
-                        ? json_decode($match->statistics, true) 
+                    $stats = is_string($match->statistics)
+                        ? json_decode($match->statistics, true)
                         : $match->statistics;
 
                     if (!is_array($stats) || stripos($stats['source'] ?? '', 'fallback') !== false) {
