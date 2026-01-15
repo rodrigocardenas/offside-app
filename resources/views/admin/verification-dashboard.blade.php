@@ -61,6 +61,97 @@
             </div>
         </div>
 
+        <section class="grid gap-6 xl:grid-cols-2">
+            <article class="rounded-3xl border border-slate-800 bg-slate-900/50 p-6">
+                <header class="flex items-start justify-between gap-6">
+                    <div>
+                        <h2 class="text-2xl font-semibold">Partidos recientemente verificados</h2>
+                        <p class="text-sm text-slate-400">Últimos encuentros con score final asignado y preguntas procesadas.</p>
+                    </div>
+                    <span class="text-xs uppercase tracking-[0.3em] text-slate-500">Top 8</span>
+                </header>
+                <div class="mt-6 flex flex-col gap-4" data-list="recent-matches">
+                    @forelse($dashboard['recent_matches'] as $match)
+                        @php
+                            $matchUpdated = ($match['updated_at'] ?? null) ? $match['updated_at']->tz($timezone)->diffForHumans() : '—';
+                            $lastAttempt = ($match['last_attempt_at'] ?? null) ? $match['last_attempt_at']->tz($timezone)->diffForHumans() : 'sin intentos';
+                            $matchScoreHome = $match['home_score'] ?? '—';
+                            $matchScoreAway = $match['away_score'] ?? '—';
+                        @endphp
+                        <div class="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/30">
+                            <div class="flex flex-wrap items-start justify-between gap-4">
+                                <div>
+                                    <p class="text-xs uppercase tracking-[0.3em] text-slate-500">{{ $match['competition'] ?? 'Sin competencia' }}</p>
+                                    <h4 class="mt-2 text-lg font-semibold text-white">{{ $match['home_team'] ?? 'Local' }} vs {{ $match['away_team'] ?? 'Visita' }}</h4>
+                                </div>
+                                <div class="text-right text-xs text-slate-400">
+                                    <span class="font-semibold text-emerald-200">{{ $match['status'] ?? 'FINISHED' }}</span>
+                                    <p>{{ $matchUpdated }}</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="flex items-center gap-3 text-3xl font-semibold">
+                                    <span>{{ $matchScoreHome }}</span>
+                                    <span class="text-base text-slate-500">-</span>
+                                    <span>{{ $matchScoreAway }}</span>
+                                </div>
+                                <div class="text-right text-xs text-slate-400">
+                                    <p><span class="text-emerald-300 font-semibold">{{ $match['questions_verified'] ?? 0 }}</span> verificadas</p>
+                                    <p><span class="text-amber-200 font-semibold">{{ $match['questions_pending'] ?? 0 }}</span> pendientes</p>
+                                </div>
+                            </div>
+                            <p class="mt-3 text-xs text-slate-500">Último intento del coordinador: {{ $lastAttempt }}</p>
+                        </div>
+                    @empty
+                        <p class="text-sm text-slate-400">Aún no hay partidos finalizados en el rango seleccionado.</p>
+                    @endforelse
+                </div>
+            </article>
+
+            <article class="rounded-3xl border border-slate-800 bg-slate-900/50 p-6">
+                <header class="flex items-start justify-between gap-6">
+                    <div>
+                        <h2 class="text-2xl font-semibold">Preguntas verificadas recientemente</h2>
+                        <p class="text-sm text-slate-400">Control de los últimos enunciados que otorgaron puntos.</p>
+                    </div>
+                    <span class="text-xs uppercase tracking-[0.3em] text-slate-500">Live log</span>
+                </header>
+                <div class="mt-6 flex flex-col gap-4" data-list="verified-questions">
+                    @forelse($dashboard['recent_verified_questions'] as $question)
+                        @php
+                            $verifiedAt = ($question['result_verified_at'] ?? null) ? $question['result_verified_at']->tz($timezone)->diffForHumans() : '—';
+                            $typeLabel = Str::headline(str_replace('_', ' ', $question['type'] ?? 'Pregunta'));
+                        @endphp
+                        <div class="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/30">
+                            <div class="flex flex-wrap items-start justify-between gap-4">
+                                <div class="max-w-md">
+                                    <p class="text-sm font-semibold text-white">{{ Str::limit($question['title'] ?? 'Pregunta sin título', 80) }}</p>
+                                    <p class="text-xs text-slate-400">{{ $typeLabel }} · {{ $question['group_name'] ?? 'Grupo general' }}</p>
+                                </div>
+                                <div class="text-right text-xs text-slate-400">
+                                    <span class="font-semibold text-emerald-200">{{ $verifiedAt }}</span>
+                                    <p>{{ $question['points'] ?? 0 }} pts</p>
+                                </div>
+                            </div>
+                            @if($question['match'])
+                                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300">
+                                    <div>
+                                        <p>{{ $question['match']['home_team'] ?? 'Local' }} vs {{ $question['match']['away_team'] ?? 'Visita' }}</p>
+                                        <p class="text-xs text-slate-500">{{ $question['match']['competition'] ?? 'Sin competencia' }}</p>
+                                    </div>
+                                    <div class="text-right font-mono text-lg">
+                                        {{ $question['match']['home_score'] ?? '—' }}-{{ $question['match']['away_score'] ?? '—' }}
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @empty
+                        <p class="text-sm text-slate-400">Sin verificaciones registradas todavía.</p>
+                    @endforelse
+                </div>
+            </article>
+        </section>
+
         <section class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             <article class="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-900/50 p-6 shadow-2xl shadow-emerald-500/5">
                 <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Runs procesados</p>
@@ -269,6 +360,10 @@
                 recentRuns: document.querySelector('[data-table="recent_runs"]'),
             },
             failures: document.querySelector('[data-list="failures"]'),
+            lists: {
+                matches: document.querySelector('[data-list="recent-matches"]'),
+                questions: document.querySelector('[data-list="verified-questions"]'),
+            },
             toggle: document.getElementById('auto-refresh-toggle'),
         };
 
@@ -338,6 +433,16 @@
             return parts[parts.length - 1] || name;
         }
 
+        function formatQuestionType(type) {
+            if (!type) {
+                return 'Pregunta';
+            }
+            return type
+                .toString()
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, (char) => char.toUpperCase());
+        }
+
         function renderTags(data) {
             if (!data || typeof data !== 'object') {
                 return '';
@@ -366,6 +471,91 @@
                     const label = key.replace(/_/g, ' ');
                     const display = typeof value === 'object' ? JSON.stringify(value) : value;
                     return `<span class="rounded-full bg-rose-500/10 px-3 py-1 text-xs text-rose-100">${escapeHtml(label)}: ${escapeHtml(display)}</span>`;
+                })
+                .join('');
+        }
+
+        function renderMatches(matches) {
+            if (!matches.length) {
+                return '<p class="text-sm text-slate-400">Aún no hay partidos finalizados en el rango seleccionado.</p>';
+            }
+            return matches
+                .map((match) => {
+                    const updated = formatRelative(match.updated_at);
+                    const lastAttempt = match.last_attempt_at ? formatRelative(match.last_attempt_at) : 'sin intentos';
+                    const homeScore = match.home_score ?? '—';
+                    const awayScore = match.away_score ?? '—';
+                    const competition = match.competition || 'Sin competencia';
+
+                    return `
+                        <div class="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/30">
+                            <div class="flex flex-wrap items-start justify-between gap-4">
+                                <div>
+                                    <p class="text-xs uppercase tracking-[0.3em] text-slate-500">${escapeHtml(competition)}</p>
+                                    <h4 class="mt-2 text-lg font-semibold text-white">${escapeHtml(match.home_team || 'Local')} vs ${escapeHtml(match.away_team || 'Visita')}</h4>
+                                </div>
+                                <div class="text-right text-xs text-slate-400">
+                                    <span class="font-semibold text-emerald-200">${escapeHtml(match.status || 'FINISHED')}</span>
+                                    <p>${escapeHtml(updated)}</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="flex items-center gap-3 text-3xl font-semibold">
+                                    <span>${escapeHtml(homeScore)}</span>
+                                    <span class="text-base text-slate-500">-</span>
+                                    <span>${escapeHtml(awayScore)}</span>
+                                </div>
+                                <div class="text-right text-xs text-slate-400">
+                                    <p><span class="text-emerald-300 font-semibold">${escapeHtml(match.questions_verified ?? 0)}</span> verificadas</p>
+                                    <p><span class="text-amber-200 font-semibold">${escapeHtml(match.questions_pending ?? 0)}</span> pendientes</p>
+                                </div>
+                            </div>
+                            <p class="mt-3 text-xs text-slate-500">Último intento del coordinador: ${escapeHtml(lastAttempt)}</p>
+                        </div>
+                    `;
+                })
+                .join('');
+        }
+
+        function renderQuestions(questions) {
+            if (!questions.length) {
+                return '<p class="text-sm text-slate-400">Sin verificaciones registradas todavía.</p>';
+            }
+
+            return questions
+                .map((question) => {
+                    const verified = formatRelative(question.result_verified_at);
+                    const typeLabel = formatQuestionType(question.type);
+                    const match = question.match;
+                    const matchBlock = match
+                        ? `
+                            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-300">
+                                <div>
+                                    <p>${escapeHtml(match.home_team || 'Local')} vs ${escapeHtml(match.away_team || 'Visita')}</p>
+                                    <p class="text-xs text-slate-500">${escapeHtml(match.competition || 'Sin competencia')}</p>
+                                </div>
+                                <div class="text-right font-mono text-lg">
+                                    ${escapeHtml(match.home_score ?? '—')}-${escapeHtml(match.away_score ?? '—')}
+                                </div>
+                            </div>
+                        `
+                        : '';
+
+                    return `
+                        <div class="rounded-2xl border border-slate-800/70 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/30">
+                            <div class="flex flex-wrap items-start justify-between gap-4">
+                                <div class="max-w-md">
+                                    <p class="text-sm font-semibold text-white">${escapeHtml(question.title || 'Pregunta sin título')}</p>
+                                    <p class="text-xs text-slate-400">${escapeHtml(typeLabel)} · ${escapeHtml(question.group_name || 'Grupo general')}</p>
+                                </div>
+                                <div class="text-right text-xs text-slate-400">
+                                    <span class="font-semibold text-emerald-200">${escapeHtml(verified)}</span>
+                                    <p>${escapeHtml(question.points ?? 0)} pts</p>
+                                </div>
+                            </div>
+                            ${matchBlock}
+                        </div>
+                    `;
                 })
                 .join('');
         }
@@ -488,6 +678,12 @@
                     }
                     if (elements.failures) {
                         elements.failures.innerHTML = renderFailures(data.recent_failures || []);
+                    }
+                    if (elements.lists.matches) {
+                        elements.lists.matches.innerHTML = renderMatches(data.recent_matches || []);
+                    }
+                    if (elements.lists.questions) {
+                        elements.lists.questions.innerHTML = renderQuestions(data.recent_verified_questions || []);
                     }
                     markSynced();
                 })

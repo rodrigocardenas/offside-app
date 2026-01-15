@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\FootballMatch;
+use App\Models\Question;
 use App\Models\VerificationRun;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -89,6 +91,9 @@ class VerificationDashboardController extends Controller
             ->values()
             ->all();
 
+        $recentMatches = $this->fetchRecentMatches();
+        $recentQuestions = $this->fetchRecentVerifiedQuestions();
+
         return [
             'summary' => [
                 'total_runs' => $total,
@@ -103,6 +108,8 @@ class VerificationDashboardController extends Controller
             'per_job' => $perJob,
             'recent_runs' => $recentRuns,
             'recent_failures' => $recentFailures,
+            'recent_matches' => $recentMatches,
+            'recent_verified_questions' => $recentQuestions,
         ];
     }
 
@@ -120,6 +127,85 @@ class VerificationDashboardController extends Controller
             'duration_seconds' => $run->duration_ms ? round($run->duration_ms / 1000, 2) : null,
             'started_at' => $run->started_at,
             'finished_at' => $run->finished_at,
+        ];
+    }
+
+    private function fetchRecentMatches(): array
+    {
+        return FootballMatch::query()
+            ->with(['competition:id,name'])
+            ->withCount([
+                'questions',
+                'questions as verified_questions_count' => function ($query) {
+                    $query->whereNotNull('result_verified_at');
+                },
+                'questions as pending_questions_count' => function ($query) {
+                    $query->whereNull('result_verified_at');
+                },
+            ])
+            ->whereIn('status', ['Match Finished', 'FINISHED'])
+            ->orderByDesc('updated_at')
+            ->limit(8)
+            ->get()
+            ->map(fn (FootballMatch $match) => $this->transformMatch($match))
+            ->all();
+    }
+
+    private function fetchRecentVerifiedQuestions(): array
+    {
+        return Question::query()
+            ->with(['group:id,name', 'football_match.competition:id,name'])
+            ->whereNotNull('result_verified_at')
+            ->orderByDesc('result_verified_at')
+            ->limit(8)
+            ->get()
+            ->map(fn (Question $question) => $this->transformQuestion($question))
+            ->all();
+    }
+
+    private function transformMatch(FootballMatch $match): array
+    {
+        $competitionName = optional($match->competition)->name ?? $match->competition ?? $match->league;
+        $matchDate = $match->match_date ?? $match->date;
+
+        return [
+            'id' => $match->id,
+            'home_team' => $match->home_team,
+            'away_team' => $match->away_team,
+            'home_score' => $match->home_team_score,
+            'away_score' => $match->away_team_score,
+            'status' => $match->status,
+            'competition' => $competitionName,
+            'match_date' => $matchDate,
+            'updated_at' => $match->updated_at,
+            'last_attempt_at' => $match->last_verification_attempt_at,
+            'questions_total' => (int) ($match->questions_count ?? 0),
+            'questions_verified' => (int) ($match->verified_questions_count ?? 0),
+            'questions_pending' => (int) ($match->pending_questions_count ?? 0),
+        ];
+    }
+
+    private function transformQuestion(Question $question): array
+    {
+        $match = $question->football_match;
+
+        return [
+            'id' => $question->id,
+            'title' => $question->title,
+            'type' => $question->type,
+            'points' => $question->points,
+            'result_verified_at' => $question->result_verified_at,
+            'group_name' => optional($question->group)->name,
+            'match' => $match ? [
+                'id' => $match->id,
+                'home_team' => $match->home_team,
+                'away_team' => $match->away_team,
+                'home_score' => $match->home_team_score,
+                'away_score' => $match->away_team_score,
+                'status' => $match->status,
+                'match_date' => $match->match_date ?? $match->date,
+                'competition' => optional($match->competition)->name ?? $match->competition ?? $match->league,
+            ] : null,
         ];
     }
 }
