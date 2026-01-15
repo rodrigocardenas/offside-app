@@ -24,9 +24,17 @@ use Illuminate\Support\Facades\Log;
  * - both_score: ¿Ambos equipos anotarán?
  * - exact_score: Score exacto
  * - goals_over_under: Goles over/under
+ * - goal_before_minute: ¿Habrá gol antes del minuto X?
  */
 class QuestionEvaluationService
 {
+    private ?GeminiService $geminiService;
+
+    public function __construct(?GeminiService $geminiService = null)
+    {
+        $this->geminiService = $geminiService;
+    }
+
     /**
      * Evalúa una pregunta y determina las opciones correctas.
      *
@@ -60,49 +68,69 @@ class QuestionEvaluationService
         try {
             $questionText = strtolower($question->title);
             $correctOptions = [];
+            $questionHandled = false;
 
             // Determinar tipo de pregunta y evaluar
             if ($this->isQuestionAbout($questionText, 'resultado|ganador|victoria|gana|ganará')) {
                 // ✅ Score-based: Siempre se puede verificar
+                $questionHandled = true;
                 $correctOptions = $this->evaluateWinner($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'primer gol|anotará.*primer')) {
                 // ❌ Event-based: Solo si hay datos verificados
+                $questionHandled = true;
                 $correctOptions = $this->evaluateFirstGoal($question, $match);
+            } elseif ($hasVerifiedData && $this->isGoalBeforeMinuteQuestion($questionText)) {
+                // ❌ Event-based: Gol antes de cierto minuto
+                $threshold = $this->extractMinuteThreshold($questionText) ?? 15;
+                $questionHandled = true;
+                $correctOptions = $this->evaluateGoalBeforeMinute($question, $match, $threshold);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'ultimo gol|anotará.*último')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluateLastGoal($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'más.*faltas|faltas')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluateFouls($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tarjetas amarillas|amarillas')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluateYellowCards($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tarjetas rojas|rojas')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluateRedCards($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'autogol|auto gol')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluateOwnGoal($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'penal|penalty')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluatePenaltyGoal($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tiro libre|free kick')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluateFreeKickGoal($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'córner|corner')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluateCornerGoal($question, $match);
             } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'posesión|possession')) {
                 // ❌ Event-based
+                $questionHandled = true;
                 $correctOptions = $this->evaluatePossession($question, $match);
             } elseif ($this->isQuestionAbout($questionText, 'ambos.*anotan|both.*score')) {
                 // ✅ Score-based: Siempre se puede verificar
+                $questionHandled = true;
                 $correctOptions = $this->evaluateBothScore($question, $match);
             } elseif ($this->isQuestionAbout($questionText, 'score.*exacto|exact|marcador')) {
                 // ✅ Score-based: Siempre se puede verificar
+                $questionHandled = true;
                 $correctOptions = $this->evaluateExactScore($question, $match);
-            } elseif ($this->isQuestionAbout($questionText, 'goles.*over|goles.*under|total.*goles')) {
+            } elseif ($this->isQuestionAbout($questionText, 'goles.*over|goles.*under|total.*goles|más.*goles|mas.*goles|menos.*goles')) {
                 // ✅ Score-based: Siempre se puede verificar
+                $questionHandled = true;
                 $correctOptions = $this->evaluateGoalsOverUnder($question, $match);
             } else {
                 Log::warning('Unknown question type for evaluation', [
@@ -117,6 +145,16 @@ class QuestionEvaluationService
                     'match_id' => $match->id,
                     'has_verified_data' => $hasVerifiedData
                 ]);
+
+                $fallbackOptions = $this->attemptGeminiFallback(
+                    $question,
+                    $match,
+                    $questionHandled ? 'empty_result' : 'unknown_type'
+                );
+
+                if (!empty($fallbackOptions)) {
+                    return $fallbackOptions;
+                }
             }
 
             return $correctOptions;
@@ -175,9 +213,25 @@ class QuestionEvaluationService
      */
     private function isQuestionAbout(string $text, string $keywords): bool
     {
-        $patterns = explode('|', $keywords);
+        $text = strtolower($text);
+        $patterns = explode('|', strtolower($keywords));
+
         foreach ($patterns as $pattern) {
-            if (strpos($text, strtolower(trim($pattern))) !== false) {
+            $pattern = trim($pattern);
+
+            if ($pattern === '') {
+                continue;
+            }
+
+            $withPlaceholders = str_replace('.*', '{wildcard}', $pattern);
+            $escaped = preg_quote($withPlaceholders, '/');
+            $regexPattern = str_replace('\{wildcard\}', '.*', $escaped);
+
+            if (@preg_match('/' . $regexPattern . '/u', $text)) {
+                if (preg_match('/' . $regexPattern . '/u', $text)) {
+                    return true;
+                }
+            } elseif (strpos($text, $pattern) !== false) {
                 return true;
             }
         }
@@ -258,6 +312,45 @@ class QuestionEvaluationService
     }
 
     /**
+     * TIPO: GOL ANTES DEL MINUTO X
+     */
+    private function evaluateGoalBeforeMinute(Question $question, FootballMatch $match, int $thresholdMinutes): array
+    {
+        $correctOptionIds = [];
+        $events = $this->parseEvents($match->events ?? []);
+
+        $firstGoalMinute = null;
+        foreach ($events as $event) {
+            if ($event['type'] !== 'GOAL') {
+                continue;
+            }
+
+            $minute = $this->parseMinuteValue($event['minute'] ?? null);
+
+            if ($minute === null) {
+                continue;
+            }
+
+            $firstGoalMinute = $minute;
+            break;
+        }
+
+        $goalBeforeThreshold = $firstGoalMinute !== null && $firstGoalMinute <= $thresholdMinutes;
+
+        foreach ($question->options as $option) {
+            $optionText = strtolower(trim($option->text));
+
+            if ($goalBeforeThreshold && $this->isAffirmativeOption($optionText)) {
+                $correctOptionIds[] = $option->id;
+            } elseif (!$goalBeforeThreshold && $this->isNegativeOption($optionText)) {
+                $correctOptionIds[] = $option->id;
+            }
+        }
+
+        return $correctOptionIds;
+    }
+
+    /**
      * TIPO: ÚLTIMO GOL
      */
     private function evaluateLastGoal(Question $question, FootballMatch $match): array
@@ -326,9 +419,24 @@ class QuestionEvaluationService
     {
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
+        $questionText = strtolower($question->title ?? '');
 
-        $homeYellow = count(array_filter($events, fn($e) => $e['type'] === 'CARD' && $e['card'] === 'YELLOW' && $e['team'] === 'HOME'));
-        $awayYellow = count(array_filter($events, fn($e) => $e['type'] === 'CARD' && $e['card'] === 'YELLOW' && $e['team'] === 'AWAY'));
+        $homeYellow = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'YELLOW') && ($e['team'] ?? null) === 'HOME'));
+        $awayYellow = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'YELLOW') && ($e['team'] ?? null) === 'AWAY'));
+        $totalYellow = $homeYellow + $awayYellow;
+
+        $threshold = $this->extractNumericValueFromText($questionText);
+        $asksMoreThan = $this->referencesMoreThan($questionText);
+        $asksLessThan = $this->referencesLessThan($questionText);
+
+        if ($threshold !== null && ($asksMoreThan || $asksLessThan)) {
+            $condition = $asksMoreThan ? $totalYellow > $threshold : $totalYellow < $threshold;
+            $binaryResult = $this->resolveBinaryQuestionOptions($question, $condition);
+
+            if (!empty($binaryResult)) {
+                return $binaryResult;
+            }
+        }
 
         foreach ($question->options as $option) {
             $optionText = strtolower(trim($option->text));
@@ -353,8 +461,8 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homeRed = count(array_filter($events, fn($e) => $e['type'] === 'CARD' && $e['card'] === 'RED' && $e['team'] === 'HOME'));
-        $awayRed = count(array_filter($events, fn($e) => $e['type'] === 'CARD' && $e['card'] === 'RED' && $e['team'] === 'AWAY'));
+        $homeRed = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'RED') && ($e['team'] ?? null) === 'HOME'));
+        $awayRed = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'RED') && ($e['team'] ?? null) === 'AWAY'));
 
         foreach ($question->options as $option) {
             $optionText = strtolower(trim($option->text));
@@ -379,10 +487,16 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homeOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && $e['team'] === 'HOME'));
-        $awayOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && $e['team'] === 'AWAY'));
+        $homeOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && ($e['team'] ?? null) === 'HOME'));
+        $awayOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && ($e['team'] ?? null) === 'AWAY'));
+        $hasOwnGoal = $homeOwnGoals > 0 || $awayOwnGoals > 0;
 
-        if ($homeOwnGoals > 0 || $awayOwnGoals > 0) {
+        $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasOwnGoal);
+        if (!empty($binaryResult)) {
+            return $binaryResult;
+        }
+
+        if ($hasOwnGoal) {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
 
@@ -411,10 +525,16 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homePenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && $e['team'] === 'HOME'));
-        $awayPenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && $e['team'] === 'AWAY'));
+        $homePenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && ($e['team'] ?? null) === 'HOME'));
+        $awayPenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && ($e['team'] ?? null) === 'AWAY'));
+        $hasPenalty = $homePenalty > 0 || $awayPenalty > 0;
 
-        if ($homePenalty > 0 || $awayPenalty > 0) {
+        $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasPenalty);
+        if (!empty($binaryResult)) {
+            return $binaryResult;
+        }
+
+        if ($hasPenalty) {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
 
@@ -443,10 +563,16 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homeFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && $e['team'] === 'HOME'));
-        $awayFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && $e['team'] === 'AWAY'));
+        $homeFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && ($e['team'] ?? null) === 'HOME'));
+        $awayFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && ($e['team'] ?? null) === 'AWAY'));
+        $hasFreeKickGoal = $homeFreeKick > 0 || $awayFreeKick > 0;
 
-        if ($homeFreeKick > 0 || $awayFreeKick > 0) {
+        $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasFreeKickGoal);
+        if (!empty($binaryResult)) {
+            return $binaryResult;
+        }
+
+        if ($hasFreeKickGoal) {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
 
@@ -475,10 +601,16 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homeCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && $e['team'] === 'HOME'));
-        $awayCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && $e['team'] === 'AWAY'));
+        $homeCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && ($e['team'] ?? null) === 'HOME'));
+        $awayCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && ($e['team'] ?? null) === 'AWAY'));
+        $hasCornerGoal = $homeCorner > 0 || $awayCorner > 0;
 
-        if ($homeCorner > 0 || $awayCorner > 0) {
+        $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasCornerGoal);
+        if (!empty($binaryResult)) {
+            return $binaryResult;
+        }
+
+        if ($hasCornerGoal) {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
 
@@ -509,6 +641,28 @@ class QuestionEvaluationService
 
         $homePossession = $stats['home']['possession'] ?? 50;
         $awayPossession = $stats['away']['possession'] ?? 50;
+        $questionText = strtolower($question->title ?? '');
+
+        $threshold = $this->extractNumericValueFromText($questionText);
+        $asksMoreThan = $this->referencesMoreThan($questionText);
+        $asksLessThan = $this->referencesLessThan($questionText);
+
+        $targetTeam = null;
+        if (strpos($questionText, strtolower($match->home_team)) !== false) {
+            $targetTeam = 'home';
+        } elseif (strpos($questionText, strtolower($match->away_team)) !== false) {
+            $targetTeam = 'away';
+        }
+
+        if ($targetTeam && $threshold !== null && ($asksMoreThan || $asksLessThan)) {
+            $teamPossession = $targetTeam === 'home' ? $homePossession : $awayPossession;
+            $condition = $asksMoreThan ? $teamPossession > $threshold : $teamPossession < $threshold;
+
+            $binaryResult = $this->resolveBinaryQuestionOptions($question, $condition);
+            if (!empty($binaryResult)) {
+                return $binaryResult;
+            }
+        }
 
         foreach ($question->options as $option) {
             $optionText = strtolower(trim($option->text));
@@ -578,23 +732,172 @@ class QuestionEvaluationService
     {
         $correctOptionIds = [];
         $totalGoals = ($match->home_team_score ?? 0) + ($match->away_team_score ?? 0);
+        $questionText = strtolower($question->title ?? '');
+        $questionThreshold = $this->extractNumericValueFromText($questionText);
+        $questionAsksOver = $this->referencesMoreThan($questionText);
+        $questionAsksUnder = $this->referencesLessThan($questionText);
+
+        if ($questionThreshold !== null && ($questionAsksOver || $questionAsksUnder)) {
+            $condition = $questionAsksOver ? $totalGoals > $questionThreshold : $totalGoals < $questionThreshold;
+            $binaryResult = $this->resolveBinaryQuestionOptions($question, $condition);
+
+            if (!empty($binaryResult)) {
+                return $binaryResult;
+            }
+        }
 
         foreach ($question->options as $option) {
             $optionText = strtolower(trim($option->text));
+            $threshold = $this->extractNumericValueFromText($optionText);
 
-            // Extract number from text like "over 2.5" or "under 2.5"
-            if (preg_match('/(\d+\.?\d*)/', $optionText, $matches)) {
-                $threshold = (float)$matches[1];
+            if ($threshold === null) {
+                continue;
+            }
 
-                if ((strpos($optionText, 'over') !== false || strpos($optionText, 'más') !== false) && $totalGoals > $threshold) {
-                    $correctOptionIds[] = $option->id;
-                } elseif ((strpos($optionText, 'under') !== false || strpos($optionText, 'menos') !== false) && $totalGoals < $threshold) {
-                    $correctOptionIds[] = $option->id;
-                }
+            if ((strpos($optionText, 'over') !== false || strpos($optionText, 'más') !== false) && $totalGoals > $threshold) {
+                $correctOptionIds[] = $option->id;
+            } elseif ((strpos($optionText, 'under') !== false || strpos($optionText, 'menos') !== false) && $totalGoals < $threshold) {
+                $correctOptionIds[] = $option->id;
             }
         }
 
         return $correctOptionIds;
+    }
+
+    /**
+     * Determina si la pregunta habla de gol antes de cierto minuto
+     */
+    private function isGoalBeforeMinuteQuestion(string $questionText): bool
+    {
+        return strpos($questionText, 'gol') !== false &&
+            (strpos($questionText, 'antes') !== false || strpos($questionText, 'primeros') !== false) &&
+            (strpos($questionText, 'minuto') !== false || strpos($questionText, 'minutos') !== false);
+    }
+
+    /**
+     * Extrae el minuto objetivo desde el texto de la pregunta
+     */
+    private function extractMinuteThreshold(string $questionText): ?int
+    {
+        if (preg_match("/(\\d+)\\s*(?:minuto|minutos|′|'|’)/u", $questionText, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
+    }
+
+    private function parseMinuteValue($minute): ?int
+    {
+        if ($minute === null || $minute === '') {
+            return null;
+        }
+
+        if (is_numeric($minute)) {
+            return (int) $minute;
+        }
+
+        if (is_string($minute)) {
+            $value = trim($minute);
+
+            if ($value === '') {
+                return null;
+            }
+
+            if (preg_match('/(\d+)\s*\+\s*(\d+)/', $value, $matches)) {
+                return (int) $matches[1] + (int) $matches[2];
+            }
+
+            if (preg_match('/(\d+)/', $value, $matches)) {
+                return (int) $matches[1];
+            }
+        }
+
+        return null;
+    }
+
+    private function resolveBinaryQuestionOptions(Question $question, bool $condition): array
+    {
+        $resolved = [];
+        $hasBinaryOptions = false;
+
+        foreach ($question->options as $option) {
+            $optionText = strtolower(trim($option->text));
+            $isAffirmative = $this->isAffirmativeOption($optionText);
+            $isNegative = $this->isNegativeOption($optionText);
+
+            if (!$isAffirmative && !$isNegative) {
+                continue;
+            }
+
+            $hasBinaryOptions = true;
+
+            if ($condition && $isAffirmative) {
+                $resolved[] = $option->id;
+            } elseif (!$condition && $isNegative) {
+                $resolved[] = $option->id;
+            }
+        }
+
+        return $hasBinaryOptions ? $resolved : [];
+    }
+
+    private function extractNumericValueFromText(?string $text): ?float
+    {
+        if ($text === null) {
+            return null;
+        }
+
+        if (preg_match('/(\d+\.?\d*)/', $text, $matches)) {
+            return (float)$matches[1];
+        }
+
+        return null;
+    }
+
+    private function referencesMoreThan(string $text): bool
+    {
+        $text = strtolower($text);
+
+        return strpos($text, 'más') !== false ||
+            strpos($text, 'mas') !== false ||
+            strpos($text, 'over') !== false ||
+            strpos($text, 'supera') !== false ||
+            strpos($text, 'mayor') !== false;
+    }
+
+    private function referencesLessThan(string $text): bool
+    {
+        $text = strtolower($text);
+
+        return strpos($text, 'menos') !== false ||
+            strpos($text, 'under') !== false ||
+            strpos($text, 'inferior') !== false ||
+            strpos($text, 'menor') !== false;
+    }
+
+    private function isCardEventOfType(array $event, string $expectedType): bool
+    {
+        if (($event['type'] ?? '') !== 'CARD') {
+            return false;
+        }
+
+        $cardType = strtoupper($event['card'] ?? $event['detail'] ?? '');
+
+        return $cardType === strtoupper($expectedType);
+    }
+
+    private function isAffirmativeOption(string $optionText): bool
+    {
+        return strpos($optionText, 'sí') !== false ||
+            strpos($optionText, 'si') !== false ||
+            strpos($optionText, 'yes') !== false;
+    }
+
+    private function isNegativeOption(string $optionText): bool
+    {
+        return strpos($optionText, 'no') !== false ||
+            strpos($optionText, 'ninguno') !== false ||
+            strpos($optionText, 'ninguna') !== false;
     }
 
     /**
@@ -630,5 +933,219 @@ class QuestionEvaluationService
             'home' => $statistics['home'] ?? [],
             'away' => $statistics['away'] ?? []
         ];
+    }
+
+    private function shouldUseGeminiFallback(): bool
+    {
+        return (bool) config('question_evaluation.gemini_fallback_enabled', true);
+    }
+
+    private function attemptGeminiFallback(Question $question, FootballMatch $match, string $reason): array
+    {
+        if (!$this->shouldUseGeminiFallback()) {
+            return [];
+        }
+
+        $gemini = $this->geminiService;
+
+        if (!$gemini) {
+            try {
+                $gemini = app(GeminiService::class);
+                $this->geminiService = $gemini;
+            } catch (\Throwable $e) {
+                Log::error('Unable to resolve GeminiService for fallback', [
+                    'question_id' => $question->id,
+                    'match_id' => $match->id,
+                    'reason' => $reason,
+                    'error' => $e->getMessage()
+                ]);
+                return [];
+            }
+        }
+
+        $prompt = $this->buildGeminiFallbackPrompt($question, $match, $reason);
+        $useGrounding = (bool) config('question_evaluation.gemini_fallback_grounding', true);
+
+        try {
+            $response = $gemini->callGemini($prompt, $useGrounding);
+            $resolved = $this->parseGeminiFallbackResponse($response, $question);
+
+            if (!empty($resolved)) {
+                Log::info('Gemini fallback resolved question options', [
+                    'question_id' => $question->id,
+                    'match_id' => $match->id,
+                    'reason' => $reason,
+                    'option_ids' => $resolved
+                ]);
+            }
+
+            return $resolved;
+        } catch (\Throwable $e) {
+            Log::error('Gemini fallback failed', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'reason' => $reason,
+                'error' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
+    private function buildGeminiFallbackPrompt(Question $question, FootballMatch $match, string $reason): string
+    {
+        $optionsPayload = [];
+        foreach ($question->options as $index => $option) {
+            $optionsPayload[] = [
+                'key' => 'option_' . ($index + 1),
+                'text' => (string) $option->text
+            ];
+        }
+
+        $matchDate = $match->date ?? $match->match_date ?? null;
+        if ($matchDate instanceof \Carbon\CarbonInterface) {
+            $matchDate = $matchDate->toDateTimeString();
+        }
+
+        $context = [
+            'match' => [
+                'id' => $match->id,
+                'home_team' => $match->home_team,
+                'away_team' => $match->away_team,
+                'status' => $match->status,
+                'date' => $matchDate,
+                'score' => [
+                    'home' => $match->home_team_score,
+                    'away' => $match->away_team_score
+                ],
+                'events' => $this->summarizeEventsForFallback($match),
+                'statistics' => $this->parseStatistics($match->statistics ?? [])
+            ],
+            'question' => [
+                'id' => $question->id,
+                'title' => $question->title,
+                'type' => $question->type,
+                'reason' => $reason
+            ],
+            'options' => $optionsPayload
+        ];
+
+        $contextJson = json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($contextJson === false) {
+            $contextJson = '{}';
+        }
+
+        return <<<PROMPT
+Eres un árbitro virtual que verifica predicciones de fútbol usando datos estructurados del partido.
+Analiza el contexto proporcionado y determina qué opciones son correctas.
+Responde EXCLUSIVAMENTE con JSON usando la forma {"selected_options":["option_1"]}.
+
+Contexto:
+{$contextJson}
+
+Instrucciones:
+1. Basate solo en la información del contexto.
+2. Si ninguna opción es correcta, devuelve {"selected_options": []}.
+3. No agregues explicaciones ni texto adicional, solo el JSON solicitado.
+PROMPT;
+    }
+
+    private function parseGeminiFallbackResponse($response, Question $question): array
+    {
+        $payload = null;
+
+        if (is_array($response)) {
+            if (isset($response['selected_options']) || isset($response['selected_option'])) {
+                $payload = $response;
+            } elseif (isset($response['content'])) {
+                $decoded = json_decode((string) $response['content'], true);
+                if (is_array($decoded)) {
+                    $payload = $decoded;
+                }
+            }
+        } elseif (is_string($response)) {
+            $decoded = json_decode($response, true);
+            if (is_array($decoded)) {
+                $payload = $decoded;
+            }
+        }
+
+        if (!is_array($payload)) {
+            return [];
+        }
+
+        $selected = $payload['selected_options'] ?? $payload['selected_option'] ?? null;
+
+        if (is_string($selected)) {
+            $selected = [$selected];
+        }
+
+        if (!is_array($selected)) {
+            return [];
+        }
+
+        $maps = $this->buildOptionMaps($question);
+        $resolvedIds = [];
+
+        foreach ($selected as $candidate) {
+            if (!is_string($candidate)) {
+                continue;
+            }
+
+            $normalized = strtolower(trim($candidate));
+
+            if ($normalized === '') {
+                continue;
+            }
+
+            if (isset($maps['keys'][$normalized])) {
+                $resolvedIds[] = $maps['keys'][$normalized];
+                continue;
+            }
+
+            if (isset($maps['texts'][$normalized])) {
+                $resolvedIds[] = $maps['texts'][$normalized];
+                continue;
+            }
+
+            foreach ($maps['texts'] as $text => $optionId) {
+                if (str_contains($text, $normalized) || str_contains($normalized, $text)) {
+                    $resolvedIds[] = $optionId;
+                    break;
+                }
+            }
+        }
+
+        return array_values(array_unique($resolvedIds));
+    }
+
+    private function buildOptionMaps(Question $question): array
+    {
+        $keyMap = [];
+        $textMap = [];
+
+        foreach ($question->options as $index => $option) {
+            $key = 'option_' . ($index + 1);
+            $keyMap[strtolower($key)] = $option->id;
+            $keyMap[$key] = $option->id;
+
+            $text = strtolower(trim((string) $option->text));
+            if ($text !== '') {
+                $textMap[$text] = $option->id;
+            }
+        }
+
+        return ['keys' => $keyMap, 'texts' => $textMap];
+    }
+
+    private function summarizeEventsForFallback(FootballMatch $match): array
+    {
+        $events = $this->parseEvents($match->events ?? []);
+        $limit = (int) config('question_evaluation.gemini_fallback_max_events', 40);
+
+        if ($limit > 0) {
+            $events = array_slice($events, 0, $limit);
+        }
+
+        return $events;
     }
 }
