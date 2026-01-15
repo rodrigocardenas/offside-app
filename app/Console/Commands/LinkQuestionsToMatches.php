@@ -182,32 +182,32 @@ class LinkQuestionsToMatches extends Command
     {
         // Enfocarse en lo que viene después de "partido" o "en"
         // Ejemplo: "en el partido Real Madrid vs Barcelona?"
-        
+
         // Patrón principal: después de "partido"
         if (preg_match('/partido\s+([A-Z][a-záéíóúñ\s]+?)\s+vs\s+([A-Z][a-záéíóúñ\s]+?)(?:\?|$|[\s,])/i', $title, $matches)) {
             $team1 = trim($matches[1]);
             $team2 = trim($matches[2]);
-            
+
             if (strlen($team1) > 2 && strlen($team2) > 2) {
                 return [$team1, $team2];
             }
         }
-        
+
         // Patrón alternativo: busca "en" antes del nombre (e.g., "en Real Madrid vs Barcelona")
         if (preg_match('/en\s+([A-Z][a-záéíóúñ\s]+?)\s+vs\s+([A-Z][a-záéíóúñ\s]+?)(?:\?|$|[\s,])/i', $title, $matches)) {
             $team1 = trim($matches[1]);
             $team2 = trim($matches[2]);
-            
+
             if (strlen($team1) > 2 && strlen($team2) > 2) {
                 return [$team1, $team2];
             }
         }
-        
+
         // Patrón genérico final: cualquier "vs" en el título
         if (preg_match('/([A-Z][a-záéíóúñ\s]+?)\s+vs\s+([A-Z][a-záéíóúñ\s]+?)(?:\?|$|[\s,])/i', $title, $matches)) {
             $team1 = trim($matches[1]);
             $team2 = trim($matches[2]);
-            
+
             if (strlen($team1) > 2 && strlen($team2) > 2) {
                 return [$team1, $team2];
             }

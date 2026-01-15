@@ -1,19 +1,32 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AppHealthDashboardController;
 use App\Http\Controllers\Admin\QuestionAdminController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\TemplateQuestionController;
 use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionController;
+use App\Http\Controllers\Admin\VerificationDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // Admin Dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/verification-dashboard', [VerificationDashboardController::class, 'index'])
+        ->name('verification-dashboard');
+    Route::get('/verification-dashboard/data', [VerificationDashboardController::class, 'data'])
+        ->name('verification-dashboard.data');
+    Route::get('/app-health', [AppHealthDashboardController::class, 'index'])
+        ->name('app-health-dashboard');
+    Route::get('/app-health/data', [AppHealthDashboardController::class, 'data'])
+        ->name('app-health-dashboard.data');
 
     // Questions Management
     Route::resource('questions', QuestionAdminController::class)->except(['show']);
     Route::post('questions/{question}/toggle-featured', [QuestionAdminController::class, 'toggleFeatured'])
         ->name('questions.toggle-featured');
+
+    Route::resource('teams', TeamController::class)->except(['show']);
 
     // Template Questions Management
 

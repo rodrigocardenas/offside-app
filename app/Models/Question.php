@@ -28,7 +28,8 @@ class Question extends Model
 
     protected $casts = [
         'available_until' => 'datetime',
-        'is_featured' => 'boolean'
+        'is_featured' => 'boolean',
+        'result_verified_at' => 'datetime',
     ];
 
     public function options()

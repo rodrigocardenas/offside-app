@@ -315,6 +315,8 @@ $schedule->job(new VerifyFinishedMatchesHourlyJob)
 - `everyFiveMinutes()`: Cada 5 minutos (para testing)
 - `everyTenMinutes()`: Cada 10 minutos (balance)
 
+**Estado**: ✅ Implementado el 15 Ene 2026 en `app/Console/Kernel.php` con timezone `America/Mexico_City`, logging de éxito/fallo y `withoutOverlapping(15)`.
+
 **Tiempo estimado**: 2-3 horas
 
 ---
@@ -329,6 +331,8 @@ $schedule->job(new VerifyFinishedMatchesHourlyJob)
 - Hits/Misses de caché
 - Latencia hasta asignación de puntos
 
+**Estado**: ✅ Persistimos cada ejecución en la nueva tabla `verification_runs` (ver `VerificationMonitoringService`) con métricas por job (`BatchGetScoresJob`, `BatchExtractEventsJob`, `VerifyAllQuestionsJob`, `VerifyFinishedMatchesHourlyJob`). Esto habilita dashboards/alertas posteriores y facilita calcular duración y fallos. Además existe el comando `php artisan verification:report --hours=24 --job=App\\Jobs\\BatchGetScoresJob` para auditar promedios y fallos sin revisar manualmente la base.
+
 **Alertas**:
 - Si tiempo > 15 minutos
 - Si fallo rate > 10%
@@ -336,6 +340,20 @@ $schedule->job(new VerifyFinishedMatchesHourlyJob)
 - Si Gemini rate limit alcanzado
 
 **Tiempo estimado**: 3-5 horas (testing + ajustes)
+
+### Fase 5: Dashboard de Monitoreo (nuevo)
+
+**Objetivo**: Proveer una vista web (Blade + Tailwind) que permita visualizar en tiempo real el estado de los jobs, métricas clave y últimos fallos sin depender de la consola.
+
+**Tareas propuestas**:
+- Crear ruta protegida para admins (`/admin/verification-dashboard`).
+- Controlador que lea `verification_runs`, agrupando por job y mostrando gráficos/indicadores (ej. cards con totales, tabla de últimos fallos, sparkline de duración promedio).
+- Componente Livewire/alpine para auto-refresh cada 60s.
+- Opcional: badge que indique estado del último cron en la barra de admin.
+
+**Dependencias**: requiere que `verification_runs` esté poblada (ya implementado) y que los jobs sigan reportando métricas.
+
+**Tiempo estimado**: 1-2 días (incluye diseño responsivo + pruebas básicas).
 
 ---
 

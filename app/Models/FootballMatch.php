@@ -38,6 +38,8 @@ class FootballMatch extends Model
         'events',
         'statistics',
         'score',
+        'last_verification_attempt_at',
+        'verification_priority',
     ];
 
     protected $casts = [
@@ -49,6 +51,8 @@ class FootballMatch extends Model
         'matchday' => 'string',
         'is_featured' => 'boolean',
         'match_date' => 'datetime',
+        'last_verification_attempt_at' => 'datetime',
+        'verification_priority' => 'integer',
     ];
 
     public function competition()

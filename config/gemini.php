@@ -36,7 +36,38 @@ return [
         'fixtures_ttl' => 24 * 60, // 24 horas en minutos
         'results_ttl' => 48 * 60,  // 48 horas en minutos
         'analysis_ttl' => 72 * 60, // 72 horas en minutos
+                'batch_results_ttl' => env('GEMINI_BATCH_RESULTS_TTL', 120), // minutos
+                'batch_error_ttl' => env('GEMINI_BATCH_ERROR_TTL', 15), // minutos
     ],
+
+        'batch' => [
+                'max_matches_per_request' => env('GEMINI_BATCH_MAX_MATCHES', 8),
+                'max_retries' => env('GEMINI_BATCH_MAX_RETRIES', 2),
+                'results_prompt_template' => <<<'PROMPT'
+Genera un JSON con los resultados finales de los siguientes partidos. Devuelve únicamente JSON válido con esta estructura exacta:
+{
+    "results": [
+        {
+            "home_team": "Nombre",
+            "away_team": "Nombre",
+            "home_goals": 0,
+            "away_goals": 0,
+            "status": "finished" | "not_played" | "not_found",
+            "match_date": "YYYY-MM-DD",
+            "league": "Nombre"
+        }
+    ]
+}
+
+Listado de partidos a resolver:
+{matches_list}
+
+Reglas adicionales:
+- Si un partido no se jugó responde con status "not_played".
+- Si no encuentras información usa "not_found" y deja los goles en null.
+- No incluyas comentarios ni bloques markdown.
+PROMPT,
+        ],
 
     /*
     |--------------------------------------------------------------------------

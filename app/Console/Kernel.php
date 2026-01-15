@@ -5,6 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\UpdateFootballData;
+use App\Jobs\VerifyFinishedMatchesHourlyJob;
 use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
@@ -22,14 +23,19 @@ class Kernel extends ConsoleKernel
                 Log::error('Error en la actualización nocturna de fixtures');
             });
 
-        // Procesar partidos finalizados recientemente UNA SOLA VEZ AL DÍA en off-peak (3 AM)
-        // IMPORTANTE: Se cambió de ->hourly() a ->dailyAt() para evitar bloquear el servidor
-        // Cada ejecución toma hasta 10 minutos y consume muchos recursos
-        $schedule->command('matches:process-recently-finished')
-            ->dailyAt('03:00')
+        // Nuevo pipeline optimizado: verifica partidos cada hora utilizando lotes y caché
+        $schedule->job(new VerifyFinishedMatchesHourlyJob())
+            ->hourly()
+            ->name('verify-matches-hourly')
+            ->withoutOverlapping(15)
             ->timezone('America/Mexico_City')
-            ->onFailure(function () {
-                Log::error('Error en el procesamiento de partidos finalizados');
+            ->onSuccess(function () {
+                Log::info('✅ verify-matches-hourly completado correctamente');
+            })
+            ->onFailure(function ($exception) {
+                Log::error('❌ verify-matches-hourly falló', [
+                    'error' => $exception->getMessage(),
+                ]);
             });
     }
 
