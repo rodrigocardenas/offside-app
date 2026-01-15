@@ -122,9 +122,6 @@ class TeamController extends Controller
 
     private function getStadiumOptions(): array
     {
-        return Stadium::query()
-            ->orderBy('name')
-            ->pluck('name', 'id')
-            ->toArray();
+        return [];
     }
 }
