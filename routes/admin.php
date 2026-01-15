@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AppHealthDashboardController;
 use App\Http\Controllers\Admin\QuestionAdminController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\TemplateQuestionController;
 use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionController;
 use App\Http\Controllers\Admin\VerificationDashboardController;
@@ -24,6 +25,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::resource('questions', QuestionAdminController::class)->except(['show']);
     Route::post('questions/{question}/toggle-featured', [QuestionAdminController::class, 'toggleFeatured'])
         ->name('questions.toggle-featured');
+
+    Route::resource('teams', TeamController::class)->except(['show']);
 
     // Template Questions Management
 

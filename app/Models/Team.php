@@ -12,6 +12,7 @@ class Team extends Model
 
     protected $fillable = [
         'name',
+        'type',
         'short_name',
         'tla',
         'external_id',
@@ -22,7 +23,6 @@ class Team extends Model
         'club_colors',
         'venue',
         'stadium_id',
-        'external_id',
     ];
 
     protected $casts = [
