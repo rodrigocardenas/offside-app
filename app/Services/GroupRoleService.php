@@ -46,22 +46,8 @@ class GroupRoleService
 
     public function assignRolesToUsers($group, $roles)
     {
-        foreach ($group->users as $user) {
-            if (isset($roles[$user->id])) {
-                $roleIds = collect($roles[$user->id])
-                    ->pluck('id')
-                    ->filter(function ($id) {
-                        return is_numeric($id) && $id > 0;
-                    });
-
-                if ($roleIds->isNotEmpty()) {
-                    $user->roles()->sync($roleIds);
-                } else {
-                    $user->roles()->detach();
-                }
-            } else {
-                $user->roles()->detach();
-            }
-        }
+        // Temporarily disabled to avoid wiping global role_user assignments.
+        // Pending redesign, we do not mutate the pivot table from group views.
+        return $roles;
     }
 }
