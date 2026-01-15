@@ -1,13 +1,16 @@
+@extends('layouts.app')
+
 @php
     use Illuminate\Support\Str;
 @endphp
 
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+@section('content')
+<div class="min-h-screen bg-slate-950 py-12 text-white">
+    <div class="mx-auto max-w-7xl space-y-8 px-6">
+        <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
                 <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Catálogo</p>
-                <h2 class="mt-1 text-2xl font-semibold text-white">Equipos</h2>
+                <h1 class="mt-1 text-3xl font-semibold text-white">Equipos</h1>
                 <p class="text-sm text-slate-400">Gestiona clubes y selecciones disponibles para las preguntas y fixtures.</p>
             </div>
             <a href="{{ route('admin.teams.create') }}"
@@ -15,11 +18,8 @@
                 <i class="fas fa-plus mr-2"></i>
                 Nuevo equipo
             </a>
-        </div>
-    </x-slot>
+        </header>
 
-    <div class="py-10">
-        <div class="mx-auto max-w-7xl space-y-8 sm:px-6 lg:px-8">
             @if (session('success'))
                 <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-emerald-200">
                     {{ session('success') }}
@@ -150,4 +150,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection
