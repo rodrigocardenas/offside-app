@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-xs uppercase tracking-[0.3em] text-gray-400">Equipos</p>
-                <h2 class="mt-1 text-2xl font-semibold text-gray-100">Editar {{ $team->name }}</h2>
-                <p class="text-sm text-gray-500">Actualiza datos del club o selección.</p>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Equipos</p>
+                <h2 class="mt-1 text-2xl font-semibold text-white">Editar {{ $team->name }}</h2>
+                <p class="text-sm text-slate-400">Actualiza datos del club o selección.</p>
             </div>
-            <a href="{{ route('admin.teams.index') }}" class="text-sm text-gray-400 hover:text-gray-200">Volver al listado</a>
+            <a href="{{ route('admin.teams.index') }}" class="text-sm text-slate-400 hover:text-slate-200">Volver al listado</a>
         </div>
     </x-slot>
 
@@ -18,7 +18,7 @@
                 </div>
             @endif
 
-            <div class="rounded-3xl border border-gray-800 bg-gray-950/60 p-6 shadow-xl shadow-black/40">
+            <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-6 shadow-2xl shadow-black/40">
                 @include('admin.teams.partials.form', [
                     'action' => route('admin.teams.update', $team),
                     'method' => 'PUT',
