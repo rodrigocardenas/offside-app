@@ -280,6 +280,37 @@ class QuestionEvaluationServiceTest extends TestCase
         $this->assertContains($question->options[0]->id, $correctOptions);
     }
 
+    public function test_evaluate_possession_with_flat_statistics(): void
+    {
+        $this->match->update([
+            'statistics' => json_encode([
+                'source' => 'Gemini (web search - VERIFIED)',
+                'verified' => true,
+                'home_possession' => 72,
+                'away_possession' => 28
+            ])
+        ]);
+        $this->match->refresh();
+
+        $question = Question::create([
+            'title' => '¿Quién tendrá más posesión de balón?',
+            'type' => 'posesion',
+            'match_id' => $this->match->id,
+            'group_id' => $this->group->id,
+            'points' => 200,
+            'available_until' => now()->addHours(24)
+        ]);
+
+        QuestionOption::create(['question_id' => $question->id, 'text' => 'Arsenal', 'is_correct' => false]);
+        QuestionOption::create(['question_id' => $question->id, 'text' => 'Liverpool', 'is_correct' => false]);
+
+        $question->refresh();
+        $correctOptions = $this->service->evaluateQuestion($question, $this->match);
+
+        $this->assertCount(1, $correctOptions);
+        $this->assertSame([$question->options[0]->id], $correctOptions);
+    }
+
     public function test_evaluate_own_goal(): void
     {
         $matchWithOwnGoal = FootballMatch::create([

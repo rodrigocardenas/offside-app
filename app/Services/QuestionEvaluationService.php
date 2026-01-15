@@ -929,10 +929,26 @@ class QuestionEvaluationService
             return ['home' => [], 'away' => []];
         }
 
-        return [
+        $result = [
             'home' => $statistics['home'] ?? [],
             'away' => $statistics['away'] ?? []
         ];
+
+        $metrics = ['possession', 'fouls', 'passes', 'shots'];
+        foreach ($metrics as $metric) {
+            $homeKey = 'home_' . $metric;
+            $awayKey = 'away_' . $metric;
+
+            if (!isset($result['home'][$metric]) && isset($statistics[$homeKey])) {
+                $result['home'][$metric] = $statistics[$homeKey];
+            }
+
+            if (!isset($result['away'][$metric]) && isset($statistics[$awayKey])) {
+                $result['away'][$metric] = $statistics[$awayKey];
+            }
+        }
+
+        return $result;
     }
 
     private function shouldUseGeminiFallback(): bool
