@@ -32,7 +32,6 @@
         <!-- Ranking Section -->
         <div class="ml-1 mr-1" style="background: {{ $bgTertiary }}; padding: 5px; border-radius: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 32px;">
             <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }}; padding: 16px;">
-                <i class="fas fa-trophy" style="font-size: 16px; color: {{ $accentColor }};"></i>
                 {{ __('views.rankings.title') }}
                 <a href="{{ url('/groups', $group->id) }}/ranking" style="margin-left: auto; font-size: 12px; color: {{ $textSecondary }}; cursor: pointer; padding: 4px 8px; border-radius: 12px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease;"
                     onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#f0f0f0' }}'; this.style.color='{{ $textPrimary }}';"
@@ -53,7 +52,6 @@
                     @else
                       <div class="podium-avatar-placeholder">{{ substr($topUsers[1]->name, 0, 1) }}</div>
                     @endif
-                    <div class="medal-icon" style="color: #C0C0C0;"><i class="fas fa-medal"></i></div>
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[1]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
@@ -72,7 +70,7 @@
                     @endif
                     <div class="medal-icon" style="color: #FFD700;"><i class="fas fa-medal"></i></div>
                   </div>
-                  <div class="podium-points">{{ number_format($topUsers[0]->total_points ?? 0, 0, ',', '.') }}</div>
+                  <div class="podium-points">{{ number_format($topUsers[0]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
                 <div class="podium-step highest">
                 </div>
@@ -89,7 +87,7 @@
                     @endif
                     <div class="medal-icon" style="color: #CD7F32;"><i class="fas fa-medal"></i></div>
                   </div>
-                  <div class="podium-points">{{ number_format($topUsers[2]->total_points ?? 0, 0, ',', '.') }}</div>
+                  <div class="podium-points">{{ number_format($topUsers[2]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
                 <div class="podium-step">
                 </div>
@@ -361,14 +359,14 @@
         flex: 1;
       }
       .podium-step {
-        padding: 12px 8px;
+        padding: 10px 52px;
         min-width: unset;
       }
       .podium-step.highest {
-        height: 120px;
+        height: 35px;
       }
       .second .podium-step, .third .podium-step {
-        height: 100px;
+        height: 20px;
       }
       .podium-avatar, .podium-avatar-placeholder {
         width: 40px;
