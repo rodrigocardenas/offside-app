@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +23,8 @@ class LoginController extends Controller
         $request->validate([
             'name' => 'required|string',
         ]);
+
+        $wasCreated = false;
 
         // Buscar usuario por ID completo (unique_id)
         $user = User::where('unique_id', $request->name)->first();
@@ -45,9 +48,15 @@ class LoginController extends Controller
                 'email' => $uniqueName . '@offsideclub.com',
                 'password' => Hash::make(Str::random(16)),
             ]);
+
+            $wasCreated = true;
         }
 
         Auth::login($user);
+
+        if ($wasCreated) {
+            event(new Registered($user));
+        }
 
         // Log para debug
         Log::info('Usuario autenticado: ' . $user->name . ' (ID: ' . $user->id . ')');
@@ -57,7 +66,6 @@ class LoginController extends Controller
         Log::info('Redirigiendo a: ' . $redirectUrl);
 
         return redirect($redirectUrl)
-
             ->with('success', '¡Bienvenido ' . $user->name . '! Tu ID completo es: ' . $user->unique_id);
     }
 
