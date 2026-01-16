@@ -9,11 +9,18 @@ return [
         'default' => env('SLACK_ALERT_WEBHOOK_URL', env('SLACK_ALERT_WEBHOOK')),
         'deployments' => env('SLACK_ALERT_DEPLOYMENTS_WEBHOOK_URL')
             ?: env('SLACK_ALERT_WEBHOOK_URL', env('SLACK_ALERT_WEBHOOK')),
+        'registrations' => env('SLACK_ALERT_REGISTRATIONS_WEBHOOK_URL')
+            ?: env('SLACK_ALERT_DEPLOYMENTS_WEBHOOK_URL')
+            ?: env('SLACK_ALERT_WEBHOOK_URL', env('SLACK_ALERT_WEBHOOK')),
     ],
 
     'job' => SendToSlackChannelJob::class,
 
     'queue' => env('SLACK_ALERT_QUEUE', 'default'),
+
+    'channels' => [
+        'registrations' => env('SLACK_ALERT_REGISTRATIONS_CHANNEL'),
+    ],
 
     'console_notifications' => [
         'enabled' => env('SLACK_ALERT_CONSOLE_ENABLED', true),

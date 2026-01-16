@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Listeners\LogUserLogin;
+use App\Listeners\SendSlackAlertOnUserRegistered;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -19,6 +20,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            SendSlackAlertOnUserRegistered::class,
         ],
         Login::class => [
             LogUserLogin::class,
