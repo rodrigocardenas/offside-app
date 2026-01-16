@@ -1222,6 +1222,7 @@ class GroupController extends Controller
 
         $groups = Group::where('competition_id', $match->competition_id)
             ->with(['users', 'competition'])
+            ->withCount(['users as members_count'])
             // and auth user is member
             ->whereHas('users', function($q) {
                 $q->where('user_id', auth()->id());

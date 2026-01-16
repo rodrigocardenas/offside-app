@@ -37,7 +37,7 @@ return [
         'created_at' => 'Creado el',
         'my_rank' => 'Mi Posición',
         'pending_predictions' => 'Tienes predicciones pendientes en algunos grupos',
-        'featured_match' => 'Partido Destacado del Día',
+        'featured_match' => 'Partido Destacado',
         'official_groups' => 'Grupos Oficiales',
         'amateur_groups' => 'Grupos Amateurs',
         'my_groups' => 'Mis Grupos',
