@@ -6,15 +6,16 @@
 @php
     // Dark theme colors
     if ($isDark) {
-        $textPrimary = '#ffffff';
-        $textSecondary = '#b0b0b0';
-        $bgSecondary = '#2a2a2a';
-        $bgTertiary = '#333333';
-        $borderColor = '#333';
+        $textPrimary = '#f1fff8';
+        $textSecondary = '#9bcfcc';
+        $bgSecondary = '#10302d';
+        $bgTertiary = '#08201d';
+        $borderColor = '#1d4f4a';
         $accentColor = '#00deb0';
-        $overlayBg = 'rgba(0, 0, 0, 0.6)';
-        $hoverBg = 'rgba(255,255,255,0.1)';
-        $accentBg = 'rgba(0, 222, 176, 0.1)';
+        $overlayBg = 'rgba(0, 0, 0, 0.55)';
+        $hoverBg = 'rgba(255,255,255,0.08)';
+        $accentBg = 'rgba(0, 222, 176, 0.12)';
+        $surfaceShadow = '0 14px 40px rgba(0, 0, 0, 0.55)';
     } else {
         // Light theme colors
         $textPrimary = '#1a1a1a';
@@ -26,12 +27,13 @@
         $overlayBg = 'rgba(0, 0, 0, 0.3)';
         $hoverBg = 'rgba(0, 184, 147, 0.05)';
         $accentBg = 'rgba(0, 184, 147, 0.1)';
+        $surfaceShadow = '0 12px 34px rgba(0, 0, 0, 0.15)';
     }
 @endphp
 
 <!-- Modal de Grupos del Partido -->
 <div id="matchGroupsModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: {{ $overlayBg }}; display: none; align-items: center; justify-content: center; z-index: 9999; padding: 16px;">
-    <div style="background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 16px; width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);">
+    <div style="background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 16px; width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto; box-shadow: {{ $surfaceShadow }};">
         <!-- Header -->
         <div style="padding: 24px; border-bottom: 1px solid {{ $borderColor }}; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background: {{ $bgSecondary }}; z-index: 10;">
             <div style="flex: 1;">
@@ -108,7 +110,7 @@
     }
 
     .group-item:hover {
-        background: {{ $isDark ? 'rgba(0, 222, 176, 0.05)' : 'rgba(0, 184, 147, 0.08)' }};
+        background: {{ $isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 184, 147, 0.08)' }};
         border-color: {{ $accentColor }};
     }
 

@@ -471,6 +471,11 @@ body {
     @apply text-sm font-semibold text-offside-dark mx-2;
 }
 
+/* Ensure match time remains legible on dark backgrounds */
+.dark-theme .match-time-inline {
+    color: #00deb0;
+}
+
 .team-logo {
     @apply w-6 h-6 object-contain;
 }
