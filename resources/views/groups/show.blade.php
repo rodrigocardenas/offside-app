@@ -75,7 +75,6 @@
                   <div class="podium-points">{{ number_format($topUsers[0]->total_points ?? 0, 0, ',', '.') }}</div>
                 </div>
                 <div class="podium-step highest">
-                  <div class="star-icon"><i class="fas fa-star"></i></div>
                 </div>
               </div>
               @if($topUsers->count() >= 3)
