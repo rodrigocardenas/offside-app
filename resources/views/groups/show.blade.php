@@ -23,6 +23,8 @@
         $accentDark = '#17b796';
         $componentsBackground = $isDark ? '#1a524e' : '#ffffff';
         $buttonBgHover = $isDark ? 'rgba(0, 222, 176, 0.12)' : 'rgba(0, 222, 176, 0.08)';
+
+        $topUsers = $group->users->sortByDesc('total_points')->take(3)->values();
     @endphp
 
     <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
@@ -39,29 +41,67 @@
                 </a>
             </div>
 
-            <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-behavior: smooth;" class="hide-scrollbar">
-                @forelse($group->users->sortByDesc('total_points') as $index => $user)
-                    @php
-                        $rankColor = $index === 0 ? '#FFD700' : ($index === 1 ? '#C0C0C0' : ($index === 2 ? '#CD7F32' : '#6c757d'));
-                    @endphp
-                    <div style="display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: {{ $bgSecondary }}; border-radius: 12px; min-width: fit-content; transition: all 0.2s ease; cursor: pointer; border-left: 4px solid {{ $rankColor }}; border: 1px solid {{ $borderColor }}; border-left: 4px solid {{ $rankColor }};"
-                        onmouseover="this.style.background='{{ $isDark ? '#1a524e' : '#f0f0f0' }}'; this.style.borderColor='{{ $accentColor }}'; this.style.transform='translateY(-2px)';"
-                        onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.borderColor='{{ $borderColor }}'; this.style.transform='translateY(0)';">
-                        <div style="text-align: left;">
-                            <div style="font-weight: 600; font-size: 12px; color: {{ $textPrimary }};">
-                                {{ Str::limit($user->name, 12, '') }} <small style="font-weight: bold; color: {{ $accentColor }}; font-size: 11px;">{{ number_format($user->total_points ?? 0, 0, ',', '.') }}</small>
-                            </div>
-                            <div style="font-weight: bold; color: {{ $accentColor }}; font-size: 11px;">
-
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div style="color: {{ $textSecondary }}; font-size: 14px; text-align: center; width: 100%;">
-                        {{ __('views.rankings.no_players') }}
-                    </div>
-                @endforelse
+            @if($topUsers->count() >= 1)
+            <div class="podium-container">
+              @if($topUsers->count() >= 2)
+              <!-- Second Place -->
+              <div class="podium-position second">
+                <div class="avatar-section">
+                  <div class="avatar-container">
+                    @if($topUsers[1]->avatar)
+                      <img src="{{ $topUsers[1]->avatar_url }}" alt="{{ $topUsers[1]->name }}" class="podium-avatar">
+                    @else
+                      <div class="podium-avatar-placeholder">{{ substr($topUsers[1]->name, 0, 1) }}</div>
+                    @endif
+                    <div class="medal-icon" style="color: #C0C0C0;"><i class="fas fa-medal"></i></div>
+                  </div>
+                  <div class="podium-points">{{ number_format($topUsers[1]->total_points ?? 0, 0, ',', '.') }} pts.</div>
+                </div>
+                <div class="podium-step">
+                </div>
+              </div>
+              @endif
+              <!-- First Place -->
+              <div class="podium-position first">
+                <div class="avatar-section">
+                  <div class="avatar-container">
+                    @if($topUsers[0]->avatar)
+                      <img src="{{ $topUsers[0]->avatar_url }}" alt="{{ $topUsers[0]->name }}" class="podium-avatar">
+                    @else
+                      <div class="podium-avatar-placeholder">{{ substr($topUsers[0]->name, 0, 1) }}</div>
+                    @endif
+                    <div class="medal-icon" style="color: #FFD700;"><i class="fas fa-medal"></i></div>
+                  </div>
+                  <div class="podium-points">{{ number_format($topUsers[0]->total_points ?? 0, 0, ',', '.') }}</div>
+                </div>
+                <div class="podium-step highest">
+                  <div class="star-icon"><i class="fas fa-star"></i></div>
+                </div>
+              </div>
+              @if($topUsers->count() >= 3)
+              <!-- Third Place -->
+              <div class="podium-position third">
+                <div class="avatar-section">
+                  <div class="avatar-container">
+                    @if($topUsers[2]->avatar)
+                      <img src="{{ $topUsers[2]->avatar_url }}" alt="{{ $topUsers[2]->name }}" class="podium-avatar">
+                    @else
+                      <div class="podium-avatar-placeholder">{{ substr($topUsers[2]->name, 0, 1) }}</div>
+                    @endif
+                    <div class="medal-icon" style="color: #CD7F32;"><i class="fas fa-medal"></i></div>
+                  </div>
+                  <div class="podium-points">{{ number_format($topUsers[2]->total_points ?? 0, 0, ',', '.') }}</div>
+                </div>
+                <div class="podium-step">
+                </div>
+              </div>
+              @endif
             </div>
+            @else
+            <div style="color: {{ $textSecondary }}; font-size: 14px; text-align: center; width: 100%; padding: 20px;">
+              {{ __('views.rankings.no_players') }}
+            </div>
+            @endif
         </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -188,6 +228,167 @@
     }
     .question-indicator.active {
         background-color: theme('colors.offside-secondary');
+    }
+
+    .podium-container {
+      display: flex;
+      justify-content: center;
+      align-items: end;
+      gap: 16px;
+      padding: 20px 16px;
+      min-height: 200px;
+    }
+
+    .podium-position {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .podium-step {
+      background: {{ $bgSecondary }};
+      border: 2px solid {{ $accentColor }};
+      border-radius: 16px 16px 0 0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 80px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .podium-step:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .podium-step.highest {
+      height: 160px;
+      background: linear-gradient(135deg, {{ $accentColor }}, {{ $accentDark }});
+      color: white;
+    }
+
+    .second .podium-step {
+      height: 120px;
+      background: {{ $bgSecondary }};
+    }
+
+    .third .podium-step {
+      height: 120px;
+      background: {{ $bgSecondary }};
+    }
+
+    .podium-avatar, .podium-avatar-placeholder {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 3px solid {{ $accentColor }};
+      object-fit: cover;
+    }
+
+    .podium-avatar-placeholder {
+      background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }});
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .podium-name {
+      font-weight: 600;
+      font-size: 12px;
+      color: {{ $textPrimary }};
+      text-align: center;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .podium-points {
+      font-weight: bold;
+      font-size: 14px;
+      color: {{ $accentColor }};
+    }
+
+    .position-badge {
+      position: absolute;
+      top: -10px;
+      background: {{ $accentColor }};
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+      border: 2px solid {{ $bgTertiary }};
+    }
+
+    .position-badge.gold {
+      background: #FFD700;
+      color: #333;
+    }
+
+    .star-icon {
+      position: absolute;
+      top: -20px;
+      color: #FFD700;
+      font-size: 20px;
+      animation: sparkle 2s infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 600px) {
+      .podium-container {
+        gap: 8px;
+        padding: 16px 8px;
+        min-height: 120px;
+      }
+      .podium-position {
+        flex: 1;
+      }
+      .podium-step {
+        padding: 12px 8px;
+        min-width: unset;
+      }
+      .podium-step.highest {
+        height: 120px;
+      }
+      .second .podium-step, .third .podium-step {
+        height: 100px;
+      }
+      .podium-avatar, .podium-avatar-placeholder {
+        width: 40px;
+        height: 40px;
+      }
+      .podium-name {
+        font-size: 10px;
+      }
+      .podium-points {
+        font-size: 12px;
+      }
+      .position-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+      }
+      .star-icon {
+        font-size: 16px;
+      }
     }
 </style>
 
