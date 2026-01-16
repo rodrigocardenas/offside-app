@@ -56,8 +56,8 @@ class NotifyDeployment extends Command
         $message = implode(' · ', $parts);
 
         $channel
-            ? SlackAlert::to($channel)->message($message)
-            : SlackAlert::message($message);
+            ? SlackAlert::to($channel)->sync()->message($message)
+            : SlackAlert::sync()->message($message);
 
         $this->info('Alerta enviada a Slack.');
 

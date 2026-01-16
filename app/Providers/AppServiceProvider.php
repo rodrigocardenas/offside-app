@@ -139,11 +139,11 @@ class AppServiceProvider extends ServiceProvider
     private function sendSlackConsoleMessage(string $message, ?string $webhookKey): void
     {
         if ($webhookKey) {
-            SlackAlert::to($webhookKey)->message($message);
+            SlackAlert::to($webhookKey)->sync()->message($message);
 
             return;
         }
 
-        SlackAlert::message($message);
+        SlackAlert::sync()->message($message);
     }
 }
