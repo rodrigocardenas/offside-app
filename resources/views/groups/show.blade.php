@@ -396,21 +396,40 @@
                 dataType: 'json',
                 success: function(data) {
                     if (data.success) {
-                        // Update button styles for all questions with this template
-                        $('.like-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-green-500').addClass('text-gray-400');
-                        $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-red-500').addClass('text-gray-400');
-
-                        if (data.user_reaction === 'like') {
-                            $('.like-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-gray-400').addClass('text-green-500');
-                        } else if (data.user_reaction === 'dislike') {
-                            $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"]').removeClass('text-gray-400').addClass('text-red-500');
-                        }
+                        updateReactionColors(templateQuestionId, data.user_reaction);
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
                 }
             });
+        }
+
+        function updateReactionColors(templateQuestionId, reaction) {
+            const likeButtons = $('.like-btn[data-template-question-id="' + templateQuestionId + '"]');
+            const dislikeButtons = $('.dislike-btn[data-template-question-id="' + templateQuestionId + '"]');
+
+            likeButtons.each(function() {
+                const defaultColor = this.dataset.defaultColor || '';
+                this.style.color = defaultColor;
+            });
+
+            dislikeButtons.each(function() {
+                const defaultColor = this.dataset.defaultColor || '';
+                this.style.color = defaultColor;
+            });
+
+            if (reaction === 'like') {
+                likeButtons.each(function() {
+                    const activeColor = this.dataset.activeColor || '#00deb0';
+                    this.style.color = activeColor;
+                });
+            } else if (reaction === 'dislike') {
+                dislikeButtons.each(function() {
+                    const activeColor = this.dataset.activeColor || '#ef4444';
+                    this.style.color = activeColor;
+                });
+            }
         }
     });
 </script>

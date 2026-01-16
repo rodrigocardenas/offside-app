@@ -36,9 +36,7 @@
         <div class="text-base font-bold mb-2" style="color: {{ $accentColor }};">
             {{ $socialQuestion->title }}
         </div>
-        @if($socialQuestion->description)
-            <p class="text-sm" style="color: {{ $textSecondary }};">{{ $socialQuestion->description }}</p>
-        @endif
+
     </div>
 
     @if($canAnswer)
@@ -171,6 +169,8 @@
         <button type="button" class="like-btn text-sm transition-colors"
                 data-question-id="{{ $socialQuestion->id }}"
                 data-template-question-id="{{ $socialQuestion->template_question_id }}"
+                data-default-color="{{ $textSecondary }}"
+                data-active-color="{{ $accentColor }}"
                 style="color: {{ $userLiked ? $accentColor : $textSecondary }};"
                 onmouseover="this.style.color='{{ $accentColor }}'"
                 onmouseout="this.style.color='{{ $userLiked ? $accentColor : $textSecondary }}'">
@@ -179,6 +179,8 @@
         <button type="button" class="dislike-btn text-sm transition-colors"
                 data-question-id="{{ $socialQuestion->id }}"
                 data-template-question-id="{{ $socialQuestion->template_question_id }}"
+                data-default-color="{{ $textSecondary }}"
+                data-active-color="#ef4444"
                 style="color: {{ $userDisliked ? '#ef4444' : $textSecondary }};"
                 onmouseover="this.style.color='#ef4444'"
                 onmouseout="this.style.color='{{ $userDisliked ? '#ef4444' : $textSecondary }}'">

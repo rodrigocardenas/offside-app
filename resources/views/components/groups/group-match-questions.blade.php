@@ -237,10 +237,26 @@
 
                 <!-- Like/Dislike Buttons -->
                 <div class="flex justify-end gap-3 mt-4">
-                    <button type="button" class="like-btn text-sm transition-colors" style="color: {{ $textSecondary }};" data-question-id="{{ $question->id }}" data-template-question-id="{{ $question->template_question_id }}">
+                    @php
+                        $userLiked = isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty();
+                        $userDisliked = isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty();
+                    @endphp
+                    <button type="button"
+                            class="like-btn text-sm transition-colors"
+                            data-question-id="{{ $question->id }}"
+                            data-template-question-id="{{ $question->template_question_id }}"
+                            data-default-color="{{ $textSecondary }}"
+                            data-active-color="{{ $accentColor }}"
+                            style="color: {{ $userLiked ? $accentColor : $textSecondary }};">
                         <i class="fas fa-thumbs-up"></i>
                     </button>
-                    <button type="button" class="dislike-btn text-sm transition-colors" style="color: {{ $textSecondary }};" data-question-id="{{ $question->id }}" data-template-question-id="{{ $question->template_question_id }}">
+                    <button type="button"
+                            class="dislike-btn text-sm transition-colors"
+                            data-question-id="{{ $question->id }}"
+                            data-template-question-id="{{ $question->template_question_id }}"
+                            data-default-color="{{ $textSecondary }}"
+                            data-active-color="#ef4444"
+                            style="color: {{ $userDisliked ? '#ef4444' : $textSecondary }};">
                         <i class="fas fa-thumbs-down"></i>
                     </button>
                 </div>
