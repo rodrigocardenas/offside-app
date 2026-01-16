@@ -5,6 +5,8 @@ set -e
 SERVER_ALIAS="offside-app"
 REMOTE_PATH="/var/www/html/offside-app"
 REQUIRED_BRANCH="main"
+DEPLOY_INITIATOR=$(whoami)
+COMMIT_SHA=$(git rev-parse --short HEAD)
 
 
 echo "🔍 Validando entorno de despliegue..."
@@ -60,6 +62,9 @@ ssh -T $SERVER_ALIAS << EOF
 
     echo "✨ Saliendo del modo mantenimiento..."
     sudo -u www-data php artisan up
+
+    echo "📣 Notificando despliegue exitoso..."
+    sudo -u www-data php artisan deployment:notify success --branch=$REQUIRED_BRANCH --env=production --channel=deployments --initiator="$DEPLOY_INITIATOR" --commit="$COMMIT_SHA"
 
     echo "✅ Servidor actualizado exitosamente."
 EOF

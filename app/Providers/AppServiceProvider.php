@@ -2,10 +2,13 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\File;
+use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Support\Facades\Blade;
-use App\Helpers\DateTimeHelper;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,26 +25,123 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Registrar Blade directives SIEMPRE (antes de cualquier condición)
+        $this->registerBladeDirectives();
+
+        if ($this->app->runningInConsole()) {
+            $this->registerConsoleSlackAlerts();
+
+            return;
+        }
+
+        $this->ensureViteManifestIsAccessible();
+    }
+
+    private function registerBladeDirectives(): void
+    {
         Blade::directive('userTime', function ($expression) {
             return "<?php echo \\App\\Helpers\\DateTimeHelper::toUserTimezone({$expression}); ?>";
         });
 
-        // Blade directive para mostrar hora UTC
         Blade::directive('utcTime', function ($expression) {
             return "<?php echo \\App\\Helpers\\DateTimeHelper::toUTC({$expression}); ?>";
         });
+    }
 
-        if ($this->app->runningInConsole()) {
-            return;
-        }
-
-        // Forzar la ubicación del manifest
+    private function ensureViteManifestIsAccessible(): void
+    {
         $manifestPath = public_path('build/manifest.json');
         $viteManifestPath = public_path('build/.vite/manifest.json');
 
         if (File::exists($viteManifestPath) && !File::exists($manifestPath)) {
             File::copy($viteManifestPath, $manifestPath);
         }
+    }
+
+    private function registerConsoleSlackAlerts(): void
+    {
+        $settings = config('slack-alerts.console_notifications', []);
+
+        if (! ($settings['enabled'] ?? false)) {
+            return;
+        }
+
+        $environments = $settings['environments'] ?? ['production'];
+
+        if (! in_array(config('app.env'), $environments, true)) {
+            return;
+        }
+
+        $commands = $settings['commands'] ?? [];
+
+        if ($commands === []) {
+            return;
+        }
+
+        if (! $this->hasSlackWebhookConfigured($settings['webhook'] ?? null)) {
+            return;
+        }
+
+        Event::listen(CommandFinished::class, function (CommandFinished $event) use ($commands, $settings): void {
+            $command = trim((string) ($event->command ?? ''));
+
+            if ($command === '') {
+                return;
+            }
+
+            if (! $this->shouldNotifyConsoleCommand($command, $commands)) {
+                return;
+            }
+
+            $status = ($event->exitCode ?? 0) === 0 ? 'completado' : 'falló';
+            $emoji = ($event->exitCode ?? 0) === 0 ? ':white_check_mark:' : ':x:';
+            $runtimeSeconds = $event->runtime > 0 ? number_format($event->runtime / 1000, 2) : '0.00';
+
+            $message = sprintf(
+                '%s `%s` %s en %s [%s] (%ss).',
+                $emoji,
+                $command,
+                $status,
+                config('app.name'),
+                config('app.env'),
+                $runtimeSeconds
+            );
+
+            $this->sendSlackConsoleMessage($message, $settings['webhook'] ?? null);
+        });
+    }
+
+    private function shouldNotifyConsoleCommand(string $command, array $patterns): bool
+    {
+        foreach ($patterns as $pattern) {
+            if (Str::is($pattern, $command)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasSlackWebhookConfigured(?string $webhookKey): bool
+    {
+        if (filled(config('slack-alerts.default_webhook'))) {
+            return true;
+        }
+
+        if ($webhookKey && filled(config("slack-alerts.webhooks.$webhookKey"))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function sendSlackConsoleMessage(string $message, ?string $webhookKey): void
+    {
+        if ($webhookKey) {
+            SlackAlert::to($webhookKey)->message($message);
+
+            return;
+        }
+
+        SlackAlert::message($message);
     }
 }
