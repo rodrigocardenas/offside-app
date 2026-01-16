@@ -12,7 +12,8 @@ class NotifyDeployment extends Command
                             {status=success : success|failed}
                             {--branch= : Rama desplegada}
                             {--env= : Entorno objetivo}
-                            {--channel=deployments : Canal configurado en slack-alerts.php}
+                            {--channel=deployments : Nombre del webhook configurado}
+                            {--slack-channel= : Canal de Slack (ej. #app-notifications)}
                             {--initiator= : Usuario que lanzó el deploy}
                             {--commit= : Hash corto del commit desplegado}';
 
@@ -20,12 +21,14 @@ class NotifyDeployment extends Command
 
     public function handle(): int
     {
-        $channel = $this->option('channel') ?: null;
+        $requestedWebhook = $this->option('channel') ?: null;
+        $slackChannel = $this->normalizeSlackChannel($this->option('slack-channel'));
+        $webhookName = $this->resolveWebhookName($requestedWebhook);
 
-        if (! $this->slackWebhookDisponible($channel)) {
-            $this->warn('No hay webhook de Slack configurado. Se omite la alerta.');
+        if (! $webhookName) {
+            $this->error('No hay ningún webhook de Slack configurado. Se omite la alerta.');
 
-            return self::SUCCESS;
+            return self::FAILURE;
         }
 
         $status = Str::of($this->argument('status'))->lower();
@@ -55,27 +58,58 @@ class NotifyDeployment extends Command
 
         $message = implode(' · ', $parts);
 
-        $channel
-            ? SlackAlert::to($channel)->sync()->message($message)
-            : SlackAlert::sync()->message($message);
+        $slack = SlackAlert::sync();
+
+        if ($webhookName !== 'default') {
+            $slack->to($webhookName);
+        }
+
+        if ($slackChannel) {
+            $slack->toChannel($slackChannel);
+        }
+
+        if ($requestedWebhook && $requestedWebhook !== $webhookName) {
+            $this->warn("El webhook '$requestedWebhook' no está configurado, se usa '$webhookName'.");
+        }
+
+        $slack->message($message);
 
         $this->info('Alerta enviada a Slack.');
 
         return self::SUCCESS;
     }
 
-    private function slackWebhookDisponible(?string $channel): bool
+    private function resolveWebhookName(?string $requested): ?string
     {
         $webhooks = config('slack-alerts.webhook_urls', []);
 
+        if ($requested && filled($webhooks[$requested] ?? null)) {
+            return $requested;
+        }
+
         if (filled($webhooks['default'] ?? null)) {
-            return true;
+            return 'default';
         }
 
-        if ($channel && filled($webhooks[$channel] ?? null)) {
-            return true;
+        return null;
+    }
+
+    private function normalizeSlackChannel(?string $channel): ?string
+    {
+        if (! $channel) {
+            return null;
         }
 
-        return false;
+        $channel = trim($channel);
+
+        if ($channel === '') {
+            return null;
+        }
+
+        if ($channel[0] === '#' || $channel[0] === '@') {
+            return $channel;
+        }
+
+        return '#'.$channel;
     }
 }

@@ -138,12 +138,37 @@ class AppServiceProvider extends ServiceProvider
 
     private function sendSlackConsoleMessage(string $message, ?string $webhookKey): void
     {
-        if ($webhookKey) {
-            SlackAlert::to($webhookKey)->sync()->message($message);
+        $webhookName = $this->resolveWebhookName($webhookKey);
+
+        if (! $webhookName) {
+            logger()->warning('Slack webhook no configurado, alerta omitida.', [
+                'requested_webhook' => $webhookKey,
+            ]);
 
             return;
         }
 
-        SlackAlert::sync()->message($message);
+        $slack = SlackAlert::sync();
+
+        if ($webhookName !== 'default') {
+            $slack->to($webhookName);
+        }
+
+        $slack->message($message);
+    }
+
+    private function resolveWebhookName(?string $requested): ?string
+    {
+        $webhooks = config('slack-alerts.webhook_urls', []);
+
+        if ($requested && filled($webhooks[$requested] ?? null)) {
+            return $requested;
+        }
+
+        if (filled($webhooks['default'] ?? null)) {
+            return 'default';
+        }
+
+        return null;
     }
 }
