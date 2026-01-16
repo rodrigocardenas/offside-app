@@ -13,91 +13,121 @@
     $buttonBgHover = $themeColors['buttonBgHover'] ?? ($buttonBgHover ?? ($isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)'));
     $accentColor = $themeColors['accentColor'] ?? ($accentColor ?? '#00deb0');
     $accentDark = $themeColors['accentDark'] ?? ($accentDark ?? '#003b2f');
+
+    $userHasAnswered = $socialQuestion->answers->firstWhere('user_id', auth()->id());
+    $recentAnswer = $userHasAnswered && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5;
+    $canAnswer = (!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now()) || $recentAnswer;
+    $userAnswerOptionId = $userAnswers[$socialQuestion->id] ?? optional($userHasAnswered)->question_option_id;
+    $userLiked = isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty();
+    $userDisliked = isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty();
 @endphp
 
-    {{-- <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-        <h2 style="font-size: 0.875rem; font-weight: bold; color: {{ $textPrimary }};">{{ __('views.groups.question_of_the_day') }}</h2>
-    </div> --}}
-    <div style="background: {{ $componentsBackground }}; border-radius: 1.2rem; padding: 1.5rem; border: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; text-align: center;">
-        <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3" style="background: {{ $accentColor }}; color: #000;">
-            PREGUNTA DEL DÍA
+<div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm text-center"
+     style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px;">
+    <div class="text-center mb-5">
+        <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3"
+             style="background: {{ $accentColor }}; color: #000;">
+            {{ __('views.groups.social_questions') }}
         </div>
-        <div style="margin-bottom: 1rem;">
-            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: {{ $accentColor }};">{{ $socialQuestion->title }}</h3>
-            @if($socialQuestion->description)
-                <p style="font-size: 0.875rem; color: {{ $textSecondary }};">⌛ <span class="countdown" data-time="{{ $socialQuestion->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span></p>
-            @endif
+        <div class="text-xs mb-4" style="color: {{ $textSecondary }};">
+            <i class="fas fa-circle" style="color: {{ $accentColor }}; font-size: 3px;"></i>
+            {{ __('views.groups.question_of_the_day') }}
         </div>
-        @php
-            $userHasAnswered = $socialQuestion->answers->where('user_id', auth()->user()->id)->first();
-        @endphp
-        @if((!$userHasAnswered && $socialQuestion->available_until->addHours(4) > now()) || ($userHasAnswered && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5))
-            <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" style="display: flex; flex-direction: column; gap: 0.75rem;" class="group-social-form">
-                @csrf
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    @foreach($socialQuestion->options as $option)
-                        <label class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;" onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $buttonBgHover }}'" onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgSecondary }}'">
-                            <input type="radio" name="question_option_id" value="{{ $option->id }}" style="display: none;" onchange="this.closest('form').submit();">
-                            <span style="flex: 1; text-align: center; pointer-events: none;">{{ $option->text }}</span>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
-                                    @if($answer->user->avatar)
-                                        <img src="{{ $answer->user->avatar_url }}"
-                                             alt="{{ $answer->user->name }}"
-                                             class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
-                                             title="{{ $answer->user->name }}">
-                                    @else
-                                        @php
-                                            $initials = '';
-                                            $nameParts = explode(' ', $answer->user->name);
-                                            foreach($nameParts as $part) {
-                                                $initials .= strtoupper(substr($part, 0, 1));
-                                            }
-                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
-                                            $color = $colors[array_rand($colors)];
-                                        @endphp
-                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
-                                             title="{{ $answer->user->name }}">
-                                            {{ $initials }}
-                                        </div>
-                                    @endif
-                                @endforeach
-                            </div>
-                        </label>
-                    @endforeach
-                </div>
-            </form>
-        @else
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div class="text-base font-bold mb-2" style="color: {{ $accentColor }};">
+            {{ $socialQuestion->title }}
+        </div>
+        @if($socialQuestion->description)
+            <p class="text-sm" style="color: {{ $textSecondary }};">{{ $socialQuestion->description }}</p>
+        @endif
+    </div>
+
+    @if($canAnswer)
+        <form action="{{ route('questions.answer', $socialQuestion) }}" method="POST" class="group-social-form">
+            @csrf
+            <div class="grid grid-cols-2 gap-3 mb-5">
                 @foreach($socialQuestion->options as $option)
                     @php
-                        $optionBg = $bgSecondary;
-                        $optionColor = $textPrimary;
-                        if ($socialQuestion->available_until->addHours(4) > now()) {
-                            if (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id) {
-                                $optionBg = $accentDark;
-                                $optionColor = '#ffffff';
-                            }
-                        } else {
-                            if ($option->is_correct) {
-                                $optionBg = '#00c800';
-                                $optionColor = '#ffffff';
-                            } elseif (isset($userAnswers[$socialQuestion->id]) && $userAnswers[$socialQuestion->id] == $option->id) {
-                                $optionBg = '#c80000';
-                                $optionColor = '#ffffff';
-                            }
-                        }
+                        $answers = $socialQuestion->answers->where('question_option_id', $option->id);
+                        $isStacked = $answers->count() > 2;
+                        $allNames = $answers->pluck('user.name')->implode(', ');
                     @endphp
-                    <div class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer" style="background: {{ $bgSecondary }}; color: {{ $textPrimary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: {{ $optionColor }};">{{ $option->text }}</span>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                @foreach($socialQuestion->answers->where('question_option_id', $option->id) as $answer)
+                    <label class="option-label w-full py-3 px-2 border rounded-xl text-xs transition-all cursor-pointer"
+                           style="background: {{ $bgSecondary }}; color: {{ $textPrimary }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;"
+                           onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $buttonBgHover }}'"
+                           onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgSecondary }}'">
+                        <input type="radio" name="question_option_id" value="{{ $option->id }}" style="display: none;"
+                               onchange="this.closest('form').submit();">
+                        <span style="pointer-events: none; flex: 1; text-align: center;">{{ $option->text }}</span>
+                        <div style="display: flex; align-items: center;">
+                            @if($answers->count() > 0)
+                                <div class="flex items-center {{ $isStacked ? '-space-x-4' : 'space-x-1' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
+                                    @foreach($answers->take(3) as $answer)
+                                        @if($answer->user->avatar)
+                                            <img src="{{ $answer->user->avatar_url }}" alt="{{ $answer->user->name }}"
+                                                 class="w-5 h-5 rounded-full border border-white shadow-sm object-cover {{ $isStacked ? 'ring-1 ring-white' : '' }}"
+                                                 title="{{ $answer->user->name }}" style="pointer-events: none;">
+                                        @else
+                                            @php
+                                                $initials = '';
+                                                $nameParts = explode(' ', $answer->user->name);
+                                                foreach($nameParts as $part) {
+                                                    $initials .= strtoupper(substr($part, 0, 1));
+                                                }
+                                                $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                                                $color = $colors[array_rand($colors)];
+                                            @endphp
+                                            <div class="w-5 h-5 rounded-full text-white flex items-center justify-center text-xs font-bold border border-white shadow-sm {{ $isStacked ? 'ring-1 ring-white' : '' }}"
+                                                 style="background: {{ $color }}; pointer-events: none;"
+                                                 title="{{ $answer->user->name }}">
+                                                {{ substr($initials, 0, 1) }}
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                    @if($isStacked && $answers->count() > 3)
+                                        <span class="text-xs font-bold ml-1" style="color: {{ $textSecondary }}; pointer-events: none;">+{{ $answers->count() - 3 }}</span>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </label>
+                @endforeach
+            </div>
+        </form>
+    @else
+        <div class="grid grid-cols-2 gap-3 mb-5">
+            @foreach($socialQuestion->options as $option)
+                @php
+                    $answers = $socialQuestion->answers->where('question_option_id', $option->id);
+                    $isStacked = $answers->count() > 2;
+                    $allNames = $answers->pluck('user.name')->implode(', ');
+                    $optionBg = $bgSecondary;
+                    $optionColor = $textPrimary;
+                    if ($socialQuestion->available_until->addHours(4) > now()) {
+                        if ($userAnswerOptionId == $option->id) {
+                            $optionBg = $accentDark;
+                            $optionColor = '#ffffff';
+                        }
+                    } else {
+                        if ($option->is_correct) {
+                            $optionBg = '#28a745';
+                            $optionColor = '#ffffff';
+                        } elseif ($userAnswerOptionId == $option->id) {
+                            $optionBg = '#dc3545';
+                            $optionColor = '#ffffff';
+                        }
+                    }
+                @endphp
+                <div class="w-full py-3 px-2 border rounded-xl text-xs font-medium"
+                     style="background: {{ $optionBg }}; color: {{ $optionColor }}; border-color: {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center;">
+                    <span>{{ $option->text }}</span>
+                    <div style="display: flex; align-items: center;">
+                        @if($answers->count() > 0)
+                            <div class="flex items-center {{ $isStacked ? '-space-x-4' : 'space-x-1' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
+                                @foreach($answers->take(3) as $answer)
                                     @if($answer->user->avatar)
-                                        <img src="{{ $answer->user->avatar_url }}"
-                                             alt="{{ $answer->user->name }}"
-                                             class="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover"
-                                             title="{{ $answer->user->name }}">
+                                        <img src="{{ $answer->user->avatar_url }}" alt="{{ $answer->user->name }}"
+                                             class="w-5 h-5 rounded-full border border-white shadow-sm object-cover {{ $isStacked ? 'ring-1 ring-white' : '' }}"
+                                             title="{{ $answer->user->name }}" style="pointer-events: none;">
                                     @else
                                         @php
                                             $initials = '';
@@ -105,40 +135,54 @@
                                             foreach($nameParts as $part) {
                                                 $initials .= strtoupper(substr($part, 0, 1));
                                             }
-                                            $colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500', 'bg-pink-500'];
+                                            $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
                                             $color = $colors[array_rand($colors)];
                                         @endphp
-                                        <div class="w-8 h-8 rounded-full {{ $color }} text-white flex items-center justify-center text-xs font-bold border-2 border-white shadow-sm"
-                                                title="{{ $answer->user->name }}">
-                                            {{ $initials }}
+                                        <div class="w-5 h-5 rounded-full text-white flex items-center justify-center text-xs font-bold border border-white shadow-sm {{ $isStacked ? 'ring-1 ring-white' : '' }}"
+                                             style="background: {{ $color }}; pointer-events: none;"
+                                             title="{{ $answer->user->name }}">
+                                            {{ substr($initials, 0, 1) }}
                                         </div>
                                     @endif
                                 @endforeach
+                                @if($isStacked && $answers->count() > 3)
+                                    <span class="text-xs font-bold ml-1" style="color: {{ $textSecondary }}; pointer-events: none;">+{{ $answers->count() - 3 }}</span>
+                                @endif
                             </div>
-                        </div>
+                        @endif
                     </div>
-                @endforeach
-            </div>
-        @endif
-        <!-- Like/Dislike Buttons -->
-        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
-            <button type="button"
-                style="display: flex; align-items: center; cursor: pointer; color: {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? $accentColor : $textSecondary }}; transition: color 0.2s;"
-                    class="like-btn"
-                    data-question-id="{{ $socialQuestion->id }}"
-                    data-template-question-id="{{ $socialQuestion->template_question_id }}"
-                    onmouseover="this.style.color='{{ $accentColor }}'"
-                    onmouseout="this.style.color='{{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty() ? $accentColor : $textSecondary }}'">
-                <i class="fas fa-thumbs-up" style="margin-right: 0.25rem;"></i>
-            </button>
-                <button type="button"
-                    style="display: flex; align-items: center; cursor: pointer; color: {{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty() ? '#ef4444' : $textSecondary }}; transition: color 0.2s;"
-                    class="dislike-btn"
-                    data-question-id="{{ $socialQuestion->id }}"
-                    data-template-question-id="{{ $socialQuestion->template_question_id }}"
-                    onmouseover="this.style.color='#ef4444'"
-                    onmouseout="this.style.color='{{ isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty() ? '#ef4444' : $textSecondary }}'">
-                <i class="fas fa-thumbs-down" style="margin-right: 0.25rem;"></i>
-            </button>
+                </div>
+            @endforeach
         </div>
+    @endif
+
+    <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
+        <i class="fas fa-clock"></i>
+        @if($socialQuestion->is_disabled)
+            {{ __('views.groups.question_disabled') }}
+        @elseif($socialQuestion->available_until->addHours(4) > now())
+            <span class="countdown" data-time="{{ $socialQuestion->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
+        @else
+            {{ __('views.groups.match_finished') }}
+        @endif
     </div>
+
+    <div class="flex justify-end gap-3 mt-4">
+        <button type="button" class="like-btn text-sm transition-colors"
+                data-question-id="{{ $socialQuestion->id }}"
+                data-template-question-id="{{ $socialQuestion->template_question_id }}"
+                style="color: {{ $userLiked ? $accentColor : $textSecondary }};"
+                onmouseover="this.style.color='{{ $accentColor }}'"
+                onmouseout="this.style.color='{{ $userLiked ? $accentColor : $textSecondary }}'">
+            <i class="fas fa-thumbs-up"></i>
+        </button>
+        <button type="button" class="dislike-btn text-sm transition-colors"
+                data-question-id="{{ $socialQuestion->id }}"
+                data-template-question-id="{{ $socialQuestion->template_question_id }}"
+                style="color: {{ $userDisliked ? '#ef4444' : $textSecondary }};"
+                onmouseover="this.style.color='#ef4444'"
+                onmouseout="this.style.color='{{ $userDisliked ? '#ef4444' : $textSecondary }}'">
+            <i class="fas fa-thumbs-down"></i>
+        </button>
+    </div>
+</div>
