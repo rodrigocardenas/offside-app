@@ -66,11 +66,13 @@ class NotifyDeployment extends Command
 
     private function slackWebhookDisponible(?string $channel): bool
     {
-        if (filled(config('slack-alerts.default_webhook'))) {
+        $webhooks = config('slack-alerts.webhook_urls', []);
+
+        if (filled($webhooks['default'] ?? null)) {
             return true;
         }
 
-        if ($channel && filled(config("slack-alerts.webhooks.$channel"))) {
+        if ($channel && filled($webhooks[$channel] ?? null)) {
             return true;
         }
 

@@ -123,11 +123,13 @@ class AppServiceProvider extends ServiceProvider
 
     private function hasSlackWebhookConfigured(?string $webhookKey): bool
     {
-        if (filled(config('slack-alerts.default_webhook'))) {
+        $webhooks = config('slack-alerts.webhook_urls', []);
+
+        if (filled($webhooks['default'] ?? null)) {
             return true;
         }
 
-        if ($webhookKey && filled(config("slack-alerts.webhooks.$webhookKey"))) {
+        if ($webhookKey && filled($webhooks[$webhookKey] ?? null)) {
             return true;
         }
 
