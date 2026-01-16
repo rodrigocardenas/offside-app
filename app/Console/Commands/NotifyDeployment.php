@@ -15,7 +15,8 @@ class NotifyDeployment extends Command
                             {--channel=deployments : Nombre del webhook configurado}
                             {--slack-channel= : Canal de Slack (ej. #app-notifications)}
                             {--initiator= : Usuario que lanzó el deploy}
-                            {--commit= : Hash corto del commit desplegado}';
+                            {--commit= : Hash corto del commit desplegado}
+                            {--summary= : Mensaje adicional (ej. título del commit)}';
 
     protected $description = 'Envía una alerta a Slack cuando termina el despliegue';
 
@@ -31,7 +32,7 @@ class NotifyDeployment extends Command
             return self::FAILURE;
         }
 
-        $status = Str::of($this->argument('status'))->lower();
+        $status = Str::of($this->argument('status'))->lower()->value();
         $successful = $status === 'success';
 
         $appName = config('app.name');
@@ -39,6 +40,7 @@ class NotifyDeployment extends Command
         $branch = $this->option('branch') ?: 'desconocida';
         $initiator = $this->option('initiator') ?: get_current_user();
         $commit = $this->option('commit');
+        $summary = $this->option('summary');
 
         $emoji = $successful ? ':rocket:' : ':warning:';
         $statusText = $successful ? 'exitoso' : 'con problemas';
@@ -54,6 +56,10 @@ class NotifyDeployment extends Command
 
         if ($initiator) {
             $parts[] = "lanzado por $initiator";
+        }
+
+        if ($summary) {
+            $parts[] = "nota: $summary";
         }
 
         $message = implode(' · ', $parts);
