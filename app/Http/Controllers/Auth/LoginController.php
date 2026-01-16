@@ -32,20 +32,22 @@ class LoginController extends Controller
         // Si no se encuentra por ID completo, crear un nuevo usuario
         if (!$user) {
             // Generar un username único basado en el nombre ingresado
-            $baseName = $request->name;
-            $counter = 1;
-            $uniqueName = $baseName;
+            $baseName = trim($request->name);
 
-            // Verificar si el nombre base ya existe y generar uno único
-            while (User::where('name', $uniqueName)->exists()) {
-                $uniqueName = $baseName . $counter;
+            // Generar un correo único reutilizando el nombre base
+            $emailDomain = '@offsideclub.com';
+            $email = $baseName . $emailDomain;
+            $counter = 1;
+
+            while (User::where('email', $email)->exists()) {
+                $email = $baseName . '_' . $counter . $emailDomain;
                 $counter++;
             }
 
-            // Crear nuevo usuario con el nombre único
+            // Crear nuevo usuario manteniendo el nombre original y correo único
             $user = User::create([
-                'name' => $uniqueName,
-                'email' => $uniqueName . '@offsideclub.com',
+                'name' => $baseName,
+                'email' => $email,
                 'password' => Hash::make(Str::random(16)),
             ]);
 
