@@ -1,0 +1,130 @@
+name: Notify on Main Branch Commit
+
+# This workflow sends notifications when commits are pushed to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Fetch last 2 commits to get commit details
+
+      - name: Get commit information
+        id: commit_info
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+          COMMIT_SHA=$(git log -1 --pretty=format:'%h')
+          COMMIT_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+          
+          echo "message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          echo "author=$COMMIT_AUTHOR" >> $GITHUB_OUTPUT
+          echo "sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "url=$COMMIT_URL" >> $GITHUB_OUTPUT
+
+      - name: Send notification via GitHub
+        run: |
+          echo "::notice title=New Commit to Main::Commit ${{ steps.commit_info.outputs.sha }} by ${{ steps.commit_info.outputs.author }}: ${{ steps.commit_info.outputs.message }}"
+          echo "✅ Notification sent for commit to main branch"
+          echo "📝 Commit: ${{ steps.commit_info.outputs.message }}"
+          echo "👤 Author: ${{ steps.commit_info.outputs.author }}"
+          echo "🔗 URL: ${{ steps.commit_info.outputs.url }}"
+
+      # Optional: Uncomment and configure one of the following notification methods
+      
+      # Slack Notification (requires SLACK_WEBHOOK_URL secret)
+      # - name: Send Slack notification
+      #   if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+      #   uses: slackapi/slack-github-action@v1.25.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "🚀 New commit to main branch",
+      #         "blocks": [
+      #           {
+      #             "type": "section",
+      #             "text": {
+      #               "type": "mrkdwn",
+      #               "text": "*New commit to main branch*\n\n*Author:* ${{ steps.commit_info.outputs.author }}\n*Commit:* ${{ steps.commit_info.outputs.message }}\n*SHA:* `${{ steps.commit_info.outputs.sha }}`\n\n<${{ steps.commit_info.outputs.url }}|View Commit>"
+      #             }
+      #           }
+      #         ]
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # Discord Notification (requires DISCORD_WEBHOOK secret)
+      # - name: Send Discord notification
+      #   if: ${{ secrets.DISCORD_WEBHOOK != '' }}
+      #   uses: tsickert/discord-webhook@v5.3.0
+      #   with:
+      #     webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+      #     content: |
+      #       🚀 **New commit to main branch**
+      #       
+      #       **Author:** ${{ steps.commit_info.outputs.author }}
+      #       **Commit:** ${{ steps.commit_info.outputs.message }}
+      #       **SHA:** `${{ steps.commit_info.outputs.sha }}`
+      #       
+      #       [View Commit](${{ steps.commit_info.outputs.url }})
+
+      # Email Notification (requires mail server configuration)
+      # - name: Send email notification
+      #   if: ${{ secrets.MAIL_USERNAME != '' }}
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: ${{ secrets.MAIL_SERVER }}
+      #     server_port: ${{ secrets.MAIL_PORT }}
+      #     username: ${{ secrets.MAIL_USERNAME }}
+      #     password: ${{ secrets.MAIL_PASSWORD }}
+      #     subject: "New commit to main branch: ${{ steps.commit_info.outputs.sha }}"
+      #     to: ${{ secrets.NOTIFICATION_EMAIL }}
+      #     from: GitHub Actions
+      #     body: |
+      #       A new commit has been pushed to the main branch:
+      #       
+      #       Author: ${{ steps.commit_info.outputs.author }}
+      #       Commit: ${{ steps.commit_info.outputs.message }}
+      #       SHA: ${{ steps.commit_info.outputs.sha }}
+      #       
+      #       View commit: ${{ steps.commit_info.outputs.url }}
+
+      # Telegram Notification (requires TELEGRAM_TOKEN and TELEGRAM_CHAT_ID secrets)
+      # - name: Send Telegram notification
+      #   if: ${{ secrets.TELEGRAM_TOKEN != '' }}
+      #   uses: appleboy/telegram-action@master
+      #   with:
+      #     to: ${{ secrets.TELEGRAM_CHAT_ID }}
+      #     token: ${{ secrets.TELEGRAM_TOKEN }}
+      #     message: |
+      #       🚀 New commit to main branch
+      #       
+      #       👤 Author: ${{ steps.commit_info.outputs.author }}
+      #       📝 Commit: ${{ steps.commit_info.outputs.message }}
+      #       🔑 SHA: ${{ steps.commit_info.outputs.sha }}
+      #       
+      #       🔗 View: ${{ steps.commit_info.outputs.url }}
+
+      # Microsoft Teams Notification (requires TEAMS_WEBHOOK_URL secret)
+      # - name: Send Teams notification
+      #   if: ${{ secrets.TEAMS_WEBHOOK_URL != '' }}
+      #   uses: aliencube/microsoft-teams-actions@v0.8.0
+      #   with:
+      #     webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+      #     title: New commit to main branch
+      #     summary: Commit by ${{ steps.commit_info.outputs.author }}
+      #     text: |
+      #       **Author:** ${{ steps.commit_info.outputs.author }}
+      #       
+      #       **Commit:** ${{ steps.commit_info.outputs.message }}
+      #       
+      #       **SHA:** ${{ steps.commit_info.outputs.sha }}
+      #       
+      #       [View Commit](${{ steps.commit_info.outputs.url }})
