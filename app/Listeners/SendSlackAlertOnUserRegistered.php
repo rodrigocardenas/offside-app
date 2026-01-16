@@ -3,6 +3,8 @@
 namespace App\Listeners;
 
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 
@@ -10,9 +12,15 @@ class SendSlackAlertOnUserRegistered
 {
     public function handle(Registered $event): void
     {
-        $user = $event->user;
+        $userData = $this->extractUserData($event->user);
 
-        if (! $user) {
+        if (! $userData) {
+            Log::warning('No se pudo extraer información del usuario para la alerta de registro.');
+
+            return;
+        }
+
+        if ($this->recentlyNotified($userData['id'])) {
             return;
         }
 
@@ -20,7 +28,7 @@ class SendSlackAlertOnUserRegistered
 
         if (! $webhookName) {
             Log::warning('Slack webhook no configurado para registros; alerta omitida.', [
-                'user_id' => $user->id ?? null,
+                'user_id' => $userData['id'],
             ]);
 
             return;
@@ -36,17 +44,16 @@ class SendSlackAlertOnUserRegistered
             $slack->toChannel($channel);
         }
 
-        $slack->message($this->buildMessage($user));
+        $slack->message($this->buildMessage($userData, request()?->ip()));
     }
 
-    private function buildMessage($user): string
+    private function buildMessage(array $userData, ?string $ip): string
     {
         $appName = config('app.name');
         $environment = config('app.env');
-        $name = $user->name ?: 'Sin nombre';
-        $email = $user->email ?: 'sin email';
-        $userId = $user->id ? '#' . $user->id : 'sin id';
-        $ip = request()?->ip();
+        $name = $userData['name'] ?? 'Sin nombre';
+        $email = $userData['email'] ?? 'sin email';
+        $userId = $userData['id'] ? '#' . $userData['id'] : 'sin id';
 
         $parts = array_filter([
             ":tada: Nuevo registro en {$appName} [{$environment}]",
@@ -92,5 +99,64 @@ class SendSlackAlertOnUserRegistered
         }
 
         return '#' . $channel;
+    }
+
+    private function extractUserData($user): ?array
+    {
+        if (! $user) {
+            return null;
+        }
+
+        if ($user instanceof Model) {
+            if (! $user->getKey()) {
+                $fresh = $user->fresh();
+
+                if ($fresh) {
+                    $user = $fresh;
+                }
+            }
+
+            if (! $user) {
+                return null;
+            }
+
+            return $this->mapUserAttributes($user);
+        }
+
+        if (is_object($user)) {
+            return $this->mapUserAttributes((array) $user);
+        }
+
+        if (is_array($user)) {
+            return $this->mapUserAttributes($user);
+        }
+
+        return null;
+    }
+
+    private function mapUserAttributes($source): array
+    {
+        $get = static fn ($key, $fallback = null) => data_get($source, $key, $fallback);
+
+        return [
+            'id' => $get('id'),
+            'name' => $get('name')
+                ?? $get('full_name')
+                ?? $get('username'),
+            'email' => $get('email')
+                ?? $get('email_address')
+                ?? $get('contact_email'),
+        ];
+    }
+
+    private function recentlyNotified($userId): bool
+    {
+        if (! $userId) {
+            return false;
+        }
+
+        $cacheKey = "slack:user-registered:{$userId}";
+
+        return ! Cache::add($cacheKey, now()->timestamp, 300);
     }
 }
