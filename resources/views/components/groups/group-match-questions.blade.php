@@ -13,6 +13,13 @@
     $buttonBgHover = $themeColors['buttonBgHover'] ?? ($buttonBgHover ?? ($isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0, 0, 0, 0.04)'));
     $accentColor = $themeColors['accentColor'] ?? ($accentColor ?? '#00deb0');
     $accentDark = $themeColors['accentDark'] ?? ($accentDark ?? '#003b2f');
+
+    $shareModalBg = $isDark ? '#10302d' : '#ffffff';
+    $shareModalText = $isDark ? '#f1fff8' : '#333333';
+    $shareModalBorder = $isDark ? '#1d4f4a' : '#e0e0e0';
+    $shareTextareaBg = $isDark ? 'rgba(255,255,255,0.05)' : '#f5f5f5';
+    $shareModalShadow = $isDark ? '0 14px 40px rgba(0, 0, 0, 0.55)' : '0 10px 40px rgba(0, 0, 0, 0.2)';
+    $shareCloseColor = $isDark ? '#d5fdf0' : '#999999';
 @endphp
 
 <div class="mt-1">
@@ -21,6 +28,18 @@
         <i class="fas fa-star" style="color: {{ $accentColor }};"></i>
         <h2 class="text-base font-semibold" style="color: {{ $textPrimary }};">{{ __('views.groups.available_questions') }}</h2>
     </div> --}}
+
+    <!-- Acciones del grupo -->
+    <div class="flex justify-end px-1 mb-4">
+        <button type="button"
+                onclick="showInviteModal(@js($group->name), @js(route('groups.invite', $group->code)))"
+                style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border: none; border-radius: 999px; background: linear-gradient(135deg, #17b796, #00deb0); color: #003b2f; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(0, 222, 176, 0.25); transition: transform 0.2s ease;"
+                onmouseover="this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.transform='translateY(0)';">
+            <i class="fas fa-paper-plane"></i>
+            <span>{{ __('views.groups.share_group') }}</span>
+        </button>
+    </div>
 
     <!-- Carrusel de preguntas -->
     <div class="relative flex items-center">
@@ -261,6 +280,7 @@
                             <h3 class="text-base font-bold text-center mb-2" style="color: {{ $textPrimary }};">
                                 {{ __('views.groups.add_more_members') }}
                             </h3>
+
                             <p class="text-xs text-center" style="color: {{ $textSecondary }};">
                                 {{ __('views.groups.social_questions_description') }}
                             </p>
@@ -295,3 +315,149 @@
         </div>
     </div>
 </div>
+
+@once
+<!-- Invite Modal (shared with index) -->
+<div id="inviteModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
+    <div style="background: {{ $shareModalBg }}; border: 1px solid {{ $shareModalBorder }}; border-radius: 16px; width: 100%; max-width: 420px; padding: 28px 24px; box-shadow: {{ $shareModalShadow }}; color: {{ $shareModalText }};">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+            <h2 style="font-size: 24px; font-weight: 700; color: {{ $shareModalText }}; margin: 0;">{{ __('views.groups.share_group') }}</h2>
+            <button onclick="document.getElementById('inviteModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: {{ $shareCloseColor }}; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div>
+                <label for="inviteMessage" style="display: block; font-size: 14px; font-weight: 600; color: {{ $shareModalText }}; margin-bottom: 8px;">{{ __('views.groups.invitation_message') }}</label>
+                <textarea id="inviteMessage" rows="4" readonly
+                          style="width: 100%; background: {{ $shareTextareaBg }}; border: 1px solid {{ $shareModalBorder }}; border-radius: 8px; padding: 12px 16px; color: {{ $shareModalText }}; font-size: 14px; font-family: 'Courier New', monospace; resize: none; box-sizing: border-box;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
+                <button type="button" onclick="copyInviteText(this)"
+                        style="flex: 1; padding: 12px 16px; background: #17b796; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                        onmouseover="this.style.background='#00deb0'"
+                        onmouseout="this.style.background='#17b796'">
+                    <i class="fas fa-copy"></i>
+                    <span>{{ __('views.groups.copy') }}</span>
+                </button>
+                <button type="button" onclick="shareOnWhatsApp()"
+                        style="flex: 1; padding: 12px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                        onmouseover="this.style.background='#20ba5a'"
+                        onmouseout="this.style.background='#25D366'">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>{{ __('views.groups.whatsapp') }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        if (window.__groupShareModalFromQuestionsInit) {
+            return;
+        }
+        window.__groupShareModalFromQuestionsInit = true;
+
+        function getInviteModal() {
+            return document.getElementById('inviteModal');
+        }
+
+        function getInviteMessageField() {
+            return document.getElementById('inviteMessage');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = getInviteModal();
+            if (!modal) {
+                return;
+            }
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        window.showInviteModal = function(groupName, inviteUrl) {
+            const modal = getInviteModal();
+            const messageArea = getInviteMessageField();
+            if (!modal || !messageArea) {
+                return;
+            }
+            const message = `¡Únete al grupo "${groupName}" en Offside Club!\n\n${inviteUrl}\n\n¡Ven a competir con nosotros!`;
+            messageArea.value = message;
+            modal.style.display = 'flex';
+        };
+
+        window.copyInviteText = function(button) {
+            const messageArea = getInviteMessageField();
+            if (!messageArea) {
+                return;
+            }
+            const text = messageArea.value;
+
+            const onSuccess = () => showCopyFeedback(button);
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(onSuccess).catch(() => {
+                    if (copyToClipboardFallback(text)) {
+                        onSuccess();
+                    }
+                });
+            } else {
+                if (copyToClipboardFallback(text)) {
+                    onSuccess();
+                }
+            }
+        };
+
+        window.shareOnWhatsApp = function() {
+            const messageArea = getInviteMessageField();
+            if (!messageArea) {
+                return;
+            }
+            const text = messageArea.value;
+            const encodedMessage = encodeURIComponent(text);
+            const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        };
+
+        function copyToClipboardFallback(text) {
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                return true;
+            } catch (err) {
+                console.error('Error al copiar:', err);
+                return false;
+            }
+        }
+
+        function showCopyFeedback(button) {
+            if (!button) {
+                return;
+            }
+            const originalHtml = button.innerHTML;
+            const originalBg = button.style.background;
+            button.innerHTML = '<i class="fas fa-check"></i><span> ¡Copiado!</span>';
+            button.style.background = '#00c800';
+            button.disabled = true;
+
+            setTimeout(() => {
+                button.innerHTML = originalHtml;
+                button.style.background = originalBg || '#17b796';
+                button.disabled = false;
+            }, 2000);
+        }
+    })();
+</script>
+@endonce

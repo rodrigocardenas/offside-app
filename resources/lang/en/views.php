@@ -276,7 +276,7 @@ return [
         'error_loading_groups' => 'Error loading groups',
         'error_loading_groups_retry' => 'We could not load the groups. Try again.',
         'members_count' => 'members',
-        'featured_match_title' => 'Featured Match of the Day',
+        'featured_match_title' => 'Featured Match',
         'click_to_see_groups' => 'Click to see groups',
         'question_of_the_day' => 'QUESTION OF THE DAY',
         'loading_ranking' => 'Loading ranking...',

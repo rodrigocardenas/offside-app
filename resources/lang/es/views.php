@@ -76,7 +76,7 @@ return [
         'error_loading_groups' => 'Error al cargar grupos',
         'error_loading_groups_retry' => 'No pudimos cargar los grupos. Intenta de nuevo.',
         'members_count' => 'miembros',
-        'featured_match_title' => 'Partido Destacado del Día',
+        'featured_match_title' => 'Partido Destacado',
         'click_to_see_groups' => 'Haz clic para ver grupos',
         'question_of_the_day' => 'PREGUNTA DEL DÍA',
         'loading_ranking' => 'Cargando ranking...',
