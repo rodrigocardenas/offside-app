@@ -29,18 +29,6 @@
         <h2 class="text-base font-semibold" style="color: {{ $textPrimary }};">{{ __('views.groups.available_questions') }}</h2>
     </div> --}}
 
-    <!-- Acciones del grupo -->
-    <div class="flex justify-end px-1 mb-4">
-        <button type="button"
-                onclick="showInviteModal(@js($group->name), @js(route('groups.invite', $group->code)))"
-                style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border: none; border-radius: 999px; background: linear-gradient(135deg, #17b796, #00deb0); color: #003b2f; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(0, 222, 176, 0.25); transition: transform 0.2s ease;"
-                onmouseover="this.style.transform='translateY(-2px)'"
-                onmouseout="this.style.transform='translateY(0)';">
-            <i class="fas fa-paper-plane"></i>
-            <span>{{ __('views.groups.share_group') }}</span>
-        </button>
-    </div>
-
     <!-- Carrusel de preguntas -->
     <div class="relative flex items-center">
         <!-- Carrusel -->
@@ -322,7 +310,7 @@
     </div>
 
         <!-- Indicadores de navegación -->
-        <div class="flex justify-center mt-4 gap-1">
+        <div class="flex justify-center gap-1">
             @foreach($matchQuestions as $index => $question)
                 <button class="w-2 h-2 rounded-full question-indicator transition-all" style="background: {{ $borderColor }};" data-index="{{ $index }}"></button>
             @endforeach

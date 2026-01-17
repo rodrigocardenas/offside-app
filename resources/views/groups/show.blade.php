@@ -23,14 +23,35 @@
         $accentDark = '#17b796';
         $componentsBackground = $isDark ? '#1a524e' : '#ffffff';
         $buttonBgHover = $isDark ? 'rgba(0, 222, 176, 0.12)' : 'rgba(0, 222, 176, 0.08)';
+
+        // Theme variables for share modal
+        $shareModalBg = $isDark ? '#10302d' : '#ffffff';
+        $shareModalText = $isDark ? '#f1fff8' : '#333333';
+        $shareModalBorder = $isDark ? '#1d4f4a' : '#e0e0e0';
+        $shareTextareaBg = $isDark ? 'rgba(255,255,255,0.05)' : '#f5f5f5';
+        $shareModalShadow = $isDark ? '0 14px 40px rgba(0, 0, 0, 0.55)' : '0 10px 40px rgba(0, 0, 0, 0.2)';
+        $shareCloseColor = $isDark ? '#d5fdf0' : '#999999';
+
+        $topUsers = $group->users->sortByDesc('total_points')->take(3)->values();
     @endphp
 
     <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
 
+        <!-- Share Group Button -->
+        <div class="flex justify-end px-1 mb-4" style="margin-top: 12px;">
+            <button type="button"
+                    onclick="showInviteModal(@js($group->name), @js(route('groups.invite', $group->code)))"
+                    style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border: none; border-radius: 999px; background: linear-gradient(135deg, #17b796, #00deb0); color: #003b2f; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(0, 222, 176, 0.25); transition: transform 0.2s ease;"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='translateY(0)';">
+                <i class="fas fa-paper-plane"></i>
+                <span>{{ __('views.groups.share_group') }}</span>
+            </button>
+        </div>
+
         <!-- Ranking Section -->
-        <div class="ml-1 mr-1" style="background: {{ $bgTertiary }}; padding: 5px; border-radius: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 32px;">
-            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 16px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }}; padding: 16px;">
-                <i class="fas fa-trophy" style="font-size: 16px; color: {{ $accentColor }};"></i>
+        <div class="ml-1 mr-1" style="background: {{ $bgTertiary }}; padding: 5px; border-radius: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 2px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }}; padding: 8px;">
                 {{ __('views.rankings.title') }}
                 <a href="{{ url('/groups', $group->id) }}/ranking" style="margin-left: auto; font-size: 12px; color: {{ $textSecondary }}; cursor: pointer; padding: 4px 8px; border-radius: 12px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease;"
                     onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#f0f0f0' }}'; this.style.color='{{ $textPrimary }}';"
@@ -39,29 +60,63 @@
                 </a>
             </div>
 
-            <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scroll-behavior: smooth;" class="hide-scrollbar">
-                @forelse($group->users->sortByDesc('total_points') as $index => $user)
-                    @php
-                        $rankColor = $index === 0 ? '#FFD700' : ($index === 1 ? '#C0C0C0' : ($index === 2 ? '#CD7F32' : '#6c757d'));
-                    @endphp
-                    <div style="display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: {{ $bgSecondary }}; border-radius: 12px; min-width: fit-content; transition: all 0.2s ease; cursor: pointer; border-left: 4px solid {{ $rankColor }}; border: 1px solid {{ $borderColor }}; border-left: 4px solid {{ $rankColor }};"
-                        onmouseover="this.style.background='{{ $isDark ? '#1a524e' : '#f0f0f0' }}'; this.style.borderColor='{{ $accentColor }}'; this.style.transform='translateY(-2px)';"
-                        onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.borderColor='{{ $borderColor }}'; this.style.transform='translateY(0)';">
-                        <div style="text-align: left;">
-                            <div style="font-weight: 600; font-size: 12px; color: {{ $textPrimary }};">
-                                {{ Str::limit($user->name, 12, '') }} <small style="font-weight: bold; color: {{ $accentColor }}; font-size: 11px;">{{ number_format($user->total_points ?? 0, 0, ',', '.') }}</small>
-                            </div>
-                            <div style="font-weight: bold; color: {{ $accentColor }}; font-size: 11px;">
-
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div style="color: {{ $textSecondary }}; font-size: 14px; text-align: center; width: 100%;">
-                        {{ __('views.rankings.no_players') }}
-                    </div>
-                @endforelse
+            @if($topUsers->count() >= 1)
+            <div class="podium-container">
+              @if($topUsers->count() >= 2)
+              <!-- Second Place -->
+              <div class="podium-position second">
+                <div class="avatar-section">
+                  <div class="avatar-container">
+                    @if($topUsers[1]->avatar)
+                      <img src="{{ $topUsers[1]->avatar_url }}" alt="{{ $topUsers[1]->name }}" class="podium-avatar">
+                    @else
+                      <div class="podium-avatar-placeholder">{{ substr($topUsers[1]->name, 0, 1) }}</div>
+                    @endif
+                  </div>
+                  <div class="podium-points">{{ number_format($topUsers[1]->total_points ?? 0, 0, ',', '.') }} pts.</div>
+                </div>
+                <div class="podium-step">
+                </div>
+              </div>
+              @endif
+              <!-- First Place -->
+              <div class="podium-position first">
+                <div class="avatar-section">
+                  <div class="avatar-container">
+                    @if($topUsers[0]->avatar)
+                      <img src="{{ $topUsers[0]->avatar_url }}" alt="{{ $topUsers[0]->name }}" class="podium-avatar">
+                    @else
+                      <div class="podium-avatar-placeholder">{{ substr($topUsers[0]->name, 0, 1) }}</div>
+                    @endif
+                  </div>
+                  <div class="podium-points">{{ number_format($topUsers[0]->total_points ?? 0, 0, ',', '.') }} pts.</div>
+                </div>
+                <div class="podium-step highest">
+                </div>
+              </div>
+              @if($topUsers->count() >= 3)
+              <!-- Third Place -->
+              <div class="podium-position third">
+                <div class="avatar-section">
+                  <div class="avatar-container">
+                    @if($topUsers[2]->avatar)
+                      <img src="{{ $topUsers[2]->avatar_url }}" alt="{{ $topUsers[2]->name }}" class="podium-avatar">
+                    @else
+                      <div class="podium-avatar-placeholder">{{ substr($topUsers[2]->name, 0, 1) }}</div>
+                    @endif
+                  </div>
+                  <div class="podium-points">{{ number_format($topUsers[2]->total_points ?? 0, 0, ',', '.') }} pts.</div>
+                </div>
+                <div class="podium-step">
+                </div>
+              </div>
+              @endif
             </div>
+            @else
+            <div style="color: {{ $textSecondary }}; font-size: 14px; text-align: center; width: 100%; padding: 20px;">
+              {{ __('views.rankings.no_players') }}
+            </div>
+            @endif
         </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -174,6 +229,146 @@
         </div>
     </div>
 
+    <!-- Invite Modal -->
+    <div id="inviteModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
+        <div style="background: {{ $shareModalBg }}; border: 1px solid {{ $shareModalBorder }}; border-radius: 16px; width: 100%; max-width: 420px; padding: 28px 24px; box-shadow: {{ $shareModalShadow }}; color: {{ $shareModalText }};">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <h2 style="font-size: 24px; font-weight: 700; color: {{ $shareModalText }}; margin: 0;">{{ __('views.groups.share_group') }}</h2>
+                <button onclick="document.getElementById('inviteModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: {{ $shareCloseColor }}; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label for="inviteMessage" style="display: block; font-size: 14px; font-weight: 600; color: {{ $shareModalText }}; margin-bottom: 8px;">{{ __('views.groups.invitation_message') }}</label>
+                    <textarea id="inviteMessage" rows="4" readonly
+                              style="width: 100%; background: {{ $shareTextareaBg }}; border: 1px solid {{ $shareModalBorder }}; border-radius: 8px; padding: 12px 16px; color: {{ $shareModalText }}; font-size: 14px; font-family: 'Courier New', monospace; resize: none; box-sizing: border-box;"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 8px;">
+                    <button type="button" onclick="copyInviteText(this)"
+                            style="flex: 1; padding: 12px 16px; background: #17b796; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                            onmouseover="this.style.background='#00deb0'"
+                            onmouseout="this.style.background='#17b796'">
+                        <i class="fas fa-copy"></i>
+                        <span>{{ __('views.groups.copy') }}</span>
+                    </button>
+                    <button type="button" onclick="shareOnWhatsApp()"
+                            style="flex: 1; padding: 12px 16px; background: #25D366; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                            onmouseover="this.style.background='#20ba5a'"
+                            onmouseout="this.style.background='#25D366'">
+                        <i class="fab fa-whatsapp"></i>
+                        <span>{{ __('views.groups.whatsapp') }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            if (window.__groupShareModalFromShowInit) {
+                return;
+            }
+            window.__groupShareModalFromShowInit = true;
+
+            function getInviteModal() {
+                return document.getElementById('inviteModal');
+            }
+
+            function getInviteMessageField() {
+                return document.getElementById('inviteMessage');
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const modal = getInviteModal();
+                if (!modal) {
+                    return;
+                }
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+
+            window.showInviteModal = function(groupName, inviteUrl) {
+                const modal = getInviteModal();
+                const messageArea = getInviteMessageField();
+                if (!modal || !messageArea) {
+                    return;
+                }
+                const message = `¡Únete al grupo "${groupName}" en Offside Club!\n\n${inviteUrl}\n\n¡Ven a competir con nosotros!`;
+                messageArea.value = message;
+                modal.style.display = 'flex';
+            };
+
+            window.copyInviteText = function(button) {
+                const messageArea = getInviteMessageField();
+                if (!messageArea) {
+                    return;
+                }
+                const text = messageArea.value;
+
+                const onSuccess = () => showCopyFeedback(button);
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(onSuccess).catch(() => {
+                        if (copyToClipboardFallback(text)) {
+                            onSuccess();
+                        }
+                    });
+                } else {
+                    if (copyToClipboardFallback(text)) {
+                        onSuccess();
+                    }
+                }
+            };
+
+            window.shareOnWhatsApp = function() {
+                const messageArea = getInviteMessageField();
+                if (!messageArea) {
+                    return;
+                }
+                const text = messageArea.value;
+                const encodedMessage = encodeURIComponent(text);
+                const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            };
+
+            function copyToClipboardFallback(text) {
+                try {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    return true;
+                } catch (err) {
+                    console.error('Error al copiar:', err);
+                    return false;
+                }
+            }
+
+            function showCopyFeedback(button) {
+                if (!button) {
+                    return;
+                }
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i><span>Copiado!</span>';
+                button.style.background = '#28a745';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '#17b796';
+                }, 2000);
+            }
+        })();
+    </script>
+
 
 
 
@@ -188,6 +383,167 @@
     }
     .question-indicator.active {
         background-color: theme('colors.offside-secondary');
+    }
+
+    .podium-container {
+      display: flex;
+      justify-content: center;
+      align-items: end;
+      gap: 16px;
+      padding: 20px 16px;
+      min-height: 200px;
+    }
+
+    .podium-position {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .podium-step {
+      background: {{ $bgSecondary }};
+      border: 2px solid {{ $accentColor }};
+      border-radius: 16px 16px 0 0;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 80px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .podium-step:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .podium-step.highest {
+      height: 160px;
+      background: linear-gradient(135deg, {{ $accentColor }}, {{ $accentDark }});
+      color: white;
+    }
+
+    .second .podium-step {
+      height: 120px;
+      background: {{ $bgSecondary }};
+    }
+
+    .third .podium-step {
+      height: 120px;
+      background: {{ $bgSecondary }};
+    }
+
+    .podium-avatar, .podium-avatar-placeholder {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 3px solid {{ $accentColor }};
+      object-fit: cover;
+    }
+
+    .podium-avatar-placeholder {
+      background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }});
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .podium-name {
+      font-weight: 600;
+      font-size: 12px;
+      color: {{ $textPrimary }};
+      text-align: center;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .podium-points {
+      font-weight: bold;
+      font-size: 14px;
+      color: {{ $accentColor }};
+    }
+
+    .position-badge {
+      position: absolute;
+      top: -10px;
+      background: {{ $accentColor }};
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 12px;
+      border: 2px solid {{ $bgTertiary }};
+    }
+
+    .position-badge.gold {
+      background: #FFD700;
+      color: #333;
+    }
+
+    .star-icon {
+      position: absolute;
+      top: -20px;
+      color: #FFD700;
+      font-size: 20px;
+      animation: sparkle 2s infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 600px) {
+      .podium-container {
+        gap: 8px;
+        padding: 16px 8px;
+        min-height: 120px;
+      }
+      .podium-position {
+        flex: 1;
+      }
+      .podium-step {
+        padding: 10px 52px;
+        min-width: unset;
+      }
+      .podium-step.highest {
+        height: 35px;
+      }
+      .second .podium-step, .third .podium-step {
+        height: 20px;
+      }
+      .podium-avatar, .podium-avatar-placeholder {
+        width: 40px;
+        height: 40px;
+      }
+      .podium-name {
+        font-size: 10px;
+      }
+      .podium-points {
+        font-size: 12px;
+      }
+      .position-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+      }
+      .star-icon {
+        font-size: 16px;
+      }
     }
 </style>
 

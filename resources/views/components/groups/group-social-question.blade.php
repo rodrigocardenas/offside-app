@@ -27,11 +27,7 @@
     <div class="text-center mb-5">
         <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3"
              style="background: {{ $accentColor }}; color: #000;">
-            {{ __('views.groups.social_questions') }}
-        </div>
-        <div class="text-xs mb-4" style="color: {{ $textSecondary }};">
-            <i class="fas fa-circle" style="color: {{ $accentColor }}; font-size: 3px;"></i>
-            {{ __('views.groups.question_of_the_day') }}
+            pregunta social del día
         </div>
         <div class="text-base font-bold mb-2" style="color: {{ $accentColor }};">
             {{ $socialQuestion->title }}

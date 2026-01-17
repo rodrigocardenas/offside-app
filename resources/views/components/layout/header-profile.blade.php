@@ -10,7 +10,9 @@
     <!-- Logo Left -->
     <div class="logo-container">
         @if($logoUrl)
-            <img src="{{ $logoUrl }}" alt="{{ $altText }}" class="header-logo">
+            <a href="{{ route('groups.index') }}">
+                <img src="{{ $logoUrl }}" alt="{{ $altText }}" class="header-logo">
+            </a>
         @else
             <a href="{{ route('groups.index') }}" style="color: #00deb0; font-size: 20px; text-decoration: none;">
                 <i class="fas fa-arrow-left"></i>
