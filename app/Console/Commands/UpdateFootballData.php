@@ -49,9 +49,13 @@ class UpdateFootballData extends Command
 
     private function updateLeagueFixtures($competitionCode, $daysAhead)
     {
-        $apiKey = env('FOOTBALL_DATA_API_KEY')
+        $apiKey = config('services.football_data.api_key')
+            ?? env('FOOTBALL_DATA_API_KEY')
+            ?? env('FOOTBALL_DATA_API_TOKEN')
             ?? config('services.football_data.api_token')
             ?? config('services.football.key');
+
+        $apiKey = $apiKey ? trim($apiKey) : null;
 
         if (!$apiKey) {
             throw new \Exception('FOOTBALL_DATA_API_KEY no configurada');
@@ -61,6 +65,7 @@ class UpdateFootballData extends Command
             'apiKey' => substr($apiKey, 0, 10) . '...',
             'length' => strlen($apiKey),
             'env_check' => env('FOOTBALL_DATA_API_KEY') ? 'exists' : 'missing',
+            'config_key' => config('services.football_data.api_key') ? 'exists' : 'missing',
         ]);
 
         // Calcular fechas
