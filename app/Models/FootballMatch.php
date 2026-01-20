@@ -77,7 +77,7 @@ class FootballMatch extends Model
 
     public function questions()
     {
-        return $this->hasMany(Question::class);
+        return $this->hasMany(Question::class, 'match_id');
     }
 
     public function getScoreAttribute()
