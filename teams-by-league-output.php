@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 // Vamos a asumir que podemos identificar la liga por los equipos conocidos
 
 $laLigaTeams = [
-    'Elche', 'Sevilla FC', 'Levante UD', 'Rayo Vallecano de Madrid', 
+    'Elche', 'Sevilla FC', 'Levante UD', 'Rayo Vallecano de Madrid',
     'CA Osasuna', 'Valencia CF', 'RCD Espanyol de Barcelona', 'Villarreal CF',
     'Real Madrid', 'Club Atlético de Madrid', 'RCD Mallorca', 'FC Barcelona',
     'Real Oviedo', 'Real Sociedad de Fútbol', 'RC Celta de Vigo', 'Deportivo Alavés',

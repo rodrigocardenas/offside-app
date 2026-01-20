@@ -126,7 +126,7 @@ Subtotal: 23 equipos*
 
 La Liga (España):         20 equipos
 Premier League:           20 equipos
-Serie A:                  18 equipos  
+Serie A:                  18 equipos
 Champions League:         23 equipos
                          ─────────
 TOTAL SINCRONIZADO:      81 equipos*

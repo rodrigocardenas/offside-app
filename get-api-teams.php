@@ -14,7 +14,7 @@ echo "API Key: " . substr($apiKey, 0, 10) . "...\n\n";
 
 foreach ($competitions as $code) {
     echo "Obteniendo competencia: $code\n";
-    
+
     $response = Http::withoutVerifying()
         ->withHeaders(['X-Auth-Token' => $apiKey])
         ->get("https://api.football-data.org/v4/competitions/{$code}/matches", [
@@ -24,12 +24,12 @@ foreach ($competitions as $code) {
         ]);
 
     echo "Status: " . $response->status() . "\n";
-    
+
     if ($response->ok()) {
         $data = $response->json();
         $matchCount = count($data['matches'] ?? []);
         echo "Partidos encontrados: $matchCount\n";
-        
+
         foreach ($response->json()['matches'] ?? [] as $match) {
             foreach (['homeTeam', 'awayTeam'] as $key) {
                 $team = $match[$key];

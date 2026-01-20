@@ -104,7 +104,7 @@ class SyncFootballApiTeamNames extends Command
     private function syncTeamsWithAPI(array $apiTeams): void
     {
         $dbTeams = Team::select('id', 'name', 'api_name')->get();
-        
+
         $summary = ['updated' => 0, 'unchanged' => 0, 'no_match' => 0];
 
         foreach ($apiTeams as $apiTeam) {
@@ -115,7 +115,7 @@ class SyncFootballApiTeamNames extends Command
 
             // Buscar el mejor match en la BD
             $dbTeam = $this->findBestMatch($apiName, $dbTeams);
-            
+
             if (!$dbTeam) {
                 $this->line("No encontrado en BD: {$apiName}");
                 $summary['no_match']++;
@@ -164,11 +164,11 @@ class SyncFootballApiTeamNames extends Command
 
         // Intento 3: Coincidencia de tokens (palabras clave) - requiere al menos 1 token compartido
         $apiTokens = array_filter(explode(' ', $normalized));
-        
+
         foreach ($dbTeams as $team) {
             $teamTokens = array_filter(explode(' ', $this->normalizeTeamName($team->name)));
             $shared = count(array_intersect($apiTokens, $teamTokens));
-            
+
             // Si comparten 1+ tokens importantes, es probablemente el mismo equipo
             if ($shared >= 1 && count($apiTokens) >= 1) {
                 return $team;
@@ -182,26 +182,26 @@ class SyncFootballApiTeamNames extends Command
     {
         // Minúsculas
         $name = strtolower($name);
-        
+
         // Case especial: Athletic Club <-> Athletic
         if ($name === 'athletic' || $name === 'athletic club') {
             return 'athletic';
         }
-        
+
         // Remover sufijos comunes de equipos
-        $suffixes = ['fc', 'cf', 'ud', 'sad', 'club', 'club de futbol', 'football club', 
+        $suffixes = ['fc', 'cf', 'ud', 'sad', 'club', 'club de futbol', 'football club',
                      'ac', 'bc', 'cd', 'sc', 'calcio', 'sporting', 'athletic'];
-        
+
         foreach ($suffixes as $suffix) {
             $name = preg_replace('/\b' . preg_quote($suffix, '/') . '\b/u', '', $name);
         }
-        
+
         // Remover caracteres especiales (mantener números)
         $name = preg_replace('/[^a-z0-9\s]/u', '', $name);
-        
+
         // Remover espacios múltiples
         $name = preg_replace('/\s+/', ' ', $name);
-        
+
         return trim($name);
     }
 

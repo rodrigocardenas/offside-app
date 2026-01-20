@@ -19,7 +19,7 @@ $allTeamsByLeague = [];
 
 foreach ($competitions as $code => $info) {
     echo "[INFO] Obteniendo equipos de {$info['name']}...\n";
-    
+
     $response = Http::withoutVerifying()
         ->timeout(15)
         ->withHeaders(['X-Auth-Token' => $apiKey])
@@ -62,15 +62,15 @@ $totalTeams = 0;
 foreach ($allTeamsByLeague as $code => $data) {
     $info = $data['info'];
     $teams = $data['teams'];
-    
+
     echo "════════════════════════════════════════════════════════════════════════════\n";
     echo strtoupper("{$info['name']} ({$info['country']})") . " - {$code}\n";
     echo "════════════════════════════════════════════════════════════════════════════\n\n";
-    
+
     foreach ($teams as $team) {
         echo $team . "\n";
     }
-    
+
     echo "\nTotal: " . count($teams) . " equipos\n\n\n";
     $totalTeams += count($teams);
 }

@@ -14,7 +14,7 @@ $allTeams = [];
 $competitions = [
     'PD' => 'La Liga',
     'PL' => 'Premier League',
-    'CL' => 'Champions League', 
+    'CL' => 'Champions League',
     'SA' => 'Serie A'
 ];
 
@@ -22,7 +22,7 @@ echo "\n=== OBTENIENDO EQUIPOS DE LA API ===\n\n";
 
 foreach ($competitions as $code => $name) {
     echo "[INFO] Obteniendo equipos de $name ($code)...\n";
-    
+
     try {
         $response = Http::withoutVerifying()
             ->timeout(10)
@@ -40,7 +40,7 @@ foreach ($competitions as $code => $name) {
 
         $matches = $response->json()['matches'] ?? [];
         echo "[OK] $name: " . count($matches) . " partidos\n";
-        
+
         foreach ($matches as $match) {
             foreach (['homeTeam', 'awayTeam'] as $key) {
                 if (isset($match[$key]['name'])) {

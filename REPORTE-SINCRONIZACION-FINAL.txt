@@ -24,7 +24,7 @@ CATEGORÍAS DE EQUIPOS SIN SINCRONIZAR:
 1. SELECCIONES NACIONALES (10 equipos):
    • Alemania, Argentina, Brasil, Bélgica, Chile, Colombia, España, Francia
    • Inglaterra, Italia, México, Países Bajos, Perú, Portugal, Uruguay
-   
+
    ⚠️ NO están en Football-Data (solo clubes)
    ACCIÓN: No sincronizar
 
@@ -32,7 +32,7 @@ CATEGORÍAS DE EQUIPOS SIN SINCRONIZAR:
    • Equipos de Segunda División
    • Equipos de ligas domésticas menores
    • Clubes históricos sin participación reciente en competiciones grandes
-   
+
    ⚠️ NO están en Football-Data (ligas menores)
    ACCIÓN: No sincronizar
 
@@ -40,7 +40,7 @@ CATEGORÍAS DE EQUIPOS SIN SINCRONIZAR:
    • Equipos de Segunda y Tercera división alemana
    • Equipos de ligas menores de otros países
    • Clubes históricos sin competiciones europeas
-   
+
    ⚠️ POSIBLEMENTE en Football-Data
    ACCIÓN: Investigación manual requerida
 
@@ -51,7 +51,7 @@ CATEGORÍAS DE EQUIPOS SIN SINCRONIZAR:
    • "RCD Espanyol" -> "RCD Espanyol de Barcelona" ✓ (se puede arreglar)
    • "Real Sociedad" -> "Real Sociedad de Fútbol" ✓ (se puede arreglar)
    • Y otros...
-   
+
    ✓ PUEDEN sincronizarse con ajustes
    ACCIÓN: Mapeo manual simple
 
@@ -77,7 +77,7 @@ Estos 117 incluyen:
 
 CONCLUSIÓN:
 El objetivo de sincronizar "equipos de ligas principales" se cumplió al 100%.
-Los equipos faltantes corresponden a categorías que NO están disponibles en 
+Los equipos faltantes corresponden a categorías que NO están disponibles en
 la API de Football-Data.
 
 ================================================================================
