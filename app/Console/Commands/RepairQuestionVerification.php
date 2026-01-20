@@ -136,66 +136,36 @@ class RepairQuestionVerification extends Command
 
                 $this->line("   📌 {$questions->count()} preguntas a procesar");
 
-                foreach ($questions as $question) {
-                    try {
-                        $totalQuestions++;
+                // ✅ OPTIMIZACIÓN: Separar preguntas por tipo
+                // 1. Primero: Preguntas verificables SIN Gemini (winner, both_score, etc.)
+                // 2. Luego: Preguntas que REQUIEREN Gemini
 
-                        // Evaluar pregunta
-                        $correctOptionIds = $this->evaluationService->evaluateQuestion($question, $match);
+                $codeOnlyQuestions = [];
+                $geminiRequiredQuestions = [];
 
-                        if (empty($correctOptionIds)) {
-                            $unverifiedQuestions++;
+                foreach ($questions as $q) {
+                    if ($this->needsGeminiForQuestion($q)) {
+                        $geminiRequiredQuestions[] = $q;
+                    } else {
+                        $codeOnlyQuestions[] = $q;
+                    }
+                }
 
-                            if ($showDetails) {
-                                $this->line("      ⏭️  {$question->title} (Sin opción correcta)");
-                            }
-                            continue;
-                        }
+                // Procesar primero las que NO necesitan Gemini
+                if (!empty($codeOnlyQuestions)) {
+                    $this->line("   🟢 Procesando " . count($codeOnlyQuestions) . " preguntas (sin Gemini)...");
+                    foreach ($codeOnlyQuestions as $question) {
+                        $this->processQuestion($question, $match, $showDetails,
+                            $verifiedQuestions, $unverifiedQuestions, $errorQuestions, $totalQuestions, $totalPointsAssigned);
+                    }
+                }
 
-                        // Actualizar opciones
-                        foreach ($question->options as $option) {
-                            $wasCorrect = $option->is_correct;
-                            $option->is_correct = in_array($option->id, $correctOptionIds);
-
-                            if ($wasCorrect !== $option->is_correct) {
-                                $option->save();
-                            }
-                        }
-
-                        // Actualizar respuestas y puntos
-                        foreach ($question->answers as $answer) {
-                            $wasCorrect = $answer->is_correct;
-                            $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
-                            $answer->points_earned = $answer->is_correct ? ($question->points ?? 300) : 0;
-
-                            if ($wasCorrect !== $answer->is_correct) {
-                                $answer->save();
-                                $totalPointsAssigned += $answer->points_earned;
-                            }
-                        }
-
-                        // Marcar como verificada
-                        $question->result_verified_at = now();
-                        $question->save();
-
-                        $verifiedQuestions++;
-
-                        if ($showDetails) {
-                            $optionCount = count($correctOptionIds);
-                            $answerCount = $question->answers->count();
-                            $this->line("      ✅ {$question->title} ({$optionCount} opciones correctas, {$answerCount} respuestas)");
-                        }
-
-                    } catch (\Exception $e) {
-                        $errorQuestions++;
-
-                        if ($showDetails) {
-                            $this->line("      ❌ {$question->title} - Error: " . $e->getMessage());
-                        }
-
-                        Log::error("Error verificando pregunta {$question->id}", [
-                            'error' => $e->getMessage()
-                        ]);
+                // Procesar luego las que SÍ necesitan Gemini
+                if (!empty($geminiRequiredQuestions)) {
+                    $this->line("   🔴 Procesando " . count($geminiRequiredQuestions) . " preguntas (con Gemini)...");
+                    foreach ($geminiRequiredQuestions as $question) {
+                        $this->processQuestion($question, $match, $showDetails,
+                            $verifiedQuestions, $unverifiedQuestions, $errorQuestions, $totalQuestions, $totalPointsAssigned);
                     }
                 }
             }
@@ -236,6 +206,99 @@ class RepairQuestionVerification extends Command
                 'trace' => $e->getTraceAsString()
             ]);
             return 1;
+        }
+    }
+
+    /**
+     * ✅ Determinar si una pregunta necesita Gemini
+     * Preguntas verificables sin Gemini: resultado, ambos anotan, score exacto, goles over/under
+     */
+    private function needsGeminiForQuestion($question): bool
+    {
+        $questionText = strtolower($question->title ?? '');
+
+        // Preguntas que se pueden verificar SIN Gemini
+        $codeOnlyPatterns = [
+            'resultado|ganador|victoria|gana|ganará',  // Score
+            'ambos.*anotan|both.*score',               // Score
+            'score.*exacto|exact|marcador',            // Score
+            'goles.*over|goles.*under|total.*goles|más.*goles|mas.*goles|menos.*goles', // Score
+        ];
+
+        foreach ($codeOnlyPatterns as $pattern) {
+            if (preg_match('/' . $pattern . '/u', $questionText)) {
+                return false; // NO necesita Gemini
+            }
+        }
+
+        // Todos los demás patrones NECESITAN Gemini (eventos, estadísticas)
+        return true;
+    }
+
+    /**
+     * Procesar una pregunta individual
+     */
+    private function processQuestion($question, $match, $showDetails, &$verifiedQuestions, &$unverifiedQuestions, &$errorQuestions, &$totalQuestions, &$totalPointsAssigned): void
+    {
+        try {
+            $totalQuestions++;
+
+            // Evaluar pregunta
+            $correctOptionIds = $this->evaluationService->evaluateQuestion($question, $match);
+
+            if (empty($correctOptionIds)) {
+                $unverifiedQuestions++;
+
+                if ($showDetails) {
+                    $this->line("      ⏭️  {$question->title} (Sin opción correcta)");
+                }
+                return;
+            }
+
+            // Actualizar opciones
+            foreach ($question->options as $option) {
+                $wasCorrect = $option->is_correct;
+                $option->is_correct = in_array($option->id, $correctOptionIds);
+
+                if ($wasCorrect !== $option->is_correct) {
+                    $option->save();
+                }
+            }
+
+            // Actualizar respuestas y puntos
+            foreach ($question->answers as $answer) {
+                $wasCorrect = $answer->is_correct;
+                $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
+                $answer->points_earned = $answer->is_correct ? ($question->points ?? 300) : 0;
+
+                if ($wasCorrect !== $answer->is_correct) {
+                    $answer->save();
+                    $totalPointsAssigned += $answer->points_earned;
+                }
+            }
+
+            // Marcar como verificada
+            $question->result_verified_at = now();
+            $question->save();
+
+            $verifiedQuestions++;
+
+            if ($showDetails) {
+                $optionCount = count($correctOptionIds);
+                $answerCount = $question->answers->count();
+                $this->line("      ✅ {$question->title} ({$optionCount} opciones correctas, {$answerCount} respuestas)");
+            }
+
+        } catch (\Exception $e) {
+            $errorQuestions++;
+
+            if ($showDetails) {
+                $this->line("      ❌ {$question->title} - Error: " . $e->getMessage());
+            }
+
+            Log::error("Error verificando pregunta {$question->id}", [
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }
