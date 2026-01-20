@@ -125,8 +125,8 @@ class UpdateFootballData extends Command
                 $footballMatch = FootballMatch::updateOrCreate(
                     ['external_id' => $match['id']],
                     [
-                        'home_team' => $homeTeam->name,
-                        'away_team' => $awayTeam->name,
+                        'home_team' => $homeTeam->api_name ?? $homeTeam->name,
+                        'away_team' => $awayTeam->api_name ?? $awayTeam->name,
                         'date' => $date,
                         'status' => $status,
                         'home_team_score' => $match['score']['fullTime']['home'] ?? null,
@@ -136,8 +136,8 @@ class UpdateFootballData extends Command
                     ]
                 );
 
-                $homeName = $homeTeam->name;
-                $awayName = $awayTeam->name;
+                $homeName = $homeTeam->api_name ?? $homeTeam->name;
+                $awayName = $awayTeam->api_name ?? $awayTeam->name;
 
                 if ($footballMatch->wasRecentlyCreated) {
                     $saved++;
