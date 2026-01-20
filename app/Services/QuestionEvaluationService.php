@@ -30,9 +30,19 @@ class QuestionEvaluationService
 {
     private ?GeminiService $geminiService;
 
+    /**
+     * ✅ CACHE: Almacena datos completos del partido para evitar llamadas múltiples a Gemini
+     * Clave: match_id, Valor: datos completos obtenidos de Gemini
+     *
+     * Esto es CRUCIAL para evitar rate limiting cuando hay múltiples preguntas
+     * que necesitan información del mismo partido
+     */
+    private array $matchDataCache = [];
+
     public function __construct(?GeminiService $geminiService = null)
     {
         $this->geminiService = $geminiService;
+        $this->matchDataCache = [];
     }
 
     /**
@@ -639,8 +649,15 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $stats = $this->parseStatistics($match->statistics ?? []);
 
-        $homePossession = $stats['home']['possession'] ?? 50;
-        $awayPossession = $stats['away']['possession'] ?? 50;
+        // ✅ OPTIMIZACIÓN: Buscar posesión en múltiples formatos (nuevo y viejo)
+        $homePossession = $stats['possession_home']
+            ?? $stats['possession']['home_percentage']
+            ?? $stats['home']['possession']
+            ?? 50;
+        $awayPossession = $stats['possession_away']
+            ?? $stats['possession']['away_percentage']
+            ?? $stats['away']['possession']
+            ?? 50;
         $questionText = strtolower($question->title ?? '');
 
         $threshold = $this->extractNumericValueFromText($questionText);
@@ -979,10 +996,18 @@ class QuestionEvaluationService
             }
         }
 
-        $prompt = $this->buildGeminiFallbackPrompt($question, $match, $reason);
+        // ✅ OPTIMIZACIÓN: Usar cache de datos del partido para evitar múltiples llamadas a Gemini
+        $prompt = $this->buildGeminiFallbackPromptOptimized($question, $match, $reason, $gemini);
         $useGrounding = (bool) config('question_evaluation.gemini_fallback_grounding', true);
 
         try {
+            Log::info('Gemini fallback attempting to resolve question', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'reason' => $reason,
+                'match_data_cached' => isset($this->matchDataCache[$match->id])
+            ]);
+
             $response = $gemini->callGemini($prompt, $useGrounding);
             $resolved = $this->parseGeminiFallbackResponse($response, $question);
 
@@ -1007,8 +1032,26 @@ class QuestionEvaluationService
         }
     }
 
-    private function buildGeminiFallbackPrompt(Question $question, FootballMatch $match, string $reason): string
-    {
+    /**
+     * ✅ OPTIMIZACIÓN: Construir prompt reutilizando datos en caché
+     *
+     * Si es la primera pregunta del match:
+     *   → Obtener datos del match una sola vez con Gemini
+     *   → Guardar en cache ($this->matchDataCache)
+     *
+     * Para preguntas posteriores del MISMO match:
+     *   → Reutilizar datos en caché
+     *   → NO hacer llamada a Gemini adicional
+     */
+    private function buildGeminiFallbackPromptOptimized(
+        Question $question,
+        FootballMatch $match,
+        string $reason,
+        GeminiService $gemini
+    ): string {
+        // Obtener o generar datos del partido
+        $matchData = $this->getMatchDataOnce($match, $gemini);
+
         $optionsPayload = [];
         foreach ($question->options as $index => $option) {
             $optionsPayload[] = [
@@ -1033,8 +1076,8 @@ class QuestionEvaluationService
                     'home' => $match->home_team_score,
                     'away' => $match->away_team_score
                 ],
-                'events' => $this->summarizeEventsForFallback($match),
-                'statistics' => $this->parseStatistics($match->statistics ?? [])
+                'events' => $matchData['events'] ?? [],
+                'statistics' => $matchData['statistics'] ?? []
             ],
             'question' => [
                 'id' => $question->id,
@@ -1063,6 +1106,86 @@ Instrucciones:
 2. Si ninguna opción es correcta, devuelve {"selected_options": []}.
 3. No agregues explicaciones ni texto adicional, solo el JSON solicitado.
 PROMPT;
+    }
+
+    /**
+     * ✅ CACHE: Obtener datos del partido UNA SOLA VEZ
+     *
+     * En lugar de hacer múltiples llamadas a Gemini para obtener detalles del partido,
+     * esto cachea los datos en la sesión de QuestionEvaluationService.
+     *
+     * Primera pregunta del match:
+     *   → Si no están los datos en DB → Llamar a Gemini UNA VEZ
+     *   → Guardar en $matchDataCache[$match->id]
+     *
+     * Preguntas posteriores del MISMO match:
+     *   → Usar datos en caché
+     *   → CERO llamadas a Gemini adicionales
+     */
+    private function getMatchDataOnce(FootballMatch $match, GeminiService $gemini): array
+    {
+        $matchId = $match->id;
+
+        // ✅ Si ya tenemos datos en caché, devolverlos inmediatamente
+        if (isset($this->matchDataCache[$matchId])) {
+            Log::debug('Match data retrieved from session cache', ['match_id' => $matchId]);
+            return $this->matchDataCache[$matchId];
+        }
+
+        // Si el partido ya tiene datos en BD, usarlos
+        $existingData = [
+            'events' => $this->parseEvents($match->events ?? []),
+            'statistics' => $this->parseStatistics($match->statistics ?? [])
+        ];
+
+        // Si hay eventos y stats existentes, guardar en caché y devolver
+        if (!empty($existingData['events']) || !empty($existingData['statistics'])) {
+            $this->matchDataCache[$matchId] = $existingData;
+            Log::debug('Match data retrieved from database', ['match_id' => $matchId]);
+            return $existingData;
+        }
+
+        // Solo si NO hay datos en BD, llamar a Gemini
+        Log::info('Fetching match data from Gemini (first time)', ['match_id' => $matchId]);
+
+        try {
+            $details = $gemini->getDetailedMatchData(
+                $match->home_team,
+                $match->away_team,
+                $match->date,
+                $match->league,
+                false // no force refresh
+            );
+
+            if ($details && is_array($details)) {
+                $matchData = [
+                    'events' => $details['events'] ?? [],
+                    'statistics' => $details['statistics'] ?? []
+                ];
+
+                // Guardar en caché para preguntas posteriores del mismo match
+                $this->matchDataCache[$matchId] = $matchData;
+
+                Log::info('Match data cached from Gemini', [
+                    'match_id' => $matchId,
+                    'events_count' => count($matchData['events']),
+                    'stats_keys' => count($matchData['statistics'])
+                ]);
+
+                return $matchData;
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Failed to fetch match data from Gemini', [
+                'match_id' => $matchId,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        // Fallback: devolver datos vacíos pero cachear para evitar múltiples intentos
+        $matchData = ['events' => [], 'statistics' => []];
+        $this->matchDataCache[$matchId] = $matchData;
+
+        return $matchData;
     }
 
     private function parseGeminiFallbackResponse($response, Question $question): array

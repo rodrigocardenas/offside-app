@@ -176,12 +176,29 @@ class BatchGetScoresJob implements ShouldQueue
         $home = (int) $result['home_goals'];
         $away = (int) $result['away_goals'];
 
+        // ✅ OPTIMIZACIÓN: Incluir posesión en statistics si está disponible
         $statistics = $this->mergeStatistics($match, [
             'source' => 'Gemini (batch results)',
             'verified' => true,
             'verification_method' => $result['source'] ?? 'gemini_batch',
             'batch_id' => $this->batchId,
             'score_updated_at' => now()->toIso8601String(),
+            // ✅ GUARDAR POSESIÓN SI ESTÁ DISPONIBLE
+            'possession' => [
+                'home_percentage' => $result['home_possession'] ?? null,
+                'away_percentage' => $result['away_possession'] ?? null,
+            ],
+            'possession_home' => $result['home_possession'] ?? null,
+            'possession_away' => $result['away_possession'] ?? null,
+            // ✅ GUARDAR OTRAS ESTADÍSTICAS
+            'fouls' => [
+                'home' => $result['home_fouls'] ?? null,
+                'away' => $result['away_fouls'] ?? null,
+            ],
+            'cards' => [
+                'yellow_total' => $result['total_yellow_cards'] ?? null,
+                'red_total' => $result['total_red_cards'] ?? null,
+            ],
         ]);
 
         $match->update([

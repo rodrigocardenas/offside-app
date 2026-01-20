@@ -88,7 +88,9 @@ class BatchExtractEventsJob implements ShouldQueue
                 }
 
                 $events = $payload['details']['events'];
+                $details = $payload['details'];
 
+                // ✅ OPTIMIZACIÓN: Guardar también possession_percentage en statistics
                 $statistics = $this->mergeStatistics($match, [
                     'source' => 'Gemini (batch detailed)',
                     'verified' => true,
@@ -97,6 +99,22 @@ class BatchExtractEventsJob implements ShouldQueue
                     'has_detailed_events' => true,
                     'detailed_event_count' => count($events),
                     'enriched_at' => now()->toIso8601String(),
+                    // ✅ GUARDAR POSESIÓN
+                    'possession' => [
+                        'home_percentage' => $details['home_possession'] ?? null,
+                        'away_percentage' => $details['away_possession'] ?? null,
+                    ],
+                    'possession_home' => $details['home_possession'] ?? null,
+                    'possession_away' => $details['away_possession'] ?? null,
+                    // ✅ GUARDAR OTRAS ESTADÍSTICAS ÚTILES
+                    'fouls' => [
+                        'home' => $details['home_fouls'] ?? null,
+                        'away' => $details['away_fouls'] ?? null,
+                    ],
+                    'cards' => [
+                        'yellow_total' => $details['total_yellow_cards'] ?? null,
+                        'red_total' => $details['total_red_cards'] ?? null,
+                    ],
                 ]);
 
                 $match->update([
