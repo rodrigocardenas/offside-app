@@ -18,7 +18,7 @@ class DiagnoseMatchVerification extends Command
      */
     protected $signature = 'diagnose:match-verification
                             {match-id : ID del partido a diagnosticar}
-                            {--verbose : Mostrar más detalles}
+                            {--details : Mostrar más detalles}
                             {--test-evaluate : Ejecutar evaluación real}';
 
     /**
@@ -36,7 +36,7 @@ class DiagnoseMatchVerification extends Command
     {
         $this->evaluationService = $evaluationService;
         $matchId = $this->argument('match-id');
-        $verbose = $this->option('verbose');
+        $details = $this->option('details');
         $testEvaluate = $this->option('test-evaluate');
 
         $match = FootballMatch::with(['questions' => function ($q) {
@@ -75,7 +75,7 @@ class DiagnoseMatchVerification extends Command
                 if (isset($stats['possession_home'])) {
                     $this->line("   Posesión: {$stats['possession_home']}% vs {$stats['possession_away']}%");
                 }
-                if ($verbose) {
+                if ($details) {
                     $this->line("   Stats Keys: " . implode(", ", array_keys($stats)));
                 }
             }
