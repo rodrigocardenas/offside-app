@@ -12,6 +12,7 @@ class Team extends Model
 
     protected $fillable = [
         'name',
+        'api_name',
         'type',
         'short_name',
         'tla',

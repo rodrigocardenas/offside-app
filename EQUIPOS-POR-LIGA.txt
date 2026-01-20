@@ -1,0 +1,140 @@
+================================================================================
+                    EQUIPOS POR LIGA - FOOTBALL-DATA API
+                         (80 Equipos Sincronizados)
+================================================================================
+
+════════════════════════════════════════════════════════════════════════════
+LA LIGA (España) - PD
+════════════════════════════════════════════════════════════════════════════
+
+CA Osasuna
+Club Atlético de Madrid
+Deportivo Alavés
+Elche CF
+FC Barcelona
+Getafe CF
+Girona FC
+Levante UD
+RC Celta de Vigo
+RCD Espanyol de Barcelona
+RCD Mallorca
+Rayo Vallecano de Madrid
+Real Betis Balompié
+Real Madrid CF
+Real Oviedo
+Real Sociedad de Fútbol
+Sevilla FC
+Valencia CF
+Villarreal CF
+
+Total: 19 equipos
+
+
+════════════════════════════════════════════════════════════════════════════
+PREMIER LEAGUE (Inglaterra) - PL
+════════════════════════════════════════════════════════════════════════════
+
+Arsenal FC
+Aston Villa FC
+Brentford FC
+Brighton & Hove Albion FC
+Burnley FC
+Chelsea FC
+Crystal Palace FC
+Everton FC
+Fulham FC
+Leeds United FC
+Liverpool FC
+Manchester City FC
+Manchester United FC
+Newcastle United FC
+Nottingham Forest FC
+Sunderland AFC
+Tottenham Hotspur FC
+West Ham United FC
+Wolverhampton Wanderers FC
+
+Total: 20 equipos
+
+
+════════════════════════════════════════════════════════════════════════════
+SERIE A (Italia) - SA
+════════════════════════════════════════════════════════════════════════════
+
+AC Milan
+AC Pisa 1909
+ACF Fiorentina
+Bologna FC 1909
+Cagliari Calcio
+Como 1907
+Genoa CFC
+Hellas Verona FC
+Juventus FC
+Parma Calcio 1913
+SS Lazio
+SSC Napoli
+Torino FC
+Udinese Calcio
+US Cremonese
+US Lecce
+US Sassuolo Calcio
+
+Total: 17 equipos
+
+
+════════════════════════════════════════════════════════════════════════════
+CHAMPIONS LEAGUE (Europa) - CL
+════════════════════════════════════════════════════════════════════════════
+
+AFC Ajax
+AS Monaco FC
+Atalanta BC
+Bayer 04 Leverkusen
+Borussia Dortmund
+Club Brugge KV
+Eintracht Frankfurt
+FC Bayern München
+FC Internazionale Milano
+FC København
+FK Bodø/Glimt
+FK Kairat
+Galatasaray SK
+Olympique de Marseille
+PAE Olympiakos SFP
+Paphos FC
+Paris Saint-Germain FC
+PSV
+Qarabağ Ağdam FK
+Royale Union Saint-Gilloise
+SK Slavia Praha
+Sport Lisboa e Benfica
+Sporting Clube de Portugal
+
+Total: 24 equipos
+
+
+════════════════════════════════════════════════════════════════════════════
+EQUIPOS SIN CLASIFICACIÓN / ADICIONALES
+════════════════════════════════════════════════════════════════════════════
+
+AS Roma
+
+Total: 1 equipo
+
+
+════════════════════════════════════════════════════════════════════════════
+                              RESUMEN GENERAL
+════════════════════════════════════════════════════════════════════════════
+
+La Liga (España):       19 equipos
+Premier League:         20 equipos
+Serie A (Italia):       17 equipos
+Champions League:       24 equipos
+Sin clasificación:       1 equipo
+                        ─────────
+TOTAL:                  80 equipos
+
+================================================================================
+Nota: La Liga y Premier League están completas. Champions League es más grande
+porque incluye equipos de varias ligas europeas.
+================================================================================

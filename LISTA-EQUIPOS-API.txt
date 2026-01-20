@@ -1,0 +1,91 @@
+================================================================================
+                    LISTA DE NOMBRES DE EQUIPOS - FOOTBALL-DATA API
+================================================================================
+
+Total de equipos: 80
+
+AC Milan
+AC Pisa 1909
+ACF Fiorentina
+AFC Ajax
+AFC Bournemouth
+Arsenal FC
+AS Monaco FC
+AS Roma
+Aston Villa FC
+Atalanta BC
+Bayer 04 Leverkusen
+Bologna FC 1909
+Borussia Dortmund
+Brentford FC
+Brighton & Hove Albion FC
+Burnley FC
+CA Osasuna
+Cagliari Calcio
+Chelsea FC
+Club Atlético de Madrid
+Club Brugge KV
+Como 1907
+Crystal Palace FC
+Deportivo Alavés
+Eintracht Frankfurt
+Elche CF
+Everton FC
+FC Barcelona
+FC Bayern München
+FC Internazionale Milano
+FC København
+FK Bodø/Glimt
+FK Kairat
+Fulham FC
+Galatasaray SK
+Genoa CFC
+Getafe CF
+Girona FC
+Hellas Verona FC
+Juventus FC
+Leeds United FC
+Levante UD
+Liverpool FC
+Manchester City FC
+Manchester United FC
+Newcastle United FC
+Nottingham Forest FC
+Olympique de Marseille
+PAE Olympiakos SFP
+Paphos FC
+Paris Saint-Germain FC
+Parma Calcio 1913
+PSV
+Qarabağ Ağdam FK
+Rayo Vallecano de Madrid
+RC Celta de Vigo
+RCD Espanyol de Barcelona
+RCD Mallorca
+Real Betis Balompié
+Real Madrid CF
+Real Oviedo
+Real Sociedad de Fútbol
+Royale Union Saint-Gilloise
+Sevilla FC
+SK Slavia Praha
+Sport Lisboa e Benfica
+Sporting Clube de Portugal
+SS Lazio
+SSC Napoli
+Sunderland AFC
+Torino FC
+Tottenham Hotspur FC
+Udinese Calcio
+US Cremonese
+US Lecce
+US Sassuolo Calcio
+Valencia CF
+Villarreal CF
+West Ham United FC
+Wolverhampton Wanderers FC
+
+================================================================================
+Estas son las variaciones exactas de nombres que devuelve la API de Football-Data.
+Notar que muchos incluyen sufijos como "FC", "CF", "UD", etc.
+================================================================================

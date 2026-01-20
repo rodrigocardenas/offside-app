@@ -9,6 +9,7 @@ use App\Models\Team;
 use App\Models\Competition;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\Support\TeamResolver;
 
 class UpdateFootballData extends Command
 {
@@ -104,40 +105,30 @@ class UpdateFootballData extends Command
 
         foreach ($matches as $match) {
             try {
-                $home_team = $match['homeTeam']['name'] ?? null;
-                $away_team = $match['awayTeam']['name'] ?? null;
-                $date = Carbon::parse($match['utcDate']);
+                $homeTeamData = $match['homeTeam'] ?? [];
+                $awayTeamData = $match['awayTeam'] ?? [];
+                $homeTeamNameFromApi = $homeTeamData['name'] ?? null;
+                $awayTeamNameFromApi = $awayTeamData['name'] ?? null;
+                $date = Carbon::parse($match['utcDate'])->utc();
 
-                if (!$home_team || !$away_team) {
+                if (!$homeTeamNameFromApi || !$awayTeamNameFromApi) {
                     $this->line("⚠ Partido sin equipos válidos");
                     continue;
                 }
 
-                // Crear o actualizar equipos
-                $homeTeam = Team::firstOrCreate(
-                    ['name' => $home_team],
-                    [
-                        'external_id' => $match['homeTeam']['id'] ?? md5($home_team),
-                        'short_name' => substr($home_team, 0, 3),
-                    ]
-                );
-
-                $awayTeam = Team::firstOrCreate(
-                    ['name' => $away_team],
-                    [
-                        'external_id' => $match['awayTeam']['id'] ?? md5($away_team),
-                        'short_name' => substr($away_team, 0, 3),
-                    ]
-                );
+                $homeTeam = $this->resolveTeamFromApi($homeTeamData);
+                $awayTeam = $this->resolveTeamFromApi($awayTeamData);
 
                 // Crear o actualizar partido
+                $status = $this->normalizeMatchStatus($match['status'] ?? 'TIMED');
+
                 $footballMatch = FootballMatch::updateOrCreate(
                     ['external_id' => $match['id']],
                     [
-                        'home_team' => $home_team,
-                        'away_team' => $away_team,
+                        'home_team' => $homeTeam->name,
+                        'away_team' => $awayTeam->name,
                         'date' => $date,
-                        'status' => $match['status'] ?? 'TIMED',
+                        'status' => $status,
                         'home_team_score' => $match['score']['fullTime']['home'] ?? null,
                         'away_team_score' => $match['score']['fullTime']['away'] ?? null,
                         'matchday' => $match['matchday'] ?? null,
@@ -145,11 +136,14 @@ class UpdateFootballData extends Command
                     ]
                 );
 
+                $homeName = $homeTeam->name;
+                $awayName = $awayTeam->name;
+
                 if ($footballMatch->wasRecentlyCreated) {
                     $saved++;
-                    $this->line("✓ NUEVO: {$home_team} vs {$away_team} ({$date->format('d/m H:i')})");
+                    $this->line("✓ NUEVO: {$homeName} vs {$awayName} ({$date->format('d/m H:i')})");
                 } else {
-                    $this->line("↻ UPDATE: {$home_team} vs {$away_team} ({$date->format('d/m H:i')})");
+                    $this->line("↻ UPDATE: {$homeName} vs {$awayName} ({$date->format('d/m H:i')})");
                 }
 
             } catch (\Exception $e) {
@@ -160,5 +154,81 @@ class UpdateFootballData extends Command
         }
 
         return $saved;
+    }
+
+    private function resolveTeamFromApi(array $teamData): Team
+    {
+        $apiName = trim($teamData['name'] ?? '');
+        $externalId = $teamData['id'] ?? null;
+
+        if ($apiName === '') {
+            throw new \InvalidArgumentException('Nombre de equipo no disponible en la respuesta de la API');
+        }
+
+        $team = null;
+
+        if ($externalId) {
+            $team = Team::where('external_id', $externalId)->first();
+        }
+
+        if (!$team) {
+            $team = Team::where(function ($query) use ($apiName) {
+                $query->where('api_name', $apiName)
+                    ->orWhere('name', $apiName);
+            })->first();
+        }
+
+        if (!$team) {
+            $team = TeamResolver::findByComparableName($apiName);
+        }
+
+        if ($team) {
+            $updates = [
+                'api_name' => $apiName,
+            ];
+
+            if ($externalId && !$team->external_id) {
+                $updates['external_id'] = $externalId;
+            }
+
+            if (!$team->short_name) {
+                $updates['short_name'] = TeamResolver::generateShortName($team->name ?? $apiName);
+            }
+
+            $team->fill(array_filter($updates, fn ($value) => !is_null($value)));
+
+            if ($team->isDirty()) {
+                $team->save();
+                TeamResolver::rememberTeam($team);
+            }
+
+            return $team;
+        }
+
+        $team = Team::create([
+            'name' => $apiName,
+            'api_name' => $apiName,
+            'external_id' => $externalId ?? TeamResolver::fallbackExternalId($apiName),
+            'short_name' => TeamResolver::generateShortName($apiName),
+        ]);
+
+        TeamResolver::rememberTeam($team);
+
+        return $team;
+    }
+
+    private function normalizeMatchStatus(?string $apiStatus): string
+    {
+        if (!$apiStatus) {
+            return 'Not Started';
+        }
+
+        $status = strtoupper($apiStatus);
+
+        if (in_array($status, ['TIMED', 'SCHEDULED'], true)) {
+            return 'Not Started';
+        }
+
+        return $apiStatus;
     }
 }
