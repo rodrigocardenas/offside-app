@@ -6,6 +6,7 @@ use App\Jobs\Concerns\InteractsWithMatchStatistics;
 use App\Models\FootballMatch;
 use App\Services\FootballService;
 use App\Services\GeminiBatchService;
+use App\Services\GeminiService;
 use App\Services\VerificationMonitoringService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -41,6 +42,9 @@ class BatchGetScoresJob implements ShouldQueue
         VerificationMonitoringService $monitoringService
     ): void
     {
+        // ✅ OPTIMIZATION: Enable non-blocking mode to prevent long waits on rate limit
+        GeminiService::setAllowBlocking(false);
+
         $monitorRun = $monitoringService->start(self::class, $this->batchId, [
             'match_ids' => $this->matchIds,
         ]);
@@ -101,6 +105,7 @@ class BatchGetScoresJob implements ShouldQueue
                 return;
             }
 
+            // ✅ OPTIMIZATION: Use optimized batch service (intelligent grounding)
             $results = $geminiBatchService->getMultipleMatchResults($pendingForGemini, $this->forceRefresh);
 
             if (empty($results)) {

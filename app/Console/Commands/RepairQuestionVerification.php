@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\FootballMatch;
 use App\Models\Question;
 use App\Services\QuestionEvaluationService;
+use App\Services\GeminiService;
 use Illuminate\Support\Facades\Log;
 
 class RepairQuestionVerification extends Command
@@ -22,6 +23,8 @@ class RepairQuestionVerification extends Command
                             {--max-hours=72 : Partidos finalizados hace como máximo N horas}
                             {--only-unverified : Solo preguntas sin verificar}
                             {--reprocess-all : Reprocesar todas las preguntas del partido}
+                            {--limit=0 : Limitar preguntas procesadas (0 = sin límite)}
+                            {--no-grounding : Deshabilitar búsqueda web de Gemini (más rápido)}
                             {--show-details : Mostrar detalles de cada pregunta}';
 
     /**
@@ -51,12 +54,24 @@ class RepairQuestionVerification extends Command
         $this->info('║ Reparación de Verificación de Preguntas (Modo Diagnóstico)    ║');
         $this->info('╚═══════════════════════════════════════════════════════════════╝');
 
+        // ✅ IMPORTANTE: No permitir bloqueos en Gemini cuando ejecutamos comando interactivo
+        // Esto evita que el comando se quede esperando 90+ segundos en rate limit
+        GeminiService::setAllowBlocking(false);
+        $this->line("   ⚠️  Modo non-blocking: Si Gemini está rate-limitado, se saltarán las preguntas");
+
+        // ✅ Opción para deshabilitar grounding si hay timeouts
+        if ($this->option('no-grounding')) {
+            GeminiService::setDisableGrounding(true);
+            $this->line("   ⚡ Grounding deshabilitado: las búsquedas web serán más rápidas");
+        }
+
         $matchId = $this->option('match-id');
         $status = $this->option('status');
         $minHours = (int) $this->option('min-hours');
         $maxHours = (int) $this->option('max-hours');
         $onlyUnverified = $this->option('only-unverified');
         $reprocessAll = $this->option('reprocess-all');
+        $limit = (int) $this->option('limit');
         $showDetails = $this->option('show-details');
 
         try {
@@ -135,38 +150,45 @@ class RepairQuestionVerification extends Command
                 }
 
                 $this->line("   📌 {$questions->count()} preguntas a procesar");
+                if ($limit > 0) {
+                    $this->line("   ⏱️  Límite: primeras {$limit} preguntas");
+                }
 
-                // ✅ OPTIMIZACIÓN: Separar preguntas por tipo
-                // 1. Primero: Preguntas verificables SIN Gemini (winner, both_score, etc.)
-                // 2. Luego: Preguntas que REQUIEREN Gemini
+                // ✅ Procesar preguntas con límite de tiempo
+                // Si Gemini está disponible, procesar. Si no, saltar.
+                $processedOk = 0;
+                $processedSkipped = 0;
+                $processedCount = 0;
 
-                $codeOnlyQuestions = [];
-                $geminiRequiredQuestions = [];
+                foreach ($questions as $question) {
+                    // Aplicar límite si está configurado
+                    if ($limit > 0 && $processedCount >= $limit) {
+                        $this->line("   ⏭️  Límite de {$limit} preguntas alcanzado - saltando resto");
+                        break;
+                    }
+                    $processedCount++;
 
-                foreach ($questions as $q) {
-                    if ($this->needsGeminiForQuestion($q)) {
-                        $geminiRequiredQuestions[] = $q;
-                    } else {
-                        $codeOnlyQuestions[] = $q;
+                    // Timeout de 15 segundos por pregunta
+                    try {
+                        $this->processQuestion($question, $match, $showDetails,
+                            $verifiedQuestions, $unverifiedQuestions, $errorQuestions, $totalQuestions, $totalPointsAssigned);
+                        $processedOk++;
+                    } catch (\Exception $e) {
+                        $errorMsg = $e->getMessage();
+                        // Si es rate limit o timeout, saltar el resto de preguntas
+                        if (strpos($errorMsg, 'Rate limited') !== false ||
+                            strpos($errorMsg, 'timeout') !== false ||
+                            strpos($errorMsg, 'Timeout') !== false) {
+                            $this->line("   ⚠️  Gemini no disponible - saltando preguntas restantes");
+                            $processedSkipped++;
+                            break;
+                        }
+                        $processedSkipped++;
                     }
                 }
 
-                // Procesar primero las que NO necesitan Gemini
-                if (!empty($codeOnlyQuestions)) {
-                    $this->line("   🟢 Procesando " . count($codeOnlyQuestions) . " preguntas (sin Gemini)...");
-                    foreach ($codeOnlyQuestions as $question) {
-                        $this->processQuestion($question, $match, $showDetails,
-                            $verifiedQuestions, $unverifiedQuestions, $errorQuestions, $totalQuestions, $totalPointsAssigned);
-                    }
-                }
-
-                // Procesar luego las que SÍ necesitan Gemini
-                if (!empty($geminiRequiredQuestions)) {
-                    $this->line("   🔴 Procesando " . count($geminiRequiredQuestions) . " preguntas (con Gemini)...");
-                    foreach ($geminiRequiredQuestions as $question) {
-                        $this->processQuestion($question, $match, $showDetails,
-                            $verifiedQuestions, $unverifiedQuestions, $errorQuestions, $totalQuestions, $totalPointsAssigned);
-                    }
+                if ($showDetails && ($processedOk > 0 || $processedSkipped > 0)) {
+                    $this->line("   ✅ Procesadas: {$processedOk} | ⚠️  Saltadas: {$processedSkipped}");
                 }
             }
 
@@ -207,32 +229,6 @@ class RepairQuestionVerification extends Command
             ]);
             return 1;
         }
-    }
-
-    /**
-     * ✅ Determinar si una pregunta necesita Gemini
-     * Preguntas verificables sin Gemini: resultado, ambos anotan, score exacto, goles over/under
-     */
-    private function needsGeminiForQuestion($question): bool
-    {
-        $questionText = strtolower($question->title ?? '');
-
-        // Preguntas que se pueden verificar SIN Gemini
-        $codeOnlyPatterns = [
-            'resultado|ganador|victoria|gana|ganará',  // Score
-            'ambos.*anotan|both.*score',               // Score
-            'score.*exacto|exact|marcador',            // Score
-            'goles.*over|goles.*under|total.*goles|más.*goles|mas.*goles|menos.*goles', // Score
-        ];
-
-        foreach ($codeOnlyPatterns as $pattern) {
-            if (preg_match('/' . $pattern . '/u', $questionText)) {
-                return false; // NO necesita Gemini
-            }
-        }
-
-        // Todos los demás patrones NECESITAN Gemini (eventos, estadísticas)
-        return true;
     }
 
     /**
@@ -293,7 +289,7 @@ class RepairQuestionVerification extends Command
             $errorQuestions++;
 
             if ($showDetails) {
-                $this->line("      ❌ {$question->title} - Error: " . $e->getMessage());
+                $this->line("      ❌ {$question->title} - Error: " . substr($e->getMessage(), 0, 60));
             }
 
             Log::error("Error verificando pregunta {$question->id}", [

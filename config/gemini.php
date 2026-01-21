@@ -17,11 +17,11 @@ return [
 
     'grounding_enabled' => env('GEMINI_GROUNDING_ENABLED', true),
 
-    'timeout' => 30,
+    'timeout' => env('GEMINI_TIMEOUT', 60), // 60 segundos (aumentado para evitar timeouts prematuros)
 
-    'max_retries' => 3,
+    'max_retries' => env('GEMINI_MAX_RETRIES', 3),
 
-    'retry_delay' => 2, // segundos
+    'retry_delay' => env('GEMINI_RETRY_DELAY', 2), // segundos
 
     /*
     |--------------------------------------------------------------------------

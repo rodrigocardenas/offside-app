@@ -19,6 +19,7 @@ class GeminiBatchService
     protected int $errorCacheTtl;
     protected int $maxBatchRetries;
     protected string $promptTemplate;
+    protected bool $useGrounding;
 
     public function __construct(GeminiService $geminiService)
     {
@@ -28,6 +29,18 @@ class GeminiBatchService
         $this->errorCacheTtl = (int) config('gemini.cache.batch_error_ttl', 15);
         $this->maxBatchRetries = (int) config('gemini.batch.max_retries', 2);
         $this->promptTemplate = (string) config('gemini.batch.results_prompt_template');
+        // ✅ Default: use intelligent grounding strategy (try without first, then with)
+        $this->useGrounding = true;
+    }
+
+    /**
+     * ✅ Disable grounding for batch operations.
+     * Useful for reducing latency when BD already has verified data.
+     */
+    public function disableGrounding(bool $disable = true): self
+    {
+        $this->useGrounding = !$disable;
+        return $this;
     }
 
     /**
@@ -76,37 +89,61 @@ class GeminiBatchService
 
     protected function fetchBatchResults(array $matches): array
     {
-        $attempt = 0;
         $prompt = $this->buildBatchPrompt($matches);
 
-        while ($attempt < max(1, $this->maxBatchRetries)) {
-            $attempt++;
+        // ✅ OPTIMIZATION: Retry logic - try WITHOUT grounding first (if data in BD)
+        // Then retry WITH grounding only if needed
+        $attemptSequence = [
+            ['useGrounding' => false, 'reason' => 'initial attempt without grounding (data likely in BD)'],
+            ['useGrounding' => true, 'reason' => 'retry with grounding (BD missing data)'],
+        ];
+
+        foreach ($attemptSequence as $attemptIndex => $config) {
+            // Skip grounding attempts if globally disabled
+            if (!$this->useGrounding && $config['useGrounding']) {
+                Log::debug('Skipping grounding attempt (disabled)', [
+                    'match_count' => count($matches),
+                    'reason' => 'useGrounding disabled',
+                ]);
+                continue;
+            }
 
             try {
-                $response = $this->geminiService->callGemini($prompt, useGrounding: true);
+                Log::debug('Gemini batch attempt', [
+                    'attempt' => $attemptIndex + 1,
+                    'match_count' => count($matches),
+                    'use_grounding' => $config['useGrounding'],
+                    'reason' => $config['reason'],
+                ]);
+
+                $response = $this->geminiService->callGemini($prompt, useGrounding: $config['useGrounding']);
                 $parsed = $this->parseBatchResponse($response, $matches);
 
                 if (!empty($parsed)) {
                     Log::info('Gemini batch results parsed successfully', [
-                        'attempt' => $attempt,
+                        'attempt' => $attemptIndex + 1,
                         'match_count' => count($matches),
                         'parsed_count' => count($parsed),
+                        'use_grounding' => $config['useGrounding'],
                     ]);
                     return $parsed;
                 }
 
                 Log::warning('Gemini batch response returned no usable data', [
-                    'attempt' => $attempt,
+                    'attempt' => $attemptIndex + 1,
                     'match_count' => count($matches),
+                    'use_grounding' => $config['useGrounding'],
                 ]);
             } catch (\Throwable $e) {
                 Log::warning('Gemini batch attempt failed', [
-                    'attempt' => $attempt,
+                    'attempt' => $attemptIndex + 1,
                     'match_count' => count($matches),
+                    'use_grounding' => $config['useGrounding'],
                     'error' => $e->getMessage(),
                 ]);
 
-                if ($attempt >= $this->maxBatchRetries) {
+                // Continue to next attempt unless this was the last one
+                if ($attemptIndex >= count($attemptSequence) - 1) {
                     break;
                 }
             }
@@ -439,7 +476,10 @@ class GeminiBatchService
             }
 
             try {
-                $details = $this->geminiService->getDetailedMatchData(
+                // ✅ OPTIMIZATION: Use retry logic for detailed match data
+                // First attempt: without grounding (if data likely in BD)
+                // Second attempt: with grounding (if needed)
+                $details = $this->getDetailedMatchDataWithRetry(
                     $match['home_team'],
                     $match['away_team'],
                     $match['match_date'] ?? null,
@@ -468,6 +508,87 @@ class GeminiBatchService
         }
 
         return $detailedResults;
+    }
+
+    /**
+     * ✅ Retry logic for detailed match data.
+     * Tries WITHOUT grounding first (data likely in BD),
+     * then WITH grounding if needed.
+     */
+    protected function getDetailedMatchDataWithRetry(
+        string $homeTeam,
+        string $awayTeam,
+        ?string $date,
+        ?string $league,
+        bool $forceRefresh
+    ): ?array {
+        // First attempt: without grounding
+        if ($this->useGrounding) {
+            try {
+                Log::debug('Gemini detailed data - attempt 1 (without grounding)', [
+                    'home_team' => $homeTeam,
+                    'away_team' => $awayTeam,
+                ]);
+
+                $details = $this->geminiService->getDetailedMatchData(
+                    $homeTeam,
+                    $awayTeam,
+                    $date,
+                    $league,
+                    $forceRefresh,
+                    false // ✅ Try WITHOUT grounding first
+                );
+
+                if ($details) {
+                    Log::info('Gemini detailed data obtained without grounding', [
+                        'home_team' => $homeTeam,
+                        'away_team' => $awayTeam,
+                    ]);
+                    return $details;
+                }
+            } catch (Throwable $e) {
+                Log::debug('Gemini detailed data attempt 1 failed (trying with grounding)', [
+                    'home_team' => $homeTeam,
+                    'away_team' => $awayTeam,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Second attempt: with grounding (if enabled and first attempt failed)
+        if ($this->useGrounding) {
+            try {
+                Log::debug('Gemini detailed data - attempt 2 (with grounding)', [
+                    'home_team' => $homeTeam,
+                    'away_team' => $awayTeam,
+                ]);
+
+                $details = $this->geminiService->getDetailedMatchData(
+                    $homeTeam,
+                    $awayTeam,
+                    $date,
+                    $league,
+                    $forceRefresh,
+                    true // ✅ Retry WITH grounding
+                );
+
+                if ($details) {
+                    Log::info('Gemini detailed data obtained with grounding', [
+                        'home_team' => $homeTeam,
+                        'away_team' => $awayTeam,
+                    ]);
+                    return $details;
+                }
+            } catch (Throwable $e) {
+                Log::warning('Gemini detailed data attempt 2 failed (with grounding)', [
+                    'home_team' => $homeTeam,
+                    'away_team' => $awayTeam,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return null;
     }
 
     protected function buildCacheKey(array $matches): string

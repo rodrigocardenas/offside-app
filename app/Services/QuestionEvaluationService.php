@@ -998,17 +998,41 @@ class QuestionEvaluationService
 
         // ✅ OPTIMIZACIÓN: Usar cache de datos del partido para evitar múltiples llamadas a Gemini
         $prompt = $this->buildGeminiFallbackPromptOptimized($question, $match, $reason, $gemini);
-        $useGrounding = (bool) config('question_evaluation.gemini_fallback_grounding', true);
+
+        // ✅ IMPORTANTE: Determinar si necesitamos grounding (búsqueda web)
+        // - Si NO hay datos verificados en la BD: usar grounding (buscar en internet)
+        // - Si SÍ hay datos verificados: NO usar grounding (más rápido)
+        $hasVerified = $this->hasVerifiedMatchData($match);
+        $useGrounding = !$hasVerified; // Solo usar grounding si NO hay datos verificados
+
+        Log::info('Gemini fallback decision', [
+            'question_id' => $question->id,
+            'match_id' => $match->id,
+            'has_verified_data' => $hasVerified,
+            'use_grounding' => $useGrounding,
+            'reason' => $reason
+        ]);
 
         try {
             Log::info('Gemini fallback attempting to resolve question', [
                 'question_id' => $question->id,
                 'match_id' => $match->id,
                 'reason' => $reason,
-                'match_data_cached' => isset($this->matchDataCache[$match->id])
+                'match_data_cached' => isset($this->matchDataCache[$match->id]),
+                'grounding' => $useGrounding ? '✅ enabled' : '❌ disabled'
             ]);
 
-            $response = $gemini->callGemini($prompt, $useGrounding);
+            // ⚠️ Usar versión segura con timeout
+            $response = $this->callGeminiSafe($gemini, $prompt, $useGrounding);
+
+            if ($response === null) {
+                Log::warning('Gemini did not respond (timeout or rate limit)', [
+                    'question_id' => $question->id,
+                    'match_id' => $match->id
+                ]);
+                return [];
+            }
+
             $resolved = $this->parseGeminiFallbackResponse($response, $question);
 
             if (!empty($resolved)) {
@@ -1026,9 +1050,54 @@ class QuestionEvaluationService
                 'question_id' => $question->id,
                 'match_id' => $match->id,
                 'reason' => $reason,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'error_type' => get_class($e)
             ]);
             return [];
+        }
+    }
+
+    /**
+     * ✅ SEGURIDAD: Llamada a Gemini con timeout y manejo de rate limit
+     * Lanza excepción si hay rate limit o timeout - no retorna null
+     */
+    private function callGeminiSafe(GeminiService $gemini, string $prompt, bool $useGrounding): ?array
+    {
+        $maxWait = 8; // máximo 8 segundos esperando
+        $startTime = microtime(true);
+
+        try {
+            $response = $gemini->callGemini($prompt, $useGrounding);
+
+            $elapsed = microtime(true) - $startTime;
+            Log::info('Gemini responded successfully', [
+                'elapsed_ms' => round($elapsed * 1000, 2)
+            ]);
+
+            return $response;
+
+        } catch (\Exception $e) {
+            $elapsed = microtime(true) - $startTime;
+            $errorMsg = $e->getMessage();
+
+            if (strpos($errorMsg, 'Rate limited') !== false || strpos($errorMsg, '429') !== false) {
+                Log::warning('Gemini rate limited - throwing exception', [
+                    'elapsed_ms' => round($elapsed * 1000, 2),
+                    'error' => substr($errorMsg, 0, 100)
+                ]);
+                throw new \Exception('Rate limited por Gemini');
+            }
+
+            if ($elapsed > $maxWait) {
+                Log::warning('Gemini call exceeded timeout threshold', [
+                    'elapsed_ms' => round($elapsed * 1000, 2),
+                    'max_wait_s' => $maxWait
+                ]);
+                throw new \Exception('Timeout esperando respuesta de Gemini (>' . $maxWait . 's)');
+            }
+
+            // Re-lanzar otros errores
+            throw $e;
         }
     }
 

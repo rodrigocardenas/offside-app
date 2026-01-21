@@ -110,6 +110,25 @@ class VerifyQuestionAnswers extends Command
             // ==================== PASO 2: Verificar cada pregunta ====================
             $this->info("\n📊 PASO 2: Verificando preguntas y asignando puntos...\n");
 
+            // ✅ OPTIMIZACIÓN: Separar preguntas por tipo
+            // 1. Primero: Preguntas verificables SIN Gemini (winner, both_score, etc.)
+            // 2. Luego: Preguntas que REQUIEREN Gemini
+
+            $codeOnlyQuestions = [];
+            $geminiRequiredQuestions = [];
+
+            foreach ($questions as $q) {
+                if ($this->needsGeminiForQuestion($q)) {
+                    $geminiRequiredQuestions[] = $q;
+                } else {
+                    $codeOnlyQuestions[] = $q;
+                }
+            }
+
+            $this->line("📊 Distribución de preguntas:");
+            $this->line("   🟢 Sin Gemini: " . count($codeOnlyQuestions));
+            $this->line("   🔴 Con Gemini: " . count($geminiRequiredQuestions));
+
             $progressBar = $this->output->createProgressBar($questions->count());
             $progressBar->start();
 
@@ -117,7 +136,8 @@ class VerifyQuestionAnswers extends Command
             $failureCount = 0;
             $skippedCount = 0;
 
-            foreach ($questions as $question) {
+            // Procesar primero las que NO necesitan Gemini
+            foreach (array_merge($codeOnlyQuestions, $geminiRequiredQuestions) as $question) {
                 $progressBar->advance();
 
                 try {
@@ -344,4 +364,31 @@ class VerifyQuestionAnswers extends Command
 
         return array_merge($current, $newData);
     }
+
+    /**
+     * ✅ Determinar si una pregunta necesita Gemini
+     * Preguntas verificables sin Gemini: resultado, ambos anotan, score exacto, goles over/under
+     */
+    private function needsGeminiForQuestion($question): bool
+    {
+        $questionText = strtolower($question->title ?? '');
+
+        // Preguntas que se pueden verificar SIN Gemini
+        $codeOnlyPatterns = [
+            'resultado|ganador|victoria|gana|ganará',  // Score
+            'ambos.*anotan|both.*score',               // Score
+            'score.*exacto|exact|marcador',            // Score
+            'goles.*over|goles.*under|total.*goles|más.*goles|mas.*goles|menos.*goles', // Score
+        ];
+
+        foreach ($codeOnlyPatterns as $pattern) {
+            if (preg_match('/' . $pattern . '/u', $questionText)) {
+                return false; // NO necesita Gemini
+            }
+        }
+
+        // Todos los demás patrones NECESITAN Gemini (eventos, estadísticas)
+        return true;
+    }
 }
+

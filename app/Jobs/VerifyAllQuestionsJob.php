@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Question;
+use App\Services\GeminiService;
 use App\Services\QuestionEvaluationService;
 use App\Services\VerificationMonitoringService;
 use Illuminate\Bus\Queueable;
@@ -37,6 +38,9 @@ class VerifyAllQuestionsJob implements ShouldQueue
         VerificationMonitoringService $monitoringService
     ): void
     {
+        // ✅ OPTIMIZATION: Enable non-blocking mode to prevent long waits on rate limit
+        GeminiService::setAllowBlocking(false);
+
         $monitorRun = $monitoringService->start(self::class, $this->batchId, [
             'match_ids' => $this->matchIds,
             'chunk_size' => $this->chunkSize,

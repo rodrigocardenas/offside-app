@@ -18,6 +18,10 @@ class GeminiService
     protected $groundingEnabled;
     protected $timeout;
 
+    // ✅ Variable estática compartida entre TODAS las instancias
+    private static bool $allowBlocking = true;
+    private static bool $disableGrounding = false; // ✅ Opción para deshabilitar grounding globalmente
+
     public function __construct()
     {
         // En testing, allow no API key
@@ -32,12 +36,42 @@ class GeminiService
 
         $this->maxRetries = config('gemini.max_retries', 5);
         $this->retryDelay = config('gemini.retry_delay', 2);
-        $this->groundingEnabled = config('gemini.grounding_enabled', true);
+        // ✅ Respetar deshabilitación global de grounding
+        $this->groundingEnabled = self::$disableGrounding ? false : config('gemini.grounding_enabled', true);
         $this->timeout = config('gemini.timeout', 60);
 
         if (!app()->environment('testing') && !$this->apiKey) {
             throw new Exception('GEMINI_API_KEY no configurada en .env');
         }
+    }
+
+    /**
+     * ✅ Controlar si las llamadas a Gemini pueden hacer sleep en rate limit
+     * true = hacer sleep (comportamiento normal, para jobs)
+     * false = tirar excepción inmediatamente (para comandos interactivos)
+     */
+    public static function setAllowBlocking(bool $allow): void
+    {
+        self::$allowBlocking = $allow;
+    }
+
+    public static function getAllowBlocking(): bool
+    {
+        return self::$allowBlocking;
+    }
+
+    /**
+     * ✅ Deshabilitar grounding (web search) globalmente para acelerar respuestas
+     * Útil cuando hay rate limiting o la API está lenta
+     */
+    public static function setDisableGrounding(bool $disable): void
+    {
+        self::$disableGrounding = $disable;
+    }
+
+    public static function getDisableGrounding(): bool
+    {
+        return self::$disableGrounding;
     }
 
     /**
@@ -115,9 +149,9 @@ class GeminiService
 
     /**
      * Obtener el resultado real de un partido específico
-     * Usa Gemini con grounding para buscar el resultado en internet
+     * ✅ Inteligencia: Primero intenta sin grounding, si no funciona, reintenta con grounding
      */
-    public function getMatchResult($homeTeam, $awayTeam, $date, $league = null, $forceRefresh = false)
+    public function getMatchResult($homeTeam, $awayTeam, $date, $league = null, $forceRefresh = false, $useGroundingAttempt = false)
     {
         $cacheKey = "gemini_match_result_" . md5("{$homeTeam}_{$awayTeam}_{$date}");
 
@@ -139,11 +173,14 @@ class GeminiService
             'home_team' => $homeTeam,
             'away_team' => $awayTeam,
             'date' => $date,
-            'league' => $league
+            'league' => $league,
+            'grounding_attempt' => $useGroundingAttempt ? '🔍 (con búsqueda web)' : '📊 (datos locales)'
         ]);
 
         try {
-            $response = $this->callGemini($prompt, true); // true = usar grounding (web search)
+            // ✅ Primero intentar SIN grounding (más rápido)
+            // Si no funciona, reintentaremos CON grounding
+            $response = $this->callGemini($prompt, $useGroundingAttempt);
 
             if ($response) {
                 // Procesar la respuesta para extraer los goles
@@ -156,18 +193,43 @@ class GeminiService
                     Log::info("Resultado obtenido de Gemini", [
                         'home_team' => $homeTeam,
                         'away_team' => $awayTeam,
-                        'score' => "{$result['home_score']} - {$result['away_score']}"
+                        'score' => "{$result['home_score']} - {$result['away_score']}",
+                        'grounding_used' => $useGroundingAttempt
                     ]);
 
                     return $result;
+                } elseif (!$useGroundingAttempt) {
+                    // Si falló sin grounding, reintentar CON grounding
+                    Log::warning("No se obtuvo resultado sin grounding, reintentando con búsqueda web", [
+                        'home_team' => $homeTeam,
+                        'away_team' => $awayTeam
+                    ]);
+                    return $this->getMatchResult($homeTeam, $awayTeam, $date, $league, $forceRefresh, true);
                 }
+            } elseif (!$useGroundingAttempt) {
+                // Respuesta nula sin grounding, reintentemos CON grounding
+                Log::warning("Respuesta nula sin grounding, reintentando con búsqueda web", [
+                    'home_team' => $homeTeam,
+                    'away_team' => $awayTeam
+                ]);
+                return $this->getMatchResult($homeTeam, $awayTeam, $date, $league, $forceRefresh, true);
             }
         } catch (\Exception $e) {
             Log::error("Error al consultar Gemini para resultado del partido", [
                 'error' => $e->getMessage(),
                 'home_team' => $homeTeam,
-                'away_team' => $awayTeam
+                'away_team' => $awayTeam,
+                'grounding_attempt' => $useGroundingAttempt
             ]);
+
+            // Si falló sin grounding, reintentar CON grounding
+            if (!$useGroundingAttempt) {
+                Log::warning("Reintentando con búsqueda web después de error", [
+                    'home_team' => $homeTeam,
+                    'away_team' => $awayTeam
+                ]);
+                return $this->getMatchResult($homeTeam, $awayTeam, $date, $league, $forceRefresh, true);
+            }
         }
 
         return null;
@@ -175,10 +237,11 @@ class GeminiService
 
     /**
      * 🆕 Obtener datos DETALLADOS del partido desde Gemini
+     * ✅ Inteligencia: Primero intenta sin grounding, si no funciona, reintenta con grounding
      * Extrae: score, eventos (goles, tarjetas, autogoles, penales), etc.
      * Permite verificar preguntas basadas en eventos
      */
-    public function getDetailedMatchData($homeTeam, $awayTeam, $date, $league = null, $forceRefresh = false)
+    public function getDetailedMatchData($homeTeam, $awayTeam, $date, $league = null, $forceRefresh = false, $useGroundingAttempt = false)
     {
         $cacheKey = "gemini_detailed_match_" . md5("{$homeTeam}_{$awayTeam}_{$date}");
 
@@ -233,11 +296,13 @@ EOT;
         Log::info("Consultando Gemini para datos detallados del partido", [
             'home_team' => $homeTeam,
             'away_team' => $awayTeam,
-            'date' => $date
+            'date' => $date,
+            'grounding_attempt' => $useGroundingAttempt ? '🔍 (con búsqueda web)' : '📊 (datos locales)'
         ]);
 
         try {
-            $response = $this->callGemini($prompt, true); // true = usar grounding (web search)
+            // ✅ Primero intentar SIN grounding (más rápido)
+            $response = $this->callGemini($prompt, $useGroundingAttempt);
 
             Log::debug("Respuesta recibida de Gemini para datos detallados", [
                 'response_type' => gettype($response),
@@ -256,30 +321,44 @@ EOT;
                         'home_team' => $homeTeam,
                         'away_team' => $awayTeam,
                         'score' => "{$matchData['home_goals']} - {$matchData['away_goals']}",
-                        'events_count' => count($matchData['events'] ?? [])
+                        'events_count' => count($matchData['events'] ?? []),
+                        'grounding_used' => $useGroundingAttempt
                     ]);
 
                     return $matchData;
-                } else {
-                    Log::warning("parseDetailedMatchData retornó NULL o datos incompletos", [
+                } elseif (!$useGroundingAttempt) {
+                    // Si falló sin grounding, reintentar CON grounding
+                    Log::warning("No se obtuvieron datos sin grounding, reintentando con búsqueda web", [
                         'home_team' => $homeTeam,
-                        'away_team' => $awayTeam,
-                        'parsed_data' => $matchData
+                        'away_team' => $awayTeam
                     ]);
+                    return $this->getDetailedMatchData($homeTeam, $awayTeam, $date, $league, $forceRefresh, true);
                 }
-            } else {
-                Log::warning("callGemini retornó NULL o falsy", [
+            } elseif (!$useGroundingAttempt) {
+                // Respuesta nula sin grounding, reintentemos CON grounding
+                Log::warning("Respuesta nula sin grounding, reintentando con búsqueda web", [
                     'home_team' => $homeTeam,
                     'away_team' => $awayTeam
                 ]);
+                return $this->getDetailedMatchData($homeTeam, $awayTeam, $date, $league, $forceRefresh, true);
             }
         } catch (\Exception $e) {
             Log::error("Error al consultar Gemini para datos detallados", [
                 'error' => $e->getMessage(),
                 'home_team' => $homeTeam,
                 'away_team' => $awayTeam,
+                'grounding_attempt' => $useGroundingAttempt,
                 'trace' => $e->getTraceAsString()
             ]);
+
+            // Si falló sin grounding, reintentar CON grounding
+            if (!$useGroundingAttempt) {
+                Log::warning("Reintentando con búsqueda web después de error", [
+                    'home_team' => $homeTeam,
+                    'away_team' => $awayTeam
+                ]);
+                return $this->getDetailedMatchData($homeTeam, $awayTeam, $date, $league, $forceRefresh, true);
+            }
         }
 
         Log::warning("getDetailedMatchData retornando NULL", [
@@ -490,6 +569,12 @@ EOT;
                 if ($response->status() === 429) { // Rate limited
                     $wait_time = 90 * $attempt; // 90s, 180s, 270s, etc. (más tolerante)
                     Log::warning("Rate limited por Gemini (429), intento {$attempt}/{$this->maxRetries}, esperando {$wait_time}s...");
+
+                    // ✅ Si no se permite bloqueo, lanzar excepción inmediatamente
+                    if (!self::$allowBlocking) {
+                        throw new Exception("Rate limited por API de Gemini - no se permite bloqueo en este contexto");
+                    }
+
                     if ($attempt < $this->maxRetries) {
                         echo "\n⏳ Rate limitado por Gemini. Esperando {$wait_time} segundos (intento {$attempt}/{$this->maxRetries})...\n";
                         sleep($wait_time);
