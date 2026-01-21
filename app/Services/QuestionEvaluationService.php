@@ -39,10 +39,25 @@ class QuestionEvaluationService
      */
     private array $matchDataCache = [];
 
+    /**
+     * ✅ DEDUPLICATION CACHE: Agrupa preguntas por (match_id, template_question_id)
+     * para evitar verificaciones duplicadas.
+     *
+     * Ejemplo:
+     * - Question #29 (template_id: 5, group: 1) → Resultado verificado: [1]
+     * - Question #24 (template_id: 5, group: 2) → Usa MISMO resultado: [1]
+     * - Question #18 (template_id: 5, group: 3) → Usa MISMO resultado: [1]
+     *
+     * Clave: "match_id|template_id", Valor: IDs de opciones correctas
+     * Reducción esperada: 80-90% de llamadas a Gemini cuando hay preguntas duplicadas
+     */
+    private array $templateResultsCache = [];
+
     public function __construct(?GeminiService $geminiService = null)
     {
         $this->geminiService = $geminiService;
         $this->matchDataCache = [];
+        $this->templateResultsCache = [];
     }
 
     /**
@@ -60,6 +75,24 @@ class QuestionEvaluationService
                 'status' => $match->status
             ]);
             return [];
+        }
+
+        // ✅ DEDUPLICATION CHECK: Si ya verificamos este template para este partido,
+        // usa el resultado cacheado (mismo template = mismo resultado)
+        if ($question->template_question_id) {
+            $templateKey = "{$match->id}|{$question->template_question_id}";
+
+            if (isset($this->templateResultsCache[$templateKey])) {
+                Log::info('✅ Template result cached (deduplication hit)', [
+                    'question_id' => $question->id,
+                    'match_id' => $match->id,
+                    'template_question_id' => $question->template_question_id,
+                    'cached_result' => $this->templateResultsCache[$templateKey],
+                    'dedup_group' => $templateKey,
+                ]);
+
+                return $this->templateResultsCache[$templateKey];
+            }
         }
 
         // ⚠️ CHECK: Detectar si el partido tiene datos verificados o ficticios/fallback
@@ -165,6 +198,20 @@ class QuestionEvaluationService
                 if (!empty($fallbackOptions)) {
                     return $fallbackOptions;
                 }
+            }
+
+            // ✅ DEDUPLICATION: Cachear resultado para futuras preguntas del mismo template
+            if ($question->template_question_id && !empty($correctOptions)) {
+                $templateKey = "{$match->id}|{$question->template_question_id}";
+                $this->templateResultsCache[$templateKey] = $correctOptions;
+
+                Log::info('✅ Template result cached for deduplication', [
+                    'question_id' => $question->id,
+                    'match_id' => $match->id,
+                    'template_question_id' => $question->template_question_id,
+                    'result' => $correctOptions,
+                    'dedup_group' => $templateKey,
+                ]);
             }
 
             return $correctOptions;
@@ -1355,5 +1402,28 @@ PROMPT;
         }
 
         return $events;
+    }
+
+    /**
+     * ✅ Obtiene estadísticas de deduplicación (cache hits)
+     * Útil para monitoreo y debugging
+     */
+    public function getDeduplicationStats(): array
+    {
+        return [
+            'template_cache_size' => count($this->templateResultsCache),
+            'cached_templates' => array_keys($this->templateResultsCache),
+            'template_results' => $this->templateResultsCache,
+        ];
+    }
+
+    /**
+     * ✅ Limpia el cache de deduplicación
+     * Útil entre diferentes batch jobs o cuando hay cambios en datos
+     */
+    public function clearDeduplicationCache(): void
+    {
+        $this->templateResultsCache = [];
+        Log::info('✅ Template deduplication cache cleared');
     }
 }

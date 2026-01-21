@@ -197,7 +197,7 @@ class RepairQuestionVerification extends Command
             $this->info("✅ REPARACIÓN COMPLETADA");
             $this->info(str_repeat("═", 70));
 
-            $this->line("\n📊 ESTADÍSTICAS:");
+            $this->line("\n📊 ESTADÍSTICAS DE VERIFICACIÓN:");
             $this->line("  ├─ Total procesadas: {$totalQuestions}");
             $this->line("  ├─ Verificadas: {$verifiedQuestions} ✅");
             $this->line("  ├─ Sin opciones correctas: {$unverifiedQuestions} ⏭️");
@@ -208,6 +208,19 @@ class RepairQuestionVerification extends Command
                 $this->line("\n💯 Tasa de éxito: {$percentage}%");
             }
 
+            // ✅ DEDUPLICATION STATS
+            $dedupStats = $this->evaluationService->getDeduplicationStats();
+            if ($dedupStats['template_cache_size'] > 0) {
+                $this->line("\n🚀 ESTADÍSTICAS DE DEDUPLICACIÓN:");
+                $this->line("  ├─ Templates únicos verificados: {$dedupStats['template_cache_size']}");
+                $this->line("  ├─ Estimado de preguntas ahorradas: ~" . ($totalQuestions - $dedupStats['template_cache_size']));
+
+                if ($totalQuestions > 0) {
+                    $savedPercentage = round((($totalQuestions - $dedupStats['template_cache_size']) / $totalQuestions) * 100, 1);
+                    $this->line("  └─ Reducción de API calls: {$savedPercentage}%");
+                }
+            }
+
             $this->line("\n💰 Puntos totales asignados: {$totalPointsAssigned}");
 
             Log::info("Reparación de verificación completada", [
@@ -216,7 +229,9 @@ class RepairQuestionVerification extends Command
                 'questions_verified' => $verifiedQuestions,
                 'questions_unverified' => $unverifiedQuestions,
                 'errors' => $errorQuestions,
-                'points_assigned' => $totalPointsAssigned
+                'points_assigned' => $totalPointsAssigned,
+                'dedup_templates_cached' => $dedupStats['template_cache_size'],
+                'dedup_estimated_savings' => $totalQuestions - $dedupStats['template_cache_size'],
             ]);
 
             return 0;
