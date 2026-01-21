@@ -279,10 +279,13 @@ class RepairQuestionVerification extends Command
             // Actualizar respuestas y puntos
             foreach ($question->answers as $answer) {
                 $wasCorrect = $answer->is_correct;
+                $wasPointsEarned = $answer->points_earned ?? 0;
+
                 $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
                 $answer->points_earned = $answer->is_correct ? ($question->points ?? 300) : 0;
 
-                if ($wasCorrect !== $answer->is_correct) {
+                // Guardar si cambió el estado O si cambiaron los puntos
+                if ($wasCorrect !== $answer->is_correct || $wasPointsEarned !== $answer->points_earned) {
                     $answer->save();
                     $totalPointsAssigned += $answer->points_earned;
                 }
