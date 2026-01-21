@@ -65,7 +65,7 @@
                         style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                         <div class="message-name"
                             style="font-size: 12px; font-weight: 600; color: {{ $textPrimary }};">
-                            {{ $message->user->name }}
+                            {{ $message->user?->name }}
                         </div>
                         <div class="message-time" style="font-size: 11px; color: {{ $textSecondary }};">
                             {{ $message->created_at->diffForHumans() }}
