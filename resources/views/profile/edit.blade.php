@@ -99,22 +99,23 @@
                     @enderror
                 </div>
 
-                {{-- COMPETENCIA FAVORITA --}}
+
+                {{-- PAÍS FAVORITO --}}
                 <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
                     <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
-                        <i class="fas fa-trophy" style="color: #00deb0; margin-right: 6px;"></i>
-                        {{ __('views.profile.favorite_competition') }}
+                        <i class="fas fa-flag" style="color: #00deb0; margin-right: 6px;"></i>
+                        País Favorito
                     </label>
-                    <select id="favorite_competition_id" name="favorite_competition_id"
+                    <select id="favorite_country" name="favorite_country"
                             style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; box-sizing: border-box; background: {{ $inputBg }};">
-                        <option value="">{{ __('views.profile.select_competition') }}</option>
-                        @foreach($competitions as $competition)
-                            <option value="{{ $competition->id }}" {{ old('favorite_competition_id', $user->favorite_competition_id) == $competition->id ? 'selected' : '' }}>
-                                {{ $competition->name }}
+                        <option value="">Selecciona un país</option>
+                        @foreach($countries as $country)
+                            <option value="{{ $country }}" {{ old('favorite_country', $user->favorite_country) == $country ? 'selected' : '' }}>
+                                {{ $country }}
                             </option>
                         @endforeach
                     </select>
-                    @error('favorite_competition_id')
+                    @error('favorite_country')
                         <p style="color: #dc3545; font-size: 12px; margin-top: 6px;">{{ $message }}</p>
                     @enderror
                 </div>
@@ -135,26 +136,6 @@
                         @endforeach
                     </select>
                     @error('favorite_club_id')
-                        <p style="color: #dc3545; font-size: 12px; margin-top: 6px;">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{-- SELECCIÓN NACIONAL FAVORITA --}}
-                <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
-                    <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
-                        <i class="fas fa-flag" style="color: #00deb0; margin-right: 6px;"></i>
-                        {{ __('views.profile.favorite_national_team') }}
-                    </label>
-                    <select id="favorite_national_team_id" name="favorite_national_team_id"
-                            style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; box-sizing: border-box; background: {{ $inputBg }};">
-                        <option value="">{{ __('views.profile.select_national_team') }}</option>
-                        @foreach($nationalTeams as $team)
-                            <option value="{{ $team->id }}" {{ old('favorite_national_team_id', $user->favorite_national_team_id) == $team->id ? 'selected' : '' }}>
-                                {{ $team->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('favorite_national_team_id')
                         <p style="color: #dc3545; font-size: 12px; margin-top: 6px;">{{ $message }}</p>
                     @enderror
                 </div>

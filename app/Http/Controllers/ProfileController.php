@@ -23,16 +23,18 @@ class ProfileController extends Controller
         $user = auth()->user();
         $competitions = Competition::all();
 
-        // Si el usuario tiene una competencia favorita, solo mostramos los clubes de esa competencia
-        if ($user->favorite_competition_id) {
-            $clubs = Team::where('type', 'club')->get();
-        } else {
-            $clubs = collect(); // Lista vacía si no hay competencia seleccionada
-        }
+        // Obtener todos los clubes ordenados alfabéticamente, independientemente de la competencia
+        $clubs = Team::where('type', 'club')->orderBy('name')->get();
 
-        $nationalTeams = Team::where('type', 'national')->get();
+        // Obtener lista de países únicos de los equipos nacionales
+        $countries = Team::where('type', 'national')
+            ->whereNotNull('country')
+            ->distinct()
+            ->orderBy('country')
+            ->pluck('country')
+            ->toArray();
 
-        return view('profile.edit', compact('user', 'competitions', 'clubs', 'nationalTeams'));
+        return view('profile.edit', compact('user', 'competitions', 'clubs', 'countries'));
     }
 
     /**

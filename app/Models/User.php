@@ -29,9 +29,8 @@ class User extends Authenticatable
         'unique_id',
         'is_admin',
         'avatar',
-        'favorite_competition_id',
         'favorite_club_id',
-        'favorite_national_team_id',
+        'favorite_country',
         'language',
         'timezone',
     ];
@@ -182,10 +181,6 @@ class User extends Authenticatable
         return $this->belongsTo(Team::class, 'favorite_club_id');
     }
 
-    public function favoriteNationalTeam()
-    {
-        return $this->belongsTo(Team::class, 'favorite_national_team_id');
-    }
 
     public function pushSubscriptions()
     {

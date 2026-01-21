@@ -26,9 +26,8 @@ class ProfileUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:4096'],
-            'favorite_competition_id' => ['nullable', 'exists:competitions,id'],
             'favorite_club_id' => ['nullable', 'exists:teams,id'],
-            'favorite_national_team_id' => ['nullable', 'exists:teams,id'],
+            'favorite_country' => ['nullable', 'string', 'max:255'],
             // 'theme' => ['required', 'string', 'in:light,dark'],
         ];
     }
