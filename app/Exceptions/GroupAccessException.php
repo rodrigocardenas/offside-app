@@ -39,6 +39,6 @@ class GroupAccessException extends Exception
             ], 403);
         }
 
-        return redirect()->route('dashboard')->with('error', $this->getMessage());
+        return redirect()->route('groups.index')->with('error', $this->getMessage());
     }
 }
