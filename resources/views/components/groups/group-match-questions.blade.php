@@ -44,7 +44,7 @@
                     </div>
                     <div class="text-xs mb-4" style="color: {{ $textSecondary }};">
                         <i class="fas fa-circle" style="color: {{ $accentColor }}; font-size: 3px;"></i>
-                        {{ $group->competition?->name }} • {{ __('views.groups.matchday') }} {{ $question->football_match->matchday ?? 'TBD' }}
+                        {{ $question->football_match?->competition_name }} • {{ __('views.groups.matchday') }} {{ $question->football_match->matchday ?? 'TBD' }}
 
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                             </div>
                                 <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->templateQuestion->awayTeam?->crest_url }}" alt="{{ $question->templateQuestion->awayTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->awayTeam?->name }}">
+                                <img src="{{ $question->templateQuestion->awayTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->templateQuestion->awayTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->awayTeam?->name }}">
                                 <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->awayTeam->name, 20, '') }}</span>
                             </div>
                         </div>
@@ -67,12 +67,12 @@
                         <div class="flex items-center justify-center gap-4 mb-5">
                             <div class="flex flex-col items-center gap-1">
                                 <img src="{{ $question->football_match->homeTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->homeTeam?->name }}">
-                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->home_team, 20, '') }}</span>
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->homeTeam->name ?? '', 20, '') }}</span>
                             </div>
                             <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->football_match->awayTeam?->crest_url }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->awayTeam?->name }}">
-                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->away_team, 20, '') }}</span>
+                                <img src="{{ $question->football_match->awayTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->football_match->awayTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->awayTeam?->name }}">
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->awayTeam->name ?? '', 20, '') }}</span>
                             </div>
                         </div>
                     @endif

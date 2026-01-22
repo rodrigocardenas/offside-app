@@ -80,6 +80,29 @@ class FootballMatch extends Model
         return $this->hasMany(Question::class, 'match_id');
     }
 
+    public function getCompetitionNameAttribute()
+    {
+        $competitions = [
+            'PL' => 'Premier League',
+            'PD' => 'La Liga',
+            'SA' => 'Serie A',
+            'BL1' => 'Bundesliga',
+            'FL1' => 'Ligue 1',
+            'DED' => 'Eredivisie',
+            'PPL' => 'Primeira Liga',
+            'CL' => 'UEFA Champions League',
+            'ELC' => 'UEFA Europa League',
+            'UEL' => 'UEFA Europa Conference League',
+            'WC' => 'FIFA World Cup',
+            'EC' => 'UEFA European Championship',
+            'FAC' => 'FA Cup',
+            'DFB' => 'DFB-Pokal',
+            'CUP' => 'Copa del Rey',
+        ];
+
+        return $competitions[$this->league] ?? 'Otro';
+    }
+
     public function getScoreAttribute()
     {
         if ($this->status === 'FINISHED') {
