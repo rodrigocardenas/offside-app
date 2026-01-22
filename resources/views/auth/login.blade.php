@@ -181,10 +181,10 @@
 
         // Función para mostrar el modal de instalación
         function showInstallModal() {
-            if (pwaInstallModal) {
-                pwaInstallModal.style.display = 'flex';
-                showDeviceInstructions();
-            }
+            // if (pwaInstallModal) {
+            //     pwaInstallModal.style.display = 'flex';
+            //     showDeviceInstructions();
+            // }
         }
 
         // Detectar el dispositivo y mostrar las instrucciones correspondientes
