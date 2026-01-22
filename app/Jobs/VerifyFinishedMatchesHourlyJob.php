@@ -31,7 +31,7 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
     {
         $this->maxMatches = $maxMatches ?? 30;
         $this->windowHours = $windowHours ?? 12;
-        $this->cooldownMinutes = $cooldownMinutes ?? 30;
+        $this->cooldownMinutes = $cooldownMinutes ?? 5;
     }
 
     public function handle(VerificationMonitoringService $monitoringService): void
@@ -66,20 +66,23 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
                 new BatchGetScoresJob($matchIds, $batchId),
                 new BatchExtractEventsJob($matchIds, $batchId),
             ])
-                ->then(function (Batch $batch) use ($matchIds, $batchId) {
-                    Log::info('VerifyFinishedMatchesHourlyJob - batch completed successfully', [
-                        'batch_id' => $batchId,
-                        'batch_name' => $batch->name,
-                    ]);
-
-                    VerifyAllQuestionsJob::dispatch($matchIds, $batchId);
-                })
                 ->catch(function (Batch $batch, Throwable $exception) use ($batchId) {
-                    Log::error('VerifyFinishedMatchesHourlyJob - batch failed', [
+                    Log::error('VerifyFinishedMatchesHourlyJob - batch encountered error', [
                         'batch_id' => $batchId,
                         'batch_name' => $batch->name,
                         'error' => $exception->getMessage(),
                     ]);
+                })
+                ->finally(function (Batch $batch) use ($matchIds, $batchId) {
+                    // Always attempt to verify questions after score and events are fetched
+                    // Some jobs may have partially completed even if batch had errors
+                    Log::info('VerifyFinishedMatchesHourlyJob - dispatching question verification', [
+                        'batch_id' => $batchId,
+                        'match_count' => count($matchIds),
+                        'batch_failed_jobs' => $batch->failed(),
+                    ]);
+
+                    VerifyAllQuestionsJob::dispatch($matchIds, $batchId);
                 })
                 ->name('verify-finished-matches-' . $batchId)
                 ->dispatch();
