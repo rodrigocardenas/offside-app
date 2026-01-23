@@ -15,9 +15,9 @@ class FootballService
 
     public function __construct()
     {
-        $this->apiKey = config('services.football_data.api_token');
-        // Log::info('API key configurada:', ['key' => $this->apiKey]);
-        $this->baseUrl = 'https://api-football-v1.p.rapidapi.com/v3/';
+        // Usar la nueva API oficial de api-sports.io
+        $this->apiKey = config('services.football.key');
+        $this->baseUrl = 'https://v3.football.api-sports.io/';
 
         // Puedes extender este arreglo con más ligas
         $this->leagueMap = [
@@ -35,6 +35,24 @@ class FootballService
         ];
     }
 
+    /**
+     * Realizar llamada HTTP a la API de Football con manejo de SSL
+     * En desarrollo, deshabilita verificación SSL
+     */
+    private function apiRequest($endpoint, $params = [])
+    {
+        $request = Http::withoutVerifying()->withHeaders([
+            'x-apisports-key' => $this->apiKey,
+        ]);
+
+        // En desarrollo, deshabilitar verificación SSL
+        if (app()->environment('local', 'development')) {
+            $request = $request->withoutVerifying();
+        }
+
+        return $request->get($this->baseUrl . $endpoint, $params);
+    }
+
     public function getNextMatches(string $competition, int $limit = 5)
     {
         $leagueId = $this->leagueMap[$competition] ?? null;
@@ -46,9 +64,8 @@ class FootballService
             );
         }
 
-        $response = Http::withHeaders([
-            'X-RapidAPI-Key' => '2ea32fefbamsh0dade5dedb8c255p1f80f9jsn59b5e00f47a5',
-            'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+        $response = Http::withoutVerifying()->withHeaders([
+            'x-apisports-key' => $this->apiKey,
         ])->get($this->baseUrl . 'fixtures', [
             'league' => 239,
             'season' => 2025,
@@ -95,7 +112,7 @@ class FootballService
             Log::info("Obteniendo partidos para competencia $competitionId, temporada calculada: $currentSeason");
 
             // Intentar primero con la temporada calculada
-            $response = Http::withHeaders([
+            $response = Http::withoutVerifying()->withHeaders([
                 'X-Auth-Token' => config('services.football_data.api_key'),
             ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches", [
                 'season' => $currentSeason
@@ -106,7 +123,7 @@ class FootballService
                 $previousSeason = $currentSeason - 1;
                 Log::info("No se encontraron partidos en temporada $currentSeason, intentando con temporada anterior: $previousSeason");
 
-                $response = Http::withHeaders([
+                $response = Http::withoutVerifying()->withHeaders([
                     'X-Auth-Token' => config('services.football_data.api_key'),
                 ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches", [
                     'season' => $previousSeason
@@ -153,7 +170,7 @@ class FootballService
 
             Log::info("Obteniendo partidos para competencia $competitionId en fecha $date, temporada: $season");
 
-            $response = Http::withHeaders([
+            $response = Http::withoutVerifying()->withHeaders([
                 'X-Auth-Token' => config('services.football_data.api_key'),
             ])->get("http://api.football-data.org/v4/competitions/{$competitionId}/matches", [
                 'season' => $season,
@@ -187,9 +204,8 @@ class FootballService
 
     public function getMatch($matchId)
     {
-        $response = Http::withHeaders([
-            'X-RapidAPI-Key' => $this->apiKey,
-            'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+        $response = Http::withoutVerifying()->withHeaders([
+            'x-apisports-key' => $this->apiKey,
         ])->get($this->baseUrl . 'fixtures', [
             'id' => $matchId
         ]);
@@ -457,9 +473,8 @@ class FootballService
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             $this->applyRateLimitDelay(1, 2);
 
-            $response = Http::withHeaders([
-                'X-RapidAPI-Key' => $this->apiKey,
-                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            $response = Http::withoutVerifying()->withHeaders([
+                'x-apisports-key' => $this->apiKey,
             ])->get($this->baseUrl . 'fixtures', [
                 'id' => $fixtureId
             ]);
@@ -542,9 +557,8 @@ class FootballService
                 $params['dateTo'] = $dateTo;
             }
 
-            $response = Http::withHeaders([
-                'X-RapidAPI-Key' => $this->apiKey,
-                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            $response = Http::withoutVerifying()->withHeaders([
+                'x-apisports-key' => $this->apiKey,
             ])->get($this->baseUrl . 'fixtures', $params);
 
             Log::info("API Response Status (attempt $attempt): " . $response->status());
@@ -691,9 +705,8 @@ class FootballService
                 $params2['dateTo'] = $dateTo;
             }
 
-            $response2 = Http::withHeaders([
-                'X-RapidAPI-Key' => $this->apiKey,
-                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+            $response2 = Http::withoutVerifying()->withHeaders([
+                'x-apisports-key' => $this->apiKey,
             ])->get($this->baseUrl . 'fixtures', $params2);
 
             if ($response2->successful()) {
@@ -811,9 +824,8 @@ class FootballService
      */
     public function obtenerTodosLosEventos($fixtureId)
     {
-        $response = Http::withHeaders([
-            'X-RapidAPI-Key' => $this->apiKey,
-            'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+        $response = Http::withoutVerifying()->withHeaders([
+            'x-apisports-key' => $this->apiKey,
         ])->get($this->baseUrl . 'fixtures', [
             'id' => $fixtureId
         ]);
@@ -1046,8 +1058,8 @@ class FootballService
                 'away_team' => $fixture['teams']['away']['name'] ?? null,
                 // 'date' => $fixture['fixture']['date'] ?? null,
                 'status' => $fixture['fixture']['status']['long'] ?? null,
-                'score_home' => $fixture['goals']['home'] ?? null,
-                'score_away' => $fixture['goals']['away'] ?? null,
+                'home_team_score' => $fixture['goals']['home'] ?? null,
+                'away_team_score' => $fixture['goals']['away'] ?? null,
                 'score' => $fixture['goals']['home'] . ' - ' . $fixture['goals']['away'],
                 'events' => $eventosString,
                 'statistics' => $estadisticasString,
@@ -1076,9 +1088,8 @@ class FootballService
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             $this->applyRateLimitDelay(1, 2);
 
-            $response = Http::withHeaders([
-                'X-RapidAPI-Key' => $this->apiKey,
-                'X-RapidAPI-Host' => 'api-football-v1.p.rapidapi.com',
+$response = Http::withoutVerifying()->withHeaders([
+                'x-apisports-key' => $this->apiKey,
             ])->get($this->baseUrl . 'fixtures', [
                 'league' => $leagueId,
                 'season' => $season
