@@ -21,7 +21,7 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 900;
-    public $tries = 3;  // Temporarily increased for debugging
+    public $tries = 1;
 
     protected int $maxMatches;
     protected int $windowHours;
@@ -126,26 +126,35 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
             ->limit($this->maxMatches * 3)
             ->get();
 
-        $filtered = $candidates
-            ->filter(function (FootballMatch $match) {
-                return $this->shouldAttemptVerification($match) && ($match->pending_questions_count ?? 0) > 0;
-            })
-            ->map(function (FootballMatch $match) {
-                $priority = $this->calculatePriority($match);
+        $matchesWithPriority = [];
 
-                if ($match->verification_priority !== $priority) {
-                    $match->verification_priority = $priority;
-                    $match->save();
-                }
+        foreach ($candidates as $match) {
+            if (!$this->shouldAttemptVerification($match) || ($match->pending_questions_count ?? 0) === 0) {
+                continue;
+            }
 
-                // Store priority as an attribute for sorting, not a DB column
-                $match->setAttribute('priority_score', $priority);
+            $priority = $this->calculatePriority($match);
 
-                return $match;
-            })
-            ->sortBy('priority_score')
-            ->values()
-            ->take($this->maxMatches);
+            if ($match->verification_priority !== $priority) {
+                $match->verification_priority = $priority;
+                $match->save();
+            }
+
+            $matchesWithPriority[] = [
+                'match' => $match,
+                'priority' => $priority,
+            ];
+        }
+
+        // Sort by priority (lower number = higher priority)
+        usort($matchesWithPriority, function ($a, $b) {
+            return $a['priority'] <=> $b['priority'];
+        });
+
+        // Extract just the matches, limited to maxMatches
+        $filtered = collect(array_slice($matchesWithPriority, 0, $this->maxMatches))
+            ->pluck('match')
+            ->values();
 
         Log::info('VerifyFinishedMatchesHourlyJob - matches selected for verification', [
             'selected' => $filtered->pluck('id'),
