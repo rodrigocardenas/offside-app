@@ -1037,82 +1037,49 @@ class FootballService
             return null;
         }
 
-        // 4. Obtener los datos del fixture directamente
+        // 4. Obtener los datos del fixture directamente (Football-Data.org)
         $fixture = $this->obtenerFixtureDirecto($fixtureId);
         if (!$fixture) {
             Log::error("No se pudo obtener el fixture con ID: $fixtureId");
             return null;
         }
 
-            // Procesar eventos como string legible
-            $eventos = [];
-            $estadisticas = [];
+        // 5. Actualizar solo score y status (Football-Data.org solo proporciona eso)
+        // Los eventos y estadísticas se pueden enriquecer en un job separado si es necesario
+        $homeScore = $fixture['goals']['home'] ?? 0;
+        $awayScore = $fixture['goals']['away'] ?? 0;
+        $score = "{$homeScore} - {$awayScore}";
+        
+        // Mapear status de Football-Data.org al formato esperado
+        $fixtureStatus = $fixture['fixture']['status'] ?? 'TIMED';
+        $statusMap = [
+            'TIMED' => 'Not Started',
+            'LIVE' => 'In Play',
+            'IN_PLAY' => 'In Play',
+            'PAUSED' => 'In Play',
+            'FINISHED' => 'Match Finished',
+            'POSTPONED' => 'Postponed',
+            'CANCELLED' => 'Cancelled',
+            'AWARDED' => 'Match Finished',
+        ];
+        $matchStatus = $statusMap[$fixtureStatus] ?? 'Not Started';
 
-            if (isset($fixture['events']) && is_array($fixture['events'])) {
-                foreach ($fixture['events'] as $evento) {
-                    $minuto = $evento['time']['elapsed'] ?? 'N/A';
-                    $jugador = $evento['player']['name'] ?? 'N/A';
-                    $equipo = $evento['team']['name'] ?? 'N/A';
-                    $tipo = $evento['type'] ?? 'N/A';
-                    $detalle = $evento['detail'] ?? '';
-
-                    switch ($tipo) {
-                        case 'Goal':
-                        case 'Goal Penalty':
-                        case 'Own Goal':
-                            $eventos[] = "⚽ {$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
-                            break;
-                        case 'Card':
-                            $color = $detalle === 'Yellow Card' ? '🟨' : '🟥';
-                            $eventos[] = "{$color} {$minuto}' - {$jugador} ({$equipo}) [{$detalle}]";
-                            break;
-                        case 'Subst':
-                            $eventos[] = "🔄 {$minuto}' - {$jugador} ({$equipo}) [Sustitución]";
-                            break;
-                        case 'Var':
-                            $eventos[] = "📺 {$minuto}' - {$jugador} ({$equipo}) [VAR - {$detalle}]";
-                            break;
-                        default:
-                            $eventos[] = "📊 {$minuto}' - {$jugador} ({$equipo}) [{$tipo}]";
-                            break;
-                    }
-                }
-            }
-
-            // Procesar estadísticas del partido
-            if (isset($fixture['statistics']) && is_array($fixture['statistics'])) {
-                foreach ($fixture['statistics'] as $stat) {
-                    if (isset($stat['team']) && isset($stat['statistics'])) {
-                        $equipo = $stat['team']['name'];
-                        $stats = $stat['statistics'];
-
-                        $estadisticas[$equipo] = [
-                            'posesion' => $this->buscarEstadistica($stats, 'Ball Possession'),
-                            'tiros_totales' => $this->buscarEstadistica($stats, 'Total Shots'),
-                            'tiros_a_gol' => $this->buscarEstadistica($stats, 'Shots on Goal'),
-                            'faltas' => $this->buscarEstadistica($stats, 'Fouls'),
-                            'tarjetas_amarillas' => $this->buscarEstadistica($stats, 'Yellow Cards'),
-                            'tarjetas_rojas' => $this->buscarEstadistica($stats, 'Red Cards'),
-                        ];
-                    }
-                }
-            }
-
-            $eventosString = implode(' | ', $eventos);
-            $estadisticasString = $this->formatearEstadisticas($estadisticas);
-
-            $match->update([
-                'home_team' => $fixture['teams']['home']['name'] ?? null,
-                'away_team' => $fixture['teams']['away']['name'] ?? null,
-                // 'date' => $fixture['fixture']['date'] ?? null,
-                'status' => $fixture['fixture']['status']['long'] ?? null,
-                'home_team_score' => $fixture['goals']['home'] ?? null,
-                'away_team_score' => $fixture['goals']['away'] ?? null,
-                'score' => $fixture['goals']['home'] . ' - ' . $fixture['goals']['away'],
-                'events' => $eventosString,
-                'statistics' => $estadisticasString,
-            ]);
-            return $match;
+        $match->update([
+            'home_team' => $fixture['teams']['home']['name'] ?? $match->home_team,
+            'away_team' => $fixture['teams']['away']['name'] ?? $match->away_team,
+            'status' => $matchStatus,
+            'home_team_score' => $homeScore,
+            'away_team_score' => $awayScore,
+            'score' => $score,
+        ]);
+        
+        Log::info("✅ Partido {$match->id} actualizado desde Football-Data.org", [
+            'score' => $score,
+            'status' => $matchStatus,
+            'source' => 'Football-Data.org'
+        ]);
+        
+        return $match;
         }
 
     /**
