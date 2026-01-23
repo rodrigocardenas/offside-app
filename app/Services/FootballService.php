@@ -463,64 +463,84 @@ class FootballService
      * Obtiene directamente un fixture usando su ID de Football-Data.org
      * Los external_id en BD son de Football-Data.org, no de API-Sports
      */
+    /**
+     * Obtiene datos de fixture desde API Football (api-sports.io) PRO
+     * Ahora espera fixture IDs de API Football (7 dígitos)
+     */
     public function obtenerFixtureDirecto($fixtureId)
     {
-        Log::info("Obteniendo fixture directo con ID de Football-Data.org: $fixtureId");
+        Log::info("Obteniendo fixture directo desde API Football PRO: $fixtureId");
 
-        $apiKey = config('services.football_data.api_key')
-            ?? env('FOOTBALL_DATA_API_KEY')
-            ?? env('FOOTBALL_DATA_API_TOKEN');
+        $apiKey = config('services.football.key')
+            ?? env('FOOTBALL_API_KEY')
+            ?? env('APISPORTS_API_KEY')
+            ?? env('API_SPORTS_KEY');
 
         if (!$apiKey) {
-            Log::error("FOOTBALL_DATA_API_KEY no configurada en obtenerFixtureDirecto");
+            Log::error("FOOTBALL_API_KEY no configurada en obtenerFixtureDirecto");
+            return null;
+        }
+
+        if (!$fixtureId || !is_numeric($fixtureId)) {
+            Log::error("Fixture ID inválido: $fixtureId");
             return null;
         }
 
         $maxRetries = 3;
-        $delaySeconds = 2;
+        $delaySeconds = 1;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
                 $response = Http::withoutVerifying()
-                    ->withHeaders(['X-Auth-Token' => $apiKey])
+                    ->withHeaders(['x-apisports-key' => $apiKey])
                     ->timeout(10)
-                    ->get("https://api.football-data.org/v4/matches/{$fixtureId}");
+                    ->get("https://v3.football.api-sports.io/fixtures", [
+                        'id' => $fixtureId
+                    ]);
 
                 if ($response->successful()) {
-                    $matchData = $response->json();
+                    $data = $response->json();
 
-                    // Convertir formato de Football-Data.org a formato compatible
+                    if (!isset($data['response']) || !is_array($data['response']) || count($data['response']) === 0) {
+                        Log::warning("No se encontró fixture en API Football para ID: $fixtureId");
+                        return null;
+                    }
+
+                    $matchData = $data['response'][0];
+
+                    // Convertir formato de API Football a formato compatible
                     $fixture = [
                         'fixture' => [
-                            'id' => $matchData['id'],
-                            'date' => $matchData['utcDate'],
-                            'status' => $matchData['status']
+                            'id' => $matchData['fixture']['id'],
+                            'date' => $matchData['fixture']['date'],
+                            'status' => $matchData['fixture']['status']['short'] ?? 'TIMED'
                         ],
                         'teams' => [
                             'home' => [
-                                'id' => $matchData['homeTeam']['id'],
-                                'name' => $matchData['homeTeam']['name'],
-                                'logo' => $matchData['homeTeam']['crest'] ?? null
+                                'id' => $matchData['teams']['home']['id'],
+                                'name' => $matchData['teams']['home']['name'],
+                                'logo' => $matchData['teams']['home']['logo'] ?? null
                             ],
                             'away' => [
-                                'id' => $matchData['awayTeam']['id'],
-                                'name' => $matchData['awayTeam']['name'],
-                                'logo' => $matchData['awayTeam']['crest'] ?? null
+                                'id' => $matchData['teams']['away']['id'],
+                                'name' => $matchData['teams']['away']['name'],
+                                'logo' => $matchData['teams']['away']['logo'] ?? null
                             ]
                         ],
                         'goals' => [
-                            'home' => $matchData['score']['fullTime']['home'],
-                            'away' => $matchData['score']['fullTime']['away'],
+                            'home' => $matchData['goals']['home'],
+                            'away' => $matchData['goals']['away'],
                         ],
                         'score' => [
                             'fullTime' => [
-                                'home' => $matchData['score']['fullTime']['home'],
-                                'away' => $matchData['score']['fullTime']['away'],
+                                'home' => $matchData['goals']['home'],
+                                'away' => $matchData['goals']['away'],
                             ]
                         ]
                     ];
 
-                    Log::info("Fixture obtenido exitosamente de Football-Data.org", [
+                    Log::info("Fixture obtenido exitosamente de API Football PRO", [
+                        'fixture_id' => $fixtureId,
                         'home' => $fixture['teams']['home']['name'],
                         'away' => $fixture['teams']['away']['name'],
                         'score' => $fixture['goals']['home'] . '-' . $fixture['goals']['away']
@@ -530,14 +550,14 @@ class FootballService
                 }
 
                 if ($response->status() === 429) {
-                    Log::warning("Rate limit en Football-Data.org (attempt $attempt). Esperando $delaySeconds segundos...");
+                    Log::warning("Rate limit en API Football (attempt $attempt). Esperando $delaySeconds segundos...");
                     if ($attempt < $maxRetries) {
                         sleep($delaySeconds);
                         $delaySeconds *= 2;
                     }
                 } else {
-                    Log::error("Error al obtener fixture de Football-Data.org (attempt $attempt): " . $response->status() . " - " . $response->body());
-                    break;
+                    Log::error("Error al obtener fixture de API Football (attempt $attempt): " . $response->status());
+                    return null;
                 }
             } catch (\Exception $e) {
                 Log::error("Exception en obtenerFixtureDirecto (attempt $attempt): " . $e->getMessage());

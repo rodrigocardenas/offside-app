@@ -21,7 +21,7 @@ class RecoverOldResults extends Command
      *
      * @var string
      */
-    protected $description = 'Recupera resultados de partidos antiguos desde Football-Data.org';
+    protected $description = 'Recupera resultados de partidos antiguos desde API Football PRO';
 
     protected $footballService;
 
@@ -45,12 +45,11 @@ class RecoverOldResults extends Command
         // Buscar partidos que:
         // 1. Tengan fecha <= hace 2 horas (debería haber terminado)
         // 2. Status aún sea "Not Started" o "Scheduled"
-        // 3. Tengan external_id
+        // 3. Tengan external_id numérico (de API Football)
         $matches = FootballMatch::whereIn('status', ['Not Started', 'Scheduled', 'In Play', 'Match Finished'])
             ->where('date', '<=', now()->subHours(2))
             ->where('date', '>=', now()->subDays($days))
-            ->where('external_id', '!=', '')
-            ->where('external_id', '!=', null)
+            ->where('external_id', 'REGEXP', '^[0-9]+$') // Solo IDs numéricos de API Football
             ->orderBy('date', 'desc')
             ->get();
 
@@ -69,28 +68,21 @@ class RecoverOldResults extends Command
 
         foreach ($matches as $match) {
             try {
-                // Intentar obtener el resultado de Football-Data.org
                 $fixtureId = $match->external_id;
 
-                // Si el external_id no es numérico, extraerlo
+                // El external_id ya debe ser numérico por el WHERE clause
                 if (!is_numeric($fixtureId)) {
-                    $fixtureId = $this->footballService->extraerFixtureIdDelExternalId(
-                        $match->external_id,
-                        $match->date->format('Y-m-d'),
-                        $match->league
-                    );
-                }
-
-                if (!$fixtureId) {
+                    Log::warning("Saltando partido con external_id no numérico", ['match_id' => $match->id, 'external_id' => $fixtureId]);
                     $failed++;
                     $bar->advance();
                     continue;
                 }
 
-                // Obtener datos del fixture
+                // Obtener datos del fixture desde API Football
                 $fixture = $this->footballService->obtenerFixtureDirecto($fixtureId);
 
                 if (!$fixture) {
+                    Log::warning("No se pudo obtener fixture", ['match_id' => $match->id, 'fixture_id' => $fixtureId]);
                     $failed++;
                     $bar->advance();
                     continue;
@@ -101,19 +93,28 @@ class RecoverOldResults extends Command
                 $awayScore = $fixture['goals']['away'] ?? null;
                 $status = $fixture['fixture']['status'] ?? 'TIMED';
 
+                // Mapear estados de API Football
                 $statusMap = [
-                    'TIMED' => 'Not Started',
+                    'TBD' => 'Not Started',
+                    'NS' => 'Not Started',
                     'LIVE' => 'In Play',
-                    'IN_PLAY' => 'In Play',
-                    'PAUSED' => 'In Play',
-                    'FINISHED' => 'Match Finished',
-                    'POSTPONED' => 'Postponed',
-                    'CANCELLED' => 'Cancelled',
-                    'AWARDED' => 'Match Finished',
+                    'ET' => 'In Play',
+                    'BT' => 'In Play',
+                    'P' => 'Postponed',
+                    'INT' => 'In Play',
+                    'FT' => 'Match Finished',
+                    'AET' => 'Match Finished',
+                    'PEN' => 'Match Finished',
+                    'CANC' => 'Cancelled',
+                    'ABD' => 'Cancelled',
+                    'AWD' => 'Match Finished',
+                    'WO' => 'Match Finished',
                 ];
 
                 $newStatus = $statusMap[$status] ?? 'Not Started';
-                $score = "{$homeScore} - {$awayScore}";
+                $score = $homeScore !== null && $awayScore !== null 
+                    ? "{$homeScore} - {$awayScore}" 
+                    : null;
 
                 $match->update([
                     'home_team' => $fixture['teams']['home']['name'] ?? $match->home_team,
@@ -125,8 +126,9 @@ class RecoverOldResults extends Command
                     'external_id' => (string)$fixtureId
                 ]);
 
-                Log::info("Partido actualizado desde Football-Data.org", [
+                Log::info("Partido actualizado desde API Football PRO", [
                     'match_id' => $match->id,
+                    'fixture_id' => $fixtureId,
                     'teams' => "{$match->home_team} vs {$match->away_team}",
                     'score' => $score,
                     'status' => $newStatus
@@ -137,6 +139,7 @@ class RecoverOldResults extends Command
             } catch (\Exception $e) {
                 Log::error("Error recuperando resultado de partido", [
                     'match_id' => $match->id,
+                    'fixture_id' => $match->external_id ?? 'N/A',
                     'error' => $e->getMessage()
                 ]);
                 $failed++;
