@@ -114,6 +114,11 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
             ->limit($this->maxMatches * 3)
             ->get();
 
+        Log::info('VerifyFinishedMatchesHourlyJob - candidate matches found', [
+            'count' => $candidates->count(),
+            'ids' => $candidates->pluck('id')->all(),
+        ]);
+
         $matchesWithPriority = [];
 
         foreach ($candidates as $match) {
