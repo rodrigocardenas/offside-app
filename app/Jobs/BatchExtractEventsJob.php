@@ -24,13 +24,13 @@ class BatchExtractEventsJob implements ShouldQueue
 
     /** @var array<int> */
     protected array $matchIds;
-    protected string $batchId;
+    protected string $verificationBatchId;
     protected bool $forceRefresh;
 
     public function __construct(array $matchIds, string $batchId, bool $forceRefresh = false)
     {
         $this->matchIds = $matchIds;
-        $this->batchId = $batchId;
+        $this->verificationBatchId = $batchId;
         $this->forceRefresh = $forceRefresh;
     }
 
@@ -39,7 +39,7 @@ class BatchExtractEventsJob implements ShouldQueue
         // ✅ OPTIMIZATION: Enable non-blocking mode to prevent long waits on rate limit
         GeminiService::setAllowBlocking(false);
 
-        $monitorRun = $monitoringService->start(self::class, $this->batchId, [
+        $monitorRun = $monitoringService->start(self::class, $this->verificationBatchId, [
             'match_ids' => $this->matchIds,
         ]);
 
@@ -52,7 +52,7 @@ class BatchExtractEventsJob implements ShouldQueue
             $matchesTotal = $matches->count();
 
             if ($matches->isEmpty()) {
-                Log::info('BatchExtractEventsJob - no matches found for provided IDs', ['batch_id' => $this->batchId]);
+                Log::info('BatchExtractEventsJob - no matches found for provided IDs', ['batch_id' => $this->verificationBatchId]);
                 $monitoringService->finish($monitorRun, ['matches_total' => 0]);
                 return;
             }
@@ -61,7 +61,7 @@ class BatchExtractEventsJob implements ShouldQueue
             $needsDetailsCount = $needsDetails->count();
 
             if ($needsDetails->isEmpty()) {
-                Log::info('BatchExtractEventsJob - all matches already contain detailed events', ['batch_id' => $this->batchId]);
+                Log::info('BatchExtractEventsJob - all matches already contain detailed events', ['batch_id' => $this->verificationBatchId]);
                 $monitoringService->finish($monitorRun, [
                     'matches_total' => $matchesTotal,
                     'needs_details' => 0,
@@ -74,7 +74,7 @@ class BatchExtractEventsJob implements ShouldQueue
             $details = $geminiBatchService->getMultipleDetailedMatchData($needsDetails, $this->forceRefresh);
 
             if (empty($details)) {
-                Log::warning('BatchExtractEventsJob - Gemini detailed data unavailable', ['batch_id' => $this->batchId]);
+                Log::warning('BatchExtractEventsJob - Gemini detailed data unavailable', ['batch_id' => $this->verificationBatchId]);
                 $monitoringService->finish($monitorRun, [
                     'matches_total' => $matchesTotal,
                     'needs_details' => $needsDetailsCount,
@@ -100,7 +100,7 @@ class BatchExtractEventsJob implements ShouldQueue
                     'source' => 'Gemini (batch detailed)',
                     'verified' => true,
                     'verification_method' => $payload['source'] ?? 'gemini_detailed',
-                    'batch_id' => $this->batchId,
+                    'batch_id' => $this->verificationBatchId,
                     'has_detailed_events' => true,
                     'detailed_event_count' => count($events),
                     'enriched_at' => now()->toIso8601String(),
@@ -131,7 +131,7 @@ class BatchExtractEventsJob implements ShouldQueue
             }
 
             Log::info('BatchExtractEventsJob - matches enriched with detailed events', [
-                'batch_id' => $this->batchId,
+                'batch_id' => $this->verificationBatchId,
                 'updated_matches' => $updatedCount,
             ]);
 

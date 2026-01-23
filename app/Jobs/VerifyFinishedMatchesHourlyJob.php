@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\FootballMatch;
-use App\Services\VerificationMonitoringService;
 use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -34,34 +33,25 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
         $this->cooldownMinutes = $cooldownMinutes ?? 5;
     }
 
-    public function handle(VerificationMonitoringService $monitoringService): void
+    public function handle(): void
     {
-        $monitorRun = $monitoringService->start(self::class, null, [
-            'max_matches' => $this->maxMatches,
-            'window_hours' => $this->windowHours,
-        ]);
+        Log::info('VerifyFinishedMatchesHourlyJob started');
 
         try {
-            try {
-                $matches = $this->findCandidateMatches();
-            } catch (Throwable $e) {
-                Log::error('VerifyFinishedMatchesHourlyJob - error finding candidates', [
-                    'error' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-                throw $e;
-            }
+            $matches = $this->findCandidateMatches();
 
             if ($matches->isEmpty()) {
                 Log::info('VerifyFinishedMatchesHourlyJob - no matches pending verification');
-                $monitoringService->finish($monitorRun, ['matches_selected' => 0]);
                 return;
             }
 
             $matchIds = $matches->pluck('id')->all();
             $batchId = Str::uuid()->toString();
+
+            Log::info('VerifyFinishedMatchesHourlyJob - found candidates', [
+                'count' => count($matchIds),
+                'ids' => $matchIds,
+            ]);
 
             FootballMatch::whereIn('id', $matchIds)->update([
                 'last_verification_attempt_at' => now(),
@@ -84,8 +74,6 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
                     ]);
                 })
                 ->finally(function (Batch $batch) use ($matchIds, $batchId) {
-                    // Always attempt to verify questions after score and events are fetched
-                    // Some jobs may have partially completed even if batch had errors
                     Log::info('VerifyFinishedMatchesHourlyJob - dispatching question verification', [
                         'batch_id' => $batchId,
                         'match_count' => count($matchIds),
@@ -97,14 +85,14 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
                 ->name('verify-finished-matches-' . $batchId)
                 ->dispatch();
 
-            $monitoringService->finish($monitorRun, [
-                'matches_selected' => count($matchIds),
-                'batch_id' => $batchId,
-            ]);
+            Log::info('VerifyFinishedMatchesHourlyJob completed successfully');
         } catch (Throwable $e) {
-            $monitoringService->finish($monitorRun, [
-                'matches_selected' => isset($matchIds) ? count($matchIds) : 0,
-            ], 'failed', $e->getMessage());
+            Log::error('VerifyFinishedMatchesHourlyJob failed', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             throw $e;
         }
     }

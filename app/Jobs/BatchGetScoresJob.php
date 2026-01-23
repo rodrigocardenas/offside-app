@@ -26,13 +26,13 @@ class BatchGetScoresJob implements ShouldQueue
 
     /** @var array<int> */
     protected array $matchIds;
-    protected string $batchId;
+    protected string $verificationBatchId;
     protected bool $forceRefresh;
 
     public function __construct(array $matchIds, string $batchId, bool $forceRefresh = false)
     {
         $this->matchIds = $matchIds;
-        $this->batchId = $batchId;
+        $this->verificationBatchId = $batchId;
         $this->forceRefresh = $forceRefresh;
     }
 
@@ -45,7 +45,7 @@ class BatchGetScoresJob implements ShouldQueue
         // ✅ OPTIMIZATION: Enable non-blocking mode to prevent long waits on rate limit
         GeminiService::setAllowBlocking(false);
 
-        $monitorRun = $monitoringService->start(self::class, $this->batchId, [
+        $monitorRun = $monitoringService->start(self::class, $this->verificationBatchId, [
             'match_ids' => $this->matchIds,
         ]);
 
@@ -63,7 +63,7 @@ class BatchGetScoresJob implements ShouldQueue
             $matchesCount = $matches->count();
 
             if ($matches->isEmpty()) {
-                Log::info('BatchGetScoresJob - no matches found for provided IDs', ['batch_id' => $this->batchId]);
+                Log::info('BatchGetScoresJob - no matches found for provided IDs', ['batch_id' => $this->verificationBatchId]);
                 $monitoringService->finish($monitorRun, ['matches_total' => 0]);
                 return;
             }
@@ -78,7 +78,7 @@ class BatchGetScoresJob implements ShouldQueue
                     $updatedMatch = $footballService->updateMatchFromApi($match->id);
                 } catch (Throwable $e) {
                     Log::warning('BatchGetScoresJob - football API update failed', [
-                        'batch_id' => $this->batchId,
+                        'batch_id' => $this->verificationBatchId,
                         'match_id' => $match->id,
                         'error' => $e->getMessage(),
                     ]);
@@ -94,7 +94,7 @@ class BatchGetScoresJob implements ShouldQueue
             }
 
             if (empty($pendingForGemini)) {
-                Log::info('BatchGetScoresJob - all matches resolved via football API', ['batch_id' => $this->batchId]);
+                Log::info('BatchGetScoresJob - all matches resolved via football API', ['batch_id' => $this->verificationBatchId]);
                 $monitoringService->finish($monitorRun, [
                     'matches_total' => $matchesCount,
                     'already_scored' => $alreadyComplete,
@@ -109,7 +109,7 @@ class BatchGetScoresJob implements ShouldQueue
             $results = $geminiBatchService->getMultipleMatchResults($pendingForGemini, $this->forceRefresh);
 
             if (empty($results)) {
-                Log::warning('BatchGetScoresJob - Gemini batch returned no results', ['batch_id' => $this->batchId]);
+                Log::warning('BatchGetScoresJob - Gemini batch returned no results', ['batch_id' => $this->verificationBatchId]);
                 $monitoringService->finish($monitorRun, [
                     'matches_total' => $matchesCount,
                     'already_scored' => $alreadyComplete,
@@ -139,7 +139,7 @@ class BatchGetScoresJob implements ShouldQueue
             }
 
             Log::info('BatchGetScoresJob - scores updated via Gemini batch', [
-                'batch_id' => $this->batchId,
+                'batch_id' => $this->verificationBatchId,
                 'updated_matches' => $updatedCount,
             ]);
 
@@ -186,7 +186,7 @@ class BatchGetScoresJob implements ShouldQueue
             'source' => 'Gemini (batch results)',
             'verified' => true,
             'verification_method' => $result['source'] ?? 'gemini_batch',
-            'batch_id' => $this->batchId,
+            'batch_id' => $this->verificationBatchId,
             'score_updated_at' => now()->toIso8601String(),
             // ✅ GUARDAR POSESIÓN SI ESTÁ DISPONIBLE
             'possession' => [
