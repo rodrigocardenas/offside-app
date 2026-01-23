@@ -20,7 +20,7 @@ class DebugVerifyQuestions extends Command
         $this->line("║ Debug Verificación de Preguntas                            ║");
         $this->line("╚════════════════════════════════════════════════════════════╝\n");
 
-        $questions = Question::where('football_match_id', $matchId)
+        $questions = Question::where('match_id', $matchId)
             ->whereNull('result_verified_at')
             ->with(['football_match', 'options', 'answers'])
             ->get();
@@ -44,6 +44,11 @@ class DebugVerifyQuestions extends Command
             $this->line("Opciones: {$question->options->count()}");
 
             try {
+                if (!$question->football_match) {
+                    $this->error("✗ Error: La pregunta no tiene partido asignado correctamente");
+                    continue;
+                }
+
                 $this->line("🔄 Evaluando...");
                 $correctOptionIds = $evaluationService->evaluateQuestion($question, $question->football_match);
 

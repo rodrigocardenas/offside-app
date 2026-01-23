@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\FootballMatch;
-use App\Services\VerificationMonitoringService;
 use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -34,9 +33,9 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
         $this->cooldownMinutes = $cooldownMinutes ?? 5;
     }
 
-    public function handle(VerificationMonitoringService $monitoringService): void
+    public function handle(): void
     {
-        $monitorRun = $monitoringService->start(self::class, null, [
+        Log::info('VerifyFinishedMatchesHourlyJob started', [
             'max_matches' => $this->maxMatches,
             'window_hours' => $this->windowHours,
         ]);
@@ -46,18 +45,22 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
 
             if ($matches->isEmpty()) {
                 Log::info('VerifyFinishedMatchesHourlyJob - no matches pending verification');
-                $monitoringService->finish($monitorRun, ['matches_selected' => 0]);
                 return;
             }
 
             $matchIds = $matches->pluck('id')->all();
             $batchId = Str::uuid()->toString();
 
+            Log::info('VerifyFinishedMatchesHourlyJob - found candidates', [
+                'count' => count($matchIds),
+                'ids' => $matchIds,
+            ]);
+
             FootballMatch::whereIn('id', $matchIds)->update([
                 'last_verification_attempt_at' => now(),
             ]);
 
-            Log::info('VerifyFinishedMatchesHourlyJob - dispatching verification batch', [
+            Log::info('VerifyFinishedMatchesHourlyJob - dispatching batch jobs', [
                 'batch_id' => $batchId,
                 'match_count' => count($matchIds),
             ]);
@@ -67,34 +70,32 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
                 new BatchExtractEventsJob($matchIds, $batchId),
             ])
                 ->catch(function (Batch $batch, Throwable $exception) use ($batchId) {
-                    Log::error('VerifyFinishedMatchesHourlyJob - batch encountered error', [
+                    Log::error('VerifyFinishedMatchesHourlyJob - batch error', [
                         'batch_id' => $batchId,
-                        'batch_name' => $batch->name,
                         'error' => $exception->getMessage(),
                     ]);
                 })
                 ->finally(function (Batch $batch) use ($matchIds, $batchId) {
-                    // Always attempt to verify questions after score and events are fetched
-                    // Some jobs may have partially completed even if batch had errors
-                    Log::info('VerifyFinishedMatchesHourlyJob - dispatching question verification', [
+                    Log::info('VerifyFinishedMatchesHourlyJob - batch complete, dispatching verification', [
                         'batch_id' => $batchId,
                         'match_count' => count($matchIds),
-                        'batch_failed_jobs' => $batch->failed(),
+                        'batch_failed' => $batch->failed(),
                     ]);
 
-                    VerifyAllQuestionsJob::dispatch($matchIds, $batchId);
+                    // Dispatch verification job
+                    dispatch(new VerifyAllQuestionsJob($matchIds, $batchId));
                 })
                 ->name('verify-finished-matches-' . $batchId)
                 ->dispatch();
 
-            $monitoringService->finish($monitorRun, [
-                'matches_selected' => count($matchIds),
-                'batch_id' => $batchId,
-            ]);
+            Log::info('VerifyFinishedMatchesHourlyJob completed successfully');
         } catch (Throwable $e) {
-            $monitoringService->finish($monitorRun, [
-                'matches_selected' => isset($matchIds) ? count($matchIds) : 0,
-            ], 'failed', $e->getMessage());
+            Log::error('VerifyFinishedMatchesHourlyJob failed', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             throw $e;
         }
     }
