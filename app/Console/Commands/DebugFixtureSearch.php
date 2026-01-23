@@ -30,7 +30,7 @@ class DebugFixtureSearch extends Command
             '2025-01-20'
         );
         $this->line("Result: " . ($result ?? 'NOT FOUND'));
-        
+
         // Try variations
         $result2 = $this->footballService->buscarFixtureId(
             'premier-league',
@@ -40,7 +40,7 @@ class DebugFixtureSearch extends Command
             '2025-01-20'
         );
         $this->line("Result (Manchester United): " . ($result2 ?? 'NOT FOUND'));
-        
+
         $this->line("\nTest 2: Chelsea vs Arsenal");
         $result3 = $this->footballService->buscarFixtureId(
             'league-cup',
@@ -50,7 +50,7 @@ class DebugFixtureSearch extends Command
             '2025-01-21'
         );
         $this->line("Result: " . ($result3 ?? 'NOT FOUND'));
-        
+
         $this->line("\nTest 3: Borussia Dortmund vs Werder Bremen");
         $result4 = $this->footballService->buscarFixtureId(
             'bundesliga',

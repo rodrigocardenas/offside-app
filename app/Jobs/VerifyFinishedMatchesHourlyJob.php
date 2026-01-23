@@ -122,16 +122,18 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
             })
             ->map(function (FootballMatch $match) {
                 $priority = $this->calculatePriority($match);
-                $match->calculated_priority = $priority;
 
                 if ($match->verification_priority !== $priority) {
                     $match->verification_priority = $priority;
                     $match->save();
                 }
 
+                // Store priority as an attribute for sorting, not a DB column
+                $match->setAttribute('priority_score', $priority);
+
                 return $match;
             })
-            ->sortBy('calculated_priority')
+            ->sortBy('priority_score')
             ->values()
             ->take($this->maxMatches);
 

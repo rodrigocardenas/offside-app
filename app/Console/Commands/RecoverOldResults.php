@@ -117,8 +117,8 @@ class RecoverOldResults extends Command
                 ];
 
                 $newStatus = $statusMap[$status] ?? 'Not Started';
-                $score = $homeScore !== null && $awayScore !== null 
-                    ? "{$homeScore} - {$awayScore}" 
+                $score = $homeScore !== null && $awayScore !== null
+                    ? "{$homeScore} - {$awayScore}"
                     : null;
 
                 $match->update([

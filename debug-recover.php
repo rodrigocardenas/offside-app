@@ -24,10 +24,10 @@ foreach ($matches as $m) {
     echo "  External ID: {$m->external_id}\n";
     echo "  Current Score: {$m->score} | Status: {$m->status}\n";
     echo "  Date: {$m->date}\n";
-    
+
     // Intentar obtener fixture
     $fixture = $service->obtenerFixtureDirecto($m->external_id);
-    
+
     if ($fixture) {
         $homeScore = $fixture['goals']['home'] ?? null;
         $awayScore = $fixture['goals']['away'] ?? null;

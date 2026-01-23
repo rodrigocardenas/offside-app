@@ -37,9 +37,9 @@ class DebugRecovery extends Command
             $this->line("ID: {$m->id} | {$m->home_team} vs {$m->away_team}");
             $this->line("  External ID: {$m->external_id}");
             $this->line("  Current: {$m->score} | {$m->status}");
-            
+
             $fixture = $this->footballService->obtenerFixtureDirecto($m->external_id);
-            
+
             if ($fixture) {
                 $homeScore = $fixture['goals']['home'] ?? 'N/A';
                 $awayScore = $fixture['goals']['away'] ?? 'N/A';
