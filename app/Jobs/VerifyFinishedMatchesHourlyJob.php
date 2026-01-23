@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\FootballMatch;
+use App\Services\VerificationMonitoringService;
 use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -29,29 +30,28 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
     public function __construct(?int $maxMatches = null, ?int $windowHours = null, ?int $cooldownMinutes = null)
     {
         $this->maxMatches = $maxMatches ?? 30;
-        $this->windowHours = $windowHours ?? 96;
+        $this->windowHours = $windowHours ?? 72;
         $this->cooldownMinutes = $cooldownMinutes ?? 5;
     }
 
-    public function handle(): void
+    public function handle(VerificationMonitoringService $monitoringService): void
     {
-        Log::info('VerifyFinishedMatchesHourlyJob started');
+        $monitorRun = $monitoringService->start(self::class, null, [
+            'max_matches' => $this->maxMatches,
+            'window_hours' => $this->windowHours,
+        ]);
 
         try {
             $matches = $this->findCandidateMatches();
 
             if ($matches->isEmpty()) {
                 Log::info('VerifyFinishedMatchesHourlyJob - no matches pending verification');
+                $monitoringService->finish($monitorRun, ['matches_selected' => 0]);
                 return;
             }
 
             $matchIds = $matches->pluck('id')->all();
             $batchId = Str::uuid()->toString();
-
-            Log::info('VerifyFinishedMatchesHourlyJob - found candidates', [
-                'count' => count($matchIds),
-                'ids' => $matchIds,
-            ]);
 
             FootballMatch::whereIn('id', $matchIds)->update([
                 'last_verification_attempt_at' => now(),
@@ -74,6 +74,8 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
                     ]);
                 })
                 ->finally(function (Batch $batch) use ($matchIds, $batchId) {
+                    // Always attempt to verify questions after score and events are fetched
+                    // Some jobs may have partially completed even if batch had errors
                     Log::info('VerifyFinishedMatchesHourlyJob - dispatching question verification', [
                         'batch_id' => $batchId,
                         'match_count' => count($matchIds),
@@ -85,14 +87,14 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
                 ->name('verify-finished-matches-' . $batchId)
                 ->dispatch();
 
-            Log::info('VerifyFinishedMatchesHourlyJob completed successfully');
-        } catch (Throwable $e) {
-            Log::error('VerifyFinishedMatchesHourlyJob failed', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
+            $monitoringService->finish($monitorRun, [
+                'matches_selected' => count($matchIds),
+                'batch_id' => $batchId,
             ]);
+        } catch (Throwable $e) {
+            $monitoringService->finish($monitorRun, [
+                'matches_selected' => isset($matchIds) ? count($matchIds) : 0,
+            ], 'failed', $e->getMessage());
             throw $e;
         }
     }
@@ -107,42 +109,31 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
             }])
             ->whereIn('status', ['Match Finished', 'FINISHED'])
             ->where('date', '>=', $windowStart)
-            // ->whereHas('questions', function ($query) {
-            //     $query->whereNull('result_verified_at');
-            // })
+            ->whereHas('questions', function ($query) {
+                $query->whereNull('result_verified_at');
+            })
             ->orderByDesc('updated_at')
             ->limit($this->maxMatches * 3)
             ->get();
 
-        $matchesWithPriority = [];
+        $filtered = $candidates
+            ->filter(function (FootballMatch $match) {
+                return $this->shouldAttemptVerification($match) && ($match->pending_questions_count ?? 0) > 0;
+            })
+            ->map(function (FootballMatch $match) {
+                $priority = $this->calculatePriority($match);
+                $match->calculated_priority = $priority;
 
-        foreach ($candidates as $match) {
-            // if (!$this->shouldAttemptVerification($match) || ($match->pending_questions_count ?? 0) === 0) {
-            //     continue;
-            // }
+                if ($match->verification_priority !== $priority) {
+                    $match->verification_priority = $priority;
+                    $match->save();
+                }
 
-            $priority = $this->calculatePriority($match);
-
-            if ($match->verification_priority !== $priority) {
-                $match->verification_priority = $priority;
-                $match->save();
-            }
-
-            $matchesWithPriority[] = [
-                'match' => $match,
-                'priority' => $priority,
-            ];
-        }
-
-        // Sort by priority (lower number = higher priority)
-        usort($matchesWithPriority, function ($a, $b) {
-            return $a['priority'] <=> $b['priority'];
-        });
-
-        // Extract just the matches, limited to maxMatches
-        $filtered = collect(array_slice($matchesWithPriority, 0, $this->maxMatches))
-            ->pluck('match')
-            ->values();
+                return $match;
+            })
+            ->sortBy('calculated_priority')
+            ->values()
+            ->take($this->maxMatches);
 
         Log::info('VerifyFinishedMatchesHourlyJob - matches selected for verification', [
             'selected' => $filtered->pluck('id'),

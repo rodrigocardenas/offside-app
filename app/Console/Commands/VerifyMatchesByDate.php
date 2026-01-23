@@ -1,0 +1,115 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Jobs\BatchGetScoresJob;
+use App\Jobs\BatchExtractEventsJob;
+use App\Jobs\VerifyAllQuestionsJob;
+use App\Models\FootballMatch;
+use Carbon\Carbon;
+use Illuminate\Bus\Batch;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Throwable;
+
+class VerifyMatchesByDate extends Command
+{
+    protected $signature = 'app:verify-matches-by-date {--date= : Date in Y-m-d format (e.g., 2026-01-20)} {--start-date= : Start date (inclusive)} {--end-date= : End date (inclusive)} {--force : Skip confirmation}';
+    protected $description = 'Force verification of matches from specific dates, bypassing normal filters';
+
+    public function handle()
+    {
+        $this->line("\n╔════════════════════════════════════════════════════════════╗");
+        $this->line("║ Verificación Forzada de Partidos por Fecha                  ║");
+        $this->line("╚════════════════════════════════════════════════════════════╝\n");
+
+        $date = $this->option('date');
+        $startDate = $this->option('start-date');
+        $endDate = $this->option('end-date');
+
+        // Build query
+        $query = FootballMatch::query();
+
+        if ($date) {
+            $parsedDate = Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
+            $query->whereDate('date', $parsedDate);
+            $this->info("Buscando partidos del: {$date}");
+        } elseif ($startDate && $endDate) {
+            $start = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
+            $end = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
+            $query->whereBetween('date', [$start, $end]);
+            $this->info("Buscando partidos entre: {$startDate} y {$endDate}");
+        } else {
+            $this->error('Debes especificar --date o ambos --start-date y --end-date');
+            return;
+        }
+
+        // Find all matches (regardless of status or questions)
+        $matches = $query->orderBy('date')->get();
+
+        if ($matches->isEmpty()) {
+            $this->warn('No se encontraron partidos para las fechas especificadas');
+            return;
+        }
+
+        $this->line("\nPartidos encontrados: {$matches->count()}");
+        $matches->each(function ($match) {
+            $this->line("  • {$match->date->format('Y-m-d H:i')} - {$match->home_team} vs {$match->away_team} ({$match->status})");
+        });
+
+        // Count questions per match
+        $this->line("\nPreguntas por partido:");
+        foreach ($matches as $match) {
+            $totalQuestions = $match->questions()->count();
+            $pendingQuestions = $match->questions()->whereNull('result_verified_at')->count();
+            $verifiedQuestions = $totalQuestions - $pendingQuestions;
+
+            $this->line("  Match ID {$match->id}: {$totalQuestions} total ({$pendingQuestions} pending, {$verifiedQuestions} verified)");
+        }
+
+        // Confirm before proceeding
+        if (!$this->option('force') && !$this->confirm("\n¿Deseas proceder con la verificación de estos partidos?")) {
+            $this->info('Operación cancelada');
+            return;
+        }
+
+        // Dispatch verification
+        try {
+            $matchIds = $matches->pluck('id')->all();
+            $batchId = Str::uuid()->toString();
+
+            $this->info("\n🔄 Despachando trabajos de verificación...");
+
+            // Update last_verification_attempt_at
+            FootballMatch::whereIn('id', $matchIds)->update([
+                'last_verification_attempt_at' => now(),
+            ]);
+
+            dispatch(new BatchGetScoresJob($matchIds, $batchId));
+            dispatch(new BatchExtractEventsJob($matchIds, $batchId));
+            dispatch(new VerifyAllQuestionsJob($matchIds, $batchId));
+
+            $this->line("\n╔════════════════════════════════════════════════════════════╗");
+            $this->line("║ RESUMEN                                                    ║");
+            $this->line("╠════════════════════════════════════════════════════════════╣");
+            $this->line("║ Partidos a verificar: " . count($matchIds) . " ✅                          ║");
+            $this->line("║ Batch ID: " . substr($batchId, 0, 8) . "...                                    ║");
+            $this->line("║ Estado: Verificación despachada                            ║");
+            $this->line("╚════════════════════════════════════════════════════════════╝\n");
+
+            Log::info('VerifyMatchesByDate - verification started', [
+                'match_count' => count($matchIds),
+                'batch_id' => $batchId,
+                'date_filter' => $date ?? "{$startDate} to {$endDate}",
+            ]);
+        } catch (Throwable $e) {
+            $this->error("Error al despa char verificación: {$e->getMessage()}");
+            Log::error('VerifyMatchesByDate failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+    }
+}
