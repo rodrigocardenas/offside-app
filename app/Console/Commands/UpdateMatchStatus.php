@@ -146,11 +146,32 @@ class UpdateMatchStatus extends Command
                 $eventCount = count(json_decode($eventsJson, true) ?? []);
                 $this->line("  Eventos: <fg=green>{$eventCount}</>");
             } else {
-                $this->line("  Eventos: <fg=yellow>No disponibles</>");
+                $this->line("  Eventos: <fg=yellow>No disponibles en Football-Data.org</>");
             }
 
             if ($statisticsJson) {
+                $statsData = json_decode($statisticsJson, true);
                 $this->line("  Estadísticas: <fg=green>✓</>");
+                
+                // Mostrar detalles de estadísticas si están disponibles
+                if (isset($statsData['total_yellow_cards'])) {
+                    $this->line("    • Tarjetas amarillas: {$statsData['total_yellow_cards']}");
+                }
+                if (isset($statsData['total_red_cards'])) {
+                    $this->line("    • Tarjetas rojas: {$statsData['total_red_cards']}");
+                }
+                if (isset($statsData['detailed_event_count'])) {
+                    $this->line("    • Eventos registrados: {$statsData['detailed_event_count']}");
+                }
+                if (isset($statsData['first_goal_scorer'])) {
+                    $this->line("    • Primer gol: {$statsData['first_goal_scorer']}");
+                }
+                if (isset($statsData['attendance'])) {
+                    $this->line("    • Asistencia: {$statsData['attendance']}");
+                }
+                if (isset($statsData['referee'])) {
+                    $this->line("    • Árbitro: {$statsData['referee']}");
+                }
             } else {
                 $this->line("  Estadísticas: <fg=yellow>No disponibles</>");
             }
@@ -192,6 +213,7 @@ class UpdateMatchStatus extends Command
                 return [];
             }
 
+            // Intentar obtener con el endpoint que incluye más detalles
             $response = Http::withoutVerifying()
                 ->withHeaders(['X-Auth-Token' => $apiKey])
                 ->timeout(10)
@@ -204,6 +226,7 @@ class UpdateMatchStatus extends Command
             $matchData = $response->json();
             $events = [];
 
+            // Obtener goles si están disponibles
             if (isset($matchData['goals']) && is_array($matchData['goals'])) {
                 foreach ($matchData['goals'] as $goal) {
                     $events[] = [
@@ -211,6 +234,18 @@ class UpdateMatchStatus extends Command
                         'type' => 'GOAL',
                         'team' => $goal['team']['id'] === $matchData['homeTeam']['id'] ? 'HOME' : 'AWAY',
                         'player' => $goal['scorer'] ?? 'N/A'
+                    ];
+                }
+            }
+
+            // Si hay eventos en la respuesta directa
+            if (isset($matchData['events']) && is_array($matchData['events']) && count($matchData['events']) > 0) {
+                foreach ($matchData['events'] as $event) {
+                    $events[] = [
+                        'minute' => (string)($event['minute'] ?? 'N/A'),
+                        'type' => $event['type'] ?? 'EVENT',
+                        'team' => $event['team']['id'] === $matchData['homeTeam']['id'] ? 'HOME' : 'AWAY',
+                        'player' => $event['player'] ?? 'N/A'
                     ];
                 }
             }
@@ -251,13 +286,29 @@ class UpdateMatchStatus extends Command
                 'source' => 'Football-Data.org (OFFICIAL)',
                 'verified' => true,
                 'verification_method' => 'football_data_api',
-                'has_detailed_events' => isset($matchData['goals']) && count($matchData['goals']) > 0,
-                'detailed_event_count' => isset($matchData['goals']) ? count($matchData['goals']) : 0,
                 'enriched_at' => now()->toIso8601String(),
                 'timestamp' => now()->toIso8601String()
             ];
 
-            // Si está disponible información de bookings
+            // Contar goles
+            if (isset($matchData['goals']) && is_array($matchData['goals'])) {
+                $statistics['has_detailed_events'] = count($matchData['goals']) > 0;
+                $statistics['detailed_event_count'] = count($matchData['goals']);
+
+                // Extraer scorers
+                $scorers = [];
+                foreach ($matchData['goals'] as $goal) {
+                    if (isset($goal['scorer'])) {
+                        $scorers[] = $goal['scorer'];
+                    }
+                }
+                if (count($scorers) > 0) {
+                    $statistics['first_goal_scorer'] = $scorers[0] ?? null;
+                    $statistics['last_goal_scorer'] = end($scorers) ?? null;
+                }
+            }
+
+            // Si hay información de bookings (tarjetas)
             if (isset($matchData['bookings']) && is_array($matchData['bookings'])) {
                 $yellowCards = 0;
                 $redCards = 0;
@@ -271,6 +322,22 @@ class UpdateMatchStatus extends Command
                 $statistics['total_yellow_cards'] = $yellowCards;
                 $statistics['total_red_cards'] = $redCards;
             }
+
+            // Si hay información de penaltis
+            if (isset($matchData['penalties']) && is_array($matchData['penalties'])) {
+                $statistics['total_penalty_goals'] = count($matchData['penalties']);
+            }
+
+            // Intentar obtener head2head para contexto
+            if (isset($matchData['head2head']) && is_array($matchData['head2head'])) {
+                $statistics['head_to_head_count'] = count($matchData['head2head']);
+            }
+
+            // Status adicional
+            $statistics['match_status'] = $matchData['status'] ?? 'UNKNOWN';
+            $statistics['attendance'] = $matchData['attendance'] ?? null;
+            $statistics['referee'] = $matchData['referee'] ?? null;
+            $statistics['stage'] = $matchData['stage'] ?? null;
 
             return $statistics;
 
