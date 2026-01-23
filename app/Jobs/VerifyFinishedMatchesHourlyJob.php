@@ -21,7 +21,7 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 900;
-    public $tries = 1;
+    public $tries = 3;  // Temporarily increased for debugging
 
     protected int $maxMatches;
     protected int $windowHours;
@@ -42,7 +42,17 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
         ]);
 
         try {
-            $matches = $this->findCandidateMatches();
+            try {
+                $matches = $this->findCandidateMatches();
+            } catch (Throwable $e) {
+                Log::error('VerifyFinishedMatchesHourlyJob - error finding candidates', [
+                    'error' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                throw $e;
+            }
 
             if ($matches->isEmpty()) {
                 Log::info('VerifyFinishedMatchesHourlyJob - no matches pending verification');
