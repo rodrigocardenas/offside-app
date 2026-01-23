@@ -460,42 +460,90 @@ class FootballService
     }
 
     /**
-     * Obtiene directamente un fixture usando su ID
-     * Método más eficiente que buscarFixtureId
+     * Obtiene directamente un fixture usando su ID de Football-Data.org
+     * Los external_id en BD son de Football-Data.org, no de API-Sports
      */
     public function obtenerFixtureDirecto($fixtureId)
     {
-        Log::info("Obteniendo fixture directo con ID: $fixtureId");
+        Log::info("Obteniendo fixture directo con ID de Football-Data.org: $fixtureId");
+
+        $apiKey = config('services.football_data.api_key') 
+            ?? env('FOOTBALL_DATA_API_KEY')
+            ?? env('FOOTBALL_DATA_API_TOKEN');
+
+        if (!$apiKey) {
+            Log::error("FOOTBALL_DATA_API_KEY no configurada en obtenerFixtureDirecto");
+            return null;
+        }
 
         $maxRetries = 3;
         $delaySeconds = 2;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            $this->applyRateLimitDelay(1, 2);
+            try {
+                $response = Http::withoutVerifying()
+                    ->withHeaders(['X-Auth-Token' => $apiKey])
+                    ->timeout(10)
+                    ->get("https://api.football-data.org/v4/matches/{$fixtureId}");
 
-            $response = Http::withoutVerifying()->withHeaders([
-                'x-apisports-key' => $this->apiKey,
-            ])->get($this->baseUrl . 'fixtures', [
-                'id' => $fixtureId
-            ]);
-
-            if ($response->successful()) {
-                $fixture = $response->json('response.0');
-                if ($fixture) {
-                    Log::info("Fixture obtenido exitosamente");
+                if ($response->successful()) {
+                    $matchData = $response->json();
+                    
+                    // Convertir formato de Football-Data.org a formato compatible
+                    $fixture = [
+                        'fixture' => [
+                            'id' => $matchData['id'],
+                            'date' => $matchData['utcDate'],
+                            'status' => $matchData['status']
+                        ],
+                        'teams' => [
+                            'home' => [
+                                'id' => $matchData['homeTeam']['id'],
+                                'name' => $matchData['homeTeam']['name'],
+                                'logo' => $matchData['homeTeam']['crest'] ?? null
+                            ],
+                            'away' => [
+                                'id' => $matchData['awayTeam']['id'],
+                                'name' => $matchData['awayTeam']['name'],
+                                'logo' => $matchData['awayTeam']['crest'] ?? null
+                            ]
+                        ],
+                        'goals' => [
+                            'home' => $matchData['score']['fullTime']['home'],
+                            'away' => $matchData['score']['fullTime']['away'],
+                        ],
+                        'score' => [
+                            'fullTime' => [
+                                'home' => $matchData['score']['fullTime']['home'],
+                                'away' => $matchData['score']['fullTime']['away'],
+                            ]
+                        ]
+                    ];
+                    
+                    Log::info("Fixture obtenido exitosamente de Football-Data.org", [
+                        'home' => $fixture['teams']['home']['name'],
+                        'away' => $fixture['teams']['away']['name'],
+                        'score' => $fixture['goals']['home'] . '-' . $fixture['goals']['away']
+                    ]);
+                    
                     return $fixture;
                 }
-            }
 
-            if (str_contains($response->body(), 'Too many requests')) {
-                Log::warning("Rate limit alcanzado al obtener fixture directo (attempt $attempt). Esperando $delaySeconds segundos...");
+                if ($response->status() === 429) {
+                    Log::warning("Rate limit en Football-Data.org (attempt $attempt). Esperando $delaySeconds segundos...");
+                    if ($attempt < $maxRetries) {
+                        sleep($delaySeconds);
+                        $delaySeconds *= 2;
+                    }
+                } else {
+                    Log::error("Error al obtener fixture de Football-Data.org (attempt $attempt): " . $response->status() . " - " . $response->body());
+                    break;
+                }
+            } catch (\Exception $e) {
+                Log::error("Exception en obtenerFixtureDirecto (attempt $attempt): " . $e->getMessage());
                 if ($attempt < $maxRetries) {
                     sleep($delaySeconds);
-                    $delaySeconds *= 2;
                 }
-            } else {
-                Log::error("Error al obtener fixture directo (attempt $attempt): " . $response->body());
-                break;
             }
         }
 
