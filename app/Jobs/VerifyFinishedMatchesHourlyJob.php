@@ -29,7 +29,7 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
     public function __construct(?int $maxMatches = null, ?int $windowHours = null, ?int $cooldownMinutes = null)
     {
         $this->maxMatches = $maxMatches ?? 30;
-        $this->windowHours = $windowHours ?? 72;
+        $this->windowHours = $windowHours ?? 96;
         $this->cooldownMinutes = $cooldownMinutes ?? 5;
     }
 
@@ -107,9 +107,9 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
             }])
             ->whereIn('status', ['Match Finished', 'FINISHED'])
             ->where('date', '>=', $windowStart)
-            ->whereHas('questions', function ($query) {
-                $query->whereNull('result_verified_at');
-            })
+            // ->whereHas('questions', function ($query) {
+            //     $query->whereNull('result_verified_at');
+            // })
             ->orderByDesc('updated_at')
             ->limit($this->maxMatches * 3)
             ->get();
