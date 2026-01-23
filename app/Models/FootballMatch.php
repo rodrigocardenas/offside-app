@@ -103,20 +103,7 @@ class FootballMatch extends Model
         return $competitions[$this->league] ?? 'Otro';
     }
 
-    public function getScoreAttribute()
-    {
-        if ($this->status === 'FINISHED') {
-            return [
-                'home' => $this->home_team_score,
-                'away' => $this->away_team_score,
-                'penalties' => $this->home_team_penalties || $this->away_team_penalties
-                    ? [
-                        'home' => $this->home_team_penalties,
-                        'away' => $this->away_team_penalties,
-                    ]
-                    : null,
-            ];
-        }
-        return null;
-    }
+    // Removed: This accessor was preventing score column from being saved
+    // The 'score' column now stores the text representation (e.g., "2 - 0")
+    // Use home_team_score and away_team_score directly for structured data
 }
