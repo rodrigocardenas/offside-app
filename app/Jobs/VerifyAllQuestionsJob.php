@@ -5,7 +5,6 @@ namespace App\Jobs;
 use App\Models\Question;
 use App\Services\GeminiService;
 use App\Services\QuestionEvaluationService;
-use App\Services\VerificationMonitoringService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -33,18 +32,15 @@ class VerifyAllQuestionsJob implements ShouldQueue
         $this->chunkSize = $chunkSize;
     }
 
-    public function handle(
-        QuestionEvaluationService $evaluationService,
-        VerificationMonitoringService $monitoringService
-    ): void
+    public function handle(QuestionEvaluationService $evaluationService): void
     {
+        Log::info('VerifyAllQuestionsJob started', [
+            'batch_id' => $this->batchId,
+            'match_ids' => $this->matchIds,
+        ]);
+
         // ✅ OPTIMIZATION: Enable non-blocking mode to prevent long waits on rate limit
         GeminiService::setAllowBlocking(false);
-
-        $monitorRun = $monitoringService->start(self::class, $this->batchId, [
-            'match_ids' => $this->matchIds,
-            'chunk_size' => $this->chunkSize,
-        ]);
 
         $processed = 0;
         $errors = 0;
@@ -86,16 +82,12 @@ class VerifyAllQuestionsJob implements ShouldQueue
                 'processed_questions' => $processed,
                 'errors' => $errors,
             ]);
-
-            $monitoringService->finish($monitorRun, [
-                'processed_questions' => $processed,
-                'errors' => $errors,
-            ]);
         } catch (Throwable $e) {
-            $monitoringService->finish($monitorRun, [
-                'processed_questions' => $processed,
-                'errors' => $errors,
-            ], 'failed', $e->getMessage());
+            Log::error('VerifyAllQuestionsJob failed', [
+                'batch_id' => $this->batchId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             throw $e;
         }
     }
