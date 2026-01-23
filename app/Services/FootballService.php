@@ -467,7 +467,7 @@ class FootballService
     {
         Log::info("Obteniendo fixture directo con ID de Football-Data.org: $fixtureId");
 
-        $apiKey = config('services.football_data.api_key') 
+        $apiKey = config('services.football_data.api_key')
             ?? env('FOOTBALL_DATA_API_KEY')
             ?? env('FOOTBALL_DATA_API_TOKEN');
 
@@ -488,7 +488,7 @@ class FootballService
 
                 if ($response->successful()) {
                     $matchData = $response->json();
-                    
+
                     // Convertir formato de Football-Data.org a formato compatible
                     $fixture = [
                         'fixture' => [
@@ -519,13 +519,13 @@ class FootballService
                             ]
                         ]
                     ];
-                    
+
                     Log::info("Fixture obtenido exitosamente de Football-Data.org", [
                         'home' => $fixture['teams']['home']['name'],
                         'away' => $fixture['teams']['away']['name'],
                         'score' => $fixture['goals']['home'] . '-' . $fixture['goals']['away']
                     ]);
-                    
+
                     return $fixture;
                 }
 
@@ -1049,7 +1049,7 @@ class FootballService
         $homeScore = $fixture['goals']['home'] ?? 0;
         $awayScore = $fixture['goals']['away'] ?? 0;
         $score = "{$homeScore} - {$awayScore}";
-        
+
         // Mapear status de Football-Data.org al formato esperado
         $fixtureStatus = $fixture['fixture']['status'] ?? 'TIMED';
         $statusMap = [
@@ -1072,13 +1072,13 @@ class FootballService
             'away_team_score' => $awayScore,
             'score' => $score,
         ]);
-        
+
         Log::info("✅ Partido {$match->id} actualizado desde Football-Data.org", [
             'score' => $score,
             'status' => $matchStatus,
             'source' => 'Football-Data.org'
         ]);
-        
+
         return $match;
         }
 

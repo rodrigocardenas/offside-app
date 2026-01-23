@@ -39,7 +39,7 @@ class EnrichMatchData extends Command
     {
         $matchId = $this->argument('match_id');
         $force = $this->option('force');
-        
+
         $match = FootballMatch::find($matchId);
         if (!$match) {
             $this->error("❌ Partido no encontrado con ID: {$matchId}");
@@ -57,7 +57,7 @@ class EnrichMatchData extends Command
 
         try {
             $hasExistingData = !empty($match->events) || !empty($match->statistics);
-            
+
             if ($hasExistingData && !$force) {
                 $this->warn("⚠️ El partido ya tiene datos. Use --force para sobrescribir.\n");
                 return Command::SUCCESS;
@@ -111,12 +111,12 @@ class EnrichMatchData extends Command
             $this->line("\nObteniendo estadísticas...");
             $this->line("Buscando en API Football...");
             $statistics = $this->getStatisticsFromApiFootball($fixtureId);
-            
+
             if (empty($statistics)) {
                 $this->line("Buscando en Football-Data.org...");
                 $statistics = $this->getStatisticsFromFootballData($fixtureId, $match);
             }
-            
+
             // Para Champions League, NO GENERAR DATOS si no hay oficiales disponibles
             if (empty($statistics) && $match->league === 'CL') {
                 $this->warn("⚠️ No hay estadísticas disponibles de APIs oficiales");
@@ -129,7 +129,7 @@ class EnrichMatchData extends Command
 
             // 4. Actualizar partido (solo si hay datos nuevos o --force)
             $this->line("\nActualizando base de datos...");
-            
+
             $updateData = [];
             if (!empty($events)) {
                 $updateData['events'] = json_encode($events);
@@ -137,7 +137,7 @@ class EnrichMatchData extends Command
             if (!empty($statistics)) {
                 $updateData['statistics'] = json_encode($statistics);
             }
-            
+
             if (!empty($updateData)) {
                 $match->update($updateData);
                 $this->line("  ✅ Datos actualizados correctamente");
@@ -149,13 +149,13 @@ class EnrichMatchData extends Command
             $this->info("\n╔════════════════════════════════════════════════════════════╗");
             $this->info("║ ✅ ENRIQUECIMIENTO COMPLETADO                               ║");
             $this->info("╠════════════════════════════════════════════════════════════╣");
-            
+
             $this->line("  Eventos: <fg=green>" . count($events) . "</>");
-            
+
             if (!empty($statistics)) {
                 $statsData = $statistics;
                 $this->line("  Estadísticas: <fg=green>✓</>");
-                
+
                 if (isset($statsData['total_yellow_cards'])) {
                     $this->line("    • Tarjetas amarillas: {$statsData['total_yellow_cards']}");
                 }
@@ -198,7 +198,7 @@ class EnrichMatchData extends Command
     private function getEventsFromApiFootball($fixtureId): array
     {
         try {
-            $apiKey = config('services.football.key') 
+            $apiKey = config('services.football.key')
                 ?? env('FOOTBALL_API_KEY')
                 ?? env('APISPORTS_API_KEY')
                 ?? env('API_SPORTS_KEY');
@@ -231,7 +231,7 @@ class EnrichMatchData extends Command
 
             if (isset($data['response']) && is_array($data['response'])) {
                 Log::info("API Football: Encontrados " . count($data['response']) . " eventos para fixture $fixtureId");
-                
+
                 foreach ($data['response'] as $event) {
                     $eventType = $event['type'] ?? 'unknown';
                     $minute = $event['time']['elapsed'] ?? 'N/A';
@@ -283,7 +283,7 @@ class EnrichMatchData extends Command
     private function getStatisticsFromApiFootball($fixtureId): array
     {
         try {
-            $apiKey = config('services.football.key') 
+            $apiKey = config('services.football.key')
                 ?? env('FOOTBALL_API_KEY')
                 ?? env('APISPORTS_API_KEY')
                 ?? env('API_SPORTS_KEY');
@@ -321,7 +321,7 @@ class EnrichMatchData extends Command
 
             if (isset($data['response']) && is_array($data['response']) && count($data['response']) >= 2) {
                 Log::info("API Football: Encontradas estadísticas para fixture $fixtureId");
-                
+
                 // Estadísticas home (índice 0) y away (índice 1)
                 $homeStats = $data['response'][0] ?? [];
                 $awayStats = $data['response'][1] ?? [];
@@ -420,7 +420,7 @@ class EnrichMatchData extends Command
     private function getEventsFromFootballData($fixtureId, $homeTeam, $awayTeam): array
     {
         try {
-            $apiKey = config('services.football_data.api_key') 
+            $apiKey = config('services.football_data.api_key')
                 ?? env('FOOTBALL_DATA_API_KEY')
                 ?? env('FOOTBALL_DATA_API_TOKEN');
 
@@ -450,7 +450,7 @@ class EnrichMatchData extends Command
             // Obtener goles
             if (isset($matchData['goals']) && is_array($matchData['goals']) && count($matchData['goals']) > 0) {
                 Log::info("Football-Data.org: Encontrados " . count($matchData['goals']) . " goles para fixture $fixtureId");
-                
+
                 foreach ($matchData['goals'] as $goal) {
                     $events[] = [
                         'minute' => (string)($goal['minute'] ?? 'N/A'),
@@ -557,7 +557,7 @@ class EnrichMatchData extends Command
     private function getStatisticsFromFootballData($fixtureId, $match): array
     {
         try {
-            $apiKey = config('services.football_data.api_key') 
+            $apiKey = config('services.football_data.api_key')
                 ?? env('FOOTBALL_DATA_API_KEY')
                 ?? env('FOOTBALL_DATA_API_TOKEN');
 

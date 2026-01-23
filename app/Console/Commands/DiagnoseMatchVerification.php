@@ -39,9 +39,7 @@ class DiagnoseMatchVerification extends Command
         $details = $this->option('details');
         $testEvaluate = $this->option('test-evaluate');
 
-        $match = FootballMatch::with(['questions' => function ($q) {
-            $q->whereNull('result_verified_at');
-        }, 'questions.options', 'questions.answers'])->find($matchId);
+        $match = FootballMatch::with(['questions' => function ($q) { $q->whereNull('result_verified_at'); }, 'questions.options', 'questions.answers'])->find($matchId);
 
         if (!$match) {
             $this->error("❌ Partido {$matchId} no encontrado");

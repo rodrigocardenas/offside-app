@@ -37,7 +37,7 @@ class RecoverOldResults extends Command
     public function handle(): int
     {
         $days = $this->option('days');
-        
+
         $this->info("╔════════════════════════════════════════════════════════════╗");
         $this->info("║ Recuperando resultados de partidos antiguos (últimos $days días)   ║");
         $this->info("╚════════════════════════════════════════════════════════════╝\n");
@@ -46,7 +46,7 @@ class RecoverOldResults extends Command
         // 1. Tengan fecha <= hace 2 horas (debería haber terminado)
         // 2. Status aún sea "Not Started" o "Scheduled"
         // 3. Tengan external_id
-        $matches = FootballMatch::whereIn('status', ['Not Started', 'Scheduled', 'In Play'])
+        $matches = FootballMatch::whereIn('status', ['Not Started', 'Scheduled', 'In Play', 'Match Finished'])
             ->where('date', '<=', now()->subHours(2))
             ->where('date', '>=', now()->subDays($days))
             ->where('external_id', '!=', '')
@@ -71,7 +71,7 @@ class RecoverOldResults extends Command
             try {
                 // Intentar obtener el resultado de Football-Data.org
                 $fixtureId = $match->external_id;
-                
+
                 // Si el external_id no es numérico, extraerlo
                 if (!is_numeric($fixtureId)) {
                     $fixtureId = $this->footballService->extraerFixtureIdDelExternalId(
@@ -80,27 +80,27 @@ class RecoverOldResults extends Command
                         $match->league
                     );
                 }
-                
+
                 if (!$fixtureId) {
                     $failed++;
                     $bar->advance();
                     continue;
                 }
-                
+
                 // Obtener datos del fixture
                 $fixture = $this->footballService->obtenerFixtureDirecto($fixtureId);
-                
+
                 if (!$fixture) {
                     $failed++;
                     $bar->advance();
                     continue;
                 }
-                
+
                 // Actualizar el partido
                 $homeScore = $fixture['goals']['home'] ?? null;
                 $awayScore = $fixture['goals']['away'] ?? null;
                 $status = $fixture['fixture']['status'] ?? 'TIMED';
-                
+
                 $statusMap = [
                     'TIMED' => 'Not Started',
                     'LIVE' => 'In Play',
@@ -111,10 +111,10 @@ class RecoverOldResults extends Command
                     'CANCELLED' => 'Cancelled',
                     'AWARDED' => 'Match Finished',
                 ];
-                
+
                 $newStatus = $statusMap[$status] ?? 'Not Started';
                 $score = "{$homeScore} - {$awayScore}";
-                
+
                 $match->update([
                     'home_team' => $fixture['teams']['home']['name'] ?? $match->home_team,
                     'away_team' => $fixture['teams']['away']['name'] ?? $match->away_team,
@@ -124,16 +124,16 @@ class RecoverOldResults extends Command
                     'status' => $newStatus,
                     'external_id' => (string)$fixtureId
                 ]);
-                
+
                 Log::info("Partido actualizado desde Football-Data.org", [
                     'match_id' => $match->id,
                     'teams' => "{$match->home_team} vs {$match->away_team}",
                     'score' => $score,
                     'status' => $newStatus
                 ]);
-                
+
                 $updated++;
-                
+
             } catch (\Exception $e) {
                 Log::error("Error recuperando resultado de partido", [
                     'match_id' => $match->id,
@@ -141,13 +141,13 @@ class RecoverOldResults extends Command
                 ]);
                 $failed++;
             }
-            
+
             $bar->advance();
             sleep(1); // Delay para no sobrecargar API
         }
 
         $bar->finish();
-        
+
         $this->line("\n\n╔════════════════════════════════════════════════════════════╗");
         $this->line("║ RESUMEN                                                    ║");
         $this->line("╠════════════════════════════════════════════════════════════╣");

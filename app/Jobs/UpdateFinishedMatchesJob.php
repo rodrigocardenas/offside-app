@@ -20,7 +20,7 @@ class UpdateFinishedMatchesJob implements ShouldQueue
 
     /**
      * Execute the job.
-     * 
+     *
      * 🎯 PIPELINE PRIORITARIO:
      * 1️⃣ API Football (scores en vivo - REQUIERE SUSCRIPCIÓN PAGADA)
      * 2️⃣ Gemini + Web Search (grounding - backup cuando API falla)

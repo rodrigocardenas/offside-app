@@ -30,7 +30,7 @@ class SyncFixtureIds extends Command
     {
         $fromDate = $this->option('from-date');
         $dryRun = $this->option('dry-run');
-        $apiKey = config('services.football.key') 
+        $apiKey = config('services.football.key')
             ?? env('FOOTBALL_API_KEY')
             ?? env('APISPORTS_API_KEY')
             ?? env('API_SPORTS_KEY');
@@ -83,13 +83,13 @@ class SyncFixtureIds extends Command
                 if ($fixtureId) {
                     if ($match->external_id !== (string)$fixtureId) {
                         $oldId = $match->external_id;
-                        
+
                         if (!$dryRun) {
                             $match->update(['external_id' => $fixtureId]);
                         }
-                        
+
                         $updated++;
-                        
+
                         if ($dryRun) {
                             $this->line("\n  [DRY-RUN] {$match->home_team} vs {$match->away_team}");
                             $this->line("    $oldId → $fixtureId");
@@ -123,17 +123,17 @@ class SyncFixtureIds extends Command
         $this->info("║ RESULTADOS DE SINCRONIZACIÓN                               ║");
         $this->info("╠════════════════════════════════════════════════════════════╣");
         $this->line("  Total procesados: <fg=green>$total</>");
-        
+
         if ($updated > 0) {
             $this->line("  Actualizados: <fg=green>$updated</>");
         }
-        
+
         $this->line("  Sin cambios: <fg=yellow>$unchanged</>");
-        
+
         if ($failed > 0) {
             $this->line("  Errores/No encontrados: <fg=red>$failed</>");
         }
-        
+
         $this->info("╚════════════════════════════════════════════════════════════╝");
 
         if ($dryRun) {
@@ -214,7 +214,7 @@ class SyncFixtureIds extends Command
         $keyWords2 = array_filter($parts2, fn($w) => strlen($w) > 3);
 
         $intersection = array_intersect($keyWords1, $keyWords2);
-        
+
         // Si hay al menos una palabra clave coincidente
         if (count($intersection) > 0 && count($keyWords1) > 0 && count($keyWords2) > 0) {
             return true;

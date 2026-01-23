@@ -38,7 +38,7 @@ class UpdateMatchStatus extends Command
     public function handle(): int
     {
         $matchId = $this->argument('match_id');
-        
+
         $match = FootballMatch::find($matchId);
         if (!$match) {
             $this->error("❌ Partido no encontrado con ID: {$matchId}");
@@ -57,7 +57,7 @@ class UpdateMatchStatus extends Command
         try {
             // 1. Extraer fixture ID
             $fixtureId = $match->external_id;
-            
+
             if (!is_numeric($fixtureId)) {
                 $this->line("Extrayendo Fixture ID del external_id...");
                 $fixtureId = $this->footballService->extraerFixtureIdDelExternalId(
@@ -87,7 +87,7 @@ class UpdateMatchStatus extends Command
             $homeScore = $fixture['goals']['home'] ?? 0;
             $awayScore = $fixture['goals']['away'] ?? 0;
             $score = "{$homeScore} - {$awayScore}";
-            
+
             $fixtureStatus = $fixture['fixture']['status'] ?? 'TIMED';
             $statusMap = [
                 'TIMED' => 'Not Started',
@@ -113,7 +113,7 @@ class UpdateMatchStatus extends Command
 
             // 6. Actualizar partido
             $this->line("\nActualizando base de datos...");
-            
+
             $updateData = [
                 'home_team' => $fixture['teams']['home']['name'] ?? $match->home_team,
                 'away_team' => $fixture['teams']['away']['name'] ?? $match->away_team,
@@ -138,10 +138,10 @@ class UpdateMatchStatus extends Command
             $this->info("\n╔════════════════════════════════════════════════════════════╗");
             $this->info("║ ✅ ACTUALIZACIÓN COMPLETADA                                 ║");
             $this->info("╠════════════════════════════════════════════════════════════╣");
-            
+
             $this->line("  Resultado: <fg=green>{$score}</>");
             $this->line("  Status: <fg=green>{$matchStatus}</>");
-            
+
             if ($eventsJson) {
                 $eventCount = count(json_decode($eventsJson, true) ?? []);
                 $this->line("  Eventos: <fg=green>{$eventCount}</>");
@@ -152,7 +152,7 @@ class UpdateMatchStatus extends Command
             if ($statisticsJson) {
                 $statsData = json_decode($statisticsJson, true);
                 $this->line("  Estadísticas: <fg=green>✓</>");
-                
+
                 // Mostrar detalles de estadísticas si están disponibles
                 if (isset($statsData['total_yellow_cards'])) {
                     $this->line("    • Tarjetas amarillas: {$statsData['total_yellow_cards']}");
@@ -205,7 +205,7 @@ class UpdateMatchStatus extends Command
     private function getDetailedEvents($fixtureId): array
     {
         try {
-            $apiKey = config('services.football_data.api_key') 
+            $apiKey = config('services.football_data.api_key')
                 ?? env('FOOTBALL_DATA_API_KEY')
                 ?? env('FOOTBALL_DATA_API_TOKEN');
 
@@ -264,7 +264,7 @@ class UpdateMatchStatus extends Command
     private function getDetailedStatistics($fixtureId): array
     {
         try {
-            $apiKey = config('services.football_data.api_key') 
+            $apiKey = config('services.football_data.api_key')
                 ?? env('FOOTBALL_DATA_API_KEY')
                 ?? env('FOOTBALL_DATA_API_TOKEN');
 
