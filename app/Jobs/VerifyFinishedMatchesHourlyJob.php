@@ -114,15 +114,33 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
             ->limit($this->maxMatches * 3)
             ->get();
 
-        Log::info('VerifyFinishedMatchesHourlyJob - candidate matches found', [
-            'count' => $candidates->count(),
-            'ids' => $candidates->pluck('id')->all(),
-        ]);
-
         $matchesWithPriority = [];
 
+        foreach ($candidates as $match) {
+            // if (!$this->shouldAttemptVerification($match) || ($match->pending_questions_count ?? 0) === 0) {
+            //     continue;
+            // }
+
+            $priority = $this->calculatePriority($match);
+
+            if ($match->verification_priority !== $priority) {
+                $match->verification_priority = $priority;
+                $match->save();
+            }
+
+            $matchesWithPriority[] = [
+                'match' => $match,
+                'priority' => $priority,
+            ];
+        }
+
+        // Sort by priority (lower number = higher priority)
+        usort($matchesWithPriority, function ($a, $b) {
+            return $a['priority'] <=> $b['priority'];
+        });
+
         // Extract just the matches, limited to maxMatches
-        $filtered = collect(array_slice($candidates, 0, $this->maxMatches))
+        $filtered = collect(array_slice($matchesWithPriority, 0, $this->maxMatches))
             ->pluck('match')
             ->values();
 
