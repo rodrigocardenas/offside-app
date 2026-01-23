@@ -106,7 +106,7 @@ class Group83QuestionSeeder extends Seeder
 
             // Create or update TemplateQuestion
             $template = TemplateQuestion::updateOrCreate(
-                ['text' => $qData['text'], 'football_match_id' => $match->id],
+                ['text' => $qData['text'], 'match_id' => $match->id],
                 [
                     'type' => 'multiple_choice',
                     'options' => $qData['options'],

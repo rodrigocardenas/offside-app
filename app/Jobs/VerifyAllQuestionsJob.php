@@ -53,7 +53,7 @@ class VerifyAllQuestionsJob implements ShouldQueue
                 ->with(['football_match', 'options', 'answers']);
 
             if (!empty($this->matchIds)) {
-                $query->whereIn('football_match_id', $this->matchIds);
+                $query->whereIn('match_id', $this->matchIds);
             }
 
             $query->chunk($this->chunkSize, function ($questions) use ($evaluationService, &$processed, &$errors) {

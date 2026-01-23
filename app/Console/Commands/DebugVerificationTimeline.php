@@ -33,7 +33,7 @@ class DebugVerificationTimeline extends Command
         // Check pending questions by match date
         $this->line("\n\nPreguntas pendientes por fecha de partido:");
         $pending = \DB::table('questions')
-            ->join('football_matches', 'questions.football_match_id', '=', 'football_matches.id')
+            ->join('football_matches', 'questions.match_id', '=', 'football_matches.id')
             ->whereNull('questions.result_verified_at')
             ->selectRaw('DATE(football_matches.date) as match_date, COUNT(*) as count, COUNT(DISTINCT football_matches.id) as matches')
             ->groupByRaw('DATE(football_matches.date)')
