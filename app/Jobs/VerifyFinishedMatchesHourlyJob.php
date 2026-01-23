@@ -122,7 +122,7 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
         $matchesWithPriority = [];
 
         // Extract just the matches, limited to maxMatches
-        $filtered = collect(array_slice($matchesWithPriority, 0, $this->maxMatches))
+        $filtered = collect(array_slice($candidates, 0, $this->maxMatches))
             ->pluck('match')
             ->values();
 
