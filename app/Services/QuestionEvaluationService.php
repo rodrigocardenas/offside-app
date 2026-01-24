@@ -357,10 +357,10 @@ class QuestionEvaluationService
             return $correctOptionIds;
         }
 
-        // Hay goles - determinar equipo
-        $teamName = $firstGoalTeam === 'HOME' ? $match->home_team : $match->away_team;
+        // Hay goles - el event['team'] es el nombre del equipo (string)
+        // Comparar contra nombre del equipo, no contra HOME/AWAY
         foreach ($question->options as $option) {
-            if (strpos(strtolower($option->text), strtolower($teamName)) !== false) {
+            if (strpos(strtolower($option->text), strtolower($firstGoalTeam)) !== false) {
                 $correctOptionIds[] = $option->id;
             }
         }
@@ -433,9 +433,9 @@ class QuestionEvaluationService
             return $correctOptionIds;
         }
 
-        $teamName = $lastGoalTeam === 'HOME' ? $match->home_team : $match->away_team;
+        // El event['team'] es el nombre del equipo (string)
         foreach ($question->options as $option) {
-            if (strpos(strtolower($option->text), strtolower($teamName)) !== false) {
+            if (strpos(strtolower($option->text), strtolower($lastGoalTeam)) !== false) {
                 $correctOptionIds[] = $option->id;
             }
         }
@@ -478,8 +478,9 @@ class QuestionEvaluationService
         $events = $this->parseEvents($match->events ?? []);
         $questionText = strtolower($question->title ?? '');
 
-        $homeYellow = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'YELLOW') && ($e['team'] ?? null) === 'HOME'));
-        $awayYellow = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'YELLOW') && ($e['team'] ?? null) === 'AWAY'));
+        // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
+        $homeYellow = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'YELLOW') && ($e['team'] ?? null) === $match->home_team));
+        $awayYellow = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'YELLOW') && ($e['team'] ?? null) === $match->away_team));
         $totalYellow = $homeYellow + $awayYellow;
 
         $threshold = $this->extractNumericValueFromText($questionText);
@@ -518,8 +519,9 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homeRed = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'RED') && ($e['team'] ?? null) === 'HOME'));
-        $awayRed = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'RED') && ($e['team'] ?? null) === 'AWAY'));
+        // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
+        $homeRed = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'RED') && ($e['team'] ?? null) === $match->home_team));
+        $awayRed = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'RED') && ($e['team'] ?? null) === $match->away_team));
 
         foreach ($question->options as $option) {
             $optionText = strtolower(trim($option->text));
@@ -544,8 +546,9 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homeOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && ($e['team'] ?? null) === 'HOME'));
-        $awayOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && ($e['team'] ?? null) === 'AWAY'));
+        // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
+        $homeOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && ($e['team'] ?? null) === $match->home_team));
+        $awayOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && ($e['team'] ?? null) === $match->away_team));
         $hasOwnGoal = $homeOwnGoals > 0 || $awayOwnGoals > 0;
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasOwnGoal);
@@ -582,8 +585,9 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homePenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && ($e['team'] ?? null) === 'HOME'));
-        $awayPenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && ($e['team'] ?? null) === 'AWAY'));
+        // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
+        $homePenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && ($e['team'] ?? null) === $match->home_team));
+        $awayPenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && ($e['team'] ?? null) === $match->away_team));
         $hasPenalty = $homePenalty > 0 || $awayPenalty > 0;
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasPenalty);
@@ -620,8 +624,9 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homeFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && ($e['team'] ?? null) === 'HOME'));
-        $awayFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && ($e['team'] ?? null) === 'AWAY'));
+        // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
+        $homeFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && ($e['team'] ?? null) === $match->home_team));
+        $awayFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && ($e['team'] ?? null) === $match->away_team));
         $hasFreeKickGoal = $homeFreeKick > 0 || $awayFreeKick > 0;
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasFreeKickGoal);
@@ -658,8 +663,9 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $homeCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && ($e['team'] ?? null) === 'HOME'));
-        $awayCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && ($e['team'] ?? null) === 'AWAY'));
+        // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
+        $homeCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && ($e['team'] ?? null) === $match->home_team));
+        $awayCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && ($e['team'] ?? null) === $match->away_team));
         $hasCornerGoal = $homeCorner > 0 || $awayCorner > 0;
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasCornerGoal);
