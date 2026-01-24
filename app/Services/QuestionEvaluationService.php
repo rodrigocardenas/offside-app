@@ -159,8 +159,8 @@ class QuestionEvaluationService
                 // ❌ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateCornerGoal($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'posesión|possession')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'posesión|possession')) {
+                // ✅ Statistics-based: Posesión está en statistics, no requiere Gemini
                 $questionHandled = true;
                 $correctOptions = $this->evaluatePossession($question, $match);
             } elseif ($this->isQuestionAbout($questionText, 'ambos.*anotan|both.*score')) {
@@ -1015,15 +1015,26 @@ class QuestionEvaluationService
 
         $metrics = ['possession', 'fouls', 'passes', 'shots'];
         foreach ($metrics as $metric) {
-            $homeKey = 'home_' . $metric;
-            $awayKey = 'away_' . $metric;
+            // Dos formatos posibles: "home_metric" o "metric_home"
+            $homeKey1 = 'home_' . $metric;
+            $homeKey2 = $metric . '_home';
+            $awayKey1 = 'away_' . $metric;
+            $awayKey2 = $metric . '_away';
 
-            if (!isset($result['home'][$metric]) && isset($statistics[$homeKey])) {
-                $result['home'][$metric] = $statistics[$homeKey];
+            if (!isset($result['home'][$metric])) {
+                if (isset($statistics[$homeKey1])) {
+                    $result['home'][$metric] = $statistics[$homeKey1];
+                } elseif (isset($statistics[$homeKey2])) {
+                    $result['home'][$metric] = $statistics[$homeKey2];
+                }
             }
 
-            if (!isset($result['away'][$metric]) && isset($statistics[$awayKey])) {
-                $result['away'][$metric] = $statistics[$awayKey];
+            if (!isset($result['away'][$metric])) {
+                if (isset($statistics[$awayKey1])) {
+                    $result['away'][$metric] = $statistics[$awayKey1];
+                } elseif (isset($statistics[$awayKey2])) {
+                    $result['away'][$metric] = $statistics[$awayKey2];
+                }
             }
         }
 
