@@ -376,7 +376,8 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        $firstGoalMinute = null;
+        // Encontrar primer gol antes del umbral
+        $firstGoalTeamBeforeThreshold = null;
         foreach ($events as $event) {
             if ($event['type'] !== 'GOAL') {
                 continue;
@@ -388,18 +389,26 @@ class QuestionEvaluationService
                 continue;
             }
 
-            $firstGoalMinute = $minute;
-            break;
+            if ($minute <= $thresholdMinutes) {
+                $firstGoalTeamBeforeThreshold = $event['team'];
+                break;
+            }
         }
 
-        $goalBeforeThreshold = $firstGoalMinute !== null && $firstGoalMinute <= $thresholdMinutes;
+        if (!$firstGoalTeamBeforeThreshold) {
+            // No hay gol antes del umbral - buscar "No"
+            foreach ($question->options as $option) {
+                if ($this->isNegativeOption(strtolower(trim($option->text)))) {
+                    $correctOptionIds[] = $option->id;
+                }
+            }
+            return $correctOptionIds;
+        }
 
+        // Hay gol antes del umbral - el event['team'] es el nombre del equipo (string)
+        // Comparar contra nombre del equipo en la opción
         foreach ($question->options as $option) {
-            $optionText = strtolower(trim($option->text));
-
-            if ($goalBeforeThreshold && $this->isAffirmativeOption($optionText)) {
-                $correctOptionIds[] = $option->id;
-            } elseif (!$goalBeforeThreshold && $this->isNegativeOption($optionText)) {
+            if (strpos(strtolower($option->text), strtolower($firstGoalTeamBeforeThreshold)) !== false) {
                 $correctOptionIds[] = $option->id;
             }
         }
