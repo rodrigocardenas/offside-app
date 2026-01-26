@@ -83,8 +83,26 @@
                     {{ $question->title }}
                 </div>
 
+                @php
+                    // Verificar si el partido ha comenzado
+                    $matchHasStarted = $question->football_match && $question->football_match->date <= now();
+                @endphp
+
+                <!-- Indicador cuando el partido ha comenzado -->
+                @if($matchHasStarted)
+                    <div class="bg-red-500 bg-opacity-20 border border-red-500 rounded-lg p-3 mb-4 text-center">
+                        <div style="color: #dc3545; font-weight: 600; font-size: 0.875rem;">
+                            <i class="fas fa-lock mr-2"></i>
+                            {{ __('views.groups.match_has_started') ?? 'El partido ha comenzado' }}
+                        </div>
+                        <p style="color: {{ $textSecondary }}; font-size: 0.75rem; margin-top: 0.25rem;">
+                            {{ __('views.groups.cannot_answer_after_start') ?? 'No puedes responder predicciones después de que inicia el partido' }}
+                        </p>
+                    </div>
+                @endif
+
                 <!-- Options (Answers) -->
-                @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now() && !$question->is_disabled) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5 && $question->can_modify))
+                @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now() && !$question->is_disabled && !$matchHasStarted) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5 && $question->can_modify && !$matchHasStarted))
                     <form action="{{ route('questions.answer', $question) }}" method="POST" class="group-question-form">
                         @csrf
                         <div class="grid grid-cols-2 gap-3 mb-5">

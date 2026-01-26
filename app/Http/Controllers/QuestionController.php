@@ -105,6 +105,24 @@ class QuestionController extends Controller
             );
         }
 
+        // Validar que el partido aún no haya comenzado (si es pregunta predictiva)
+        if ($question->type === 'predictive' && $question->football_match) {
+            if ($question->football_match->date <= Carbon::now()) {
+                Log::warning('Intento de responder pregunta predictiva después del inicio del partido', [
+                    'user_id' => auth()->id(),
+                    'question_id' => $question->id,
+                    'match_date' => $question->football_match->date,
+                    'current_time' => Carbon::now()
+                ]);
+                throw new QuestionException(
+                    'No puedes responder esta predicción. El partido ya ha comenzado.',
+                    $question->id,
+                    auth()->id(),
+                    'match_already_started'
+                );
+            }
+        }
+
         $request->validate([
             'question_option_id' => 'required|exists:question_options,id',
         ]);
