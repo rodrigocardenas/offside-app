@@ -258,33 +258,41 @@ Estos bugs impactan la UX pero no rompen funcionalidad crítica.
 
 ## 8. ⏱️ Hora del Partido Muestra Zona Horaria de App (Madrid) No del Dispositivo
 
+**Status:** ✅ **RESUELTO** (26 enero 2026)
+
 **Descripción:**  
-En el show de grupos, cuando se despliega la card de preguntas predictivas, la hora del partido se muestra en la zona horaria de la app (Madrid UTC+1), no en la zona horaria del dispositivo del usuario.
+En el show de grupos, cuando se desplegaba la card de preguntas predictivas, la hora del partido se mostraba en la zona horaria de la app (Madrid UTC+1), no en la zona horaria del dispositivo del usuario.
 
 **Impacto:**
 - 🟡 Medio: Confunde al usuario sobre cuándo es el partido
 - Especialmente problemático para usuarios en zonas horarias lejanas
 - Los usuarios pueden perder preguntas por "timing"
 
-**Ubicación del Código:**
-- Frontend: Componente de mostrar predicciones
-- Backend: Ya tiene soporte (DateTimeHelper)
-- Vistas Blade: Algunas pueden no usar conversión
+**Solución Implementada:**
 
-**Causa Probable:**
-- El frontend no está usando el helper de zona horaria
-- Se está mostrando directamente la hora UTC sin conversión
-- Falta de implementación de zona horaria del usuario
+### Backend
+✅ Nuevo método `toUserTimestampForCountdown()` en DateTimeHelper:
+- Convierte UTC → zona horaria del usuario
+- Retorna formato legible para JavaScript (Y-m-d H:i:s)
+- Usa `Auth::user()->timezone` si existe
 
-**Solución Recomendada:**
-1. Usar helper `DateTimeHelper.php` en vistas (ya existe)
-2. O implementar conversión en JavaScript con `Intl.DateTimeFormat`
-3. Detectar zona horaria del dispositivo
-4. Mostrar hora en esa zona horaria
+### Frontend
+✅ Nuevo Blade directive `@userTimestamp()`:
+- Reemplaza hardcoded `.timezone('Europe/Madrid')`
+- 3 vistas actualizadas (group-match-questions x2, group-social-question)
+- Countdown.js recibe hora correcta por zona
 
-**Archivos Relacionados:**
-- [app/Helpers/DateTimeHelper.php](app/Helpers/DateTimeHelper.php)
-- Vistas Blade de preguntas predictivas
+✅ **Horas de partidos ya correctas:**
+- Ya usaban `@userTime()` en líneas 60 y 72 de group-match-questions.blade.php
+
+**Archivos Modificados:**
+- [app/Helpers/DateTimeHelper.php](app/Helpers/DateTimeHelper.php#L103-L147)
+- [app/Providers/AppServiceProvider.php](app/Providers/AppServiceProvider.php#L52-L54)
+- [resources/views/components/groups/group-match-questions.blade.php](resources/views/components/groups/group-match-questions.blade.php#L162,L237)
+- [resources/views/components/groups/group-social-question.blade.php](resources/views/components/groups/group-social-question.blade.php#L158)
+
+**Documentación:**
+- [IMPLEMENTATION_BUG8_TIMEZONE.md](IMPLEMENTATION_BUG8_TIMEZONE.md) - Análisis completo
 
 ---
 

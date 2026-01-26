@@ -114,4 +114,36 @@ class DateTimeHelper
             'Australia/Sydney' => 'Sídney (UTC+11)',
         ];
     }
+
+    /**
+     * Obtener timestamp ISO 8601 en la zona horaria del usuario
+     * Usado para JavaScript countdowns que respetan la zona horaria local
+     *
+     * @param Carbon|string $date Fecha en UTC
+     * @param string|null $timezone Zona horaria (si no se proporciona, usa la del usuario)
+     * @return string Timestamp ISO 8601 en formato 'Y-m-d H:i:s'
+     */
+    public static function toUserTimestampForCountdown($date, $timezone = null)
+    {
+        // Obtener zona horaria del usuario o usar la por defecto
+        if (!$timezone && Auth::check()) {
+            $timezone = Auth::user()->timezone ?? config('app.timezone');
+        } elseif (!$timezone) {
+            $timezone = config('app.timezone');
+        }
+
+        // Si es string, asumir que está en UTC (formato de BD)
+        if (is_string($date)) {
+            $date = Carbon::createFromFormat('Y-m-d H:i:s', $date, 'UTC');
+        } else {
+            // Si es Carbon object desde el modelo, Laravel ya aplicó app.timezone
+            $date = $date->copy();
+            $hour = $date->format('Y-m-d H:i:s');
+            // Re-crear como UTC
+            $date = Carbon::createFromFormat('Y-m-d H:i:s', $hour, 'UTC');
+        }
+
+        // Convertir a zona horaria del usuario y retornar en formato legible
+        return $date->setTimezone($timezone)->format('Y-m-d H:i:s');
+    }
 }

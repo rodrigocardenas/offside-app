@@ -159,7 +159,7 @@
                         @if($question->is_disabled)
                             {{ __('views.groups.question_disabled') }}
                         @elseif($question->available_until->addHours(4) > now())
-                            <span class="countdown" data-time="{{ $question->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i') }}"></span>
+                            <span class="countdown" data-time="{{ @userTimestamp($question->available_until->addHours(4), 'Y-m-d H:i') }}"></span>
                         @else
                             {{ __('views.groups.match_finished') }}
                         @endif
@@ -234,7 +234,7 @@
                         @if($question->is_disabled)
                             {{ __('views.groups.question_disabled') }}
                         @elseif($question->available_until->addHours(4) > now())
-                            <span class="countdown" data-time="{{ $question->available_until->addHours(4)->timezone('Europe/Madrid')->format('Y-m-d H:i:s') }}"></span>
+                            <span class="countdown" data-time="{{ @userTimestamp($question->available_until->addHours(4), 'Y-m-d H:i:s') }}"></span>
                         @else
                             {{ __('views.groups.match_finished') }}
                         @endif

@@ -45,6 +45,10 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('utcTime', function ($expression) {
             return "<?php echo \\App\\Helpers\\DateTimeHelper::toUTC({$expression}); ?>";
         });
+
+        Blade::directive('userTimestamp', function ($expression) {
+            return "<?php echo \\App\\Helpers\\DateTimeHelper::toUserTimestampForCountdown({$expression}); ?>";
+        });
     }
 
     private function ensureViteManifestIsAccessible(): void
