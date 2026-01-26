@@ -166,7 +166,7 @@
                         @if($question->is_disabled)
                             {{ __('views.groups.question_disabled') }}
                         @elseif($isQuestionActive)
-                        sdd
+                            <span class="countdown" data-time="{{ $question->available_until->addHours(4)->format('Y-m-d H:i') }}"></span>
                         @else
                             {{ __('views.groups.match_finished') }}
                         @endif
@@ -244,7 +244,7 @@
                         @if($question->is_disabled)
                             {{ __('views.groups.question_disabled') }}
                         @elseif($isQuestionActive2)
-                        dfsd
+                            <span class="countdown" data-time="{{ $question->available_until->addHours(4)->format('Y-m-d H:i:s') }}"></span>
                         @else
                             {{ __('views.groups.match_finished') }}
                         @endif
