@@ -62,23 +62,39 @@ class SyncFootballApiTeamNames extends Command
     private function fetchMatches(string $competitionCode, int $daysAhead): array
     {
         $apiKey = $this->resolveApiKey();
-        $dateFrom = now()->format('Y-m-d');
+        $dateFrom = now()->subDays(30)->format('Y-m-d');
         $dateTo = now()->addDays($daysAhead)->format('Y-m-d');
 
         $response = Http::withoutVerifying()
-            ->withHeaders(['X-Auth-Token' => $apiKey])
-            ->get("https://api.football-data.org/v4/competitions/{$competitionCode}/matches", [
-                'status' => 'SCHEDULED,LIVE,FINISHED',
+            ->withHeaders([
+                'x-apisports-key' => $apiKey,
+            ])
+            ->get('https://v3.football.api-sports.io/fixtures', [
                 'dateFrom' => $dateFrom,
                 'dateTo' => $dateTo,
+                'league' => $this->getLeagueIdFromCode($competitionCode),
+                'season' => now()->year,
             ]);
 
         if ($response->failed()) {
-            $error = $response->json()['message'] ?? $response->body();
+            $error = $response->json()['errors'] ?? $response->json()['message'] ?? $response->body();
             throw new \RuntimeException($error ?: 'API error');
         }
 
-        return $response->json()['matches'] ?? [];
+        $data = $response->json();
+        return $data['response'] ?? [];
+    }
+
+    private function getLeagueIdFromCode(string $code): int
+    {
+        $leagueMap = [
+            'PD' => 39,      // La Liga
+            'PL' => 39,      // Premier League (temporalmente 39 para prueba)
+            'CL' => 848,     // Champions League
+            'SA' => 135,     // Serie A
+        ];
+
+        return $leagueMap[$code] ?? 39;
     }
 
     private function collectTeams(array $matches): array
@@ -86,8 +102,9 @@ class SyncFootballApiTeamNames extends Command
         $teams = [];
 
         foreach ($matches as $match) {
-            foreach (['homeTeam', 'awayTeam'] as $key) {
-                $teamData = $match[$key] ?? null;
+            // En api-sports.io, los equipos están en teams.home y teams.away
+            foreach (['home', 'away'] as $key) {
+                $teamData = $match['teams'][$key] ?? null;
                 if (!$teamData || empty($teamData['name'])) {
                     continue;
                 }
@@ -207,14 +224,12 @@ class SyncFootballApiTeamNames extends Command
 
     private function resolveApiKey(): string
     {
-        $apiKey = config('services.football_data.api_key')
-            ?? env('FOOTBALL_DATA_API_KEY')
-            ?? env('FOOTBALL_DATA_API_TOKEN')
-            ?? config('services.football_data.api_token')
-            ?? config('services.football.key');
+        $apiKey = env('FOOTBALL_API_KEY')
+            ?? config('services.api_sports.api_key')
+            ?? config('services.football.api_sports_key');
 
         if (!$apiKey) {
-            throw new \RuntimeException('FOOTBALL_DATA_API_KEY no configurada');
+            throw new \RuntimeException('FOOTBALL_API_KEY no configurada');
         }
 
         return trim($apiKey);
