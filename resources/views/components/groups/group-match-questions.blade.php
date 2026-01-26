@@ -158,7 +158,7 @@
                     </form>
 
                     @php
-                        $isQuestionActive = ($question->available_until->addHours(4)) > now();
+                        $isQuestionActive = $question->available_until->addHours(4)->greaterThan(now());
                     @endphp
                     <!-- Timer -->
                     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
@@ -236,7 +236,7 @@
                     </div>
 
                     @php
-                        $isQuestionActive2 = $question->available_until->addHours(4) > now();
+                        $isQuestionActive2 = $question->available_until->addHours(4)->greaterThan(now());
                     @endphp
                     <!-- Timer -->
                     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">

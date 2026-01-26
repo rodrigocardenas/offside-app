@@ -151,7 +151,7 @@
     @endif
 
     @php
-        $isSocialQuestionActive = $socialQuestion->available_until->addHours(4) > now();
+        $isSocialQuestionActive = $socialQuestion->available_until->addHours(4)->greaterThan(now());
     @endphp
     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
         <i class="fas fa-clock"></i>
