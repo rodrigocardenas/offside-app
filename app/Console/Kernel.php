@@ -40,12 +40,13 @@ class Kernel extends ConsoleKernel
                 ]);
             });
 
-        // 2️⃣ Cada hora (5 minutos después): Verificar respuestas de partidos ya terminados
+        // 2️⃣ Cada hora (15 minutos después): Verificar respuestas de partidos ya terminados
         // Este job DEPENDE de que UpdateFinishedMatchesJob haya marcado los partidos como FINISHED
+        // BUG #7 FIX: Aumentar timing gap de :05 a :15 para dar más tiempo a ProcessMatchBatchJob
         $schedule->job(new VerifyFinishedMatchesHourlyJob())
             ->hourly()
             ->timezone('America/Mexico_City')
-            ->at(':05')  // 5 minutos después de la hora
+            ->at(':15')  // 15 minutos después de la hora (era :05)
             ->name('verify-matches-hourly')
             ->withoutOverlapping(15)
             ->onSuccess(function () {
@@ -56,6 +57,15 @@ class Kernel extends ConsoleKernel
                     'error' => $exception->getMessage(),
                 ]);
             });
+
+        // 3️⃣ Cada hora (:20): Health check del ciclo de verificación (BUG #7 FIX)
+        // Monitorea que el flujo de resultados → verificación → puntos está funcionando
+        $schedule->job(new \App\Jobs\VerifyBatchHealthCheckJob())
+            ->hourly()
+            ->timezone('America/Mexico_City')
+            ->at(':20')  // 20 minutos después de la hora
+            ->name('verify-batch-health-check')
+            ->withoutOverlapping(10);
     }
 
     /**

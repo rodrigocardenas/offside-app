@@ -16,7 +16,7 @@ class ProcessMatchBatchJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 120; // 2 minutos por lote
+    public $timeout = 300; // 5 minutos por lote (BUG #7 FIX: Gemini puede tardar 30-60s)
     public $tries = 3;
 
     protected $matchIds;
@@ -131,7 +131,17 @@ class ProcessMatchBatchJob implements ShouldQueue
                             ])
                         ];
 
-                        $match->update($updateData);
+                        $updated = $match->update($updateData);
+                        
+                        // BUG #7 FIX: Validar que la actualización se persistió en BD
+                        if (!$updated) {
+                            Log::error("❌ CRÍTICO: No se pudo actualizar partido en BD", [
+                                'match_id' => $match->id,
+                                'home_team' => $match->home_team,
+                                'away_team' => $match->away_team,
+                            ]);
+                            throw new \Exception("Failed to update match {$match->id} in database");
+                        }
 
                         Log::info("✅ Partido {$match->id} actualizado desde Gemini", [
                             'score' => "{$homeScore} - {$awayScore}",

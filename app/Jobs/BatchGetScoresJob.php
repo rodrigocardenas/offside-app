@@ -22,7 +22,7 @@ class BatchGetScoresJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable, InteractsWithMatchStatistics;
 
     public $timeout = 600;
-    public $tries = 1;
+    public $tries = 3;  // BUG #7 FIX: Agregado reintentos (era 1) para manejar Gemini timeouts
 
     /** @var array<int> */
     protected array $matchIds;

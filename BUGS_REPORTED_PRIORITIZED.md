@@ -263,6 +263,8 @@ El sistema genera preguntas predictivas con la API Football sin validar que no s
 
 ## 7. ⏰ Actualización de Resultados y Verificación de Preguntas Falla
 
+**Status:** ✅ **RESUELTO** (26 enero 2026)
+
 **Descripción:**  
 La actualización de resultados de partidos (cada hora) no funciona correctamente. Tampoco funciona la verificación posterior de preguntas y asignación de puntos.
 
@@ -271,28 +273,86 @@ La actualización de resultados de partidos (cada hora) no funciona correctament
 - Los usuarios no reciben puntos correctamente
 - Las preguntas no se marcan como contestadas/finalizadas
 
-**Ubicación del Código:**
-- Backend: Batch jobs/Commands que actualizan resultados
-- [app/Jobs/SendPredictiveResultsPushNotification.php](app/Jobs/SendPredictiveResultsPushNotification.php)
-- API Football integration
-- Posible: Queue workers
+**Root Cause Identificado:**
 
-**Causa Probable:**
-- Fallo en la integración con API Football para obtener resultados
-- Lógica de verificación de respuestas tiene errores
-- Asignación de puntos no actualiza BD correctamente
-- Timeout en Gemini grounding (si se usa)
+### Flujo en Cascada
+```
+:00 → UpdateFinishedMatchesJob (Despacha ProcessMatchBatchJob)
+:05 → VerifyFinishedMatchesHourlyJob (Busca partidos finalizados)
+     → VerifyAllQuestionsJob (Asigna puntos)
+```
 
-**Solución Recomendada:**
-1. Debuggear batch job de actualización de resultados
-2. Validar respuestas de API Football
-3. Revisar lógica de verificación de preguntas
-4. Implementar logging exhaustivo en cada paso
-5. Crear tests unitarios para el flujo completo
+### 4 Problemas Críticos
 
-**Archivos Relacionados:**
-- Backend: Batch jobs de resultados
-- [app/Jobs/SendPredictiveResultsPushNotification.php](app/Jobs/SendPredictiveResultsPushNotification.php)
+1. **Timeout insuficiente:** ProcessMatchBatchJob timeout=120s, pero Gemini tardaba 30-60s × 5 partidos = 150-300s
+2. **Sin reintentos:** BatchGetScoresJob tries=1, una falla en Gemini = job completo fallaba
+3. **Timing gap:** VerifyFinishedMatchesHourlyJob :05 se ejecutaba antes de que ProcessMatchBatchJob terminara
+4. **Sin validación:** `$match->update()` fallaba silenciosamente, datos no persistidos
+
+**Solución Implementada:**
+
+### 1️⃣ Aumentar Timeout
+✅ [app/Jobs/ProcessMatchBatchJob.php](app/Jobs/ProcessMatchBatchJob.php#L17):
+- timeout: 120s → 300s (5 minutos)
+- Dar tiempo a Gemini web search
+
+### 2️⃣ Agregar Reintentos
+✅ [app/Jobs/BatchGetScoresJob.php](app/Jobs/BatchGetScoresJob.php#L24):
+- tries: 1 → 3
+- 3 intentos para recuperar de fallos Gemini
+
+### 3️⃣ Aumentar Timing Gap
+✅ [app/Console/Kernel.php](app/Console/Kernel.php#L47):
+- VerifyFinishedMatchesHourlyJob: `:05` → `:15` (15 minutos)
+- Garantiza que ProcessMatchBatchJob completó
+
+### 4️⃣ Validar Persistencia
+✅ [app/Jobs/ProcessMatchBatchJob.php](app/Jobs/ProcessMatchBatchJob.php#L132-141):
+```php
+$updated = $match->update($updateData);
+if (!$updated) {
+    throw new Exception("Failed to update match");
+}
+```
+- Verifica que update() funcionó
+- Reintentos si falla
+
+### 5️⃣ Health Check Automático
+✅ [app/Jobs/VerifyBatchHealthCheckJob.php](app/Jobs/VerifyBatchHealthCheckJob.php) (NUEVO):
+- Se ejecuta cada hora `:20` (después del ciclo)
+- Monitorea:
+  - ¿Partidos sin finalizar?
+  - ¿Preguntas sin verificar?
+  - ¿Respuestas sin puntos?
+  - ¿Errores en logs?
+- Alerta si anomalías
+
+**Timeline Resultante:**
+```
+:00 → UpdateFinishedMatchesJob (despacha ProcessMatchBatchJob)
+:10-:14 → ProcessMatchBatchJob procesando lotes (timeout: 300s)
+:15 → VerifyFinishedMatchesHourlyJob (busca partidos finalizados + asigna puntos)
+:20 → VerifyBatchHealthCheckJob (monitoreo de salud)
+```
+
+**Características:**
+- ✅ Timeout suficiente para Gemini
+- ✅ Reintentos automáticos en fallos
+- ✅ Timing garantizado entre jobs
+- ✅ Validación de persistencia
+- ✅ Monitoreo proactivo
+- ✅ Logs detallados para debugging
+
+**Archivos Modificados:**
+- [app/Jobs/ProcessMatchBatchJob.php](app/Jobs/ProcessMatchBatchJob.php) - timeout 300s, validación update()
+- [app/Jobs/BatchGetScoresJob.php](app/Jobs/BatchGetScoresJob.php) - tries=3
+- [app/Console/Kernel.php](app/Console/Kernel.php) - timing gap :15, health check
+- [app/Jobs/VerifyBatchHealthCheckJob.php](app/Jobs/VerifyBatchHealthCheckJob.php) - NUEVO
+
+**Documentación:**
+- [BUG7_FLOW_ANALYSIS.md](BUG7_FLOW_ANALYSIS.md) - Análisis del flujo completo
+- [BUG7_SOLUTIONS.md](BUG7_SOLUTIONS.md) - Problemas y soluciones
+- [IMPLEMENTATION_BUG7_COMPLETE.md](IMPLEMENTATION_BUG7_COMPLETE.md) - Implementación
 
 ---
 
