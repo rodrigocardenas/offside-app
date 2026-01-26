@@ -152,6 +152,8 @@ El contenido mostrado en la app móvil no se actualiza automáticamente. Solo se
 
 ## 5. 📱 Pull-to-Refresh No Está Disponible en App (Solo en Web)
 
+**Status:** ✅ **RESUELTO** (26 enero 2026)
+
 **Descripción:**  
 En la web, el gesto de recarga (swipe sostenido desde arriba) funciona correctamente. En la app móvil, este gesto no está disponible para actualizar la página.
 
@@ -160,24 +162,43 @@ En la web, el gesto de recarga (swipe sostenido desde arriba) funciona correctam
 - Los usuarios mobile no pueden recargar manualmente
 - Dependen completamente de la actualización automática
 
-**Ubicación del Código:**
-- Frontend: Componentes principales
-- [capacitor.config.ts](capacitor.config.ts#L1)
-- Posible: iOS/Android native code
+**Solución Implementada:**
 
-**Causa Probable:**
-- Gesto no manejado en contexto de Capacitor
-- Falta de implementación de Ionic `IonRefresher` o similar
-- Native pull-to-refresh no configurado
+### Librería Vanilla JavaScript
+✅ Creada clase `OffsidePullToRefresh` en [public/js/pull-to-refresh.js](public/js/pull-to-refresh.js):
+- Touch events para mobile
+- Indicador visual responsivo
+- Icono que rota con progreso
+- Spinner durante recarga
+- Sin dependencias externas
 
-**Solución Recomendada:**
-1. Implementar `IonRefresher` (si usa Ionic)
-2. O implementar gesto manual con librerías como `pulltorefresh.js`
-3. Llamar a `location.reload()` o refrescar datos
-4. Configurar native pull-to-refresh en Android/iOS
+### Integración
+✅ Script incluido en [resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php):
+- Detecta automáticamente mobile/Capacitor
+- No interfiere en desktop
+- Inicializa sin configuración manual
 
-**Archivos Relacionados:**
-- Componentes del frontend
+### Backend
+✅ Nuevo endpoint [POST /api/cache/clear-user](routes/api.php):
+- Limpia cache del usuario
+- Limpia cache de todos sus grupos
+- Protegido con auth:sanctum
+- Fallback a page reload
+
+**Características:**
+- ✅ Detección automática de mobile
+- ✅ Indicador visual con color dinámico
+- ✅ Threshold 80px para activar
+- ✅ Cache limpiado automáticamente
+- ✅ Confirmación visual de éxito
+
+**Archivos Modificados:**
+- [public/js/pull-to-refresh.js](public/js/pull-to-refresh.js) - Creado
+- [resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php#L49-L50)
+- [routes/api.php](routes/api.php#L38-L54)
+
+**Documentación:**
+- [IMPLEMENTATION_BUG5_PULL_TO_REFRESH.md](IMPLEMENTATION_BUG5_PULL_TO_REFRESH.md) - Análisis completo
 
 ---
 

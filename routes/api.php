@@ -30,6 +30,25 @@ Route::get('/competitions/{competition}/teams', function (App\Models\Competition
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);
+    Route::post('/cache/clear-user', function (Request $request) {
+        // Limpiar cache específico del usuario
+        $userId = $request->user()->id;
+
+        // Limpiar todos los caches relacionados con este usuario
+        \Illuminate\Support\Facades\Cache::forget('user_answers_' . $userId);
+        \Illuminate\Support\Facades\Cache::forget('user_groups_' . $userId);
+
+        // Limpiar caches de grupos del usuario
+        foreach ($request->user()->groups as $group) {
+            \Illuminate\Support\Facades\Cache::forget("group_{$group->id}_match_questions");
+            \Illuminate\Support\Facades\Cache::forget("group_{$group->id}_social_question");
+            \Illuminate\Support\Facades\Cache::forget("group_{$group->id}_user_answers");
+            \Illuminate\Support\Facades\Cache::forget("group_{$group->id}_show_data");
+        }
+
+        return response()->json(['success' => true, 'message' => 'Cache limpiado correctamente']);
+    });
 });
+
 Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store']);
 Route::post('/actualizar-token', [PushTokenController::class, 'update']);
