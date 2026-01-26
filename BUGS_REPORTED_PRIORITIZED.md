@@ -208,6 +208,8 @@ Estos bugs impactan directamente la funcionalidad core de predicciones deportiva
 
 ## 6. 🔄 Partidos Repetidos en Preguntas Predictivas
 
+**Status:** ✅ **RESUELTO** (26 enero 2026)
+
 **Descripción:**  
 El sistema genera preguntas predictivas con la API Football sin validar que no se generen partidos/preguntas duplicadas. Resulta en preguntas repetidas.
 
@@ -216,25 +218,46 @@ El sistema genera preguntas predictivas con la API Football sin validar que no s
 - Desperdicia datos de la API Football
 - Lógica predictiva no confiable
 
-**Ubicación del Código:**
-- Backend: Command/Job que genera preguntas predictivas
-- Posible: `app/Console/Commands/` 
-- API Football integration
+**Root Cause Identificado:**
+1. En `fillGroupPredictiveQuestions()` línea 218: Solo verificaba preguntas vigentes (`available_until > now()`)
+2. Cuando una pregunta expiraba (hace 5 min), se creaba OTRA para el mismo partido
+3. En `createQuestionFromTemplate()` línea 335: `firstOrCreate()` usaba `title` como clave, no `match_id` + `group_id`
 
-**Causa Probable:**
-- No existe validación de duplicados antes de crear preguntas
-- Lógica de selección de partidos no filtra existentes
-- Posible race condition en procesos paralelos
+**Solución Implementada:**
 
-**Solución Recomendada:**
-1. Antes de generar preguntas, verificar que no existan para ese partido
-2. Usar `whereNotExists()` en queries
-3. Agregar unique constraint en DB si no existe
-4. Implementar transacciones para evitar race conditions
+### 1. Actualizar Validación de Duplicados
+✅ [app/Traits/HandlesQuestions.php](app/Traits/HandlesQuestions.php#L218-L226):
+- Cambio: `available_until > now()` → `created_at > now()->subHours(24)`
+- Ahora considera preguntas expiradas en las últimas 24 horas
+- Previene crear pregunta si existe una reciente del mismo partido
 
-**Archivos Relacionados:**
-- Backend: Comando generador de preguntas
-- Modelos: PredictiveQuestion, Match
+### 2. Mejorar `firstOrCreate()` con Claves Correctas
+✅ [app/Traits/HandlesQuestions.php](app/Traits/HandlesQuestions.php#L335-L348):
+- Cambio: Claves `(title, group_id, match_id, template_question_id)` → `(match_id, group_id, template_question_id)`
+- Garantiza unicidad por (`match_id`, `group_id`, `template_question_id`)
+- Idempotente: job puede ejecutarse múltiples veces sin duplicados
+
+### 3. Validación en Model (Boot Hook)
+✅ [app/Models/Question.php](app/Models/Question.php#L32-L58):
+- Nuevo `boot()` method con validación en `creating()`
+- Verifica que no exista pregunta predictiva para (match_id, group_id) en últimas 24h
+- Lanza Exception si intenta crear duplicada
+- Registra en logs intentos bloqueados
+
+**Características:**
+- ✅ Preguntas expiradas no bloquean nuevas del mismo partido
+- ✅ Job idempotente: puede ejecutarse N veces sin duplicados
+- ✅ Protección de 3 capas: query filter + firstOrCreate keys + model validation
+- ✅ Preguntas sociales NO se ven afectadas
+- ✅ Logs registran intentos de duplicados
+
+**Archivos Modificados:**
+- [app/Traits/HandlesQuestions.php](app/Traits/HandlesQuestions.php) - Deduplicación en trait
+- [app/Models/Question.php](app/Models/Question.php) - Validación en modelo
+
+**Documentación:**
+- [IMPLEMENTATION_BUG6_DUPLICATE_QUESTIONS.md](IMPLEMENTATION_BUG6_DUPLICATE_QUESTIONS.md) - Análisis técnico
+- [TESTING_BUG6_DUPLICATE_PREVENTION.md](TESTING_BUG6_DUPLICATE_PREVENTION.md) - Guía de testing
 
 ---
 

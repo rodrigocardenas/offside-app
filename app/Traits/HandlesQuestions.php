@@ -215,12 +215,14 @@ trait HandlesQuestions
             ->orderBy('date')
             ->get();
 
-        // 3. Filtrar partidos que ya tengan pregunta vigente en el grupo
+        // 3. Filtrar partidos que ya tengan pregunta vigente o reciente (últimas 24 horas) en el grupo
+        // DEDUPLICATION FIX: Incluir preguntas expiradas en las últimas 24 horas
+        // para evitar crear duplicadas cuando una pregunta recién expiró
         $matchesSinPregunta = $matches->filter(function($match) use ($group) {
             return !\App\Models\Question::where('type', 'predictive')
                 ->where('group_id', $group->id)
                 ->where('match_id', $match->id)
-                ->where('available_until', '>', now())
+                ->where('created_at', '>', now()->subHours(24))
                 ->exists();
         });
 
@@ -350,9 +352,8 @@ trait HandlesQuestions
             }
 
             $question = Question::firstOrCreate([
-                'title' => $questionData['title'],
-                'group_id' => $questionData['group_id'],
                 'match_id' => $questionData['match_id'],
+                'group_id' => $questionData['group_id'],
                 'template_question_id' => $questionData['template_question_id']
             ], [
                 'type' => $template->type,
