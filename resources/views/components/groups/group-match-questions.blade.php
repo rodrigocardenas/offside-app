@@ -34,8 +34,12 @@
         <!-- Carrusel -->
         <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 flex-1 px-1 pb-4" id="predictiveQuestionsCarousel">
             @forelse($matchQuestions->where('type', 'predictive') as $question)
+                @php
+                    $questionExpired = $question->available_until->addHours(4) < now();
+                    $shouldDim = $question->is_disabled || $questionExpired;
+                @endphp
                 <!-- Prediction Section (Similar to HTML design) -->
-                <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" id="question{{ $question->id }}" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px; {{ $question->is_disabled || $question->available_until->addHours(4) < now() ? 'opacity-60;' : '' }}">
+                <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" id="question{{ $question->id }}" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px; {{ $shouldDim ? 'opacity-60;' : '' }}">
 
                 <!-- Prediction Header -->
                 <div class="text-center mb-5">
