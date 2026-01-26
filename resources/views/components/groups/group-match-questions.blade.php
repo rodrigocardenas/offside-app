@@ -158,7 +158,7 @@
                         <i class="fas fa-clock"></i>
                         @if($question->is_disabled)
                             {{ __('views.groups.question_disabled') }}
-                        @elseif($question->available_until->addHours(4) > now())
+                        @elseif(($question->available_until->addHours(4)) > now())
                             <span class="countdown" data-time="{{ @userTimestamp($question->available_until->addHours(4), 'Y-m-d H:i') }}"></span>
                         @else
                             {{ __('views.groups.match_finished') }}
