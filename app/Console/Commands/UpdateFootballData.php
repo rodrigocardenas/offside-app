@@ -66,9 +66,9 @@ class UpdateFootballData extends Command
 
         // Mapear competitionCode a leagueId de api-sports.io
         $leagueMap = [
-            'PD' => 39,      // La Liga
-            'PL' => 39,      // Premier League (usar 39 temporalmente)
-            'CL' => 848,     // Champions League
+            'PD' => 140,     // La Liga
+            'PL' => 39,      // Premier League
+            'CL' => 2,       // Champions League
             'SA' => 135,     // Serie A
         ];
 
