@@ -71,12 +71,12 @@
                         <div class="flex items-center justify-center gap-4 mb-5">
                             <div class="flex flex-col items-center gap-1">
                                 <img src="{{ $question->football_match->homeTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->homeTeam?->name }}">
-                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->homeTeam->name ?? '', 20, '') }}</span>
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->homeTeam->name ?? $question->football_match->home_team, 20, '') }}</span>
                             </div>
                             <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
                             <div class="flex flex-col items-center gap-1">
                                 <img src="{{ $question->football_match->awayTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->awayTeam?->name }}">
-                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->awayTeam->name ?? '', 20, '') }}</span>
+                                <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->awayTeam->name ?? $question->football_match->away_team, 20, '') }}</span>
                             </div>
                         </div>
                     @endif
