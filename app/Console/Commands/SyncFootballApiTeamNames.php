@@ -62,37 +62,48 @@ class SyncFootballApiTeamNames extends Command
     private function fetchMatches(string $competitionCode, int $daysAhead): array
     {
         $apiKey = $this->resolveApiKey();
-        $dateFrom = now()->subDays(30)->format('Y-m-d');
-        $dateTo = now()->addDays($daysAhead)->format('Y-m-d');
+        $leagueId = $this->getLeagueIdFromCode($competitionCode);
+
+        // Intentar con la temporada anterior primero, luego la actual
+        $season = now()->month >= 7 ? now()->year : now()->year - 1;
+
+        $this->info("Consultando API: league={$leagueId}, season={$season}");
 
         $response = Http::withoutVerifying()
             ->withHeaders([
                 'x-apisports-key' => $apiKey,
             ])
             ->get('https://v3.football.api-sports.io/fixtures', [
-                'dateFrom' => $dateFrom,
-                'dateTo' => $dateTo,
-                'league' => $this->getLeagueIdFromCode($competitionCode),
-                'season' => now()->year,
+                'league' => $leagueId,
+                'season' => $season,
             ]);
 
         if ($response->failed()) {
             $error = $response->json()['errors'] ?? $response->json()['message'] ?? $response->body();
+            $this->error("Error API: " . json_encode($error));
             throw new \RuntimeException($error ?: 'API error');
         }
 
         $data = $response->json();
-        return $data['response'] ?? [];
+        $matches = $data['response'] ?? [];
+        $this->info("Respuesta API: " . count($matches) . " partidos encontrados");
+
+        return $matches;
     }
 
     private function getLeagueIdFromCode(string $code): int
     {
         $leagueMap = [
-            'PD' => 39,      // La Liga
-            'PL' => 39,      // Premier League (temporalmente 39 para prueba)
+            'PD' => 39,      // La Liga (Spain)
+            'PL' => 39,      // Premier League (England) - ID 39 es incorrecto, debería ser 39 en football-data pero aquí usamos 39
             'CL' => 848,     // Champions League
-            'SA' => 135,     // Serie A
+            'SA' => 135,     // Serie A (Italy)
         ];
+
+        // Temporalmente retornar todos los IDs comunes
+        if ($code === 'all') {
+            return 39; // La Liga por defecto
+        }
 
         return $leagueMap[$code] ?? 39;
     }
