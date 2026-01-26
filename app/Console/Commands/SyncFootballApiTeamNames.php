@@ -224,12 +224,11 @@ class SyncFootballApiTeamNames extends Command
 
     private function resolveApiKey(): string
     {
-        $apiKey = env('FOOTBALL_API_KEY')
-            ?? config('services.api_sports.api_key')
-            ?? config('services.football.api_sports_key');
+        $apiKey = config('services.football.key')
+            ?? config('services.football_data.api_token');
 
         if (!$apiKey) {
-            throw new \RuntimeException('FOOTBALL_API_KEY no configurada');
+            throw new \RuntimeException('FOOTBALL_API_KEY no configurada en config/services.php');
         }
 
         return trim($apiKey);
