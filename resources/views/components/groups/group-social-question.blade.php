@@ -158,7 +158,7 @@
         @if($socialQuestion->is_disabled)
             {{ __('views.groups.question_disabled') }}
         @elseif($isSocialQuestionActive)
-            <span class="countdown" data-time="{{ @userTimestamp($socialQuestion->available_until->addHours(4), 'Y-m-d H:i:s') }}"></span>
+dsf
         @else
             {{ __('views.groups.match_finished') }}
         @endif
