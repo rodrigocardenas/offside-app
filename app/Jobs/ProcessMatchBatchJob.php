@@ -132,7 +132,7 @@ class ProcessMatchBatchJob implements ShouldQueue
                         ];
 
                         $updated = $match->update($updateData);
-                        
+
                         // BUG #7 FIX: Validar que la actualización se persistió en BD
                         if (!$updated) {
                             Log::error("❌ CRÍTICO: No se pudo actualizar partido en BD", [

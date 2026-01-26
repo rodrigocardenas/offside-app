@@ -14,14 +14,14 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * BUG #7 FIX: Health check job para monitorear el flujo de verificación
- * 
+ *
  * Se ejecuta después del ciclo de verificación (:20)
  * Verifica:
  * 1. ¿Cuántos partidos siguen sin finalizar?
  * 2. ¿Cuántas preguntas están sin verificar?
  * 3. ¿Cuántos usuarios tienen puntos = 0?
  * 4. ¿Hubo timeouts o errores en logs?
- * 
+ *
  * Si hay anomalías → Envía alerta a admin
  */
 class VerifyBatchHealthCheckJob implements ShouldQueue
@@ -43,7 +43,7 @@ class VerifyBatchHealthCheckJob implements ShouldQueue
 
         try {
             $health = $this->performHealthCheck();
-            
+
             if ($health['status'] === 'ALERT') {
                 Log::alert('⚠️ BUG #7: ANOMALÍA DETECTADA EN FLUJO DE VERIFICACIÓN', $health);
                 // Aquí se podría enviar email/notificación a admin
@@ -132,16 +132,16 @@ class VerifyBatchHealthCheckJob implements ShouldQueue
     {
         // Búsqueda simple en logs
         // En producción, podrías usar un servicio de logs (Sentry, Datadog, etc)
-        
+
         $logFile = storage_path('logs/laravel.log');
-        
+
         if (!file_exists($logFile)) {
             return 0;
         }
 
         $errors = 0;
         $handle = fopen($logFile, 'r');
-        
+
         if ($handle) {
             while (($line = fgets($handle)) !== false) {
                 // Buscar errores en los últimos 2 horas
