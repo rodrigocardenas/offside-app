@@ -138,13 +138,14 @@ class CleanupAndSyncTeamNames extends Command
         $season = now()->month >= 7 ? now()->year : now()->year - 1;
 
         $leagues = [
-            'La Liga' => 39,
+            'La Liga' => 140,
             'Premier League' => 39,
-            'Champions League' => 848,
+            'Champions League' => 2,
             'Serie A' => 135,
         ];
 
         $totalUpdated = 0;
+        $totalCreated = 0;
 
         foreach ($leagues as $leagueName => $leagueId) {
             $this->line("Obteniendo {$leagueName} (ID: {$leagueId})...");
@@ -170,26 +171,67 @@ class CleanupAndSyncTeamNames extends Command
                     $homeTeam = $match['teams']['home'] ?? null;
                     $awayTeam = $match['teams']['away'] ?? null;
 
-                    if ($homeTeam && !isset($apiTeams[$homeTeam['name']])) {
-                        $apiTeams[$homeTeam['name']] = $homeTeam['name'];
+                    if ($homeTeam && !isset($apiTeams[$homeTeam['id']])) {
+                        $apiTeams[$homeTeam['id']] = [
+                            'api_id' => $homeTeam['id'],
+                            'api_name' => $homeTeam['name'],
+                        ];
                     }
-                    if ($awayTeam && !isset($apiTeams[$awayTeam['name']])) {
-                        $apiTeams[$awayTeam['name']] = $awayTeam['name'];
+                    if ($awayTeam && !isset($apiTeams[$awayTeam['id']])) {
+                        $apiTeams[$awayTeam['id']] = [
+                            'api_id' => $awayTeam['id'],
+                            'api_name' => $awayTeam['name'],
+                        ];
                     }
                 }
 
-                // Actualizar equipos
-                foreach ($apiTeams as $apiName) {
-                    $team = $this->findTeamByName($apiName);
+                // Actualizar o crear equipos
+                foreach ($apiTeams as $apiTeamData) {
+                    $apiName = $apiTeamData['api_name'];
+                    $apiId = $apiTeamData['api_id'];
+
+                    // Primero buscar por ID exacto
+                    $team = Team::where('external_id', $apiId)->first();
+
+                    // Si no existe, buscar por nombre
+                    if (!$team) {
+                        $team = $this->findTeamByName($apiName);
+                    }
 
                     if ($team) {
+                        // Actualizar el equipo encontrado
+                        $changed = false;
+
                         if ($team->api_name !== $apiName) {
-                            $team->update(['api_name' => $apiName]);
-                            $this->line("  ✓ {$team->name} → {$apiName}");
+                            $this->line("    ✓ {$team->name} → api_name: {$apiName}");
+                            $team->api_name = $apiName;
+                            $changed = true;
+                        }
+
+                        if (!$team->external_id && $apiId) {
+                            $team->external_id = $apiId;
+                            $changed = true;
+                        }
+
+                        if ($changed) {
+                            $team->save();
                             $totalUpdated++;
                         }
                     } else {
-                        $this->line("  ⚠ No encontrado en BD: {$apiName}");
+                        // Crear nuevo equipo si no existe
+                        try {
+                            $team = Team::create([
+                                'name' => $apiName,
+                                'api_name' => $apiName,
+                                'external_id' => $apiId,
+                                'short_name' => $this->generateShortName($apiName),
+                            ]);
+
+                            $this->line("    ✨ NUEVO: {$apiName}");
+                            $totalCreated++;
+                        } catch (\Exception $e) {
+                            $this->warn("    ⚠ Error: {$apiName} - " . $e->getMessage());
+                        }
                     }
                 }
 
@@ -203,32 +245,65 @@ class CleanupAndSyncTeamNames extends Command
 
         $this->info("═════════════════════════════════════════");
         $this->info("✅ {$totalUpdated} equipos actualizados");
+        $this->info("✨ {$totalCreated} equipos creados");
         $this->info("═════════════════════════════════════════");
         $this->newLine();
     }
 
     private function findTeamByName(string $apiName): ?Team
     {
-        $normalized = $this->normalizeTeamName($apiName);
+        // Estrategia CONSERVADORA: Solo búsquedas exactas
+        // Por orden de prioridad:
+        // 1. Por name exacto
+        // 2. Por api_name exacto (si ya fue sincronizado)
+        // 3. Por normalización exacta
+        // Si nada funciona, retorna NULL para crear nuevo
 
-        // Intento 1: Coincidencia exacta normalizada
-        foreach (Team::all() as $team) {
-            if ($this->normalizeTeamName($team->name) === $normalized) {
-                return $team;
+        // Intento 1: Búsqueda por nombre EXACTO
+        $team = Team::where('name', $apiName)->first();
+        if ($team) return $team;
+
+        // Intento 2: Búsqueda por api_name exacto
+        $team = Team::where('api_name', $apiName)->first();
+        if ($team) return $team;
+
+        // Intento 3: Búsqueda por normalización exacta
+        $normalized = $this->normalizeTeamName($apiName);
+        foreach (Team::all() as $candidate) {
+            if ($this->normalizeTeamName($candidate->name) === $normalized) {
+                return $candidate;
             }
         }
 
-        // Intento 2: Búsqueda por nombre similar
-        return Team::where('name', 'like', '%' . $apiName . '%')->first()
-            ?? Team::where('api_name', 'like', '%' . $apiName . '%')->first();
+        // No encontrado - retorna NULL para crear nuevo
+        return null;
+    }
+
+    private function generateShortName(string $name): string
+    {
+        $words = explode(' ', trim($name));
+        $shortName = '';
+
+        foreach ($words as $i => $word) {
+            if ($i >= 2) break; // Máximo 2 primeras palabras
+            $shortName .= mb_substr($word, 0, 1, 'UTF-8');
+        }
+
+        // Si quedó corto, rellenar con caracteres ASCII seguros
+        while (strlen($shortName) < 3) {
+            $shortName .= 'X';
+        }
+
+        return mb_substr($shortName, 0, 3, 'UTF-8');
     }
 
     private function normalizeTeamName(string $name): string
     {
-        $name = strtolower(trim($name));
+        // Convertir a minúsculas
+        $name = strtolower($name);
 
         // Remover sufijos comunes
-        $suffixes = ['fc', 'cf', 'ud', 'sad', 'club', 'ac', 'bc', 'cd', 'sc', 'calcio', 'sporting', 'athletic'];
+        $suffixes = ['fc', 'cf', 'ud', 'sad', 'club', 'ac', 'bc', 'cd', 'sc', 'calcio', 'sporting', 'athletic', 'as', 'ss', 'ssd', 'asd'];
         foreach ($suffixes as $suffix) {
             $name = preg_replace('/\b' . preg_quote($suffix, '/') . '\b/u', '', $name);
         }
