@@ -150,11 +150,14 @@
         </div>
     @endif
 
+    @php
+        $isSocialQuestionActive = $socialQuestion->available_until->addHours(4) > now();
+    @endphp
     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
         <i class="fas fa-clock"></i>
         @if($socialQuestion->is_disabled)
             {{ __('views.groups.question_disabled') }}
-        @elseif($socialQuestion->available_until->addHours(4) > now())
+        @elseif($isSocialQuestionActive)
             <span class="countdown" data-time="{{ @userTimestamp($socialQuestion->available_until->addHours(4), 'Y-m-d H:i:s') }}"></span>
         @else
             {{ __('views.groups.match_finished') }}

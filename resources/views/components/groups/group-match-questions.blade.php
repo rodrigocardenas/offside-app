@@ -157,7 +157,20 @@
                         </div>
                     </form>
 
-
+                    @php
+                        $isQuestionActive = ($question->available_until->addHours(4)) > now();
+                    @endphp
+                    <!-- Timer -->
+                    <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
+                        <i class="fas fa-clock"></i>
+                        @if($question->is_disabled)
+                            {{ __('views.groups.question_disabled') }}
+                        @elseif($isQuestionActive)
+                            <span class="countdown" data-time="{{ @userTimestamp($question->available_until->addHours(4), 'Y-m-d H:i') }}"></span>
+                        @else
+                            {{ __('views.groups.match_finished') }}
+                        @endif
+                    </div>
                 @else
                     <!-- Display Results -->
                     <div class="grid grid-cols-2 gap-3 mb-5">
@@ -222,7 +235,20 @@
                         @endforeach
                     </div>
 
-
+                    @php
+                        $isQuestionActive2 = $question->available_until->addHours(4) > now();
+                    @endphp
+                    <!-- Timer -->
+                    <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
+                        <i class="fas fa-clock"></i>
+                        @if($question->is_disabled)
+                            {{ __('views.groups.question_disabled') }}
+                        @elseif($isQuestionActive2)
+                            <span class="countdown" data-time="{{ @userTimestamp($question->available_until->addHours(4), 'Y-m-d H:i:s') }}"></span>
+                        @else
+                            {{ __('views.groups.match_finished') }}
+                        @endif
+                    </div>
                 @endif
 
                 <!-- Like/Dislike Buttons -->
