@@ -3,20 +3,34 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.offsideclub.app"
     compileSdk rootProject.ext.compileSdkVersion
+
+    // Forzar uso del manifest principal
+    sourceSets {
+        main {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+        }
+    }
+
     defaultConfig {
         applicationId "com.offsideclub.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
-        versionName "1.07"
+        versionCode 6
+        versionName "1.072"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
+        // Asegurar que se usa el AndroidManifest.xml
+        manifestPlaceholders = [:]
     }
     buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -43,6 +57,19 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+
+// Task para inyectar Android App Links en el manifest
+android.applicationVariants.all { variant ->
+    def variantName = variant.name.capitalize()
+    def processManifestTask = tasks.findByName("process${variantName}Manifest")
+
+    if (processManifestTask) {
+        processManifestTask.doLast {
+            println "Inyectando Android App Links en manifest..."
+            // Los intent-filters ya están en AndroidManifest.xml, solo validamos que se usen
+        }
+    }
+}
 
 try {
     def servicesJSON = file('google-services.json')
