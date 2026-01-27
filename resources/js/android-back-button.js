@@ -24,9 +24,12 @@ class AndroidBackButtonHandler {
             const { App } = window.Capacitor?.Plugins || {};
 
             if (!App) {
-                console.error('[AndroidBackButton] App plugin no disponible');
+                console.error('[AndroidBackButton] App plugin no disponible. Plugins:',
+                    Object.keys(window.Capacitor?.Plugins || {}).join(', '));
                 return;
             }
+
+            console.log('[AndroidBackButton] App plugin disponible, agregando listener...');
 
             // Escuchar el evento del botón back
             App.addListener('backButton', async (event) => {
@@ -44,9 +47,14 @@ class AndroidBackButtonHandler {
      * Detectar si la app está corriendo en Capacitor
      */
     isCapacitorApp() {
-        return typeof window.Capacitor !== 'undefined' &&
-               typeof window.Capacitor.isNativePlatform === 'function' &&
-               window.Capacitor.isNativePlatform();
+        // En Capacitor (nativo), simplemente window.Capacitor existe
+        // No necesitamos llamar a isNativePlatform() que puede no estar disponible
+        const hasCapacitor = typeof window.Capacitor !== 'undefined';
+        if (hasCapacitor) {
+            console.log('[AndroidBackButton] Capacitor detectado. Plugins disponibles:',
+                Object.keys(window.Capacitor?.Plugins || {}).join(', '));
+        }
+        return hasCapacitor;
     }
 
     /**
