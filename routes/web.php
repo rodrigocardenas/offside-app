@@ -30,7 +30,32 @@ use App\Http\Controllers\MatchGroupsController;
 |
 */
 
-// Rutas de autenticación
+// Rutas públicas sin autenticación
+Route::get('/.well-known/assetlinks.json', function () {
+    $filePath = public_path('.well-known/assetlinks.json');
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+    $content = file_get_contents($filePath);
+    return response($content, 200, [
+        'Content-Type' => 'application/json',
+        'Access-Control-Allow-Origin' => '*'
+    ]);
+})->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+// Ruta alternativa: /assetlinks.json (para Android App Links como fallback)
+Route::get('/assetlinks.json', function () {
+    $filePath = public_path('.well-known/assetlinks.json');
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+    $content = file_get_contents($filePath);
+    return response($content, 200, [
+        'Content-Type' => 'application/json',
+        'Access-Control-Allow-Origin' => '*'
+    ]);
+})->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('login', [LoginController::class, 'login']);

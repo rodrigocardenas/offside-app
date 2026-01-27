@@ -1,0 +1,10 @@
+# Permitir acceso a archivos en .well-known/
+<IfModule mod_rewrite.c>
+    RewriteEngine Off
+</IfModule>
+
+# Headers para assetlinks.json
+<Files "assetlinks.json">
+    Header set Content-Type "application/json"
+    Header set Access-Control-Allow-Origin "*"
+</Files>
