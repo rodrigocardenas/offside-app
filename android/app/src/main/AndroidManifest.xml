@@ -30,26 +30,15 @@
                 <data android:scheme="offsideclub" />
             </intent-filter>
 
-            <!-- Android App Links para HTTPS URLs: /invite/{code} -->
-            <intent-filter android:autoVerify="true">
+            <!-- Android App Links para HTTPS URLs: app.offsideclub.es -->
+            <!-- Esta intención intentará abrirse primero, sin autoVerify -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="https"
-                    android:host="app.offsideclub.es"
-                    android:path="/invite/*" />
-            </intent-filter>
-
-            <!-- Android App Links para HTTPS URLs: /groups/invite/{code} -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="app.offsideclub.es"
-                    android:path="/groups/invite/*" />
+                    android:host="app.offsideclub.es" />
             </intent-filter>
 
         </activity>

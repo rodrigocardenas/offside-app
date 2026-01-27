@@ -1,0 +1,21 @@
+task printSHA256 {
+    doLast {
+        def keystorePath = System.getProperty("user.home") + "/.android/debug.keystore"
+        def keystoreFile = new File(keystorePath)
+        
+        if (keystoreFile.exists()) {
+            println("Keystore encontrado: $keystorePath")
+            
+            def process = "keytool -list -v -keystore $keystorePath -alias androiddebugkey -storepass android -keypass android".execute()
+            def output = process.text
+            
+            output.eachLine { line ->
+                if (line.contains("SHA256")) {
+                    println(line)
+                }
+            }
+        } else {
+            println("Keystore no encontrado")
+        }
+    }
+}
