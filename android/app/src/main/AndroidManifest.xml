@@ -52,6 +52,20 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Broadcast Receiver para interceptar deep links globalmente -->
+        <receiver
+            android:name=".DeepLinkReceiver"
+            android:exported="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="app.offsideclub.es" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- Permissions -->
