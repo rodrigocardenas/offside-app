@@ -299,8 +299,23 @@
                 if (!modal || !messageArea) {
                     return;
                 }
-                const message = `¡Únete al grupo "${groupName}" en Offside Club!\n\n${inviteUrl}\n\n¡Ven a competir con nosotros!`;
+                
+                // Extraer el código del grupo de la URL
+                const code = inviteUrl.split('/').pop();
+                
+                // Crear URLs: web y deep link
+                const webUrl = window.location.origin + '/groups/invite/' + code;
+                const deepLink = 'offsideclub://invite/' + code;
+                
+                // Mensaje con ambas URLs
+                const message = `¡Únete al grupo "${groupName}" en Offside Club!\n\n${deepLink}\n\n¡Ven a competir con nosotros!`;
                 messageArea.value = message;
+                
+                // Guardar URLs para luego usarlas en compartir
+                messageArea.dataset.deepLink = deepLink;
+                messageArea.dataset.webUrl = webUrl;
+                messageArea.dataset.code = code;
+                
                 modal.style.display = 'flex';
             };
 
@@ -331,7 +346,13 @@
                 if (!messageArea) {
                     return;
                 }
-                const text = messageArea.value;
+                
+                const deepLink = messageArea.dataset.deepLink || '';
+                const webUrl = messageArea.dataset.webUrl || '';
+                
+                // Mensaje con el deep link para apps móviles
+                const text = `¡Únete al grupo en Offside Club!\n\n${deepLink}\n\nSi tienes la app instalada, este link te llevará directamente. Si no, puedes usar: ${webUrl}\n\n¡Ven a competir con nosotros!`;
+                
                 const encodedMessage = encodeURIComponent(text);
                 const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
