@@ -30,6 +30,23 @@
                 <data android:scheme="offsideclub" />
             </intent-filter>
 
+            <!-- Android App Links para HTTPS URLs: app.offsideclub.es/invite/* -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Ruta corta: /invite/{code} -->
+                <data
+                    android:scheme="https"
+                    android:host="app.offsideclub.es"
+                    android:path="/invite/*" />
+                <!-- Ruta alternativa: /groups/invite/{code} -->
+                <data
+                    android:scheme="https"
+                    android:host="app.offsideclub.es"
+                    android:path="/groups/invite/*" />
+            </intent-filter>
+
         </activity>
 
         <provider
