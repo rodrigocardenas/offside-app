@@ -303,17 +303,18 @@
                 // Extraer el código del grupo de la URL
                 const code = inviteUrl.split('/').pop();
                 
-                // Crear URLs: web y deep link
-                const webUrl = window.location.origin + '/groups/invite/' + code;
-                const deepLink = 'offsideclub://invite/' + code;
+                // Crear URL clickeable: inviteUrl corta
+                // WhatsApp la reconocerá como URL válida y la hará clickeable
+                const inviteUrlShort = window.location.origin + '/invite/' + code;
+                const inviteUrlFull = window.location.origin + '/groups/invite/' + code;
                 
-                // Mensaje con ambas URLs
-                const message = `¡Únete al grupo "${groupName}" en Offside Club!\n\n${deepLink}\n\n¡Ven a competir con nosotros!`;
+                // Mensaje con URL HTTPS clickeable en WhatsApp
+                const message = `¡Únete al grupo "${groupName}" en Offside Club!\n\n${inviteUrlShort}\n\n¡Ven a competir con nosotros!`;
                 messageArea.value = message;
                 
-                // Guardar URLs para luego usarlas en compartir
-                messageArea.dataset.deepLink = deepLink;
-                messageArea.dataset.webUrl = webUrl;
+                // Guardar URLs para luego usarlas
+                messageArea.dataset.inviteUrl = inviteUrlShort;
+                messageArea.dataset.inviteUrlFull = inviteUrlFull;
                 messageArea.dataset.code = code;
                 
                 modal.style.display = 'flex';
@@ -347,12 +348,10 @@
                     return;
                 }
                 
-                const deepLink = messageArea.dataset.deepLink || '';
-                const webUrl = messageArea.dataset.webUrl || '';
+                const text = messageArea.value;
                 
-                // Mensaje con el deep link para apps móviles
-                const text = `¡Únete al grupo en Offside Club!\n\n${deepLink}\n\nSi tienes la app instalada, este link te llevará directamente. Si no, puedes usar: ${webUrl}\n\n¡Ven a competir con nosotros!`;
-                
+                // Enviar mensaje con URL HTTPS clickeable
+                // WhatsApp reconocerá la URL y la hará clickeable automáticamente
                 const encodedMessage = encodeURIComponent(text);
                 const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank', 'noopener,noreferrer');

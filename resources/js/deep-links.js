@@ -72,10 +72,15 @@ class DeepLinksHandler {
                 }
             }
 
-            if (host === 'invite') {
-                const inviteToken = pathname.replace(/\//g, '');
-                if (inviteToken) {
-                    this.navigateTo(`/invite/${inviteToken}`);
+            // Soportar: offsideclub://invite/code O https://app.offsideclub.es/invite/code
+            if (host === 'invite' || pathname.includes('/invite/')) {
+                // Extraer el código desde el pathname
+                const parts = pathname.split('/').filter(p => p);
+                const codeIndex = parts.indexOf('invite');
+                const inviteCode = codeIndex >= 0 ? parts[codeIndex + 1] : pathname.replace(/\//g, '');
+                
+                if (inviteCode) {
+                    this.navigateTo(`/invite/${inviteCode}`);
                     return;
                 }
             }

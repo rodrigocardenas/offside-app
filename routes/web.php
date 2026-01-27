@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('competitions', CompetitionController::class);
 
     Route::get('/groups/invite/{code}', [GroupController::class, 'joinByInvite'])->name('groups.invite');
+    Route::get('/invite/{code}', [GroupController::class, 'joinByInvite'])->name('invite'); // Atajo para deep links
 
     Route::get('/test-questions', [GroupController::class, 'testGenerateQuestions'])->middleware(['auth']);
 
