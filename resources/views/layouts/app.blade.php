@@ -52,13 +52,6 @@
     <!-- Pull-to-Refresh (solo en mobile/Capacitor) -->
     <script src="{{ asset('js/pull-to-refresh.js') }}"></script>
 
-    <!-- Android Back Button Handler (solo en Capacitor) -->
-    <script type="module">
-        import { AndroidBackButtonHandler } from '{{ asset('js/android-back-button.js') }}';
-        const handler = new AndroidBackButtonHandler();
-        handler.init();
-    </script>
-
     @stack('styles')
     @stack('scripts')
 </head>

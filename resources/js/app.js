@@ -3,6 +3,7 @@ import Alpine from 'alpinejs';
 import '@fortawesome/fontawesome-free/js/all';
 import './header-dropdown';
 import './navigation';
+import './android-back-button';
 
 window.Alpine = Alpine;
 
