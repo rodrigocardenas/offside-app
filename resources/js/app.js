@@ -5,6 +5,7 @@ import './header-dropdown';
 import './navigation';
 import './android-back-button';
 import './pull-to-refresh';
+import './deep-links';
 
 window.Alpine = Alpine;
 
