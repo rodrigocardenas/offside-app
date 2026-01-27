@@ -4,6 +4,7 @@ import '@fortawesome/fontawesome-free/js/all';
 import './header-dropdown';
 import './navigation';
 import './android-back-button';
+import './pull-to-refresh';
 
 window.Alpine = Alpine;
 
