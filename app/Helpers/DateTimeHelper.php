@@ -116,14 +116,15 @@ class DateTimeHelper
     }
 
     /**
-     * Obtener timestamp ISO 8601 en la zona horaria del usuario
+     * Obtener timestamp en la zona horaria del usuario con formato personalizado
      * Usado para JavaScript countdowns que respetan la zona horaria local
      *
      * @param Carbon|string $date Fecha en UTC
+     * @param string $format Formato deseado (ej: 'Y-m-d H:i' o 'Y-m-d H:i:s')
      * @param string|null $timezone Zona horaria (si no se proporciona, usa la del usuario)
-     * @return string Timestamp ISO 8601 en formato 'Y-m-d H:i:s'
+     * @return string Timestamp en formato especificado en la zona del usuario
      */
-    public static function toUserTimestampForCountdown($date, $timezone = null)
+    public static function toUserTimestampForCountdown($date, $format = 'Y-m-d H:i:s', $timezone = null)
     {
         // Obtener zona horaria del usuario o usar la por defecto
         if (!$timezone && Auth::check()) {
@@ -143,7 +144,7 @@ class DateTimeHelper
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $hour, 'UTC');
         }
 
-        // Convertir a zona horaria del usuario y retornar en formato legible
-        return $date->setTimezone($timezone)->format('Y-m-d H:i:s');
+        // Convertir a zona horaria del usuario y retornar en formato solicitado
+        return $date->setTimezone($timezone)->format($format);
     }
 }
