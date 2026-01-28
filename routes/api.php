@@ -28,16 +28,19 @@ Route::get('/competitions/{competition}/teams', function (App\Models\Competition
 });
 
 
-// POST timezone - Acepta auth:sanctum Y sesión de navegador
-Route::post('/set-timezone', function (Request $request) {
+// POST timezone - Acepta AMBOS: sesión de navegador Y Bearer token (Sanctum)
+Route::middleware('auth.session-or-sanctum')->post('/set-timezone', function (Request $request) {
     $request->validate([
         'timezone' => 'required|string|timezone',
     ]);
 
     $user = $request->user();
     if (!$user) {
-        return response()->json(['error' => 'No autenticado'], 401);
+        \Illuminate\Support\Facades\Log::warning("❌ Intento de actualizar timezone sin autenticación");
+        return response()->json(['error' => 'Unauthenticated', 'message' => 'No autenticado'], 401);
     }
+
+    \Illuminate\Support\Facades\Log::info("🔍 Usuario autenticado: {$user->id} ({$user->name}) - Timezone: {$request->timezone}");
 
     $oldTimezone = $user->timezone;
     
@@ -58,7 +61,7 @@ Route::post('/set-timezone', function (Request $request) {
         'previous_timezone' => $oldTimezone,
         'synced_at' => now()->toIso8601String(),
     ]);
-})->middleware('auth');
+})->name('api.set-timezone');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);

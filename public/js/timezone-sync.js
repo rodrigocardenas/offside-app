@@ -28,7 +28,6 @@ window.TZSync.getDeviceTimezone = function() {
 };
 
 /**
-
  * Sincronizar timezone con servidor
  */
 window.TZSync.syncTimezone = function(timezone, attemptNum, maxAttempts) {
@@ -37,12 +36,24 @@ window.TZSync.syncTimezone = function(timezone, attemptNum, maxAttempts) {
 
     console.log('%c🔄 Intento ' + attemptNum + '/' + maxAttempts + ' - Sincronizando: ' + timezone, 'color: #00deb0; font-weight: bold;');
 
+    // Preparar headers
+    var headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    };
+
+    // Intenta obtener Bearer token de localStorage (para APIs móviles/Capacitor)
+    var bearerToken = localStorage.getItem('api_token');
+    if (bearerToken) {
+        headers['Authorization'] = 'Bearer ' + bearerToken;
+        console.log('%c🔐 Usando Bearer token para autenticación', 'color: #00deb0; font-weight: bold;');
+    } else {
+        console.log('%c🔐 Usando autenticación por sesión de navegador', 'color: #00deb0; font-weight: bold;');
+    }
+
     fetch('/api/set-timezone', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
+        headers: headers,
         credentials: 'include', // Incluir cookies de sesión
         body: JSON.stringify({ timezone: timezone }),
     })
