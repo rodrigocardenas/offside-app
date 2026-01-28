@@ -14,7 +14,12 @@ window.TZSync = window.TZSync || {};
 window.TZSync.getDeviceTimezone = function() {
     try {
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const userLanguage = navigator.language || navigator.userLanguage;
+        
         console.log('%c✅ Timezone detectado: ' + tz, 'color: #00deb0; font-weight: bold;');
+        console.log('%c📍 Idioma/Locale: ' + userLanguage, 'color: #74b9ff;');
+        console.log('%c🕐 Offset actual: ' + (new Date().getTimezoneOffset() / -60) + ' horas', 'color: #74b9ff;');
+        
         return tz;
     } catch (e) {
         console.error('%c❌ Error al detectar timezone:', 'color: #ff6b6b; font-weight: bold;', e);
@@ -23,20 +28,7 @@ window.TZSync.getDeviceTimezone = function() {
 };
 
 /**
- * Obtener CSRF token
- */
-window.TZSync.getCsrfToken = function() {
-    const token = document.querySelector('meta[name="csrf-token"]');
-    if (token) {
-        console.log('%c✅ CSRF token encontrado', 'color: #00deb0; font-weight: bold;');
-        return token.getAttribute('content');
-    } else {
-        console.warn('%c⚠️ CSRF token NO encontrado', 'color: #ffd93d; font-weight: bold;');
-        return null;
-    }
-};
 
-/**
  * Sincronizar timezone con servidor
  */
 window.TZSync.syncTimezone = function(timezone, attemptNum, maxAttempts) {
@@ -45,31 +37,37 @@ window.TZSync.syncTimezone = function(timezone, attemptNum, maxAttempts) {
 
     console.log('%c🔄 Intento ' + attemptNum + '/' + maxAttempts + ' - Sincronizando: ' + timezone, 'color: #00deb0; font-weight: bold;');
 
-    const csrfToken = window.TZSync.getCsrfToken();
-    if (!csrfToken) {
-        console.error('%c❌ No hay CSRF token disponible', 'color: #ff6b6b; font-weight: bold;');
-        return;
-    }
-
     fetch('/api/set-timezone', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
         },
+        credentials: 'include', // Incluir cookies de sesión
         body: JSON.stringify({ timezone: timezone }),
     })
         .then(function(response) {
             console.log('%c📡 Response status: ' + response.status, 'color: #00deb0;');
-            if (!response.ok) {
-                throw new Error('HTTP ' + response.status);
-            }
-            return response.json();
+            
+            // Log del contenido si no es JSON
+            return response.text().then(function(text) {
+                console.log('%c📝 Response body (primeros 500 chars): ' + text.substring(0, 500), 'color: #74b9ff; font-size: 10px;');
+                
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Response no es JSON: ' + text.substring(0, 200));
+                }
+            });
         })
         .then(function(data) {
-            console.log('%c✅ ✅ ÉXITO: Timezone sincronizado', 'color: #51cf66; font-weight: bold; font-size: 13px;', data);
-            localStorage.setItem('lastSyncedTimezone', timezone);
-            localStorage.setItem('lastSyncTimestamp', new Date().toISOString());
+            if (data.success) {
+                console.log('%c✅ ✅ ÉXITO: Timezone sincronizado', 'color: #51cf66; font-weight: bold; font-size: 13px;', data);
+                localStorage.setItem('lastSyncedTimezone', timezone);
+                localStorage.setItem('lastSyncTimestamp', new Date().toISOString());
+            } else {
+                throw new Error(data.message || 'Error desconocido');
+            }
         })
         .catch(function(error) {
             console.warn('%c⚠️ Error en intento ' + attemptNum + ': ' + error.message, 'color: #ffd93d; font-weight: bold;');
@@ -182,3 +180,36 @@ setInterval(function() {
 
 console.log('%c✅ ✅ TIMEZONE SYNC COMPLETAMENTE LISTO', 'color: #51cf66; font-weight: bold; font-size: 14px;');
 console.log('%c💡 Ejecuta: window.forceTimezoneSync() para forzar sincronización', 'color: #74b9ff; font-style: italic;');
+console.log('%c💡 Ejecuta: window.TZSync.debugInfo() para ver información de debug', 'color: #74b9ff; font-style: italic;');
+
+/**
+ * Función de debug para verificar todo
+ */
+window.TZSync.debugInfo = function() {
+    console.log('%c========== DEBUG INFO ==========', 'color: #00deb0; font-weight: bold; font-size: 14px;');
+    
+    const deviceTz = window.TZSync.getDeviceTimezone();
+    const lastSynced = localStorage.getItem('lastSyncedTimezone');
+    const lastTimestamp = localStorage.getItem('lastSyncTimestamp');
+    
+    console.log('%c📋 Información de Dispositivo:', 'color: #00deb0; font-weight: bold;');
+    console.log('  Timezone: ' + deviceTz);
+    console.log('  Idioma: ' + (navigator.language || navigator.userLanguage));
+    console.log('  Offset: ' + (new Date().getTimezoneOffset() / -60) + ' horas');
+    
+    console.log('%c📋 Información en LocalStorage:', 'color: #00deb0; font-weight: bold;');
+    console.log('  Último sincronizado: ' + (lastSynced || 'NUNCA'));
+    console.log('  Timestamp: ' + (lastTimestamp || 'NUNCA'));
+    
+    // Verificar cookies de sesión
+    console.log('%c📋 Cookies:', 'color: #00deb0; font-weight: bold;');
+    console.log('  XSRF-TOKEN: ' + (document.cookie.includes('XSRF-TOKEN') ? 'SÍ' : 'NO'));
+    console.log('  LARAVEL_SESSION: ' + (document.cookie.includes('LARAVEL_SESSION') ? 'SÍ' : 'NO'));
+    
+    // User ID del meta tag
+    const userIdMeta = document.querySelector('meta[name="user-id"]');
+    console.log('%c📋 Autenticación:', 'color: #00deb0; font-weight: bold;');
+    console.log('  User ID (meta): ' + (userIdMeta ? userIdMeta.getAttribute('content') : 'NO ENCONTRADO'));
+    
+    console.log('%c================================', 'color: #00deb0; font-weight: bold;');
+};

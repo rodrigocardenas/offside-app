@@ -28,30 +28,40 @@ Route::get('/competitions/{competition}/teams', function (App\Models\Competition
 });
 
 
+// POST timezone - Acepta auth:sanctum Y sesión de navegador
+Route::post('/set-timezone', function (Request $request) {
+    $request->validate([
+        'timezone' => 'required|string|timezone',
+    ]);
+
+    $user = $request->user();
+    if (!$user) {
+        return response()->json(['error' => 'No autenticado'], 401);
+    }
+
+    $oldTimezone = $user->timezone;
+    
+    $updated = $user->update([
+        'timezone' => $request->timezone,
+    ]);
+
+    if ($updated) {
+        \Illuminate\Support\Facades\Log::info("✅ Timezone actualizado para usuario {$user->id} ({$user->name}): {$oldTimezone} → {$request->timezone}");
+    } else {
+        \Illuminate\Support\Facades\Log::error("❌ Error al actualizar timezone para usuario {$user->id}");
+    }
+
+    return response()->json([
+        'success' => $updated,
+        'message' => $updated ? 'Zona horaria actualizada correctamente' : 'Error al actualizar',
+        'timezone' => $request->timezone,
+        'previous_timezone' => $oldTimezone,
+        'synced_at' => now()->toIso8601String(),
+    ]);
+})->middleware('auth');
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);
-    Route::post('/set-timezone', function (Request $request) {
-        $request->validate([
-            'timezone' => 'required|string|timezone',
-        ]);
-
-        $user = $request->user();
-        $oldTimezone = $user->timezone;
-        
-        $user->update([
-            'timezone' => $request->timezone,
-        ]);
-
-        \Illuminate\Support\Facades\Log::info("Timezone actualizado para usuario {$user->id} ({$user->name}): {$oldTimezone} → {$request->timezone}");
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Zona horaria actualizada correctamente',
-            'timezone' => $request->timezone,
-            'previous_timezone' => $oldTimezone,
-            'synced_at' => now()->toIso8601String(),
-        ]);
-    });
     Route::get('/timezone-status', function (Request $request) {
         $user = $request->user();
         $deviceTimezone = $request->query('device_tz');
