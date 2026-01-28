@@ -28,8 +28,8 @@ Route::get('/competitions/{competition}/teams', function (App\Models\Competition
 });
 
 
-// POST timezone - Acepta AMBOS: sesión de navegador Y Bearer token (Sanctum)
-Route::middleware('auth.session-or-sanctum')->post('/set-timezone', function (Request $request) {
+// POST timezone - Funciona con sesión de navegador Y Bearer tokens (gracias a EnsureFrontendRequestsAreStateful)
+Route::middleware('auth:sanctum')->post('/set-timezone', function (Request $request) {
     $request->validate([
         'timezone' => 'required|string|timezone',
     ]);
