@@ -51,7 +51,7 @@ window.TZSync.syncTimezone = function(timezone, attemptNum, maxAttempts) {
         console.log('%c🔐 Usando autenticación por sesión de navegador', 'color: #00deb0; font-weight: bold;');
     }
 
-    fetch('/api/set-timezone', {
+    fetch('/timezone/sync', {
         method: 'POST',
         headers: headers,
         credentials: 'include', // Incluir cookies de sesión

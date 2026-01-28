@@ -183,3 +183,31 @@ Route::get('/clear-cache', function() {
     return view('clear-cache');
 })->name('clear-cache');
 
+// 🌍 Sincronización de Timezone - Ruta protegida por autenticación web
+Route::middleware('auth')->post('/timezone/sync', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'timezone' => 'required|string|timezone',
+    ]);
+
+    $user = $request->user();
+    $oldTimezone = $user->timezone;
+    
+    $updated = $user->update([
+        'timezone' => $request->timezone,
+    ]);
+
+    if ($updated) {
+        \Illuminate\Support\Facades\Log::info("✅ Timezone actualizado para usuario {$user->id} ({$user->name}): {$oldTimezone} → {$request->timezone}");
+    } else {
+        \Illuminate\Support\Facades\Log::error("❌ Error al actualizar timezone para usuario {$user->id}");
+    }
+
+    return response()->json([
+        'success' => $updated,
+        'message' => $updated ? 'Zona horaria actualizada correctamente' : 'Error al actualizar',
+        'timezone' => $request->timezone,
+        'previous_timezone' => $oldTimezone,
+        'synced_at' => now()->toIso8601String(),
+    ]);
+})->name('timezone.sync');
+
