@@ -8,7 +8,7 @@
     @push('scripts')
         <!-- Sincronización Timezone PRIORITARIA -->
         <script src="{{ asset('js/timezone-sync.js') }}"></script>
-        
+
         <script src="{{ asset('js/common/navigation.js') }}"></script>
         <script src="{{ asset('js/common/hover-effects.js') }}"></script>
         <script src="{{ asset('js/common/modal-handler.js') }}"></script>
@@ -299,26 +299,26 @@
         window.showInviteModal = function(groupName, inviteUrl) {
             const modal = document.getElementById('inviteModal');
             const messageArea = document.getElementById('inviteMessage');
-            
+
             // Extraer el código del grupo de la URL
             const code = inviteUrl.split('/').pop();
-            
+
             // Crear URL clickeable: inviteUrl corta
             // WhatsApp la reconocerá como URL válida y la hará clickeable
             const inviteUrlShort = window.location.origin + '/invite/' + code;
             const inviteUrlFull = window.location.origin + '/groups/invite/' + code;
-            
+
             // Mensaje con URL HTTPS clickeable en WhatsApp
             // Si tiene app: Android App Links lo abrirá en la app
             // Si no: Se abrirá en navegador (ambas rutas funcionan igual)
             const message = `¡Únete al grupo "${groupName}" en Offside Club!\n\n${inviteUrlShort}\n\n¡Ven a competir con nosotros!`;
             messageArea.value = message;
-            
+
             // Guardar URLs para luego usarlas
             messageArea.dataset.inviteUrl = inviteUrlShort;
             messageArea.dataset.inviteUrlFull = inviteUrlFull;
             messageArea.dataset.code = code;
-            
+
             modal.style.display = 'flex';
         };
 
@@ -376,7 +376,7 @@
         window.shareOnWhatsApp = function() {
             const messageArea = document.getElementById('inviteMessage');
             const text = messageArea.value;
-            
+
             // Enviar mensaje con URL HTTPS clickeable
             // WhatsApp reconocerá la URL y la hará clickeable automáticamente
             // Si el usuario tiene app: Android App Links la abrirá en la app

@@ -114,15 +114,15 @@
     </div>
 
     @stack('modals')
-    
+
     <!-- Debug Widget (solo en local) -->
     @if(app()->environment('local'))
         @include('components.timezone-debug-widget')
     @endif
-    
+
     @livewireScripts
     <script src="{{ asset('sw-update.js') }}"></script>
-    
+
     <!-- Sincronización Timezone (al final para garantizar DOM listo) -->
     <script src="{{ asset('js/timezone-sync.js') }}"></script>
 </body>
