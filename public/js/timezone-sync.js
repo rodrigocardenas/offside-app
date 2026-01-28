@@ -28,6 +28,20 @@ window.TZSync.getDeviceTimezone = function() {
 };
 
 /**
+ * Obtener CSRF token del meta tag
+ */
+window.TZSync.getCsrfToken = function() {
+    const token = document.querySelector('meta[name="csrf-token"]');
+    if (token) {
+        console.log('%c✅ CSRF token encontrado', 'color: #00deb0; font-weight: bold;');
+        return token.getAttribute('content');
+    } else {
+        console.warn('%c⚠️ CSRF token NO encontrado', 'color: #ffd93d; font-weight: bold;');
+        return null;
+    }
+};
+
+/**
  * Sincronizar timezone con servidor
  */
 window.TZSync.syncTimezone = function(timezone, attemptNum, maxAttempts) {
@@ -40,6 +54,7 @@ window.TZSync.syncTimezone = function(timezone, attemptNum, maxAttempts) {
     var headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'X-CSRF-TOKEN': window.TZSync.getCsrfToken(),
     };
 
     // Intenta obtener Bearer token de localStorage (para APIs móviles/Capacitor)
