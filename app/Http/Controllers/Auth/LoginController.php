@@ -22,6 +22,7 @@ class LoginController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
+            'timezone' => 'nullable|string|timezone',
         ]);
 
         $wasCreated = false;
@@ -44,14 +45,24 @@ class LoginController extends Controller
                 $counter++;
             }
 
+            // Determinar timezone
+            $timezone = $request->timezone ?? config('app.timezone');
+
             // Crear nuevo usuario manteniendo el nombre original y correo único
             $user = User::create([
                 'name' => $baseName,
                 'email' => $email,
                 'password' => Hash::make(Str::random(16)),
+                'timezone' => $timezone,
             ]);
 
             $wasCreated = true;
+        } else {
+            // Si el usuario existe, SIEMPRE actualizar el timezone si viene en la request
+            // Esto asegura que se actualice aunque ya tenga un valor
+            if ($request->filled('timezone')) {
+                $user->update(['timezone' => $request->timezone]);
+            }
         }
 
         Auth::login($user);

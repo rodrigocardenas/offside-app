@@ -30,6 +30,21 @@ Route::get('/competitions/{competition}/teams', function (App\Models\Competition
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);
+    Route::post('/set-timezone', function (Request $request) {
+        $request->validate([
+            'timezone' => 'required|string|timezone',
+        ]);
+
+        $request->user()->update([
+            'timezone' => $request->timezone,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Zona horaria actualizada correctamente',
+            'timezone' => $request->timezone,
+        ]);
+    });
     Route::post('/cache/clear-user', function (Request $request) {
         // Limpiar cache específico del usuario
         $userId = $request->user()->id;

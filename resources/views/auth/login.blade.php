@@ -35,6 +35,9 @@
                 <form method="POST" action="{{ route('login') }}" style="display: flex; flex-direction: column; gap: 16px;">
                     @csrf
 
+                    <!-- Campo de Timezone Oculto -->
+                    <input type="hidden" id="timezone" name="timezone" value="">
+
                     <!-- Campo Username/Nickname -->
                     <div>
                         <label for="name" style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
@@ -245,6 +248,20 @@
                     }
                 });
             }
+
+            // 🌍 Capturar y setear el timezone del dispositivo
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    const timezoneInput = document.getElementById('timezone');
+                    if (timezoneInput) {
+                        timezoneInput.value = timezone;
+                        console.log('Timezone del dispositivo capturado:', timezone);
+                    }
+                } catch (e) {
+                    console.warn('No se pudo detectar el timezone:', e);
+                }
+            });
 
             // Registrar el Service Worker
             if ('serviceWorker' in navigator) {

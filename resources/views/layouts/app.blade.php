@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @auth
+        <meta name="user-id" content="{{ auth()->user()->id }}">
+    @endauth
     <title>{{ config('app.name', 'Offside Club') }}</title>
 
     <!-- Meta tags básicos -->
@@ -51,6 +54,9 @@
 
     <!-- Pull-to-Refresh (solo en mobile/Capacitor) -->
     <script src="{{ asset('js/pull-to-refresh.js') }}"></script>
+
+    <!-- Sincronización Automática de Zona Horaria -->
+    <script src="{{ asset('js/timezone-sync.js') }}"></script>
 
     @stack('styles')
     @stack('scripts')
