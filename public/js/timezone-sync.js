@@ -15,14 +15,14 @@
 (function() {
     'use strict';
 
-    const DEBUG = false; // Cambiar a true para ver logs en consola
+    const DEBUG = true; // ✅ ACTIVADO por defecto para ver logs
 
     function log(msg, data = null) {
         if (DEBUG) {
             if (data) {
-                console.log(`[TZ-SYNC] ${msg}`, data);
+                console.log(`%c[TZ-SYNC] ${msg}`, 'color: #00deb0; font-weight: bold;', data);
             } else {
-                console.log(`[TZ-SYNC] ${msg}`);
+                console.log(`%c[TZ-SYNC] ${msg}`, 'color: #00deb0; font-weight: bold;');
             }
         }
     }
@@ -32,9 +32,11 @@
      */
     function getDeviceTimezone() {
         try {
-            return Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            log(`✅ Timezone del dispositivo detectado: ${tz}`);
+            return tz;
         } catch (e) {
-            console.warn('[TZ-SYNC] No se pudo detectar el timezone del dispositivo:', e);
+            console.error('[TZ-SYNC] ❌ No se pudo detectar el timezone del dispositivo:', e);
             return null;
         }
     }
@@ -44,7 +46,30 @@
      */
     function getCsrfToken() {
         const token = document.querySelector('meta[name="csrf-token"]');
-        return token ? token.getAttribute('content') : null;
+        if (token) {
+            log('✅ CSRF token encontrado');
+            return token.getAttribute('content');
+        } else {
+            console.warn('[TZ-SYNC] ⚠️ CSRF token no encontrado');
+            return null;
+        }
+    }
+
+    /**
+     * Verificar si el usuario está autenticado
+     */
+    function isUserAuthenticated() {
+        const userMeta = document.querySelector('meta[name="user-id"]');
+        const isAuth = !!userMeta;
+        const userId = userMeta ? userMeta.getAttribute('content') : 'N/A';
+        
+        if (isAuth) {
+            log(`✅ Usuario autenticado (ID: ${userId})`);
+        } else {
+            log('⚠️ Usuario NO autenticado - script seguirá ejecutándose igualmente');
+        }
+        
+        return { isAuth, userId };
     }
 
     /**
@@ -55,7 +80,7 @@
     function syncTimezoneWithServer(timezone, retries = 3) {
         const csrfToken = getCsrfToken();
         if (!csrfToken) {
-            console.warn('[TZ-SYNC] CSRF token no encontrado');
+            console.error('[TZ-SYNC] ❌ CSRF token no encontrado - no se puede sincronizar');
             return;
         }
 
@@ -71,19 +96,20 @@
                 body: JSON.stringify({ timezone: timezone }),
             })
                 .then(response => {
+                    log(`Response status: ${response.status}`);
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    log(`✅ Zona horaria sincronizada: ${data.timezone}`);
+                    log(`✅ Zona horaria sincronizada exitosamente: ${data.timezone}`, data);
                     // Guardar en localStorage para optimizar futuros checks
                     localStorage.setItem('lastSyncedTimezone', timezone);
                     localStorage.setItem('lastSyncTimestamp', new Date().toISOString());
                 })
                 .catch(error => {
-                    console.warn(`[TZ-SYNC] Error en intento ${attemptNum}: ${error.message}`);
+                    console.warn(`[TZ-SYNC] ⚠️ Error en intento ${attemptNum}: ${error.message}`);
                     
                     // Reintentar si quedan intentos
                     if (attemptNum < retries) {
@@ -93,7 +119,7 @@
                             attempt(attemptNum + 1);
                         }, delayMs);
                     } else {
-                        console.error(`[TZ-SYNC] ❌ Fallo definitivo sincronizando timezone después de ${retries} intentos`);
+                        console.error(`[TZ-SYNC] ❌ Fallo definitivo sincronizando timezone después de ${retries} intentos`, error);
                     }
                 });
         };
@@ -105,18 +131,22 @@
      * Verificar y sincronizar el timezone si es necesario
      */
     function checkAndSyncTimezone() {
+        log('--- Iniciando verificación de timezone ---');
+        
         const deviceTimezone = getDeviceTimezone();
         
         if (!deviceTimezone) {
-            console.warn('[TZ-SYNC] No se pudo obtener el timezone del dispositivo');
+            console.error('[TZ-SYNC] ❌ No se pudo obtener el timezone del dispositivo');
             return;
         }
 
-        log(`Timezone del dispositivo detectado: ${deviceTimezone}`);
+        log(`Timezone del dispositivo: ${deviceTimezone}`);
 
         // Verificar si ya fue sincronizado recientemente (dentro de las últimas 4 horas)
         const lastSynced = localStorage.getItem('lastSyncedTimezone');
         const lastSyncTimestamp = localStorage.getItem('lastSyncTimestamp');
+        
+        log(`LastSynced: ${lastSynced || 'NINGUNO'}, LastTimestamp: ${lastSyncTimestamp || 'NINGUNO'}`);
         
         if (lastSynced === deviceTimezone && lastSyncTimestamp) {
             const lastSyncDate = new Date(lastSyncTimestamp);
@@ -146,29 +176,32 @@
      * Inicializar cuando el documento esté disponible
      */
     function initialize() {
-        // Solo ejecutar si el usuario está autenticado
-        const userMeta = document.querySelector('meta[name="user-id"]');
-        if (!userMeta) {
-            log('Usuario no autenticado, saltando sincronización');
-            return;
-        }
-
-        log('Inicializando sincronización de timezone para usuario autenticado');
+        log('=== INICIALIZANDO TIMEZONE SYNC ===');
+        
+        const { isAuth, userId } = isUserAuthenticated();
+        
+        // ✅ IMPORTANTE: Ejecutar SIEMPRE, aunque no esté autenticado
+        // (El script de login también lo usará)
+        log('Ejecutando checkAndSyncTimezone...');
         checkAndSyncTimezone();
     }
 
     // ✅ Intentar ejecutar lo antes posible (no esperar DOMContentLoaded)
+    log('Script timezone-sync.js cargado');
+    
     if (document.readyState === 'loading') {
         // Documento aún se está cargando
+        log('Documento aún se está cargando, esperando DOMContentLoaded...');
         document.addEventListener('DOMContentLoaded', initialize);
     } else {
         // Documento ya está listo (ej: si el script se carga tarde)
+        log('Documento ya está listo, ejecutando initialize...');
         initialize();
     }
 
     // ✅ También ejecutar cuando el documento esté listo (por si acaso)
     document.addEventListener('DOMContentLoaded', function() {
-        log('DOMContentLoaded fired');
+        log('DOMContentLoaded event fired');
         initialize();
     });
 
@@ -206,9 +239,20 @@
 
     // ✅ Exponer función global para forzar sincronización manual (debug)
     window.forceTimezoneSync = function() {
-        console.log('[TZ-SYNC] Forzando sincronización manual de timezone...');
+        console.log('%c🌍 FORZANDO SINCRONIZACIÓN MANUAL DE TIMEZONE', 'color: #00deb0; font-weight: bold; font-size: 14px;');
         localStorage.removeItem('lastSyncedTimezone');
         localStorage.removeItem('lastSyncTimestamp');
         checkAndSyncTimezone();
     };
+
+    // ✅ Exponer función para desactivar debug (opcional)
+    window.disableTzDebug = function() {
+        console.log('Debug de timezone desactivado');
+        // Cambiar la variable (esto no funcionará porque es const, pero lo dejamos como referencia)
+    };
+
+    log('=== TIMEZONE SYNC LISTO ===');
+    console.log('%c💡 Tip: Ejecuta window.forceTimezoneSync() para forzar sincronización manual', 'color: #00deb0; font-style: italic;');
+
 })();
+
