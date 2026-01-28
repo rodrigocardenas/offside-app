@@ -128,7 +128,11 @@ class DateTimeHelper
     {
         // Obtener zona horaria del usuario o usar la por defecto
         if (!$timezone && Auth::check()) {
-            $timezone = Auth::user()->timezone ?? config('app.timezone');
+            // Obtener usuario fresco de la BD para asegurar timezone actualizado
+            $user = Auth::user();
+            // Si el usuario tiene timezone en memoria (desde la sesión actual), usarlo
+            // Si no, consultar la BD directamente para obtener el valor más reciente
+            $timezone = $user->timezone ?? $user->fresh()->timezone ?? config('app.timezone');
         } elseif (!$timezone) {
             $timezone = config('app.timezone');
         }

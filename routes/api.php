@@ -36,11 +36,21 @@ Route::middleware('auth:sanctum')->group(function () {
             'timezone' => 'required|string|timezone'
         ]);
 
-        $request->user()->update([
-            'timezone' => $request->timezone
-        ]);
+        $user = $request->user();
+        $user->timezone = $request->timezone;
+        $user->save();
 
-        return response()->json(['success' => true, 'timezone' => $request->timezone]);
+        // Limpiar caché de la aplicación
+        \Illuminate\Support\Facades\Cache::flush();
+
+        // Regenerar sesión para asegurar que el usuario tiene datos frescos
+        $request->session()->regenerate();
+
+        return response()->json([
+            'success' => true,
+            'timezone' => $request->timezone,
+            'message' => 'Timezone actualizado correctamente'
+        ]);
     });
 
     Route::post('/cache/clear-user', function (Request $request) {
