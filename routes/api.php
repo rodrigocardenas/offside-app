@@ -35,14 +35,33 @@ Route::middleware('auth:sanctum')->group(function () {
             'timezone' => 'required|string|timezone',
         ]);
 
-        $request->user()->update([
+        $user = $request->user();
+        $oldTimezone = $user->timezone;
+        
+        $user->update([
             'timezone' => $request->timezone,
         ]);
+
+        \Illuminate\Support\Facades\Log::info("Timezone actualizado para usuario {$user->id} ({$user->name}): {$oldTimezone} → {$request->timezone}");
 
         return response()->json([
             'success' => true,
             'message' => 'Zona horaria actualizada correctamente',
             'timezone' => $request->timezone,
+            'previous_timezone' => $oldTimezone,
+            'synced_at' => now()->toIso8601String(),
+        ]);
+    });
+    Route::get('/timezone-status', function (Request $request) {
+        $user = $request->user();
+        $deviceTimezone = $request->query('device_tz');
+        
+        return response()->json([
+            'user_id' => $user->id,
+            'saved_timezone' => $user->timezone,
+            'device_timezone' => $deviceTimezone,
+            'match' => $user->timezone === $deviceTimezone,
+            'last_updated' => $user->updated_at,
         ]);
     });
     Route::post('/cache/clear-user', function (Request $request) {

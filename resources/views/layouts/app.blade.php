@@ -117,6 +117,12 @@
     </div>
 
     @stack('modals')
+    
+    <!-- Debug Widget (solo en local) -->
+    @if(app()->environment('local'))
+        @include('components.timezone-debug-widget')
+    @endif
+    
     @livewireScripts
     <script src="{{ asset('sw-update.js') }}"></script>
 </body>
