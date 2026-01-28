@@ -52,6 +52,9 @@
     <!-- Pull-to-Refresh (solo en mobile/Capacitor) -->
     <script src="{{ asset('js/pull-to-refresh.js') }}"></script>
 
+    <!-- Detect and Save User Timezone -->
+    <script src="{{ asset('js/detect-timezone.js') }}"></script>
+
     @stack('styles')
     @stack('scripts')
 </head>
