@@ -55,6 +55,9 @@
     <!-- Detect and Save User Timezone -->
     <script src="{{ asset('js/detect-timezone.js') }}"></script>
 
+    <!-- Client-side Countdown with Timezone Support -->
+    <script src="{{ asset('js/countdown-client-timezone.js') }}"></script>
+
     @stack('styles')
     @stack('scripts')
 </head>

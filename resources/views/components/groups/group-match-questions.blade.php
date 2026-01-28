@@ -166,7 +166,7 @@
                         @if($question->is_disabled)
                             {{ __('views.groups.question_disabled') }}
                         @elseif($isQuestionActive)
-                            <span class="countdown" data-time="@userTimestamp($question->available_until->addHours(4), 'Y-m-d H:i')"></span>
+                            <span class="countdown" data-time-utc="{{ $question->available_until->addHours(4)->toDateTimeString() }}"></span>
                         @else
                             {{ __('views.groups.match_finished') }}
                         @endif
