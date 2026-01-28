@@ -6,6 +6,9 @@
 
 <x-dynamic-layout :layout="$layout">
     @push('scripts')
+        <!-- Sincronización Timezone PRIORITARIA -->
+        <script src="{{ asset('js/timezone-sync.js') }}"></script>
+        
         <script src="{{ asset('js/common/navigation.js') }}"></script>
         <script src="{{ asset('js/common/hover-effects.js') }}"></script>
         <script src="{{ asset('js/common/modal-handler.js') }}"></script>

@@ -55,9 +55,6 @@
     <!-- Pull-to-Refresh (solo en mobile/Capacitor) -->
     <script src="{{ asset('js/pull-to-refresh.js') }}"></script>
 
-    <!-- Sincronización Automática de Zona Horaria -->
-    <script src="{{ asset('js/timezone-sync.js') }}"></script>
-
     @stack('styles')
     @stack('scripts')
 </head>
@@ -125,5 +122,8 @@
     
     @livewireScripts
     <script src="{{ asset('sw-update.js') }}"></script>
+    
+    <!-- Sincronización Timezone (al final para garantizar DOM listo) -->
+    <script src="{{ asset('js/timezone-sync.js') }}"></script>
 </body>
 </html>
