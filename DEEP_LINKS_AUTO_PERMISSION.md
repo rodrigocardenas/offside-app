@@ -46,16 +46,20 @@ para nuestro dominio.
 Si el usuario hace clic en "Continuar":
 
 **Android 12+ (API 31+):**
-```
-android-app://com.android.settings/action/app_open_by_default_settings
-```
-Se abre directamente la pantalla de handlers preferidos.
+- Intenta abrir `android-app://com.android.settings/action/app_open_by_default_settings`
+- Si falla, intenta `android-app://com.android.settings/action/manage_app_links`
+- Si falla, abre Settings general y muestra instrucciones específicas
 
-**Android < 12:**
-```
-android-app://com.android.settings
-```
-Se abre Settings general y se muestran instrucciones.
+**Android < 12 o fallback:**
+- Abre Settings general
+- Muestra instrucciones paso a paso adaptadas a:
+  - **Samsung:** "Abrir vínculos admitidos"
+  - **Xiaomi/Redmi:** "Navegador predeterminado"
+  - **Otros:** "Abrir enlaces"
+
+**Si Settings no se abre:**
+- Muestra instrucciones manuales detectando el fabricante
+- Usuario debe completar manualmente
 
 ## Técnicamente
 
@@ -111,6 +115,11 @@ localStorage.setItem('offsideclub_deep_links_permission_requested', 'true');
 - Detecta Android automáticamente
 - Compatible con Android 8+
 - Dialog elegante con instrucciones fallback
+- **v1.078+**: Mejorada apertura de Settings
+  - Intenta múltiples URLs de Settings
+  - Fallback a instrucciones detectadas por fabricante
+  - Samsung, Xiaomi/Redmi, y Android genérico
+  - Logging mejorado para debugging
 
 ## FAQ
 
@@ -137,6 +146,15 @@ if (daysPassed > 7) {
   // Mostrar de nuevo
 }
 ```
+
+### ¿Qué pasa si el botón "Continuar" no abre nada?
+El código intenta múltiples URLs de Settings según la versión:
+1. Intenta `app_open_by_default_settings` (Android 12+)
+2. Intenta `manage_app_links` (Android 11)
+3. Intenta Settings general
+4. Si todo falla, muestra instrucciones manuales específicas por fabricante
+
+Ver [DEEP_LINKS_SETTINGS_FIX.md](DEEP_LINKS_SETTINGS_FIX.md) para más detalles.
 
 ### ¿Cómo desabilito esto?
 Simplemente elimina la llamada a `requestDeepLinksPermission()` en `deep-links.js`.

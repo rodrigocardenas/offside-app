@@ -78,7 +78,7 @@ class DeepLinksHandler {
                 const parts = pathname.split('/').filter(p => p);
                 const codeIndex = parts.indexOf('invite');
                 const inviteCode = codeIndex >= 0 ? parts[codeIndex + 1] : pathname.replace(/\//g, '');
-                
+
                 if (inviteCode) {
                     this.navigateTo(`/invite/${inviteCode}`);
                     return;
@@ -196,7 +196,7 @@ async function showDeepLinksDialog() {
         dialog.innerHTML = `
             <h2 style="margin: 0 0 8px 0; font-size: 18px; color: #1a1a1a;">⚙️ Configuración Recomendada</h2>
             <p style="margin: 0 0 16px 0; font-size: 14px; color: #666; line-height: 1.5;">
-                Para que los links de invitación se abran correctamente en OffsideClub, 
+                Para que los links de invitación se abran correctamente en OffsideClub,
                 configura esta app como handler preferido para nuestro dominio.
             </p>
             <div style="display: flex; gap: 8px;">
@@ -254,35 +254,58 @@ async function showDeepLinksDialog() {
 
 /**
  * Abrir Settings para configurar handler preferido
+ * Intenta múltiples rutas ya que varían según versión y fabricante
  */
 async function openDeepLinksSettings() {
     try {
         const { AppLauncher } = await import('@capacitor/app-launcher');
 
-        // Intentar abrir Android 12+ settings
-        try {
-            const canOpen = await AppLauncher.canOpenUrl({
-                url: 'android-app://com.android.settings/action/app_open_by_default_settings'
-            });
+        // Lista de URLs a intentar en orden de preferencia
+        const settingsUrls = [
+            // Android 12+ (API 31+) - Ruta directa a "Abrir por defecto"
+            'android-app://com.android.settings/action/app_open_by_default_settings',
 
-            if (canOpen.canOpen) {
-                await AppLauncher.openUrl({
-                    url: 'android-app://com.android.settings/action/app_open_by_default_settings'
-                });
+            // Android 11 - Ruta alternativa
+            'android-app://com.android.settings/action/manage_app_links',
+
+            // Settings general (último recurso)
+            'android-app://com.android.settings',
+
+            // Intent intent via intents
+            'intent://com.android.settings/action/app_open_by_default_settings#Intent;action=android.intent.action.VIEW;end',
+        ];
+
+        for (const url of settingsUrls) {
+            try {
+                console.log('[DeepLinks] Intentando abrir:', url);
+
+                // Verificar si se puede abrir
+                try {
+                    const canOpen = await AppLauncher.canOpenUrl({ url });
+                    if (!canOpen.canOpen) {
+                        console.log('[DeepLinks] No se puede abrir:', url);
+                        continue;
+                    }
+                } catch (e) {
+                    console.log('[DeepLinks] Error verificando URL:', url, e);
+                    // Continuar intentando aunque no pueda verificar
+                }
+
+                // Intentar abrir
+                await AppLauncher.openUrl({ url });
+                console.log('[DeepLinks] Abierto exitosamente:', url);
                 return;
+            } catch (error) {
+                console.log('[DeepLinks] Fallo al abrir:', url, error.message);
+                continue;
             }
-        } catch (e) {
-            // Ignorar y probar alternativa
         }
 
-        // Fallback: Abrir Settings general
-        await AppLauncher.openUrl({
-            url: 'android-app://com.android.settings'
-        });
+        // Si nada funcionó, mostrar instrucciones manuales
+        console.error('[DeepLinks] No se pudo abrir Settings con ningún URL');
+        showManualInstructions();
     } catch (error) {
-        console.error('[DeepLinks] Error abriendo settings:', error);
-        
-        // Mostrar instrucciones manuales
+        console.error('[DeepLinks] Error en openDeepLinksSettings:', error);
         showManualInstructions();
     }
 }
@@ -303,6 +326,7 @@ function showManualInstructions() {
         align-items: center;
         justify-content: center;
         z-index: 9999;
+        overflow-y: auto;
     `;
 
     const dialog = document.createElement('div');
@@ -310,23 +334,78 @@ function showManualInstructions() {
         background: white;
         border-radius: 12px;
         padding: 24px;
-        max-width: 320px;
+        max-width: 380px;
         text-align: left;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        margin: 20px;
     `;
 
-    dialog.innerHTML = `
+    const userAgent = navigator.userAgent.toLowerCase();
+    let deviceType = 'Android';
+    if (userAgent.includes('samsung')) {
+        deviceType = 'Samsung';
+    } else if (userAgent.includes('redmi') || userAgent.includes('xiaomi')) {
+        deviceType = 'Xiaomi/Redmi';
+    }
+
+    let instructionsHtml = `
         <h2 style="margin: 0 0 16px 0; font-size: 16px; color: #1a1a1a;">Configuración Manual</h2>
-        <p style="margin: 0 0 12px 0; font-size: 14px; color: #666; line-height: 1.6;">
-            Abre <strong>Settings</strong> y sigue estos pasos:
+        <p style="margin: 0 0 12px 0; font-size: 13px; color: #666; line-height: 1.6;">
+            <strong>Dispositivo detectado:</strong> ${deviceType}
         </p>
-        <ol style="margin: 0 0 16px 0; padding-left: 20px; font-size: 14px; color: #666; line-height: 1.8;">
-            <li>Apps / Aplicaciones</li>
-            <li>Default apps / Aplicaciones predeterminadas</li>
-            <li>Opening links / Abrir enlaces</li>
-            <li>Busca <strong>app.offsideclub.es</strong></li>
-            <li>Selecciona <strong>OffsideClub</strong></li>
-        </ol>
+    `;
+
+    if (deviceType === 'Samsung') {
+        instructionsHtml += `
+            <p style="margin: 0 0 12px 0; font-size: 13px; color: #666; line-height: 1.6; font-weight: 600;">
+                📱 Samsung - Pasos:
+            </p>
+            <ol style="margin: 0 0 16px 0; padding-left: 20px; font-size: 13px; color: #666; line-height: 1.8;">
+                <li>Abre <strong>Configuración</strong></li>
+                <li>Ve a <strong>Aplicaciones</strong></li>
+                <li>Selecciona <strong>Aplicaciones predeterminadas</strong></li>
+                <li>Busca y toca <strong>Abrir vínculos admitidos</strong></li>
+                <li>En la lista, busca <strong>app.offsideclub.es</strong></li>
+                <li>Toca en <strong>OffsideClub</strong></li>
+            </ol>
+        `;
+    } else if (deviceType === 'Xiaomi/Redmi') {
+        instructionsHtml += `
+            <p style="margin: 0 0 12px 0; font-size: 13px; color: #666; line-height: 1.6; font-weight: 600;">
+                📱 Xiaomi/Redmi - Pasos:
+            </p>
+            <ol style="margin: 0 0 16px 0; padding-left: 20px; font-size: 13px; color: #666; line-height: 1.8;">
+                <li>Abre <strong>Configuración</strong></li>
+                <li>Ve a <strong>Aplicaciones</strong> o <strong>Gestor de aplicaciones</strong></li>
+                <li>Selecciona <strong>Aplicaciones predeterminadas</strong></li>
+                <li>Toca en <strong>Navegador predeterminado</strong> o <strong>Abrir enlaces</strong></li>
+                <li>Busca <strong>app.offsideclub.es</strong></li>
+                <li>Selecciona <strong>OffsideClub</strong></li>
+            </ol>
+        `;
+    } else {
+        instructionsHtml += `
+            <p style="margin: 0 0 12px 0; font-size: 13px; color: #666; line-height: 1.6; font-weight: 600;">
+                📱 Android - Pasos:
+            </p>
+            <ol style="margin: 0 0 16px 0; padding-left: 20px; font-size: 13px; color: #666; line-height: 1.8;">
+                <li>Abre <strong>Configuración</strong></li>
+                <li>Ve a <strong>Aplicaciones</strong></li>
+                <li>Selecciona <strong>Aplicaciones predeterminadas</strong></li>
+                <li>Toca en <strong>Abrir enlaces</strong> o <strong>Direcciones web admitidas</strong></li>
+                <li>Busca <strong>app.offsideclub.es</strong></li>
+                <li>Toca en <strong>OffsideClub</strong></li>
+            </ol>
+        `;
+    }
+
+    instructionsHtml += `
+        <div style="background: #f0f0f0; border-left: 4px solid #007AFF; padding: 12px; border-radius: 4px; margin: 0 0 16px 0;">
+            <p style="margin: 0; font-size: 12px; color: #666;">
+                <strong>💡 Nota:</strong> Si no encuentras <strong>app.offsideclub.es</strong> en la lista,
+                primero abre un link de invitación en la app para que Android la registre como handler disponible.
+            </p>
+        </div>
         <button id="close-instructions" style="
             width: 100%;
             padding: 10px;
@@ -340,6 +419,7 @@ function showManualInstructions() {
         ">Entendido</button>
     `;
 
+    dialog.innerHTML = instructionsHtml;
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
 
