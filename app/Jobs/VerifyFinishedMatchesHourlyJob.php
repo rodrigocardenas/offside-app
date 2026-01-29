@@ -123,13 +123,15 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
             })
             ->map(function (FootballMatch $match) {
                 $priority = $this->calculatePriority($match);
-                $match->calculated_priority = $priority;
 
                 if ($match->verification_priority !== $priority) {
-                    $match->verification_priority = $priority;
-                    $match->save();
+                    $match->update(['verification_priority' => $priority]);
                 }
 
+                return $match;
+            })
+            ->map(function (FootballMatch $match) {
+                $match->calculated_priority = $this->calculatePriority($match);
                 return $match;
             })
             ->sortBy('calculated_priority')
