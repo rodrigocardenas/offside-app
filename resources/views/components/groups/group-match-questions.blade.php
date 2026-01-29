@@ -37,6 +37,7 @@
                 @php
                     $questionExpired = $question->available_until->addHours(4) < now();
                     $shouldDim = $question->is_disabled || $questionExpired;
+                    $userHasAnswered = $question->answers->firstWhere('user_id', auth()->id());
                 @endphp
                 <!-- Prediction Section (Similar to HTML design) -->
                 <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" id="question{{ $question->id }}" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px; {{ $shouldDim ? 'opacity-60;' : '' }}">
