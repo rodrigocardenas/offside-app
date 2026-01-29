@@ -31,8 +31,8 @@
             </intent-filter>
 
             <!-- Android App Links para HTTPS URLs: app.offsideclub.es -->
-            <!-- Esta intención intentará abrirse primero, sin autoVerify -->
-            <intent-filter>
+            <!-- autoVerify="true" permite a Android verificar automáticamente el dominio con assetlinks.json -->
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
