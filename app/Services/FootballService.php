@@ -1280,18 +1280,35 @@ class FootballService
             Log::warning("No se obtuvieron eventos para fixture {$fixtureId}");
         }
 
-        // Intentar obtener estadísticas reales desde API Football
-        $estadisticas = $this->obtenerEstadisticasFixture($fixtureId);
+        // Intentar obtener estadísticas reales desde API Football con reintentos
+        $estadisticas = null;
+        $maxRetries = 3;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            $estadisticas = $this->obtenerEstadisticasFixture($fixtureId);
+
+            if ($estadisticas && isset($estadisticas['teams']) && count($estadisticas['teams']) > 0) {
+                Log::info("✅ Estadísticas obtenidas en intento $attempt para fixture {$fixtureId}: " . count($estadisticas['teams']) . " equipos");
+                break;
+            }
+
+            if ($attempt < $maxRetries) {
+                Log::warning("Intento $attempt fallido para obtener estadísticas de fixture {$fixtureId}, reintentando...");
+                sleep(1);
+            }
+        }
+
         if ($estadisticas && isset($estadisticas['teams']) && count($estadisticas['teams']) > 0) {
             Log::info("Guardando estadísticas reales para fixture {$fixtureId}: " . count($estadisticas['teams']) . " equipos");
             $updateData['statistics'] = json_encode($estadisticas);
         } else {
-            Log::warning("No se obtuvieron estadísticas reales para fixture {$fixtureId}, guardando metadata");
+            Log::warning("❌ No se obtuvieron estadísticas reales para fixture {$fixtureId} después de $maxRetries intentos, guardando metadata");
             $updateData['statistics'] = json_encode([
                 'source' => 'API Football PRO',
                 'api_verified' => true,
                 'fixture_id' => $fixtureId,
-                'updated_at' => now()->toIso8601String()
+                'updated_at' => now()->toIso8601String(),
+                'WARNING' => 'Estadísticas no disponibles del API'
             ]);
         }
 

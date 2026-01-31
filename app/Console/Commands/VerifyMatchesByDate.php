@@ -89,8 +89,8 @@ class VerifyMatchesByDate extends Command
             'last_verification_attempt_at' => now(),
         ]);
 
-        // Despachar BatchGetScoresJob AHORA
-        $getScoresJob = new BatchGetScoresJob($matchIds, $batchId);
+        // Despachar BatchGetScoresJob AHORA con forceRefresh=true para obtener eventos + estadísticas
+        $getScoresJob = new BatchGetScoresJob($matchIds, $batchId, true);
         dispatch($getScoresJob);
 
         // Despachar BatchExtractEventsJob DESPUÉS de un delay (esperar a que BatchGetScoresJob termine)

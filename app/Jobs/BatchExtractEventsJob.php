@@ -36,116 +36,139 @@ class BatchExtractEventsJob implements ShouldQueue
 
     public function handle(GeminiBatchService $geminiBatchService, VerificationMonitoringService $monitoringService): void
     {
-        // ✅ OPTIMIZATION: Enable non-blocking mode to prevent long waits on rate limit
-        GeminiService::setAllowBlocking(false);
-
-        $monitorRun = $monitoringService->start(self::class, $this->verificationBatchId, [
-            'match_ids' => $this->matchIds,
-        ]);
-
-        $matchesTotal = 0;
-        $needsDetailsCount = 0;
-        $updatedCount = 0;
-
         try {
-            $matches = FootballMatch::whereIn('id', $this->matchIds)->get();
-            $matchesTotal = $matches->count();
+            // ✅ OPTIMIZATION: Enable non-blocking mode to prevent long waits on rate limit
+            GeminiService::setAllowBlocking(false);
 
-            if ($matches->isEmpty()) {
-                Log::info('BatchExtractEventsJob - no matches found for provided IDs', ['batch_id' => $this->verificationBatchId]);
-                $monitoringService->finish($monitorRun, ['matches_total' => 0]);
-                return;
-            }
+            $monitorRun = $monitoringService->start(self::class, $this->verificationBatchId, [
+                'match_ids' => $this->matchIds,
+            ]);
 
-            $needsDetails = $matches->filter(fn (FootballMatch $match) => !$this->hasStructuredEvents($match));
-            $needsDetailsCount = $needsDetails->count();
+            $matchesTotal = 0;
+            $needsDetailsCount = 0;
+            $updatedCount = 0;
 
-            if ($needsDetails->isEmpty()) {
-                Log::info('BatchExtractEventsJob - all matches already contain detailed events', ['batch_id' => $this->verificationBatchId]);
-                $monitoringService->finish($monitorRun, [
-                    'matches_total' => $matchesTotal,
-                    'needs_details' => 0,
-                    'updated_matches' => 0,
+            try {
+                $matches = FootballMatch::whereIn('id', $this->matchIds)->get();
+                $matchesTotal = $matches->count();
+
+                if ($matches->isEmpty()) {
+                    Log::info('BatchExtractEventsJob - no matches found for provided IDs', ['batch_id' => $this->verificationBatchId]);
+                    $monitoringService->finish($monitorRun, ['matches_total' => 0]);
+                    return;
+                }
+
+                // ✅ SKIP EARLY: Si todos los partidos ya tienen eventos de API Football PRO, no necesitamos Gemini
+                $needsDetails = $matches->filter(fn (FootballMatch $match) => !$this->hasStructuredEvents($match));
+                $needsDetailsCount = $needsDetails->count();
+
+                if ($needsDetails->isEmpty()) {
+                    Log::info('BatchExtractEventsJob - all matches already contain detailed events from API Football PRO', ['batch_id' => $this->verificationBatchId]);
+                    $monitoringService->finish($monitorRun, [
+                        'matches_total' => $matchesTotal,
+                        'needs_details' => 0,
+                        'updated_matches' => 0,
+                        'message' => 'No Gemini enrichment needed - API Football PRO data is complete'
+                    ]);
+                    return;
+                }
+
+                Log::info('BatchExtractEventsJob - Found matches that need Gemini enrichment', [
+                    'batch_id' => $this->verificationBatchId,
+                    'needs_details_count' => $needsDetailsCount
                 ]);
-                return;
-            }
 
-            // ✅ OPTIMIZATION: Use optimized batch service (intelligent grounding)
-            $details = $geminiBatchService->getMultipleDetailedMatchData($needsDetails, $this->forceRefresh);
+                // ✅ OPTIMIZATION: Use optimized batch service (intelligent grounding)
+                $details = $geminiBatchService->getMultipleDetailedMatchData($needsDetails, $this->forceRefresh);
 
-            if (empty($details)) {
-                Log::warning('BatchExtractEventsJob - Gemini detailed data unavailable', ['batch_id' => $this->verificationBatchId]);
+                if (empty($details)) {
+                    Log::warning('BatchExtractEventsJob - Gemini detailed data unavailable', ['batch_id' => $this->verificationBatchId]);
+                    $monitoringService->finish($monitorRun, [
+                        'matches_total' => $matchesTotal,
+                        'needs_details' => $needsDetailsCount,
+                        'updated_matches' => 0,
+                    ]);
+                    return;
+                }
+
+                $detailsByMatch = collect($details)->keyBy('match_id');
+
+                foreach ($needsDetails as $match) {
+                    $payload = $detailsByMatch->get($match->id);
+
+                    if (!$payload || empty($payload['details']['events'] ?? [])) {
+                        continue;
+                    }
+
+                    $events = $payload['details']['events'];
+                    $details = $payload['details'];
+
+                    // ✅ OPTIMIZACIÓN: Guardar también possession_percentage en statistics
+                    $statistics = $this->mergeStatistics($match, [
+                        'source' => 'Gemini (batch detailed)',
+                        'verified' => true,
+                        'verification_method' => $payload['source'] ?? 'gemini_detailed',
+                        'batch_id' => $this->verificationBatchId,
+                        'has_detailed_events' => true,
+                        'detailed_event_count' => count($events),
+                        'enriched_at' => now()->toIso8601String(),
+                        // ✅ GUARDAR POSESIÓN
+                        'possession' => [
+                            'home_percentage' => $details['home_possession'] ?? null,
+                            'away_percentage' => $details['away_possession'] ?? null,
+                        ],
+                        'possession_home' => $details['home_possession'] ?? null,
+                        'possession_away' => $details['away_possession'] ?? null,
+                        // ✅ GUARDAR OTRAS ESTADÍSTICAS ÚTILES
+                        'fouls' => [
+                            'home' => $details['home_fouls'] ?? null,
+                            'away' => $details['away_fouls'] ?? null,
+                        ],
+                        'cards' => [
+                            'yellow_total' => $details['total_yellow_cards'] ?? null,
+                            'red_total' => $details['total_red_cards'] ?? null,
+                        ],
+                    ]);
+
+                    $match->update([
+                        'events' => json_encode($events),
+                        'statistics' => json_encode($statistics),
+                    ]);
+
+                    $updatedCount++;
+                }
+
+                Log::info('BatchExtractEventsJob - matches enriched with detailed events', [
+                    'batch_id' => $this->verificationBatchId,
+                    'updated_matches' => $updatedCount,
+                ]);
+
                 $monitoringService->finish($monitorRun, [
                     'matches_total' => $matchesTotal,
                     'needs_details' => $needsDetailsCount,
-                    'updated_matches' => 0,
+                    'updated_matches' => $updatedCount,
                 ]);
-                return;
-            }
-
-            $detailsByMatch = collect($details)->keyBy('match_id');
-
-            foreach ($needsDetails as $match) {
-                $payload = $detailsByMatch->get($match->id);
-
-                if (!$payload || empty($payload['details']['events'] ?? [])) {
-                    continue;
-                }
-
-                $events = $payload['details']['events'];
-                $details = $payload['details'];
-
-                // ✅ OPTIMIZACIÓN: Guardar también possession_percentage en statistics
-                $statistics = $this->mergeStatistics($match, [
-                    'source' => 'Gemini (batch detailed)',
-                    'verified' => true,
-                    'verification_method' => $payload['source'] ?? 'gemini_detailed',
+            } catch (\Throwable $e) {
+                Log::error('BatchExtractEventsJob - Inner catch block error', [
                     'batch_id' => $this->verificationBatchId,
-                    'has_detailed_events' => true,
-                    'detailed_event_count' => count($events),
-                    'enriched_at' => now()->toIso8601String(),
-                    // ✅ GUARDAR POSESIÓN
-                    'possession' => [
-                        'home_percentage' => $details['home_possession'] ?? null,
-                        'away_percentage' => $details['away_possession'] ?? null,
-                    ],
-                    'possession_home' => $details['home_possession'] ?? null,
-                    'possession_away' => $details['away_possession'] ?? null,
-                    // ✅ GUARDAR OTRAS ESTADÍSTICAS ÚTILES
-                    'fouls' => [
-                        'home' => $details['home_fouls'] ?? null,
-                        'away' => $details['away_fouls'] ?? null,
-                    ],
-                    'cards' => [
-                        'yellow_total' => $details['total_yellow_cards'] ?? null,
-                        'red_total' => $details['total_red_cards'] ?? null,
-                    ],
+                    'error' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
                 ]);
-
-                $match->update([
-                    'events' => json_encode($events),
-                    'statistics' => json_encode($statistics),
-                ]);
-
-                $updatedCount++;
+                $monitoringService->finish($monitorRun, [
+                    'matches_total' => $matchesTotal ?? 0,
+                    'needs_details' => $needsDetailsCount ?? 0,
+                    'updated_matches' => $updatedCount ?? 0,
+                ], 'failed', $e->getMessage());
+                throw $e;
             }
-
-            Log::info('BatchExtractEventsJob - matches enriched with detailed events', [
-                'batch_id' => $this->verificationBatchId,
-                'updated_matches' => $updatedCount,
-            ]);
-
-            $monitoringService->finish($monitorRun, [
-                'matches_total' => $matchesTotal,
-                'needs_details' => $needsDetailsCount,
-                'updated_matches' => $updatedCount,
-            ]);
         } catch (\Throwable $e) {
-            $monitoringService->finish($monitorRun, [
-                'matches_total' => $matchesTotal,
-                'needs_details' => $needsDetailsCount,
-                'updated_matches' => $updatedCount,
-            ], 'failed', $e->getMessage());
+            Log::error('BatchExtractEventsJob - Outer catch block error', [
+                'batch_id' => $this->verificationBatchId,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
             throw $e;
         }
     }

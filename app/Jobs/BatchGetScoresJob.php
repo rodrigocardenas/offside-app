@@ -69,7 +69,8 @@ class BatchGetScoresJob implements ShouldQueue
             }
 
             foreach ($matches as $match) {
-                if ($this->hasValidScore($match)) {
+                // Si no es forceRefresh y ya tiene score válido, saltar
+                if (!$this->forceRefresh && $this->hasValidScore($match)) {
                     $alreadyComplete++;
                     continue;
                 }
