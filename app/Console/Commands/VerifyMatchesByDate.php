@@ -75,20 +75,31 @@ class VerifyMatchesByDate extends Command
             return;
         }
 
-        // Dispatch verification
+        // Dispatch verification jobs IN SEQUENCE (not parallel!)
+        // 1. BatchGetScoresJob → Update scores from API
+        // 2. BatchExtractEventsJob → Enrich with detailed events if needed
+        // 3. VerifyAllQuestionsJob → Verify questions
         $matchIds = $matches->pluck('id')->all();
         $batchId = Str::uuid()->toString();
 
-        $this->info("\n🔄 Despachando trabajos de verificación...");
+        $this->info("\n🔄 Despachando trabajos de verificación en secuencia...");
 
         // Update last_verification_attempt_at
         FootballMatch::whereIn('id', $matchIds)->update([
             'last_verification_attempt_at' => now(),
         ]);
 
-        dispatch(new BatchGetScoresJob($matchIds, $batchId));
-        dispatch(new BatchExtractEventsJob($matchIds, $batchId));
-        dispatch(new VerifyAllQuestionsJob($matchIds, $batchId));
+        // Despachar BatchGetScoresJob AHORA
+        $getScoresJob = new BatchGetScoresJob($matchIds, $batchId);
+        dispatch($getScoresJob);
+
+        // Despachar BatchExtractEventsJob DESPUÉS de un delay (esperar a que BatchGetScoresJob termine)
+        $extractEventsJob = new BatchExtractEventsJob($matchIds, $batchId);
+        dispatch($extractEventsJob->delay(now()->addSeconds(60))); // Esperar 60 segundos
+
+        // Despachar VerifyAllQuestionsJob DESPUÉS de otro delay
+        $verifyJob = new VerifyAllQuestionsJob($matchIds, $batchId);
+        dispatch($verifyJob->delay(now()->addSeconds(120))); // Esperar 2 minutos
 
         $this->line("\n╔════════════════════════════════════════════════════════════╗");
         $this->line("║ RESUMEN                                                    ║");

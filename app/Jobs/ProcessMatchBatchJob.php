@@ -70,6 +70,8 @@ class ProcessMatchBatchJob implements ShouldQueue
                     Log::info("✅ Partido {$match->id} actualizado desde API Football", [
                         'status' => $updatedMatch->status,
                         'score' => $updatedMatch->score,
+                        'events' => $updatedMatch->events ? '✓ Sí' : '✗ No',
+                        'statistics' => $updatedMatch->statistics ? '✓ Sí' : '✗ No',
                         'source' => 'API Football (VERIFIED)'
                     ]);
                     continue; // Pasar al siguiente partido

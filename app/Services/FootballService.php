@@ -601,11 +601,7 @@ class FootballService
             $data = $response->json();
             $events = $data['response'] ?? [];
 
-            if (empty($events)) {
-                return null;
-            }
-
-            // Convertir eventos al formato esperado
+            // Convertir eventos al formato esperado (puede estar vacío)
             $formattedEvents = [];
             foreach ($events as $event) {
                 $formattedEvents[] = [
@@ -618,11 +614,122 @@ class FootballService
                 ];
             }
 
+            Log::info("Eventos obtenidos del fixture {$fixtureId}: " . count($formattedEvents) . " eventos");
             return $formattedEvents;
         } catch (\Exception $e) {
             Log::warning("Exception al obtener eventos: {$e->getMessage()}");
             return null;
         }
+    }
+
+    /**
+     * Obtiene las estadísticas reales de un fixture desde API Football
+     * Posesión, tiros, faltas, tarjetas, etc.
+     */
+    public function obtenerEstadisticasFixture($fixtureId)
+    {
+        $apiKey = config('services.football.key')
+            ?? env('FOOTBALL_API_KEY')
+            ?? env('APISPORTS_API_KEY')
+            ?? env('API_SPORTS_KEY');
+
+        if (!$apiKey || !is_numeric($fixtureId)) {
+            return null;
+        }
+
+        try {
+            $response = Http::withoutVerifying()
+                ->withHeaders(['x-apisports-key' => $apiKey])
+                ->timeout(10)
+                ->get("https://v3.football.api-sports.io/fixtures/statistics", [
+                    'fixture' => $fixtureId
+                ]);
+
+            if (!$response->successful()) {
+                Log::warning("Error al obtener estadísticas de fixture {$fixtureId}: " . $response->status());
+                return null;
+            }
+
+            $data = $response->json();
+            $stats = $data['response'] ?? [];
+
+            if (empty($stats)) {
+                Log::info("No hay estadísticas disponibles para fixture {$fixtureId}");
+                return null;
+            }
+
+            // Agrupar estadísticas por equipo
+            $estadisticas = [
+                'source' => 'API Football PRO',
+                'api_verified' => true,
+                'fixture_id' => $fixtureId,
+                'updated_at' => now()->toIso8601String(),
+                'teams' => []
+            ];
+
+            foreach ($stats as $teamStats) {
+                $teamName = $teamStats['team']['name'] ?? 'Unknown';
+
+                // Mapeo de estadísticas - clave => nombres en la API
+                $estadisticasMap = [
+                    'possession' => ['Ball Possession'],
+                    'shots' => ['Total Shots'],
+                    'shots_on_target' => ['Shots on Goal'],
+                    'shots_off_target' => ['Shots off Goal'],
+                    'blocked_shots' => ['Blocked Shots'],
+                    'shots_inside_box' => ['Shots insidebox'],
+                    'shots_outside_box' => ['Shots outsidebox'],
+                    'passes' => ['Total passes'],
+                    'passes_accurate' => ['Passes accurate'],
+                    'passes_percentage' => ['Passes %'],
+                    'fouls' => ['Fouls', 'Fouls committed'],
+                    'corner_kicks' => ['Corner Kicks'],
+                    'offsides' => ['Offsides'],
+                    'yellow_cards' => ['Yellow Cards'],
+                    'red_cards' => ['Red Cards'],
+                    'goalkeeper_saves' => ['Goalkeeper Saves'],
+                    'expected_goals' => ['expected_goals'],
+                    'goals_prevented' => ['goals_prevented'],
+                ];
+
+                $teamStats_formatted = [
+                    'team' => $teamName,
+                ];
+
+                // Llenar todas las estadísticas
+                foreach ($estadisticasMap as $key => $apiNames) {
+                    $value = null;
+                    foreach ($apiNames as $apiName) {
+                        $value = $this->extraerEstadistica($teamStats['statistics'], $apiName);
+                        if ($value !== null) {
+                            break;
+                        }
+                    }
+                    $teamStats_formatted[$key] = $value;
+                }
+
+                $estadisticas['teams'][$teamName] = $teamStats_formatted;
+            }
+
+            Log::info("Estadísticas obtenidas para fixture {$fixtureId}: " . count($estadisticas['teams']) . " equipos");
+            return $estadisticas;
+        } catch (\Exception $e) {
+            Log::warning("Exception al obtener estadísticas: {$e->getMessage()}");
+            return null;
+        }
+    }
+
+    /**
+     * Extrae un valor específico de un array de estadísticas
+     */
+    private function extraerEstadistica($statistics, $nombreEstadistica)
+    {
+        foreach ($statistics as $stat) {
+            if (($stat['type'] ?? '') === $nombreEstadistica) {
+                return $stat['value'] ?? null;
+            }
+        }
+        return null;
     }
 
     /**
@@ -1162,21 +1269,45 @@ class FootballService
             'home_team_score' => $homeScore,
             'away_team_score' => $awayScore,
             'score' => $score,
-            'statistics' => json_encode([
+        ];
+
+        // Intentar obtener eventos desde API Football
+        $events = $this->obtenerEventosFixture($fixtureId);
+        if (is_array($events)) {
+            Log::info("Guardando eventos para fixture {$fixtureId}: " . count($events) . " eventos");
+            $updateData['events'] = json_encode($events);
+        } else {
+            Log::warning("No se obtuvieron eventos para fixture {$fixtureId}");
+        }
+
+        // Intentar obtener estadísticas reales desde API Football
+        $estadisticas = $this->obtenerEstadisticasFixture($fixtureId);
+        if ($estadisticas && isset($estadisticas['teams']) && count($estadisticas['teams']) > 0) {
+            Log::info("Guardando estadísticas reales para fixture {$fixtureId}: " . count($estadisticas['teams']) . " equipos");
+            $updateData['statistics'] = json_encode($estadisticas);
+        } else {
+            Log::warning("No se obtuvieron estadísticas reales para fixture {$fixtureId}, guardando metadata");
+            $updateData['statistics'] = json_encode([
                 'source' => 'API Football PRO',
                 'api_verified' => true,
                 'fixture_id' => $fixtureId,
                 'updated_at' => now()->toIso8601String()
-            ])
-        ];
-
-        // Intentar obtener eventos también desde API Football
-        $events = $this->obtenerEventosFixture($fixtureId);
-        if ($events) {
-            $updateData['events'] = json_encode($events);
+            ]);
         }
 
+        Log::info("Datos a actualizar en BD para match {$match->id}:", [
+            'events_count' => is_array($events) ? count($events) : 0,
+            'statistics_size' => strlen($updateData['statistics'] ?? 'empty'),
+        ]);
+
         $updated = $match->update($updateData);
+
+        if ($updated) {
+            Log::info("BD actualizada. Verificando columnas...", [
+                'events_saved' => $match->fresh()->events,
+                'statistics_saved' => $match->fresh()->statistics
+            ]);
+        }
 
         if (!$updated) {
             Log::error("❌ CRÍTICO: No se pudo actualizar partido en BD", [
@@ -1196,7 +1327,8 @@ class FootballService
             'status' => $matchStatus,
             'home_team' => $fixture['teams']['home']['name'],
             'away_team' => $fixture['teams']['away']['name'],
-            'events_obtained' => $events ? count($events) : 0,
+            'events_obtained' => is_array($events) ? count($events) : 0,
+            'statistics_teams' => $estadisticas && isset($estadisticas['teams']) ? count($estadisticas['teams']) : 0,
             'source' => 'API Football PRO (api-sports.io)'
         ]);
 
