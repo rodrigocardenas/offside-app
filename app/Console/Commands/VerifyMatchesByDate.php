@@ -76,40 +76,32 @@ class VerifyMatchesByDate extends Command
         }
 
         // Dispatch verification
-        try {
-            $matchIds = $matches->pluck('id')->all();
-            $batchId = Str::uuid()->toString();
+        $matchIds = $matches->pluck('id')->all();
+        $batchId = Str::uuid()->toString();
 
-            $this->info("\n🔄 Despachando trabajos de verificación...");
+        $this->info("\n🔄 Despachando trabajos de verificación...");
 
-            // Update last_verification_attempt_at
-            FootballMatch::whereIn('id', $matchIds)->update([
-                'last_verification_attempt_at' => now(),
-            ]);
+        // Update last_verification_attempt_at
+        FootballMatch::whereIn('id', $matchIds)->update([
+            'last_verification_attempt_at' => now(),
+        ]);
 
-            dispatch(new BatchGetScoresJob($matchIds, $batchId));
-            dispatch(new BatchExtractEventsJob($matchIds, $batchId));
-            dispatch(new VerifyAllQuestionsJob($matchIds, $batchId));
+        dispatch(new BatchGetScoresJob($matchIds, $batchId));
+        dispatch(new BatchExtractEventsJob($matchIds, $batchId));
+        dispatch(new VerifyAllQuestionsJob($matchIds, $batchId));
 
-            $this->line("\n╔════════════════════════════════════════════════════════════╗");
-            $this->line("║ RESUMEN                                                    ║");
-            $this->line("╠════════════════════════════════════════════════════════════╣");
-            $this->line("║ Partidos a verificar: " . count($matchIds) . " ✅                          ║");
-            $this->line("║ Batch ID: " . substr($batchId, 0, 8) . "...                                    ║");
-            $this->line("║ Estado: Verificación despachada                            ║");
-            $this->line("╚════════════════════════════════════════════════════════════╝\n");
+        $this->line("\n╔════════════════════════════════════════════════════════════╗");
+        $this->line("║ RESUMEN                                                    ║");
+        $this->line("╠════════════════════════════════════════════════════════════╣");
+        $this->line("║ Partidos a verificar: " . count($matchIds) . " ✅                          ║");
+        $this->line("║ Batch ID: " . substr($batchId, 0, 8) . "...                                    ║");
+        $this->line("║ Estado: Verificación despachada                            ║");
+        $this->line("╚════════════════════════════════════════════════════════════╝\n");
 
-            Log::info('VerifyMatchesByDate - verification started', [
-                'match_count' => count($matchIds),
-                'batch_id' => $batchId,
-                'date_filter' => $date ?? "{$startDate} to {$endDate}",
-            ]);
-        } catch (Throwable $e) {
-            $this->error("Error al despachar verificación: {$e->getMessage()}");
-            Log::error('VerifyMatchesByDate failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-        }
+        Log::info('VerifyMatchesByDate - verification started', [
+            'match_count' => count($matchIds),
+            'batch_id' => $batchId,
+            'date_filter' => $date ?? "{$startDate} to {$endDate}",
+        ]);
     }
 }

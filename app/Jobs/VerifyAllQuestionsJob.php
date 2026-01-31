@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;>
+namespace App\Jobs;
 
 use App\Models\Question;
 use App\Services\GeminiService;

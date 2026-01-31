@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class DiagnoseMatchesUpdate extends Command
 {
-    protected $signature = 'app:diagnose-matches-update {--limit=5 : Number of matches to diagnose}';
+    protected $signature = 'app:diagnose-matches-update {--limit=5 : Number of matches to diagnose} {--date= : Filter by specific date (Y-m-d format)}';
     protected $description = 'Diagnose why matches are not being updated correctly';
 
     public function handle()
@@ -19,12 +19,20 @@ class DiagnoseMatchesUpdate extends Command
         $this->info("╚════════════════════════════════════════════════════════════╝\n");
 
         $limit = (int) $this->option('limit');
+        $date = $this->option('date');
 
         // Obtener partidos sin external_id
         $this->line("\n📋 REVISANDO PARTIDOS SIN EXTERNAL_ID:");
         $this->line(str_repeat('-', 80));
 
-        $withoutExternalId = FootballMatch::whereNull('external_id')
+        $query = FootballMatch::query();
+        if ($date) {
+            $parsedDate = \Carbon\Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
+            $query->whereDate('date', $parsedDate);
+            $this->info("Filtrando por fecha: {$date}\n");
+        }
+
+        $withoutExternalId = $query->whereNull('external_id')
             ->limit($limit)
             ->get();
 
@@ -41,24 +49,18 @@ class DiagnoseMatchesUpdate extends Command
         $this->line("\n📋 ANALIZANDO PARTIDOS CON EXTERNAL_ID:");
         $this->line(str_repeat('-', 80));
 
-        $withExternalId = FootballMatch::whereNotNull('external_id')
-            ->where('status', '!=', 'Match Finished')
+        $query = FootballMatch::query();
+        if ($date) {
+            $parsedDate = \Carbon\Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
+            $query->whereDate('date', $parsedDate);
+        }
+
+        $withExternalId = $query->whereNotNull('external_id')
             ->limit($limit)
             ->get();
 
         if ($withExternalId->isEmpty()) {
-            $this->warn("ℹ️  No hay partidos sin terminar con external_id para diagnosticar");
-
-            // Buscar partidos terminados para diagnosticar
-            $this->line("\n📋 USANDO PARTIDOS TERMINADOS PARA DIAGNÓSTICO:");
-            $withExternalId = FootballMatch::whereNotNull('external_id')
-                ->where('status', 'Match Finished')
-                ->limit($limit)
-                ->get();
-        }
-
-        if ($withExternalId->isEmpty()) {
-            $this->warn("No se encontraron partidos para diagnosticar");
+            $this->warn("ℹ️  No hay partidos con external_id para diagnosticar");
             return;
         }
 
@@ -139,8 +141,6 @@ class DiagnoseMatchesUpdate extends Command
                 ];
             }
         }
-
-        // Resumen
         $this->newLine();
         $this->info("═══════════════════════════════════════════════════════════════");
         $this->info("RESUMEN DIAGNÓSTICO");

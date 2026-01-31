@@ -571,6 +571,61 @@ class FootballService
     }
 
     /**
+     * Obtiene los eventos de un fixture desde API Football
+     * Retorna array de eventos o null
+     */
+    public function obtenerEventosFixture($fixtureId)
+    {
+        $apiKey = config('services.football.key')
+            ?? env('FOOTBALL_API_KEY')
+            ?? env('APISPORTS_API_KEY')
+            ?? env('API_SPORTS_KEY');
+
+        if (!$apiKey || !is_numeric($fixtureId)) {
+            return null;
+        }
+
+        try {
+            $response = Http::withoutVerifying()
+                ->withHeaders(['x-apisports-key' => $apiKey])
+                ->timeout(10)
+                ->get("https://v3.football.api-sports.io/fixtures/events", [
+                    'fixture' => $fixtureId
+                ]);
+
+            if (!$response->successful()) {
+                Log::warning("Error al obtener eventos de fixture {$fixtureId}: " . $response->status());
+                return null;
+            }
+
+            $data = $response->json();
+            $events = $data['response'] ?? [];
+
+            if (empty($events)) {
+                return null;
+            }
+
+            // Convertir eventos al formato esperado
+            $formattedEvents = [];
+            foreach ($events as $event) {
+                $formattedEvents[] = [
+                    'time' => $event['time']['elapsed'] ?? 0,
+                    'type' => $event['type'] ?? 'other',
+                    'team' => $event['team']['name'] ?? 'Unknown',
+                    'player' => $event['player']['name'] ?? 'Unknown',
+                    'assist' => $event['assist']['name'] ?? null,
+                    'detail' => $event['detail'] ?? null,
+                ];
+            }
+
+            return $formattedEvents;
+        } catch (\Exception $e) {
+            Log::warning("Exception al obtener eventos: {$e->getMessage()}");
+            return null;
+        }
+    }
+
+    /**
      * Busca el fixtureId de un partido terminado por nombres de equipos, liga, temporada y fecha
      */
     public function buscarFixtureId($competition, $season, $homeTeam, $awayTeam, $matchDate = null)
@@ -1115,6 +1170,12 @@ class FootballService
             ])
         ];
 
+        // Intentar obtener eventos también desde API Football
+        $events = $this->obtenerEventosFixture($fixtureId);
+        if ($events) {
+            $updateData['events'] = json_encode($events);
+        }
+
         $updated = $match->update($updateData);
 
         if (!$updated) {
@@ -1125,6 +1186,9 @@ class FootballService
             return null;
         }
 
+        // 🔄 IMPORTANTE: Recargar el partido desde BD para que el objeto tenga los datos actualizados
+        $match->refresh();
+
         Log::info("✅ Partido actualizado desde API Football PRO", [
             'match_id' => $match->id,
             'fixture_id' => $fixtureId,
@@ -1132,6 +1196,7 @@ class FootballService
             'status' => $matchStatus,
             'home_team' => $fixture['teams']['home']['name'],
             'away_team' => $fixture['teams']['away']['name'],
+            'events_obtained' => $events ? count($events) : 0,
             'source' => 'API Football PRO (api-sports.io)'
         ]);
 
