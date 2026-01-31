@@ -35,7 +35,7 @@
         <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 flex-1 px-1 pb-4" id="predictiveQuestionsCarousel">
             @forelse($matchQuestions->where('type', 'predictive') as $question)
                 @php
-                    $questionExpired = $question->available_until->addHours(4) < now();
+                    $questionExpired = $question->available_until->addHours(4) < now('UTC');
                     $shouldDim = $question->is_disabled || $questionExpired;
                     $userHasAnswered = $question->answers->firstWhere('user_id', auth()->id());
                 @endphp
@@ -89,25 +89,12 @@
                 </div>
 
                 @php
-                    // Verificar si el partido ha comenzado
-                    $matchHasStarted = $question->football_match && $question->football_match->date <= now();
+                    // Verificar si el partido ha comenzado (comparar en UTC)
+                    $matchHasStarted = $question->football_match && $question->football_match->date <= now('UTC');
                 @endphp
 
-                <!-- Indicador cuando el partido ha comenzado -->
-                @if($matchHasStarted)
-                    <div class="bg-red-500 bg-opacity-20 border border-red-500 rounded-lg p-3 mb-4 text-center">
-                        <div style="color: #dc3545; font-weight: 600; font-size: 0.875rem;">
-                            <i class="fas fa-lock mr-2"></i>
-                            {{ __('views.groups.match_has_started') ?? 'El partido ha comenzado' }}
-                        </div>
-                        <p style="color: {{ $textSecondary }}; font-size: 0.75rem; margin-top: 0.25rem;">
-                            {{ __('views.groups.cannot_answer_after_start') ?? 'No puedes responder predicciones después de que inicia el partido' }}
-                        </p>
-                    </div>
-                @endif
-
                 <!-- Options (Answers) -->
-                @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now() && !$question->is_disabled && !$matchHasStarted) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now()) <= 5 && $question->can_modify && !$matchHasStarted))
+                @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now('UTC') && !$question->is_disabled && !$matchHasStarted) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now('UTC')) <= 5 && $question->can_modify && !$matchHasStarted))
                     <form action="{{ route('questions.answer', $question) }}" method="POST" class="group-question-form">
                         @csrf
                         <div class="grid grid-cols-2 gap-3 mb-5">
@@ -159,7 +146,7 @@
                     </form>
 
                     @php
-                        $isQuestionActive = $question->available_until->addHours(4)->greaterThan(now());
+                        $isQuestionActive = $question->available_until->addHours(4)->greaterThan(now('UTC'));
                     @endphp
                     <!-- Timer -->
                     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
@@ -182,7 +169,7 @@
                                 $allNames = $answers->pluck('user.name')->implode(', ');
                                 $optionBg = $bgSecondary;
                                 $optionColor = $textPrimary;
-                                if ($question->available_until->addHours(4) > now() && !$question->is_disabled) {
+                                if ($question->available_until->addHours(4) > now('UTC') && !$question->is_disabled) {
                                     if ($userHasAnswered && $userHasAnswered->id == $option->id) {
                                         $optionBg = $accentDark;
                                         $optionColor = '#ffffff';
@@ -237,7 +224,7 @@
                     </div>
 
                     @php
-                        $isQuestionActive2 = $question->available_until->addHours(4)->greaterThan(now());
+                        $isQuestionActive2 = $question->available_until->addHours(4)->greaterThan(now('UTC'));
                     @endphp
                     <!-- Timer -->
                     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
