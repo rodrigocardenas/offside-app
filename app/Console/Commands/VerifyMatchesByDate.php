@@ -105,7 +105,7 @@ class VerifyMatchesByDate extends Command
                 'date_filter' => $date ?? "{$startDate} to {$endDate}",
             ]);
         } catch (Throwable $e) {
-            $this->error("Error al despa char verificación: {$e->getMessage()}");
+            $this->error("Error al despachar verificación: {$e->getMessage()}");
             Log::error('VerifyMatchesByDate failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

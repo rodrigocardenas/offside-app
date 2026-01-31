@@ -1023,13 +1023,14 @@ class FootballService
      */
     public function updateMatchFromApi($localId)
     {
-        // 1. Buscar el partido en tu base de datos
+        // 1️⃣ Buscar el partido en base de datos
         $match = FootballMatch::find($localId);
         if (!$match) {
+            Log::warning("Partido no encontrado en BD: $localId");
             return null;
         }
 
-        // 2. Verificar si tiene external_id
+        // 2️⃣ Verificar que tenga external_id
         if (!$match->external_id) {
             Log::error("El partido no tiene external_id configurado", [
                 'match_id' => $match->id,
@@ -1039,68 +1040,103 @@ class FootballService
             return null;
         }
 
-        Log::info("Actualizando partido usando external_id:", [
+        Log::info("Actualizando partido desde API Football PRO:", [
             'id' => $match->id,
             'external_id' => $match->external_id,
             'home_team' => $match->home_team,
             'away_team' => $match->away_team,
             'date' => $match->date,
             'league' => $match->league,
-            'status' => $match->status
         ]);
 
-        // 3. Extraer el fixtureId del external_id usando la fecha del partido y la liga
+        // 3️⃣ Extraer fixtureId del external_id
         $matchDate = $match->date ? $match->date->format('Y-m-d') : null;
         $fixtureId = $this->extraerFixtureIdDelExternalId($match->external_id, $matchDate, $match->league);
-        Log::info('Fixture ID extraído: ' . $fixtureId . ' para fecha: ' . $matchDate . ' en liga: ' . $match->league);
+
         if (!$fixtureId) {
+            Log::warning("No se pudo extraer fixtureId del external_id", [
+                'match_id' => $match->id,
+                'external_id' => $match->external_id
+            ]);
             return null;
         }
 
-        // 4. Obtener los datos del fixture directamente (Football-Data.org)
+        Log::info("Fixture ID extraído", [
+            'fixture_id' => $fixtureId,
+            'match_date' => $matchDate,
+            'league' => $match->league
+        ]);
+
+        // 4️⃣ Obtener datos del fixture desde API Football PRO (api-sports.io)
         $fixture = $this->obtenerFixtureDirecto($fixtureId);
         if (!$fixture) {
-            Log::error("No se pudo obtener el fixture con ID: $fixtureId");
+            Log::error("No se pudo obtener fixture de API Football", [
+                'fixture_id' => $fixtureId,
+                'match_id' => $match->id
+            ]);
             return null;
         }
 
-        // 5. Actualizar solo score y status (Football-Data.org solo proporciona eso)
-        // Los eventos y estadísticas se pueden enriquecer en un job separado si es necesario
+        // 5️⃣ Extraer scores y status
         $homeScore = $fixture['goals']['home'] ?? 0;
         $awayScore = $fixture['goals']['away'] ?? 0;
         $score = "{$homeScore} - {$awayScore}";
 
-        // Mapear status de Football-Data.org al formato esperado
-        $fixtureStatus = $fixture['fixture']['status'] ?? 'TIMED';
+        // Mapear status de API Football PRO (formato corto: 'NS', 'LIVE', 'FT', etc.)
+        $fixtureStatus = $fixture['fixture']['status'] ?? 'NS';
         $statusMap = [
-            'TIMED' => 'Not Started',
+            'NS' => 'Not Started',
             'LIVE' => 'In Play',
-            'IN_PLAY' => 'In Play',
-            'PAUSED' => 'In Play',
-            'FINISHED' => 'Match Finished',
-            'POSTPONED' => 'Postponed',
-            'CANCELLED' => 'Cancelled',
-            'AWARDED' => 'Match Finished',
+            'FT' => 'Match Finished',
+            'ET' => 'In Play',      // Extra Time
+            'P' => 'In Play',       // Penalty
+            'SUSP' => 'In Play',    // Suspended
+            'PST' => 'Postponed',
+            'CANC' => 'Cancelled',
+            'ABD' => 'Cancelled',   // Abandoned
+            'AWD' => 'Match Finished', // Awarded
+            'WO' => 'Match Finished',  // Walkover
         ];
         $matchStatus = $statusMap[$fixtureStatus] ?? 'Not Started';
 
-        $match->update([
+        // 6️⃣ Actualizar partido en BD
+        $updateData = [
             'home_team' => $fixture['teams']['home']['name'] ?? $match->home_team,
             'away_team' => $fixture['teams']['away']['name'] ?? $match->away_team,
             'status' => $matchStatus,
             'home_team_score' => $homeScore,
             'away_team_score' => $awayScore,
             'score' => $score,
-        ]);
+            'statistics' => json_encode([
+                'source' => 'API Football PRO',
+                'api_verified' => true,
+                'fixture_id' => $fixtureId,
+                'updated_at' => now()->toIso8601String()
+            ])
+        ];
 
-        Log::info("✅ Partido {$match->id} actualizado desde Football-Data.org", [
+        $updated = $match->update($updateData);
+
+        if (!$updated) {
+            Log::error("❌ CRÍTICO: No se pudo actualizar partido en BD", [
+                'match_id' => $match->id,
+                'fixture_id' => $fixtureId,
+            ]);
+            return null;
+        }
+
+        Log::info("✅ Partido actualizado desde API Football PRO", [
+            'match_id' => $match->id,
+            'fixture_id' => $fixtureId,
             'score' => $score,
             'status' => $matchStatus,
-            'source' => 'Football-Data.org'
+            'home_team' => $fixture['teams']['home']['name'],
+            'away_team' => $fixture['teams']['away']['name'],
+            'source' => 'API Football PRO (api-sports.io)'
         ]);
 
         return $match;
-        }
+    }
 
     /**
      * Busca el fixtureId específicamente para ligas latinoamericanas sin filtros de fecha
