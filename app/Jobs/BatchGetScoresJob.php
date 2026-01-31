@@ -170,7 +170,7 @@ class BatchGetScoresJob implements ShouldQueue
 
     protected function isFinishedScorePayload(array $result): bool
     {
-        if (($result['status'] ?? 'finished') !== 'finished') {
+        if (($result['status'] ?? 'Match Finished') !== 'Match Finished') {
             return false;
         }
 

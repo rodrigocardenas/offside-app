@@ -14,7 +14,7 @@ class CheckExternalIds extends Command
     {
         $this->info("Checking external IDs of finished matches:\n");
 
-        $matches = FootballMatch::whereIn('status', ['Match Finished', 'FINISHED'])
+        $matches = FootballMatch::whereIn('status', ['Match Finished', 'FINISHED', 'Finished'])
             ->orderByDesc('updated_at')
             ->limit(10)
             ->get();

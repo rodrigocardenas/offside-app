@@ -38,7 +38,7 @@ class VerifyQuestionResultsJob implements ShouldQueue
         // Usar chunking para procesar de manera más eficiente
         Question::whereNull('result_verified_at')
             ->whereHas('football_match', function($query) {
-                $query->whereIn('status', ['FINISHED', 'Match Finished']);
+                $query->whereIn('status', ['FINISHED', 'Match Finished', 'Finished']);
             })
             ->with('football_match', 'options', 'answers')
             ->chunk($chunkSize, function ($questions) use ($evaluationService, &$processedCount, &$errorCount) {
