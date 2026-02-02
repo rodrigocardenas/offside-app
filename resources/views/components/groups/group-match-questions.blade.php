@@ -20,6 +20,10 @@
     $shareTextareaBg = $isDark ? 'rgba(255,255,255,0.05)' : '#f5f5f5';
     $shareModalShadow = $isDark ? '0 14px 40px rgba(0, 0, 0, 0.55)' : '0 10px 40px rgba(0, 0, 0, 0.2)';
     $shareCloseColor = $isDark ? '#d5fdf0' : '#999999';
+
+    // Zona horaria del usuario
+    $userTimezone = auth()->user()->timezone ?? config('app.timezone');
+    $nowUser = now()->setTimezone($userTimezone);
 @endphp
 
 <div class="mt-1">
@@ -35,7 +39,7 @@
         <div class="overflow-x-auto hide-scrollbar snap-x snap-mandatory flex space-x-4 flex-1 px-1 pb-4" id="predictiveQuestionsCarousel">
             @forelse($matchQuestions->where('type', 'predictive') as $question)
                 @php
-                    $questionExpired = $question->available_until->addHours(4) < now('UTC');
+                    $questionExpired = $question->available_until->setTimezone($userTimezone)->addHours(4) < $nowUser;
                     $shouldDim = $question->is_disabled || $questionExpired;
                     $userHasAnswered = $question->answers->firstWhere('user_id', auth()->id());
                 @endphp
@@ -89,12 +93,12 @@
                 </div>
 
                 @php
-                    // Verificar si el partido ha comenzado (comparar en UTC)
-                    $matchHasStarted = $question->football_match && $question->football_match->date <= now('UTC');
+                    // Verificar si el partido ha comenzado (comparar en zona horaria del usuario)
+                    $matchHasStarted = $question->football_match && $question->football_match->date->setTimezone($userTimezone) <= $nowUser;
                 @endphp
 
                 <!-- Options (Answers) -->
-                @if((!isset($userHasAnswered) && $question->available_until->addHours(4) > now('UTC') && !$question->is_disabled && !$matchHasStarted) || (isset($userHasAnswered) && $userHasAnswered->updated_at->diffInMinutes(now('UTC')) <= 5 && $question->can_modify && !$matchHasStarted))
+                @if((!isset($userHasAnswered) && $question->available_until->setTimezone($userTimezone)->addHours(4) > $nowUser && !$question->is_disabled && !$matchHasStarted) || (isset($userHasAnswered) && $userHasAnswered->updated_at->setTimezone($userTimezone)->diffInMinutes($nowUser) <= 5 && $question->can_modify && !$matchHasStarted))
                     <form action="{{ route('questions.answer', $question) }}" method="POST" class="group-question-form">
                         @csrf
                         <div class="grid grid-cols-2 gap-3 mb-5">
@@ -146,7 +150,7 @@
                     </form>
 
                     @php
-                        $isQuestionActive = $question->available_until->addHours(4)->greaterThan(now('UTC'));
+                        $isQuestionActive = $question->available_until->setTimezone($userTimezone)->addHours(4)->greaterThan($nowUser);
                     @endphp
                     <!-- Timer -->
                     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
@@ -169,7 +173,7 @@
                                 $allNames = $answers->pluck('user.name')->implode(', ');
                                 $optionBg = $bgSecondary;
                                 $optionColor = $textPrimary;
-                                if ($question->available_until->addHours(4) > now('UTC') && !$question->is_disabled) {
+                                if ($question->available_until->setTimezone($userTimezone)->addHours(4) > $nowUser && !$question->is_disabled) {
                                     if ($userHasAnswered && $userHasAnswered->id == $option->id) {
                                         $optionBg = $accentDark;
                                         $optionColor = '#ffffff';
@@ -224,7 +228,7 @@
                     </div>
 
                     @php
-                        $isQuestionActive2 = $question->available_until->addHours(4)->greaterThan(now('UTC'));
+                        $isQuestionActive2 = $question->available_until->setTimezone($userTimezone)->addHours(4)->greaterThan($nowUser);
                     @endphp
                     <!-- Timer -->
                     <div class="text-center text-sm font-semibold" style="color: {{ $accentColor }};">
