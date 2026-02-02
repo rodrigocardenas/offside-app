@@ -13,16 +13,24 @@ use Throwable;
 
 class ForceVerifyQuestionsCommand extends Command
 {
-    protected $signature = 'app:force-verify-questions
-        {--days=30 : Número de días hacia atrás para buscar partidos (default: 30)}
-        {--limit=100 : Máximo número de matches a verificar (default: 100)}
-        {--match-id= : ID específico de match a verificar (omite filtros)}
-        {--dry-run : Solo mostrar qué se verificaría sin ejecutar}';
+    protected $signature = 'app:force-verify-questions {--days=30} {--limit=100} {--match-id=} {--dry-run}';
 
     protected $description = 'Force verification of questions para partidos más antiguos. Útil para re-procesar matches que no se verificaron automáticamente.';
 
     public function handle(): int
     {
+        // Validación y descripción de opciones
+        $this->line('');
+        $this->line('📖 USAGE:');
+        $this->line('  php artisan app:force-verify-questions [OPTIONS]');
+        $this->line('');
+        $this->line('📋 OPTIONS:');
+        $this->line('  --days=N       Número de días hacia atrás (default: 30)');
+        $this->line('  --limit=N      Máximo de matches a verificar (default: 100)');
+        $this->line('  --match-id=ID  ID específico del match (omite otros filtros)');
+        $this->line('  --dry-run      Solo previsualizar sin ejecutar');
+        $this->line('');
+
         $daysBack = $this->option('days') ?? 30;
         $limit = $this->option('limit') ?? 100;
         $matchId = $this->option('match-id');
