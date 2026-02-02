@@ -148,17 +148,11 @@ class ForceVerifyQuestionsCommand extends Command
                 new BatchGetScoresJob($matchIds, $batchId),
                 new BatchExtractEventsJob($matchIds, $batchId),
             ])
-                ->catch(function ($batch, Throwable $exception) use ($batchId) {
-                    $this->error("❌ Batch error: " . $exception->getMessage());
-                })
-                ->finally(function ($batch) use ($matchIds, $batchId) {
-                    if ($batch->failed()) {
-                        $this->warn("⚠️  Some jobs failed, but continuing with verification...");
-                    }
-                    dispatch(new VerifyAllQuestionsJob($matchIds, $batchId));
-                })
                 ->name('force-verify-' . $batchId)
                 ->dispatch();
+            
+            // Dispatch VerifyAllQuestionsJob after batch (with delay to allow batch to complete)
+            dispatch(new VerifyAllQuestionsJob($matchIds, $batchId))->delay(now()->addSeconds(60));
 
             $this->info("✅ Verification batch dispatched successfully");
             $this->info("📊 Queue will process: BatchGetScoresJob → BatchExtractEventsJob → VerifyAllQuestionsJob");

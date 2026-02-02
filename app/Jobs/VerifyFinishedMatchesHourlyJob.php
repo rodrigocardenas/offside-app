@@ -69,24 +69,11 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
                 new BatchGetScoresJob($matchIds, $batchId),
                 new BatchExtractEventsJob($matchIds, $batchId),
             ])
-                ->catch(function (Batch $batch, Throwable $exception) use ($batchId) {
-                    Log::error('VerifyFinishedMatchesHourlyJob - batch error', [
-                        'batch_id' => $batchId,
-                        'error' => $exception->getMessage(),
-                    ]);
-                })
-                ->finally(function (Batch $batch) use ($matchIds, $batchId) {
-                    Log::info('VerifyFinishedMatchesHourlyJob - batch complete, dispatching verification', [
-                        'batch_id' => $batchId,
-                        'match_count' => count($matchIds),
-                        'batch_failed' => $batch->failed(),
-                    ]);
-
-                    // Dispatch verification job
-                    dispatch(new VerifyAllQuestionsJob($matchIds, $batchId));
-                })
                 ->name('verify-finished-matches-' . $batchId)
                 ->dispatch();
+
+            // Dispatch verification job after batch (with delay to allow batch to complete)
+            dispatch(new VerifyAllQuestionsJob($matchIds, $batchId))->delay(now()->addSeconds(60));
 
             Log::info('VerifyFinishedMatchesHourlyJob completed successfully');
         } catch (Throwable $e) {
