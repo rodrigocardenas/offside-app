@@ -61,9 +61,12 @@ class RankingController extends Controller
                     'question' => [
                         'id' => $answer->question->id,
                         'title' => $answer->question->title,
+                        'result_verified_at' => $answer->question->result_verified_at,
                         'football_match' => $answer->question->football_match ? [
+                            'id' => $answer->question->football_match->id,
                             'home_team' => $answer->question->football_match->home_team,
                             'away_team' => $answer->question->football_match->away_team,
+                            'status' => $answer->question->football_match->status,
                         ] : null,
                     ],
                     'question_option' => [
