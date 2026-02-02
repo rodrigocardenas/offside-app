@@ -6,6 +6,7 @@ use App\Jobs\BatchGetScoresJob;
 use App\Jobs\BatchExtractEventsJob;
 use App\Jobs\VerifyAllQuestionsJob;
 use App\Models\FootballMatch;
+use App\Models\Question;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Str;
@@ -13,7 +14,7 @@ use Throwable;
 
 class ForceVerifyQuestionsCommand extends Command
 {
-    protected $signature = 'app:force-verify-questions {--days=30} {--limit=100} {--match-id=} {--dry-run}';
+    protected $signature = 'app:force-verify-questions {--days=30} {--limit=100} {--match-id=} {--dry-run} {--re-verify}';
 
     protected $description = 'Force verification of questions para partidos más antiguos. Útil para re-procesar matches que no se verificaron automáticamente.';
 
@@ -28,6 +29,7 @@ class ForceVerifyQuestionsCommand extends Command
         $this->line('  --days=N       Número de días hacia atrás (default: 30)');
         $this->line('  --limit=N      Máximo de matches a verificar (default: 100)');
         $this->line('  --match-id=ID  ID específico del match (omite otros filtros)');
+        $this->line('  --re-verify    Re-verificar preguntas ya verificadas y asignar puntos');
         $this->line('  --dry-run      Solo previsualizar sin ejecutar');
         $this->line('');
 
@@ -35,21 +37,20 @@ class ForceVerifyQuestionsCommand extends Command
         $limit = $this->option('limit') ?? 100;
         $matchId = $this->option('match-id');
         $dryRun = $this->option('dry-run');
+        $reVerify = $this->option('re-verify');
 
         $this->info("🔍 FORCE VERIFY QUESTIONS");
         $this->info("═══════════════════════════════════════════════════════════════");
         $this->info("Days back: $daysBack");
         $this->info("Limit: $limit");
         $this->info("Match ID: " . ($matchId ?? 'ANY'));
+        $this->info("Re-verify: " . ($reVerify ? 'YES (Asignará puntos nuevamente)' : 'NO'));
         $this->info("Dry Run: " . ($dryRun ? 'YES' : 'NO'));
         $this->info("═══════════════════════════════════════════════════════════════\n");
 
         try {
             // Construir query
             $query = FootballMatch::query()
-                ->withCount(['questions as pending_questions_count' => function ($q) {
-                    $q->whereNull('result_verified_at');
-                }])
                 ->whereIn('status', ['Match Finished', 'FINISHED', 'Finished']);
 
             // Filtrar por match específico o rango de fechas
@@ -62,10 +63,16 @@ class ForceVerifyQuestionsCommand extends Command
                 $this->info("Buscando matches desde: " . $windowStart->format('Y-m-d H:i') . "\n");
             }
 
-            // Tener preguntas pendientes
-            $query->whereHas('questions', function ($q) {
-                $q->whereNull('result_verified_at');
-            });
+            // Filtrar por preguntas
+            if ($reVerify) {
+                // Para re-verify: buscar matches con ANY questions
+                $query->whereHas('questions');
+            } else {
+                // Modo normal: solo matches con preguntas no verificadas
+                $query->whereHas('questions', function ($q) {
+                    $q->whereNull('result_verified_at');
+                });
+            }
 
             $matches = $query
                 ->orderByDesc('updated_at')
@@ -77,19 +84,24 @@ class ForceVerifyQuestionsCommand extends Command
                 return 1;
             }
 
-            $this->info("✅ Encontrados " . $matches->count() . " matches con preguntas pendientes:\n");
+            $mode = $reVerify ? "RE-VERIFICAR" : "VERIFICAR";
+            $this->info("✅ Encontrados " . $matches->count() . " matches para $mode:\n");
 
             // Mostrar detalles
             foreach ($matches as $match) {
-                $pending = $match->pending_questions_count ?? 0;
                 $verified = $match->questions()->whereNotNull('result_verified_at')->count();
+                $unverified = $match->questions()->whereNull('result_verified_at')->count();
                 $total = $match->questions->count();
 
                 $this->info("  Match #{$match->id}");
                 $this->info("    • {$match->home_team} vs {$match->away_team} ({$match->home_team_score}-{$match->away_team_score})");
                 $this->info("    • Fecha: " . $match->date->format('Y-m-d H:i'));
                 $this->info("    • Status: {$match->status}");
-                $this->info("    • Preguntas: $verified/$total verificadas ($pending pendientes)");
+                if ($reVerify) {
+                    $this->info("    • Preguntas: $total para re-verificar");
+                } else {
+                    $this->info("    • Preguntas: $verified verificadas, $unverified pendientes (total: $total)");
+                }
                 $this->info("");
             }
 
@@ -105,6 +117,15 @@ class ForceVerifyQuestionsCommand extends Command
             // Ejecutar verificación
             $matchIds = $matches->pluck('id')->all();
             $batchId = Str::uuid()->toString();
+
+            if ($reVerify) {
+                // Reset result_verified_at para re-verificar
+                Question::whereIn('match_id', $matchIds)->update([
+                    'result_verified_at' => null,
+                    'result' => null,
+                ]);
+                $this->warn("🔄 Reseteando result_verified_at para re-verificación...");
+            }
 
             $this->info("🚀 DISPATCHING VERIFICATION BATCH");
             $this->info("Batch ID: $batchId");
