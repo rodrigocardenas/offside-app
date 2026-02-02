@@ -69,8 +69,7 @@ class VerifyBatchHealthCheckJob implements ShouldQueue
         $windowStart = $now->copy()->subHours(1);
 
         // Métrica 1: Partidos no finalizados en la última hora
-        $unfinalizedMatches = FootballMatch::where('status', '!=', 'FINISHED')
-            ->where('status', '!=', 'Match Finished')
+        $unfinalizedMatches = FootballMatch::whereNotIn('status', ['FINISHED', 'Match Finished', 'Finished'])
             ->where('date', '>=', $windowStart)
             ->count();
 

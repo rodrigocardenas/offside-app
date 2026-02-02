@@ -36,7 +36,7 @@ class UpdateFinishedMatchesJob implements ShouldQueue
         // En desarrollo, buscar en un rango más amplio (72 horas)
         $hoursBack = env('APP_ENV') === 'production' ? 24 : 72;
 
-        $finishedMatches = FootballMatch::whereNotIn('status', ['FINISHED', 'Match Finished'])
+        $finishedMatches = FootballMatch::whereNotIn('status', ['FINISHED', 'Match Finished', 'Finished'])
             ->where('date', '<=', now()->subHours(2))
             ->where('date', '>=', now()->subHours($hoursBack))
             ->pluck('id')

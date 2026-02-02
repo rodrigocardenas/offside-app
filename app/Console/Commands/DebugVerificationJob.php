@@ -21,8 +21,8 @@ class DebugVerificationJob extends Command
         $this->line("Total matches in DB: $total");
 
         // Check matches with status finished
-        $finishedCount = FootballMatch::whereIn('status', ['Match Finished', 'FINISHED'])->count();
-        $this->line("Matches with status 'Match Finished' or 'FINISHED': $finishedCount");
+        $finishedCount = FootballMatch::whereIn('status', ['Match Finished', 'FINISHED', 'Finished'])->count();
+        $this->line("Matches with status 'Match Finished', 'FINISHED', or 'Finished': $finishedCount");
 
         // Check all unique statuses
         $statuses = FootballMatch::distinct('status')->pluck('status');
@@ -34,7 +34,7 @@ class DebugVerificationJob extends Command
 
         // Check matches with pending questions
         $windowStart = now()->subHours(72);
-        $withQuestions = FootballMatch::whereIn('status', ['Match Finished', 'FINISHED'])
+        $withQuestions = FootballMatch::whereIn('status', ['Match Finished', 'FINISHED', 'Finished'])
             ->where('date', '>=', $windowStart)
             ->whereHas('questions', function ($query) {
                 $query->whereNull('result_verified_at');

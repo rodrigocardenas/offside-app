@@ -48,7 +48,7 @@ class VerifyAllQuestionsJob implements ShouldQueue
         try {
             $query = Question::whereNull('result_verified_at')
                 ->whereHas('football_match', function ($query) {
-                    $query->whereIn('status', ['FINISHED', 'Match Finished']);
+                    $query->whereIn('status', ['Match Finished', 'FINISHED', 'Finished']);
                 })
                 ->with(['football_match', 'options', 'answers']);
 
