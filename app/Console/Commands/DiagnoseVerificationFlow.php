@@ -15,7 +15,7 @@ class DiagnoseVerificationFlow extends Command
     public function handle()
     {
         $limit = $this->option('limit');
-        
+
         $this->info('='.str_repeat('=', 70).'=');
         $this->info('DIAGNÓSTICO DEL FLUJO DE VERIFICACIÓN DE PREGUNTAS');
         $this->info('='.str_repeat('=', 70).'=');
@@ -24,7 +24,7 @@ class DiagnoseVerificationFlow extends Command
         $this->newLine();
         $this->line('<fg=cyan>1. PARTIDOS TERMINADOS (últimas 24h)</fg=cyan>');
         $this->line(str_repeat('-', 72));
-        
+
         $finishedMatches = FootballMatch::whereIn('status', ['Match Finished', 'FINISHED', 'Finished'])
             ->where('date', '>=', now()->subHours(24))
             ->orderBy('date', 'desc')
@@ -38,21 +38,21 @@ class DiagnoseVerificationFlow extends Command
                 $this->line("  ID: {$match->id} | {$match->home_team} vs {$match->away_team}");
                 $this->line("  └─ Status: {$match->status}");
                 $this->line("  └─ Score: {$match->home_team_score} - {$match->away_team_score}");
-                
+
                 // Decodificar statistics
-                $stats = is_string($match->statistics) 
-                    ? json_decode($match->statistics, true) 
+                $stats = is_string($match->statistics)
+                    ? json_decode($match->statistics, true)
                     : $match->statistics;
-                
+
                 $source = $stats['source'] ?? 'UNKNOWN';
                 $verified = $stats['verified'] ?? false;
                 $this->line("  └─ Statistics Source: {$source}");
                 $this->line("  └─ Verified: " . ($verified ? '✓ SÍ' : '✗ NO'));
-                
+
                 // Eventos
                 $hasEvents = !empty($match->events);
                 $this->line("  └─ Events: " . ($hasEvents ? '✓ SÍ' : '✗ NO'));
-                
+
                 $this->newLine();
             }
         }
@@ -61,9 +61,9 @@ class DiagnoseVerificationFlow extends Command
         $this->newLine();
         $this->line('<fg=cyan>2. PREGUNTAS SIN VERIFICAR DE ESTOS PARTIDOS</fg=cyan>');
         $this->line(str_repeat('-', 72));
-        
+
         $matchIds = $finishedMatches->pluck('id')->toArray();
-        
+
         if (empty($matchIds)) {
             $this->warn('No hay partidos para revisar');
         } else {
@@ -84,15 +84,15 @@ class DiagnoseVerificationFlow extends Command
                     $this->line("  └─ Options: " . $q->options->count());
                     $this->line("  └─ Answers: " . $q->answers->count());
                     $this->line("  └─ Verified At: " . ($q->result_verified_at ?? 'NO'));
-                    
+
                     // Revisar si hay respuestas correctas asignadas
                     $correctOptions = $q->options->where('is_correct', true)->count();
                     $this->line("  └─ Correct Options: {$correctOptions}");
-                    
+
                     // Revisar si hay puntos asignados
                     $totalPoints = $q->answers->sum('points_earned');
                     $this->line("  └─ Total Points Earned: {$totalPoints}");
-                    
+
                     $this->newLine();
                 }
             }
@@ -103,23 +103,23 @@ class DiagnoseVerificationFlow extends Command
             $this->newLine();
             $this->line('<fg=cyan>3. DETALLES PROFUNDOS DEL PRIMER PARTIDO</fg=cyan>');
             $this->line(str_repeat('-', 72));
-            
+
             $firstMatch = $finishedMatches->first();
-            
+
             // Statistics
-            $stats = is_string($firstMatch->statistics) 
-                ? json_decode($firstMatch->statistics, true) 
+            $stats = is_string($firstMatch->statistics)
+                ? json_decode($firstMatch->statistics, true)
                 : $firstMatch->statistics;
-            
+
             $this->line('Statistics JSON:');
             $this->line(json_encode($stats, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            
+
             // Events
             if ($firstMatch->events) {
                 $events = is_string($firstMatch->events)
                     ? json_decode($firstMatch->events, true)
                     : $firstMatch->events;
-                
+
                 $this->newLine();
                 $this->line('Events JSON:');
                 if (is_array($events) && count($events) > 0) {
@@ -138,12 +138,12 @@ class DiagnoseVerificationFlow extends Command
         $this->newLine();
         $this->line('<fg=cyan>4. ESTADÍSTICAS GENERALES</fg=cyan>');
         $this->line(str_repeat('-', 72));
-        
+
         $totalFinished = FootballMatch::whereIn('status', ['Match Finished', 'FINISHED', 'Finished'])->count();
         $totalQuestions = Question::count();
         $pendingQuestions = Question::whereNull('result_verified_at')->count();
         $verifiedQuestions = Question::whereNotNull('result_verified_at')->count();
-        
+
         $this->line("Partidos terminados: {$totalFinished}");
         $this->line("Total preguntas: {$totalQuestions}");
         $this->line("Preguntas sin verificar: {$pendingQuestions}");

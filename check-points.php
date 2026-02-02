@@ -22,10 +22,10 @@ foreach($matches as $m) {
     echo "Match {$m->id}: {$m->home_team} vs {$m->away_team}\n";
     echo "Date: " . $m->date->format('Y-m-d H:i') . "\n";
     echo "═══════════════════════════════════════\n";
-    
+
     $questions = $m->questions;
     echo "  Questions: " . $questions->count() . "\n\n";
-    
+
     if($questions->count() > 0) {
         foreach($questions as $q) {
             $verified = $q->result_verified_at ? "✓" : "✗";

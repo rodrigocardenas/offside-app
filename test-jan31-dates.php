@@ -21,20 +21,20 @@ if ($allMatches->count() == 0) {
     echo "❌ No hay matches exactamente el 31 de Enero\n\n";
     echo "✅ Opción 1: Usar un rango de fechas diferente\n";
     echo "   Disponible matches para:\n";
-    
+
     $available = FootballMatch::selectRaw('DATE(date) as match_date')
         ->distinct()
         ->orderBy('match_date', 'desc')
         ->limit(5)
         ->get();
-    
+
     foreach($available as $m) {
         $count = FootballMatch::whereDate('date', $m->match_date)->count();
         echo "   - {$m->match_date} ({$count} matches)\n";
     }
 } else {
     echo "✅ Encontrados " . $allMatches->count() . " matches en $targetDate\n\n";
-    
+
     // Show matches with status
     $allMatches->each(function($m) {
         $qCount = $m->questions()->count();

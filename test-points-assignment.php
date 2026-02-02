@@ -50,7 +50,7 @@ $verifiedQuestions->take(10)->each(function($q) {
     $correctCount = $q->answers->where('is_correct', 1)->count();
     $pointsTotal = $q->answers->sum('points_earned');
     $questText = substr($q->text, 0, 60) . (strlen($q->text) > 60 ? '...' : '');
-    
+
     echo "Q{$q->id}: \"$questText\"\n";
     echo "  Respuestas: {$q->answers->count()} | Correctas: $correctCount | Puntos totales: $pointsTotal\n";
     echo "  Verificada: {$q->result_verified_at}\n\n";

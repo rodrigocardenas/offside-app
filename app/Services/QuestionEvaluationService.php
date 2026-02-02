@@ -611,7 +611,7 @@ class QuestionEvaluationService
 
     /**
      * TIPO: GOLES DE PENAL
-     * 
+     *
      * ⚠️ NOTA: API Football PRO no proporciona type='PENALTY' en eventos
      * Buscamos en múltiples lugares:
      * 1. events[].type === 'PENALTY'
@@ -626,11 +626,11 @@ class QuestionEvaluationService
         // Buscar penales en múltiples formatos
         $homePenalty = 0;
         $awayPenalty = 0;
-        
+
         foreach ($events as $event) {
             $type = strtoupper($event['type'] ?? '');
             $team = $event['team'] ?? null;
-            
+
             // Formato 1: type === 'PENALTY'
             if ($type === 'PENALTY') {
                 if ($team === $match->home_team) {
@@ -639,7 +639,7 @@ class QuestionEvaluationService
                     $awayPenalty++;
                 }
             }
-            
+
             // Formato 2: PENALTY_GOAL
             elseif ($type === 'PENALTY_GOAL') {
                 if ($team === $match->home_team) {
@@ -648,12 +648,12 @@ class QuestionEvaluationService
                     $awayPenalty++;
                 }
             }
-            
+
             // Formato 3: Goal con detail='penalty' o 'penal'
             elseif ($type === 'GOAL') {
                 $detail = strtolower($event['detail'] ?? '');
                 $shotType = strtolower($event['shot_type'] ?? '');
-                
+
                 if (stripos($detail, 'penalty') !== false || stripos($detail, 'penal') !== false ||
                     stripos($shotType, 'penalty') !== false || stripos($shotType, 'penal') !== false) {
                     if ($team === $match->home_team) {
@@ -664,7 +664,7 @@ class QuestionEvaluationService
                 }
             }
         }
-        
+
         if ($homePenalty > 0 || $awayPenalty > 0) {
             Log::info('Penalty goals detected', [
                 'question_id' => $question->id,
@@ -1041,11 +1041,11 @@ class QuestionEvaluationService
 
         return $cardType === strtoupper($expectedType);
     }
-    
+
     /**
      * Fuzzy matching: Intenta matchear un texto contra un nombre de equipo
      * Útil cuando hay variaciones en nombres (ej: "Manchester City" vs "Man City")
-     * 
+     *
      * @param string $optionText El texto de la opción de la pregunta
      * @param string $teamName El nombre del equipo
      * @param int|null $teamApiId Opcional: ID del equipo en la API para matching exacto
@@ -1055,27 +1055,27 @@ class QuestionEvaluationService
     {
         $optionLower = strtolower(trim($optionText));
         $teamLower = strtolower(trim($teamName));
-        
+
         // Match exacto por nombre
         if ($optionLower === $teamLower) {
             return true;
         }
-        
+
         // Contains check
         if (strpos($optionLower, $teamLower) !== false) {
             return true;
         }
-        
+
         if (strpos($teamLower, $optionLower) !== false) {
             return true;
         }
-        
+
         // Fuzzy: Levenshtein distance (para variaciones menores)
         // Si el error es menor al 30% de la longitud más larga, considerar match
         $maxLen = max(strlen($optionLower), strlen($teamLower));
         $distance = levenshtein($optionLower, $teamLower);
         $threshold = ceil($maxLen * 0.3);
-        
+
         if ($distance <= $threshold && $distance > 0) {
             Log::debug('Fuzzy team name match', [
                 'option' => $optionText,
@@ -1086,7 +1086,7 @@ class QuestionEvaluationService
             ]);
             return true;
         }
-        
+
         // Si se proporciona API ID, intentar buscar si la opción contiene números (como IDs)
         if ($teamApiId !== null) {
             // Buscar números en la opción de texto y compararlos
@@ -1098,7 +1098,7 @@ class QuestionEvaluationService
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -1593,7 +1593,7 @@ PROMPT;
     /**
      * Obtiene los IDs de la API de los equipos (home y away)
      * Cachea el resultado para evitar múltiples consultas
-     * 
+     *
      * @return array|null ['home_id' => int, 'away_id' => int] o null si no están disponibles
      */
     private function getTeamApiIds(FootballMatch $match): ?array
@@ -1630,5 +1630,3 @@ PROMPT;
         }
     }
 }
-
-```

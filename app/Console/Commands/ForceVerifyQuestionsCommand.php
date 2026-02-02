@@ -121,17 +121,17 @@ class ForceVerifyQuestionsCommand extends Command
             if ($reVerify) {
                 // Reset result_verified_at y points_earned para re-verificar
                 $questionsForMatch = Question::whereIn('match_id', $matchIds)->pluck('id');
-                
+
                 // Reset points_earned in answers for these questions
                 \App\Models\Answer::whereIn('question_id', $questionsForMatch)->update([
                     'points_earned' => 0,
                 ]);
-                
+
                 // Reset result_verified_at on questions
                 Question::whereIn('match_id', $matchIds)->update([
                     'result_verified_at' => null,
                 ]);
-                
+
                 $this->warn("🔄 Reseteando result_verified_at y points_earned para re-verificación...");
             }
 
@@ -150,7 +150,7 @@ class ForceVerifyQuestionsCommand extends Command
             ])
                 ->name('force-verify-' . $batchId)
                 ->dispatch();
-            
+
             // Dispatch VerifyAllQuestionsJob after batch (with delay to allow batch to complete)
             dispatch(new VerifyAllQuestionsJob($matchIds, $batchId))->delay(now()->addSeconds(60));
 

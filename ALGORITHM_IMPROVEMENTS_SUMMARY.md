@@ -1,7 +1,7 @@
 ## ✅ MEJORAS IMPLEMENTADAS AL ALGORITMO DE EVALUACIÓN
 
 ### 1. Detección Mejorada de Penales
-
+>
 **Problema anterior**: Solo buscaba `type === 'PENALTY'` en eventos, pero API Football PRO no proporciona este tipo.
 
 **Solución implementada**: Ahora busca en múltiples formatos:

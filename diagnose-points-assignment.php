@@ -38,7 +38,7 @@ foreach ($matches as $match) {
     foreach ($questions as $q) {
         $verified = $q->result_verified_at ? "✅ " . $q->result_verified_at : "❌ NO";
         $pointsAssigned = 0;
-        
+
         // Contar puntos asignados a usuarios por esta pregunta
         $pointsLog = \DB::table('points_history')
             ->where('question_id', $q->id)
@@ -50,11 +50,11 @@ foreach ($matches as $match) {
         echo "    • Puntos posibles: $q->points\n";
         echo "    • Verificada: $verified\n";
         echo "    • Puntos asignados: $pointsLog\n";
-        
+
         if ($q->result_verified_at) {
             $answers = $q->answers;
             echo "    • Respuestas registradas: " . $answers->count() . "\n";
-            
+
             // Ver detalles de respuestas
             foreach ($answers->take(3) as $answer) {
                 $user = User::find($answer->user_id);
@@ -62,16 +62,16 @@ foreach ($matches as $match) {
                     ->where('id', $answer->option_id)
                     ->where('is_correct', 1)
                     ->exists();
-                
+
                 $status = $isCorrect ? "✅ CORRECTA" : "❌ INCORRECTA";
                 echo "      - Usuario #$answer->user_id: $status\n";
             }
-            
+
             if ($answers->count() > 3) {
                 echo "      ... y " . ($answers->count() - 3) . " más\n";
             }
         }
-        
+
         echo "\n";
     }
 
