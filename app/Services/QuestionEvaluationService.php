@@ -69,7 +69,7 @@ class QuestionEvaluationService
      */
     public function evaluateQuestion(Question $question, FootballMatch $match): array
     {
-        if (!in_array($match->status, ['FINISHED', 'Match Finished'])) {
+        if (!in_array($match->status, ['FINISHED', 'Match Finished', 'Finished'])) {
             Log::warning('Match not finished', [
                 'match_id' => $match->id,
                 'status' => $match->status
@@ -358,9 +358,9 @@ class QuestionEvaluationService
         }
 
         // Hay goles - el event['team'] es el nombre del equipo (string)
-        // Comparar contra nombre del equipo, no contra HOME/AWAY
+        // Usar fuzzy matching para comparar contra opciones
         foreach ($question->options as $option) {
-            if (strpos(strtolower($option->text), strtolower($firstGoalTeam)) !== false) {
+            if ($this->teamNameMatches($option->text, $firstGoalTeam)) {
                 $correctOptionIds[] = $option->id;
             }
         }
@@ -406,9 +406,9 @@ class QuestionEvaluationService
         }
 
         // Hay gol antes del umbral - el event['team'] es el nombre del equipo (string)
-        // Comparar contra nombre del equipo en la opción
+        // Usar fuzzy matching para comparar contra opciones
         foreach ($question->options as $option) {
-            if (strpos(strtolower($option->text), strtolower($firstGoalTeamBeforeThreshold)) !== false) {
+            if ($this->teamNameMatches($option->text, $firstGoalTeamBeforeThreshold)) {
                 $correctOptionIds[] = $option->id;
             }
         }
@@ -588,15 +588,68 @@ class QuestionEvaluationService
 
     /**
      * TIPO: GOLES DE PENAL
+     * 
+     * ⚠️ NOTA: API Football PRO no proporciona type='PENALTY' en eventos
+     * Buscamos en múltiples lugares:
+     * 1. events[].type === 'PENALTY'
+     * 2. events[].type === 'PENALTY_GOAL'
+     * 3. events[] con type='GOAL' y detail contiene 'penalty' o 'penal'
      */
     private function evaluatePenaltyGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
-        $homePenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && ($e['team'] ?? null) === $match->home_team));
-        $awayPenalty = count(array_filter($events, fn($e) => $e['type'] === 'PENALTY' && ($e['team'] ?? null) === $match->away_team));
+        // Buscar penales en múltiples formatos
+        $homePenalty = 0;
+        $awayPenalty = 0;
+        
+        foreach ($events as $event) {
+            $type = strtoupper($event['type'] ?? '');
+            $team = $event['team'] ?? null;
+            
+            // Formato 1: type === 'PENALTY'
+            if ($type === 'PENALTY') {
+                if ($team === $match->home_team) {
+                    $homePenalty++;
+                } elseif ($team === $match->away_team) {
+                    $awayPenalty++;
+                }
+            }
+            
+            // Formato 2: PENALTY_GOAL
+            elseif ($type === 'PENALTY_GOAL') {
+                if ($team === $match->home_team) {
+                    $homePenalty++;
+                } elseif ($team === $match->away_team) {
+                    $awayPenalty++;
+                }
+            }
+            
+            // Formato 3: Goal con detail='penalty' o 'penal'
+            elseif ($type === 'GOAL') {
+                $detail = strtolower($event['detail'] ?? '');
+                $shotType = strtolower($event['shot_type'] ?? '');
+                
+                if (stripos($detail, 'penalty') !== false || stripos($detail, 'penal') !== false ||
+                    stripos($shotType, 'penalty') !== false || stripos($shotType, 'penal') !== false) {
+                    if ($team === $match->home_team) {
+                        $homePenalty++;
+                    } elseif ($team === $match->away_team) {
+                        $awayPenalty++;
+                    }
+                }
+            }
+        }
+        
+        if ($homePenalty > 0 || $awayPenalty > 0) {
+            Log::info('Penalty goals detected', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'home_penalties' => $homePenalty,
+                'away_penalties' => $awayPenalty
+            ]);
+        }
         $hasPenalty = $homePenalty > 0 || $awayPenalty > 0;
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasPenalty);
@@ -727,9 +780,9 @@ class QuestionEvaluationService
         $asksLessThan = $this->referencesLessThan($questionText);
 
         $targetTeam = null;
-        if (strpos($questionText, strtolower($match->home_team)) !== false) {
+        if ($this->teamNameMatches($questionText, $match->home_team)) {
             $targetTeam = 'home';
-        } elseif (strpos($questionText, strtolower($match->away_team)) !== false) {
+        } elseif ($this->teamNameMatches($questionText, $match->away_team)) {
             $targetTeam = 'away';
         }
 
@@ -746,9 +799,10 @@ class QuestionEvaluationService
         foreach ($question->options as $option) {
             $optionText = strtolower(trim($option->text));
 
-            if ($homePossession > $awayPossession && strpos($optionText, strtolower($match->home_team)) !== false) {
+            // Usar fuzzy matching para nombres de equipos
+            if ($homePossession > $awayPossession && $this->teamNameMatches($optionText, $match->home_team)) {
                 $correctOptionIds[] = $option->id;
-            } elseif ($awayPossession > $homePossession && strpos($optionText, strtolower($match->away_team)) !== false) {
+            } elseif ($awayPossession > $homePossession && $this->teamNameMatches($optionText, $match->away_team)) {
                 $correctOptionIds[] = $option->id;
             }
         }
@@ -963,6 +1017,48 @@ class QuestionEvaluationService
         $cardType = strtoupper($event['card'] ?? $event['detail'] ?? '');
 
         return $cardType === strtoupper($expectedType);
+    }
+    
+    /**
+     * Fuzzy matching: Intenta matchear un texto contra un nombre de equipo
+     * Útil cuando hay variaciones en nombres (ej: "Manchester City" vs "Man City")
+     */
+    private function teamNameMatches(string $optionText, string $teamName): bool
+    {
+        $optionLower = strtolower(trim($optionText));
+        $teamLower = strtolower(trim($teamName));
+        
+        // Match exacto
+        if ($optionLower === $teamLower) {
+            return true;
+        }
+        
+        // Contains
+        if (strpos($optionLower, $teamLower) !== false) {
+            return true;
+        }
+        
+        if (strpos($teamLower, $optionLower) !== false) {
+            return true;
+        }
+        
+        // Fuzzy: Levenshtein distance (para variaciones menores)
+        // Si el error es menor al 30% de la longitud más larga, considerar match
+        $maxLen = max(strlen($optionLower), strlen($teamLower));
+        $distance = levenshtein($optionLower, $teamLower);
+        $threshold = ceil($maxLen * 0.3);
+        
+        if ($distance <= $threshold && $distance > 0) {
+            Log::debug('Fuzzy team name match', [
+                'option' => $optionText,
+                'team' => $teamName,
+                'distance' => $distance,
+                'threshold' => $threshold
+            ]);
+            return true;
+        }
+        
+        return false;
     }
 
     private function isAffirmativeOption(string $optionText): bool

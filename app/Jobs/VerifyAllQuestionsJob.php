@@ -96,7 +96,7 @@ class VerifyAllQuestionsJob implements ShouldQueue
     {
         $match = $question->football_match;
 
-        if (!$match || !in_array($match->status, ['FINISHED', 'Match Finished'])) {
+        if (!$match || !in_array($match->status, ['FINISHED', 'Match Finished', 'Finished'])) {
             Log::warning('VerifyAllQuestionsJob - match not ready for verification', [
                 'question_id' => $question->id,
                 'match_id' => $match?->id,

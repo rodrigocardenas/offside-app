@@ -108,7 +108,7 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
             ->withCount(['questions as pending_questions_count' => function ($query) {
                 $query->whereNull('result_verified_at');
             }])
-            ->whereIn('status', ['Match Finished', 'FINISHED'])
+            ->whereIn('status', ['Match Finished', 'FINISHED', 'Finished'])
             ->where('date', '>=', $windowStart)
             ->whereHas('questions', function ($query) {
                 $query->whereNull('result_verified_at');
