@@ -75,7 +75,7 @@ class ForceVerifyQuestionsCommand extends Command
             }
 
             $matches = $query
-                ->orderByDesc('updated_at')
+                ->orderByDesc('date')
                 ->limit($limit)
                 ->get();
 

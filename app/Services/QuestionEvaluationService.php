@@ -53,6 +53,12 @@ class QuestionEvaluationService
      */
     private array $templateResultsCache = [];
 
+    /**
+     * ✅ TEAM API IDS CACHE: Almacena los IDs de la API de los equipos para fuzzy matching
+     * Clave: match_id, Valor: ['home_id' => int, 'away_id' => int]
+     */
+    private array $teamApiIdsCache = [];
+
     public function __construct(?GeminiService $geminiService = null)
     {
         $this->geminiService = $geminiService;
@@ -357,10 +363,27 @@ class QuestionEvaluationService
             return $correctOptionIds;
         }
 
-        // Hay goles - el event['team'] es el nombre del equipo (string)
+        // Obtener IDs de equipos para mejor matching
+        $teamIds = $this->getTeamApiIds($match);
+        $homeTeamId = $teamIds['home_id'] ?? null;
+        $awayTeamId = $teamIds['away_id'] ?? null;
+
+        // Determinar qué equipo anotó usando fuzzy matching + IDs
+        $scoringTeamId = null;
+        if ($this->teamNameMatches($firstGoalTeam, $match->home_team, $homeTeamId)) {
+            $scoringTeamId = $homeTeamId;
+        } elseif ($this->teamNameMatches($firstGoalTeam, $match->away_team, $awayTeamId)) {
+            $scoringTeamId = $awayTeamId;
+        }
+
         // Usar fuzzy matching para comparar contra opciones
         foreach ($question->options as $option) {
+            // Intentar match por nombre
             if ($this->teamNameMatches($option->text, $firstGoalTeam)) {
+                $correctOptionIds[] = $option->id;
+            }
+            // Si tenemos ID del equipo que anotó, también intentar match por ID
+            elseif ($scoringTeamId !== null && preg_match('/\b' . preg_quote($scoringTeamId) . '\b/', $option->text)) {
                 $correctOptionIds[] = $option->id;
             }
         }
@@ -1022,18 +1045,23 @@ class QuestionEvaluationService
     /**
      * Fuzzy matching: Intenta matchear un texto contra un nombre de equipo
      * Útil cuando hay variaciones en nombres (ej: "Manchester City" vs "Man City")
+     * 
+     * @param string $optionText El texto de la opción de la pregunta
+     * @param string $teamName El nombre del equipo
+     * @param int|null $teamApiId Opcional: ID del equipo en la API para matching exacto
+     * @return bool
      */
-    private function teamNameMatches(string $optionText, string $teamName): bool
+    private function teamNameMatches(string $optionText, string $teamName, ?int $teamApiId = null): bool
     {
         $optionLower = strtolower(trim($optionText));
         $teamLower = strtolower(trim($teamName));
         
-        // Match exacto
+        // Match exacto por nombre
         if ($optionLower === $teamLower) {
             return true;
         }
         
-        // Contains
+        // Contains check
         if (strpos($optionLower, $teamLower) !== false) {
             return true;
         }
@@ -1053,9 +1081,22 @@ class QuestionEvaluationService
                 'option' => $optionText,
                 'team' => $teamName,
                 'distance' => $distance,
-                'threshold' => $threshold
+                'threshold' => $threshold,
+                'method' => 'levenshtein'
             ]);
             return true;
+        }
+        
+        // Si se proporciona API ID, intentar buscar si la opción contiene números (como IDs)
+        if ($teamApiId !== null) {
+            // Buscar números en la opción de texto y compararlos
+            if (preg_match('/\b' . preg_quote($teamApiId) . '\b/', $optionText)) {
+                Log::debug('Team ID match found', [
+                    'option' => $optionText,
+                    'team_api_id' => $teamApiId
+                ]);
+                return true;
+            }
         }
         
         return false;
@@ -1548,4 +1589,46 @@ PROMPT;
         $this->templateResultsCache = [];
         Log::info('✅ Template deduplication cache cleared');
     }
+
+    /**
+     * Obtiene los IDs de la API de los equipos (home y away)
+     * Cachea el resultado para evitar múltiples consultas
+     * 
+     * @return array|null ['home_id' => int, 'away_id' => int] o null si no están disponibles
+     */
+    private function getTeamApiIds(FootballMatch $match): ?array
+    {
+        // Verificar caché
+        if (isset($this->teamApiIdsCache[$match->id])) {
+            return $this->teamApiIdsCache[$match->id];
+        }
+
+        try {
+            // Cargar los equipos con sus IDs externos
+            $homeTeam = $match->homeTeam()->first();
+            $awayTeam = $match->awayTeam()->first();
+
+            if (!$homeTeam || !$awayTeam || !$homeTeam->external_id || !$awayTeam->external_id) {
+                return null;
+            }
+
+            $ids = [
+                'home_id' => (int) $homeTeam->external_id,
+                'away_id' => (int) $awayTeam->external_id,
+            ];
+
+            // Cachear
+            $this->teamApiIdsCache[$match->id] = $ids;
+
+            return $ids;
+        } catch (\Exception $e) {
+            Log::debug('Could not load team API IDs', [
+                'match_id' => $match->id,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
 }
+
+```
