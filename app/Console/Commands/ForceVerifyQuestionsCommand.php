@@ -122,7 +122,6 @@ class ForceVerifyQuestionsCommand extends Command
                 // Reset result_verified_at para re-verificar
                 Question::whereIn('match_id', $matchIds)->update([
                     'result_verified_at' => null,
-                    'result' => null,
                 ]);
                 $this->warn("🔄 Reseteando result_verified_at para re-verificación...");
             }
