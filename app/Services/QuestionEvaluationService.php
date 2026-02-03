@@ -1145,6 +1145,19 @@ class QuestionEvaluationService
             return ['home' => [], 'away' => []];
         }
 
+        // Si tiene estructura "teams" (nombre de equipos como keys)
+        if (isset($statistics['teams']) && is_array($statistics['teams'])) {
+            $teams = array_values($statistics['teams']);
+            if (count($teams) >= 2) {
+                return [
+                    'home' => $teams[0],
+                    'away' => $teams[1],
+                    'possession_home' => $this->extractPercentage($teams[0]['possession'] ?? null),
+                    'possession_away' => $this->extractPercentage($teams[1]['possession'] ?? null),
+                ];
+            }
+        }
+
         $result = [
             'home' => $statistics['home'] ?? [],
             'away' => $statistics['away'] ?? []
@@ -1176,6 +1189,20 @@ class QuestionEvaluationService
         }
 
         return $result;
+    }
+
+    private function extractPercentage($value): ?float
+    {
+        if ($value === null) {
+            return null;
+        }
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+        if (is_string($value)) {
+            return (float) str_replace('%', '', $value);
+        }
+        return null;
     }
 
     private function shouldUseGeminiFallback(): bool
