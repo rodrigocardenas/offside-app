@@ -191,8 +191,13 @@ class QuestionEvaluationService
             if (empty($correctOptions)) {
                 Log::warning('No correct options found - cannot verify with available data', [
                     'question_id' => $question->id,
+                    'question_text' => $question->title,
                     'match_id' => $match->id,
-                    'has_verified_data' => $hasVerifiedData
+                    'match_name' => "{$match->home_team} vs {$match->away_team}",
+                    'has_verified_data' => $hasVerifiedData,
+                    'has_statistics' => !empty($match->statistics),
+                    'has_events' => !empty($match->events),
+                    'statistics_keys' => is_string($match->statistics) ? array_keys(json_decode($match->statistics, true) ?? []) : array_keys($match->statistics ?? []),
                 ]);
 
                 $fallbackOptions = $this->attemptGeminiFallback(
