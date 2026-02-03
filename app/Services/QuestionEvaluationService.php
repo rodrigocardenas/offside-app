@@ -486,6 +486,13 @@ class QuestionEvaluationService
         $homeFouls = $stats['home']['fouls'] ?? 0;
         $awayFouls = $stats['away']['fouls'] ?? 0;
 
+        if ($homeFouls === 0 && $awayFouls === 0) {
+            \Log::warning('No fouls data found for match', [
+                'match_id' => $match->id,
+                'stats' => $stats,
+            ]);
+        }
+
         foreach ($question->options as $option) {
             $optionText = strtolower(trim($option->text));
 
@@ -1163,7 +1170,7 @@ class QuestionEvaluationService
             'away' => $statistics['away'] ?? []
         ];
 
-        $metrics = ['possession', 'fouls', 'passes', 'shots'];
+        $metrics = ['possession', 'fouls', 'passes', 'shots', 'yellow_cards', 'red_cards'];
         foreach ($metrics as $metric) {
             // Dos formatos posibles: "home_metric" o "metric_home"
             $homeKey1 = 'home_' . $metric;
@@ -1188,6 +1195,14 @@ class QuestionEvaluationService
             }
         }
 
+        // Garantizar que los valores principales estén disponibles también en el nivel raíz
+        $result['possession_home'] = $result['possession_home'] 
+            ?? $this->extractPercentage($result['home']['possession'] ?? null)
+            ?? null;
+        $result['possession_away'] = $result['possession_away'] 
+            ?? $this->extractPercentage($result['away']['possession'] ?? null)
+            ?? null;
+        
         return $result;
     }
 
