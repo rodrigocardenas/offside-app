@@ -55,7 +55,7 @@ class RankingController extends Controller
             return $answer->question->football_match ?
                 $answer->question->football_match->date->format('Y-m-d') :
                 $answer->created_at->format('Y-m-d');
-        })->map(function ($group) {
+        })->sortKeys('desc')->map(function ($group) {
             return $group->map(function ($answer) {
                 $correctOption = $answer->question->options->where('is_correct', true)->first();
                 return [
