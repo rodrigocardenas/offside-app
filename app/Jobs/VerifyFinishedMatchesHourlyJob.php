@@ -28,8 +28,8 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
 
     public function __construct(?int $maxMatches = null, ?int $windowHours = null, ?int $cooldownMinutes = null)
     {
-        $this->maxMatches = $maxMatches ?? 30;
-        $this->windowHours = $windowHours ?? 72;
+        $this->maxMatches = $maxMatches ?? 50;
+        $this->windowHours = $windowHours ?? 360; // 15 days instead of 72 hours (3 days)
         $this->cooldownMinutes = $cooldownMinutes ?? 5;
     }
 
