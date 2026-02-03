@@ -33,8 +33,10 @@ class RankingController extends Controller
     {
         $user = auth()->user();
 
-        // Obtener respuestas del usuario
+        // Obtener respuestas del usuario (últimos 7 días)
+        $sevenDaysAgo = now()->subDays(7);
         $answers = \App\Models\Answer::where('user_id', $user->id)
+            ->where('created_at', '>=', $sevenDaysAgo)
             ->whereHas('question', function ($query) use ($group) {
                 $query->where('group_id', $group->id)
                     ->where('type', 'predictive')
