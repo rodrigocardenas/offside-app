@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('navigation-title', $group->nam>e)>
+    @section('navigation-title', $group->name)>
 
     @php
         // Tomar tema del usuario
