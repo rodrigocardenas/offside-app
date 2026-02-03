@@ -53,6 +53,14 @@ class RankingController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        \Log::info('RankingController results', [
+            'user_id' => $user->id,
+            'group_id' => $group->id,
+            'sevenDaysAgo' => $sevenDaysAgo->format('Y-m-d H:i:s'),
+            'answers_count' => $answers->count(),
+            'answer_ids' => $answers->pluck('id')->toArray(),
+        ]);
+
         $groupedAnswers = $answers->groupBy(function ($answer) {
             return $answer->question->football_match ?
                 $answer->question->football_match->date->format('Y-m-d') :
