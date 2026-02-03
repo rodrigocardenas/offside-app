@@ -33,16 +33,12 @@ class RankingController extends Controller
     {
         $user = auth()->user();
 
-        // Obtener respuestas del usuario (últimos 7 días de PARTIDOS, no respuestas)
-        $sevenDaysAgo = now()->subDays(7);
+        // Obtener todas las respuestas verificadas del usuario (sin límite de fecha)
         $answers = \App\Models\Answer::where('user_id', $user->id)
-            ->whereHas('question', function ($query) use ($group, $sevenDaysAgo) {
+            ->whereHas('question', function ($query) use ($group) {
                 $query->where('group_id', $group->id)
                     ->where('type', 'predictive')
-                    ->whereNotNull('result_verified_at')
-                    ->whereHas('football_match', function ($matchQuery) use ($sevenDaysAgo) {
-                        $matchQuery->where('date', '>=', $sevenDaysAgo);
-                    });
+                    ->whereNotNull('result_verified_at');
             })
             ->with([
                 'question' => function ($query) {
@@ -52,14 +48,6 @@ class RankingController extends Controller
             ])
             ->orderBy('created_at', 'desc')
             ->get();
-
-        \Log::info('RankingController results', [
-            'user_id' => $user->id,
-            'group_id' => $group->id,
-            'sevenDaysAgo' => $sevenDaysAgo->format('Y-m-d H:i:s'),
-            'answers_count' => $answers->count(),
-            'answer_ids' => $answers->pluck('id')->toArray(),
-        ]);
 
         $groupedAnswers = $answers->groupBy(function ($answer) {
             return $answer->question->football_match ?
