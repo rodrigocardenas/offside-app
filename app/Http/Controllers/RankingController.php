@@ -33,14 +33,16 @@ class RankingController extends Controller
     {
         $user = auth()->user();
 
-        // Obtener respuestas del usuario (últimos 7 días)
+        // Obtener respuestas del usuario (últimos 7 días de PARTIDOS, no respuestas)
         $sevenDaysAgo = now()->subDays(7);
         $answers = \App\Models\Answer::where('user_id', $user->id)
-            ->where('created_at', '>=', $sevenDaysAgo)
-            ->whereHas('question', function ($query) use ($group) {
+            ->whereHas('question', function ($query) use ($group, $sevenDaysAgo) {
                 $query->where('group_id', $group->id)
                     ->where('type', 'predictive')
-                    ->whereNotNull('result_verified_at');
+                    ->whereNotNull('result_verified_at')
+                    ->whereHas('football_match', function ($matchQuery) use ($sevenDaysAgo) {
+                        $matchQuery->where('date', '>=', $sevenDaysAgo);
+                    });
             })
             ->with([
                 'question' => function ($query) {
