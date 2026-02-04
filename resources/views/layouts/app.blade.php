@@ -58,6 +58,12 @@
     <!-- Firebase Notification Service (Web + Capacitor) -->
     <script src="{{ asset('js/firebase-notification-service.js') }}"></script>
 
+    <!-- Android Back Button Handler (Bug 1) -->
+    <script src="{{ asset('js/android-back-button.js') }}"></script>
+
+    <!-- Deep Links Handler (Bug 2) -->
+    <script src="{{ asset('js/deep-links.js') }}"></script>
+
     @stack('styles')
     @stack('scripts')
 </head>

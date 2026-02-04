@@ -21,65 +21,92 @@
 
 Estos bugs afectan la experiencia de la app móvil generada con Capacitor y deben resolverse primero.
 
-## 1. ❌ Gesto/Botón Volver de Android No Funciona Correctamente
+## 1. ✅ Gesto/Botón Volver de Android No Funciona Correctamente
+
+**Status:** ✅ **RESUELTO** (4 feb 2026)
 
 **Descripción:**  
 El gesto o botón atrás nativo de Android no navega a la pantalla anterior, sino que vuelve siempre a la pantalla de inicio.
 
-**Impacto:**  
-- 🔴 Crítico: Rompe la navegación fundamental de la app
-- Los usuarios no pueden navegar correctamente entre pantallas
-- Experiencia degradada comparada con navegación web
+**Solución Implementada:**
 
-**Ubicación del Código:**
-- [capacitor.config.ts](capacitor.config.ts) - Configuración base de Capacitor
-- Potencialmente en: Rutas de Angular/React, manejo de historial del navegador
+### ✅ 1. Controlador nativo de back button
+- `resources/js/android-back-button.js` (100 líneas)
+- Clase `AndroidBackButtonHandler` que escucha evento `App.backButton` de Capacitor
+- Usa `window.history.back()` para navegar correctamente
+- Dialogo nativo para salir cuando no hay historial
 
-**Causa Probable:**
-- El stack de navegación de Capacitor no sincroniza correctamente con el historial del navegador
-- Posible conflicto entre navegación Capacitor + navegación web
+### ✅ 2. Integración en app.blade.php
+- Script incluido automáticamente en layout
+- Se inicializa solo en contexto Capacitor
+- Sin interferencia en navegación web
 
-**Solución Recomendada:**
-1. Implementar manejador de `backButton` nativo de Capacitor
-2. Sincronizar con el stack de historial de la app web
-3. Usar `history.back()` en lugar de rutas hard-coded
+### ✅ 3. Validaciones
+- Detecta si está en Capacitor (window.Capacitor)
+- Chequea disponibilidad del plugin App
+- Logging completo para debugging
 
-**Archivos Relacionados:**
-- [capacitor.config.ts](capacitor.config.ts#L1)
-- Componentes de enrutamiento principales
+**Características:**
+- ✅ Navegación correcta: back → pantalla anterior, no inicio
+- ✅ History length tracking: previene salir cuando hay historial
+- ✅ Diálogo nativo: confirmación antes de salir
+- ✅ Sin dependencias externas
+- ✅ Compatible con web (no interfiere)
+
+**Archivos Modificados:**
+- [resources/js/android-back-button.js](resources/js/android-back-button.js) - Creado
+- [resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php) - Integrado
+
+**Documentación:**
+- [ANDROID_BACK_BUTTON_FIX.md](ANDROID_BACK_BUTTON_FIX.md)
+- [ANDROID_BACK_BUTTON_SUMMARY.md](ANDROID_BACK_BUTTON_SUMMARY.md)
 
 ---
 
-## 2. 🔗 Deep Links No Abren la App (Abren Web en su lugar)
+## 2. ✅ Deep Links No Abren la App (Abren Web en su lugar)
+
+**Status:** ✅ **RESUELTO** (4 feb 2026)
 
 **Descripción:**  
 Al generar un link de invitación a un grupo, este envía a los usuarios a la app web en lugar de abrir la app móvil instalada.
 
-**Impacto:**
-- 🔴 Crítico: Falla la experiencia de onboarding social
-- Los links compartidos no funcionan correctamente en la app
-- Los usuarios nuevos no pueden unirse a grupos desde invitaciones
+**Solución Implementada:**
 
-**Ubicación del Código:**
-- [capacitor.config.ts](capacitor.config.ts#L1) - Configuración de deep links
-- `AndroidManifest.xml` (si existe)
-- Backend: Generación de links de invitación
+### ✅ 1. Intent-filters en AndroidManifest.xml
+- `offsideclub://` scheme para deep links custom
+- `https://app.offsideclub.es` scheme para Android App Links
+- `android:autoVerify="true"` para verificación automática
+- BroadcastReceiver para interceptar globalmente
 
-**Causa Probable:**
-- Deep links no configurados en Capacitor
-- Falta de `intent-filter` en Android
-- URLs no están asociadas a la app correctamente
+### ✅ 2. Handler JavaScript en Frontend
+- `resources/js/deep-links.js` (160 líneas)
+- Escucha evento `appUrlOpen` de Capacitor
+- Parsea URLs: `offsideclub://group/{id}`, `offsideclub://invite/{code}`, etc.
+- Navega a rutas internas correctas
+- Solicita permisos automáticamente
 
-**Solución Recomendada:**
-1. Configurar deep links en `capacitor.config.ts`
-2. Agregar `intent-filter` en `AndroidManifest.xml`
-3. Implementar manejador de rutas para deep links
-4. Usar App Links (Android) para mejor seguridad
-5. Configurar Universal Links (iOS)
+### ✅ 3. Validaciones Múltiples
+- Detecta si está en Capacitor
+- Valida formato de URLs
+- Fallback a navegación normal si falla
+- Logging completo para debugging
 
-**Archivos Relacionados:**
-- [capacitor.config.ts](capacitor.config.ts#L1)
-- Backend: Generación de links de invitación
+**Características:**
+- ✅ Abre app en lugar de web
+- ✅ Soporta múltiples tipos de links: group, invite, chat, etc.
+- ✅ Navegación a ruta correcta internamente
+- ✅ Permisos automáticos en Android
+- ✅ Universal Links (iOS) configurado
+
+**Archivos Modificados:**
+- [android/app/src/main/AndroidManifest.xml](android/app/src/main/AndroidManifest.xml#L26-L54) - Intent-filters
+- [resources/js/deep-links.js](resources/js/deep-links.js) - Creado
+- [resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php) - Integrado
+
+**Documentación:**
+- [DEEP_LINKS_IMPLEMENTATION_COMPLETE.md](DEEP_LINKS_IMPLEMENTATION_COMPLETE.md)
+- [DEEP_LINKS_TL_DR.md](DEEP_LINKS_TL_DR.md)
+- [ANDROID_APP_LINKS_FINAL_SUMMARY.md](ANDROID_APP_LINKS_FINAL_SUMMARY.md)
 
 ---
 
