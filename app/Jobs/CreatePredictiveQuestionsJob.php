@@ -55,10 +55,11 @@ class CreatePredictiveQuestionsJob implements ShouldQueue
                             $newQuestionsCount = $allQuestions->count() - $activeCount;
 
                             if ($newQuestionsCount > 0) {
-                                // Notificar a los usuarios del grupo
-                                \App\Jobs\SendNewPredictiveQuestionsPushNotification::dispatch($group->id, $newQuestionsCount);
+                                // DESACTIVADO: Notificaciones de nuevas preguntas
+                                // Ahora se envía un reminder diario de preguntas sin responder en lugar de notificar cada pregunta nueva
+                                // \App\Jobs\SendNewPredictiveQuestionsPushNotification::dispatch($group->id, $newQuestionsCount);
 
-                                Log::info("Nuevas preguntas predictivas creadas y notificación enviada al grupo {$group->id}", [
+                                Log::info("Nuevas preguntas predictivas creadas para el grupo {$group->id}", [
                                     'new_questions_count' => $newQuestionsCount,
                                     'total_active' => $allQuestions->count()
                                 ]);

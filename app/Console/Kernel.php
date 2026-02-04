@@ -7,6 +7,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\UpdateFootballData;
 use App\Jobs\VerifyFinishedMatchesHourlyJob;
 use App\Jobs\UpdateFinishedMatchesJob;
+use App\Jobs\SendDailyUnanswerQuestionReminderPushNotification;
 use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
@@ -66,6 +67,22 @@ class Kernel extends ConsoleKernel
             ->at(':20')  // 20 minutos después de la hora
             ->name('verify-batch-health-check')
             ->withoutOverlapping(10);
+
+        // 4️⃣ Diaria (18:00): Enviar reminder de preguntas sin responder
+        // Notifica a usuarios si tienen preguntas predictivas pendientes de responder
+        $schedule->job(new SendDailyUnanswerQuestionReminderPushNotification())
+            ->dailyAt('18:00')
+            ->timezone('America/Mexico_City')
+            ->name('daily-unanswer-questions-reminder')
+            ->withoutOverlapping(10)
+            ->onSuccess(function () {
+                Log::info('✅ daily-unanswer-questions-reminder completado: reminders enviados');
+            })
+            ->onFailure(function ($exception) {
+                Log::error('❌ daily-unanswer-questions-reminder falló', [
+                    'error' => $exception->getMessage(),
+                ]);
+            });
     }
 
     /**
