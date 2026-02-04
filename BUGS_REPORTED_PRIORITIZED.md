@@ -85,6 +85,8 @@ Al generar un link de invitación a un grupo, este envía a los usuarios a la ap
 
 ## 3. 🔔 Notificaciones Firebase Solo Llegan a Web App, No a Mobile App
 
+**Status:** 🟡 **EN PROGRESO** - 87% Completado (4 feb 2026)
+
 **Descripción:**  
 Las notificaciones push configuradas con Firebase solo se reciben en la web app, no en la app móvil generada con Capacitor.
 
@@ -105,16 +107,51 @@ Las notificaciones push configuradas con Firebase solo se reciben en la web app,
 - Firebase Messaging no está integrado con Capacitor App
 - Falta de `capacitor-google-play-services` o plugins similares
 
-**Solución Recomendada:**
-1. Implementar `@capacitor-firebase/messaging` (plugin oficial)
-2. Registrar device token con Firebase desde app native
-3. Sincronizar tokens con backend
-4. Manejador de notificaciones en foreground/background
+**Solución Implementada (Fase 1-4):**
 
-**Archivos Relacionados:**
-- [public/sw.js](public/sw.js#L97-L150)
-- [public/firebase-messaging-sw.js](public/firebase-messaging-sw.js#L1)
-- App Jobs de notificaciones
+### ✅ 1. Dependencias Instaladas
+- `@capacitor-firebase/messaging@^6.1.2` ✅
+- `@capacitor/device@^6.0.1` ✅
+
+### ✅ 2. Configuración Base
+- `capacitor.config.ts` con FirebaseMessaging ✅
+- Migration para agregar `platform` field ✅
+
+### ✅ 3. Frontend Unificado
+- `public/js/firebase-notification-service.js` ✅
+- Auto-detección web vs Capacitor ✅
+- Manejo foreground/background ✅
+- Sincronización automática de tokens ✅
+
+### ✅ 4. Backend Refactorizado
+- `app/Traits/HandlesPushNotifications.php` trait ✅
+- Todos 4 Jobs actualizados ✅
+- Código reducido 60% (eliminar duplicación) ✅
+- Soporte para web, Android, iOS ✅
+
+### 🟡 5. Testing (Próximo)
+- [ ] Testing en web
+- [ ] Testing en Android
+- [ ] Testing en iOS
+
+**Documentación:**
+- [BUG3_FIREBASE_MOBILE_PUSH_ANALYSIS.md](BUG3_FIREBASE_MOBILE_PUSH_ANALYSIS.md) - Análisis técnico
+- [IMPLEMENTATION_BUG3_FIREBASE_MOBILE_PUSH_PHASE_1-4.md](IMPLEMENTATION_BUG3_FIREBASE_MOBILE_PUSH_PHASE_1-4.md) - Implementación
+- [TESTING_BUG3_FIREBASE_MOBILE_PUSH.md](TESTING_BUG3_FIREBASE_MOBILE_PUSH.md) - Guía de testing
+- [BUG3_EXECUTIVE_SUMMARY.md](BUG3_EXECUTIVE_SUMMARY.md) - Resumen ejecutivo
+- [WORK_SUMMARY_BUG3_SESSION.md](WORK_SUMMARY_BUG3_SESSION.md) - Resumen de sesión
+
+**Rama:** `feature/bug3-firebase-notifications`  
+**Commits:** 3 (537078f, 2316b6d, 86ff859)  
+**Archivos Creados:** 4 + 5 docs  
+**Archivos Modificados:** 10  
+
+**Próximos Pasos:**
+1. Compilar APK Android con google-services.json
+2. Testing en web/Android/iOS
+3. Resolver issues si hay
+4. Merge a main
+5. Deploy a producción
 
 ---
 
