@@ -9,6 +9,12 @@
            Proyecto: offside-dd226
            Descarga: google-services.json
            Copia en: android/app/google-services.json
+
+✅ Paso 2: Firebase Gradle configurado?
+├─ SI (root/app build.gradle actualizados) → Continúa ↓
+└─ NO → Ver: FIREBASE_GRADLE_CONFIG.md
+        Actualiza build.gradle files
+        Commit: e16c61e ya lo hizo por ti ✓
 ```
 
 ---
@@ -20,7 +26,12 @@
 cd c:\laragon\www\offsideclub
 npm install
 npx cap sync android
+
+# Limpiar cache anterior (importante!)
 cd android
+./gradlew clean
+
+# Compilar APK
 ./gradlew assembleDebug
 
 # Espera 5-10 minutos...
