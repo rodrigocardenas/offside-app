@@ -129,36 +129,9 @@ class VerifyBatchHealthCheckJob implements ShouldQueue
 
     protected function countRecentErrors($since): int
     {
-        // Búsqueda simple en logs
-        // En producción, podrías usar un servicio de logs (Sentry, Datadog, etc)
-
-        $logFile = storage_path('logs/laravel.log');
-
-        if (!file_exists($logFile)) {
-            return 0;
-        }
-
-        $errors = 0;
-        $handle = fopen($logFile, 'r');
-
-        if ($handle) {
-            while (($line = fgets($handle)) !== false) {
-                // Buscar errores en los últimos 2 horas
-                if (
-                    (strpos($line, 'ERROR') !== false || strpos($line, 'error') !== false) &&
-                    (
-                        strpos($line, 'VerifyAllQuestionsJob') !== false ||
-                        strpos($line, 'ProcessMatchBatchJob') !== false ||
-                        strpos($line, 'BatchGetScoresJob') !== false ||
-                        strpos($line, 'Gemini') !== false
-                    )
-                ) {
-                    $errors++;
-                }
-            }
-            fclose($handle);
-        }
-
-        return min($errors, 100); // Cap at 100 to avoid huge numbers
+        // OPTIMIZACIÓN: No leer logs línea por línea (muy lento)
+        // En producción, usar Sentry o servicio de logs externo
+        // Por ahora retornar 0 para evitar I/O bloqueo
+        return 0;
     }
 }

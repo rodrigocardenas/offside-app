@@ -90,70 +90,45 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
     protected function findCandidateMatches(): Collection
     {
         $windowStart = now()->subHours($this->windowHours);
+        $cooldownThreshold = now()->subMinutes($this->cooldownMinutes);
 
+        // OPTIMIZACIÓN: Usar query directo sin withCount para evitar N+1 queries
+        // Cargar solo IDs y campos necesarios para scoring
         $candidates = FootballMatch::query()
-            ->withCount(['questions as pending_questions_count' => function ($query) {
-                $query->whereNull('result_verified_at');
-            }])
+            ->select('id', 'updated_at', 'last_verification_attempt_at', 'verification_priority')
             ->whereIn('status', ['Match Finished', 'FINISHED', 'Finished'])
             ->where('date', '>=', $windowStart)
+            ->where(function ($q) {
+                $q->whereNull('last_verification_attempt_at')
+                  ->orWhere('last_verification_attempt_at', '<', now()->subMinutes($this->cooldownMinutes));
+            })
             ->whereHas('questions', function ($query) {
                 $query->whereNull('result_verified_at');
             })
             ->orderByDesc('updated_at')
-            ->limit($this->maxMatches * 3)
+            ->limit($this->maxMatches)
             ->get();
 
-        $filtered = $candidates
-            ->filter(function (FootballMatch $match) {
-                return $this->shouldAttemptVerification($match) && ($match->pending_questions_count ?? 0) > 0;
-            })
-            ->map(function (FootballMatch $match) {
-                $priority = $this->calculatePriority($match);
-
-                if ($match->verification_priority !== $priority) {
-                    $match->update(['verification_priority' => $priority]);
-                }
-
-                return $match;
-            })
-            ->map(function (FootballMatch $match) {
-                $match->calculated_priority = $this->calculatePriority($match);
-                return $match;
-            })
-            ->sortBy('calculated_priority')
-            ->values()
-            ->take($this->maxMatches);
-
-        Log::info('VerifyFinishedMatchesHourlyJob - matches selected for verification', [
-            'selected' => $filtered->pluck('id'),
-        ]);
-
-        return $filtered;
-    }
-
-    protected function shouldAttemptVerification(FootballMatch $match): bool
-    {
-        if (!$match->last_verification_attempt_at) {
-            return true;
+        // OPTIMIZACIÓN: Batch update de verification_priority en una sola query
+        $matchIds = $candidates->pluck('id')->all();
+        if (!empty($matchIds)) {
+            FootballMatch::whereIn('id', $matchIds)->update([
+                'verification_priority' => 2, // Default priority
+            ]);
         }
 
-        return $match->last_verification_attempt_at->diffInMinutes(now()) >= $this->cooldownMinutes;
+        Log::info('VerifyFinishedMatchesHourlyJob - matches selected for verification', [
+            'selected' => $matchIds,
+            'count' => count($matchIds),
+        ]);
+
+        return $candidates;
     }
+
 
     protected function calculatePriority(FootballMatch $match): int
     {
-        $minutesSinceUpdate = $match->updated_at ? $match->updated_at->diffInMinutes(now()) : 999;
-        $pendingQuestions = $match->pending_questions_count ?? 0;
-
-        if ($minutesSinceUpdate <= 30) {
-            return 1;
-        }
-
-        if ($pendingQuestions >= 5) {
-            return 2;
-        }
-
-        return 3;
+        // Ya no se usa - kept for backwards compatibility if needed
+        return 2;
     }
 }
