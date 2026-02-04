@@ -624,11 +624,19 @@ class QuestionEvaluationService
     /**
      * TIPO: GOLES DE PENAL
      *
-     * ⚠️ NOTA: API Football PRO no proporciona type='PENALTY' en eventos
-     * Buscamos en múltiples lugares:
-     * 1. events[].type === 'PENALTY'
-     * 2. events[].type === 'PENALTY_GOAL'
+     * ⚠️ NOTA CRÍTICA: API Football PRO NO proporciona información de penales
+     * 
+     * Problema identificado:
+     * - API Football no incluye type='PENALTY' en eventos
+     * - No proporciona detail='penalty' en goles
+     * - Solo devuelve type='GOAL' sin indicar si fue penal
+     * - Esto hace imposible verificar esta pregunta sin Gemini
+     *
+     * Buscamos en múltiples lugares (fallback chain):
+     * 1. events[].type === 'PENALTY' (raro pero posible)
+     * 2. events[].type === 'PENALTY_GOAL' (raro pero posible)
      * 3. events[] con type='GOAL' y detail contiene 'penalty' o 'penal'
+     * 4. Si no encuentra nada → USAR GEMINI
      */
     private function evaluatePenaltyGoal(Question $question, FootballMatch $match): array
     {
@@ -638,6 +646,7 @@ class QuestionEvaluationService
         // Buscar penales en múltiples formatos
         $homePenalty = 0;
         $awayPenalty = 0;
+        $foundPenaltyData = false;
 
         foreach ($events as $event) {
             $type = strtoupper($event['type'] ?? '');
@@ -645,6 +654,7 @@ class QuestionEvaluationService
 
             // Formato 1: type === 'PENALTY'
             if ($type === 'PENALTY') {
+                $foundPenaltyData = true;
                 if ($team === $match->home_team) {
                     $homePenalty++;
                 } elseif ($team === $match->away_team) {
@@ -654,6 +664,7 @@ class QuestionEvaluationService
 
             // Formato 2: PENALTY_GOAL
             elseif ($type === 'PENALTY_GOAL') {
+                $foundPenaltyData = true;
                 if ($team === $match->home_team) {
                     $homePenalty++;
                 } elseif ($team === $match->away_team) {
@@ -668,6 +679,7 @@ class QuestionEvaluationService
 
                 if (stripos($detail, 'penalty') !== false || stripos($detail, 'penal') !== false ||
                     stripos($shotType, 'penalty') !== false || stripos($shotType, 'penal') !== false) {
+                    $foundPenaltyData = true;
                     if ($team === $match->home_team) {
                         $homePenalty++;
                     } elseif ($team === $match->away_team) {
@@ -677,14 +689,27 @@ class QuestionEvaluationService
             }
         }
 
+        if (!$foundPenaltyData) {
+            \Log::warning('Penalty information NOT found in events - API Football does not provide this data', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'match' => "{$match->home_team} vs {$match->away_team}",
+                'events_count' => count($events),
+                'note' => 'API Football PRO does not include penalty type in events'
+            ]);
+            // No hay forma de verificar - retornar vacío para usar fallback Gemini
+            return [];
+        }
+
         if ($homePenalty > 0 || $awayPenalty > 0) {
-            Log::info('Penalty goals detected', [
+            \Log::info('Penalty goals detected in events', [
                 'question_id' => $question->id,
                 'match_id' => $match->id,
                 'home_penalties' => $homePenalty,
                 'away_penalties' => $awayPenalty
             ]);
         }
+
         $hasPenalty = $homePenalty > 0 || $awayPenalty > 0;
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasPenalty);
@@ -721,10 +746,24 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
+        // ⚠️ NOTA: API Football PRO también no proporciona type='FREE_KICK' en eventos
+        // Solo devuelve: GOAL, YELLOW_CARD, RED_CARD, SUBST, etc.
+        // Fallará → retornará vacío → usará Gemini fallback
+
         // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
         $homeFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && ($e['team'] ?? null) === $match->home_team));
         $awayFreeKick = count(array_filter($events, fn($e) => $e['type'] === 'FREE_KICK' && ($e['team'] ?? null) === $match->away_team));
         $hasFreeKickGoal = $homeFreeKick > 0 || $awayFreeKick > 0;
+
+        if (!$hasFreeKickGoal && !empty($events)) {
+            \Log::warning('Free kick information NOT found in events - API Football does not provide this data', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'match' => "{$match->home_team} vs {$match->away_team}",
+                'events_count' => count($events),
+                'available_types' => array_values(array_unique(array_map(fn($e) => $e['type'] ?? null, $events)))
+            ]);
+        }
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasFreeKickGoal);
         if (!empty($binaryResult)) {
@@ -760,10 +799,24 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
+        // ⚠️ NOTA: API Football PRO también no proporciona type='CORNER' en eventos
+        // Solo devuelve: GOAL, YELLOW_CARD, RED_CARD, SUBST, etc.
+        // Fallará → retornará vacío → usará Gemini fallback
+
         // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
         $homeCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && ($e['team'] ?? null) === $match->home_team));
         $awayCorner = count(array_filter($events, fn($e) => $e['type'] === 'CORNER' && ($e['team'] ?? null) === $match->away_team));
         $hasCornerGoal = $homeCorner > 0 || $awayCorner > 0;
+
+        if (!$hasCornerGoal && !empty($events)) {
+            \Log::warning('Corner information NOT found in events - API Football does not provide this data', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'match' => "{$match->home_team} vs {$match->away_team}",
+                'events_count' => count($events),
+                'available_types' => array_values(array_unique(array_map(fn($e) => $e['type'] ?? null, $events)))
+            ]);
+        }
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasCornerGoal);
         if (!empty($binaryResult)) {
