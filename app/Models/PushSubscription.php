@@ -11,7 +11,8 @@ class PushSubscription extends Model
         'endpoint',
         'public_key',
         'auth_token',
-        'device_token'
+        'device_token',
+        'platform'
     ];
 
     public function user()

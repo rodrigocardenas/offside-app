@@ -55,6 +55,9 @@
     <!-- Pull-to-Refresh (solo en mobile/Capacitor) -->
     <script src="{{ asset('js/pull-to-refresh.js') }}"></script>
 
+    <!-- Firebase Notification Service (Web + Capacitor) -->
+    <script src="{{ asset('js/firebase-notification-service.js') }}"></script>
+
     @stack('styles')
     @stack('scripts')
 </head>
