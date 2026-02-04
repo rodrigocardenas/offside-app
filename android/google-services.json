@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "249528682190",
+    "project_id": "offside-dd226",
+    "storage_bucket": "offside-dd226.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249528682190:android:f6925f5b6c850dca74f29f",
+        "android_client_info": {
+          "package_name": "com.offsideclub.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFjBPcyffqGCGpP2Y98F5s1XeyOYe-Zt0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
