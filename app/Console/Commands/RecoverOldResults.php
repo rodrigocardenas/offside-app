@@ -215,10 +215,11 @@ class RecoverOldResults extends Command
                     ];
 
                     $mappedType = $typeMap[$eventType] ?? strtoupper($eventType);
+                    $detail = $event['detail'] ?? '';  // ✅ CAPTURAR EL FIELD 'detail'
 
                     // Si es tarjeta, verificar el color
                     if ($eventType === 'Card') {
-                        $card = $event['detail'] ?? '';
+                        $card = $detail;
                         if (strpos($card, 'Red Card') !== false) {
                             $mappedType = 'RED_CARD';
                         } else {
@@ -230,7 +231,8 @@ class RecoverOldResults extends Command
                         'minute' => (string)$minute,
                         'type' => $mappedType,
                         'team' => $team,
-                        'player' => $player
+                        'player' => $player,
+                        'detail' => $detail  // ✅ AGREGAR 'detail' al evento guardado
                     ];
                 }
             }
