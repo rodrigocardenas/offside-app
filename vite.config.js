@@ -26,10 +26,7 @@ export default defineConfig(({ mode }) => {
         build: {
             outDir: 'public/build',
             assetsDir: 'assets',
-            manifest: {
-                fileName: 'manifest.json',
-                path: 'public/build/manifest.json'
-            },
+            manifest: true,
             rollupOptions: {
                 input: {
                     app: 'resources/js/app.js',
