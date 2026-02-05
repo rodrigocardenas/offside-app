@@ -5,6 +5,10 @@
         <div class="menu-icon"><i class="fas fa-users"></i></div>
         <div class="menu-label">{{ __('views.groups.title') }}</div>
     </a>
+    <a href="{{ route('matches.calendar') }}" class="menu-item {{ $activeItem === 'partidos' ? 'active' : '' }}" data-item="partidos" title="Partidos">
+        <div class="menu-icon"><i class="fas fa-calendar-alt"></i></div>
+        <div class="menu-label">Partidos</div>
+    </a>
     {{-- <a href="{{ route('competitions.index') }}" class="menu-item {{ $activeItem === 'comunidades' ? 'active' : '' }}" data-item="comunidades" title="Comunidades">
         <div class="menu-icon"><i class="fas fa-globe"></i></div>
         <div class="menu-label">Comunidades</div>

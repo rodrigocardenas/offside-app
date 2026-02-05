@@ -256,7 +256,7 @@ class MatchesCalendarService
      *
      * @return Collection
      */
-    public function getAvailableCompetitions(): Collection
+    public function getAvailableCompetitions(): array
     {
         $cacheKey = 'available_competitions';
 
@@ -264,10 +264,60 @@ class MatchesCalendarService
             return Cache::get($cacheKey);
         }
 
+        // Obtener de la tabla competitions si existen registros
         $competitions = Competition::whereHas('matches')
             ->select('id', 'name', 'type', 'country')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(fn($comp) => [
+                'id' => $comp->id,
+                'name' => $comp->name,
+                'type' => $comp->type ?? 'league',
+                'country' => $comp->country,
+            ])
+            ->toArray();
+
+        // Si no hay competiciones en la tabla, usar las ligas del campo 'league'
+        if (empty($competitions)) {
+            $leagues = FootballMatch::whereNotNull('league')
+                ->distinct('league')
+                ->orderBy('league')
+                ->pluck('league')
+                ->toArray();
+
+            // Mapear códigos de liga a nombres legibles
+            $leagueNames = [
+                'PL' => 'Premier League',
+                'PD' => 'La Liga',
+                'SA' => 'Serie A',
+                'BL1' => 'Bundesliga',
+                'FL1' => 'Ligue 1',
+                'DED' => 'Eredivisie',
+                'PPL' => 'Primeira Liga',
+                'CL' => 'UEFA Champions League',
+                'ELC' => 'UEFA Europa League',
+                'fa-cup' => 'FA Cup',
+                'serie-a' => 'Serie A',
+                'la-liga' => 'La Liga',
+                'bundesliga' => 'Bundesliga',
+                'ligue-1' => 'Ligue 1',
+                'primera-division' => 'La Liga',
+                'eredivisie' => 'Eredivisie',
+                'primeira-liga' => 'Primeira Liga',
+                'serie-b' => 'Serie B',
+                'championship' => 'Championship',
+                'champions-league' => 'Champions League',
+            ];
+
+            $competitions = array_map(function ($index, $league) use ($leagueNames) {
+                return [
+                    'id' => $index + 1,
+                    'name' => $leagueNames[$league] ?? ucwords(str_replace('-', ' ', $league)),
+                    'type' => 'league',
+                    'country' => null,
+                ];
+            }, array_keys($leagues), $leagues);
+        }
 
         Cache::put($cacheKey, $competitions, 60 * 60); // Cache 1 hora
 

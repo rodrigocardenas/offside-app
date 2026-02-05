@@ -101,12 +101,13 @@
     @if(!$isFinished)
         <div style="display: flex; gap: 8px; margin-top: 10px;">
             <button class="btn-predict" 
-                    onclick="openPredictModal({{ $match['id'] }})"
+                    onclick="openMatchGroupsModal({{ $match['id'] }}, '{{ $match['home_team']['name'] }} vs {{ $match['away_team']['name'] }}', '{{ $match['competition']['name'] }}')"
                     style="flex: 1; padding: 8px; background: linear-gradient(135deg, #17b796, {{ $accentColor }}); border: none; border-radius: 6px; color: white; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s;">
                 <i class="fas fa-star"></i> Predecir
             </button>
             <button class="btn-details" 
-                    onclick="openMatchDetails({{ $match['id'] }})"
+                    data-match='{{ json_encode($match) }}'
+                    onclick="openMatchDetailsModalFromButton(this)"
                     style="flex: 1; padding: 8px; background: {{ $isDark ? 'rgba(255,255,255,0.1)' : '#e8e8e8' }}; border: none; border-radius: 6px; color: {{ $textColor }}; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.3s;">
                 <i class="fas fa-info-circle"></i> Detalles
             </button>

@@ -26,8 +26,14 @@
             :selectedCompetitionId="$selectedCompetitionId ?? null"
         />
 
+        {{-- SPINNER DE CARGA --}}
+        <div id="loadingSpinner" style="display: none; text-align: center; padding: 60px 20px;">
+            <div style="display: inline-block; width: 50px; height: 50px; border: 4px solid rgba(0, 222, 176, 0.2); border-top-color: #00deb0; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <p style="margin-top: 16px; color: #999; font-size: 14px;">Cargando partidos...</p>
+        </div>
+
         {{-- CALENDARIO PRINCIPAL --}}
-        <div class="matches-calendar-section">
+        <div id="matchesContainer" class="matches-calendar-section">
             <div class="section-title">
                 <i class="fas fa-calendar-alt"></i> Próximos Partidos
             </div>
@@ -53,6 +59,12 @@
 
         {{-- NAVEGACIÓN INFERIOR --}}
         <x-layout.bottom-navigation active-item="partidos" />
+        
+        {{-- MODAL DE GRUPOS --}}
+        <x-matches.match-groups-modal :match="null" :is-dark="$isDark" />
+        
+        {{-- MODAL DE DETALLES --}}
+        <x-matches.match-details-modal :is-dark="$isDark" />
     </div>
 </x-dynamic-layout>
 
@@ -69,5 +81,9 @@
         font-weight: 700;
         padding: 20px 16px 16px 16px;
         margin-bottom: 8px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>

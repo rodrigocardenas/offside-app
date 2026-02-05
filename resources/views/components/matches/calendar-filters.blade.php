@@ -84,15 +84,34 @@
     }
 
     function fetchMatches(competitionId, range = 'week') {
-        const url = new URL('/api/matches/calendar', window.location.origin);
+        // Mostrar spinner
+        showLoadingSpinner();
+        
+        // Construir parámetros de rango de fecha
+        const today = new Date();
+        let toDate = new Date(today);
+        
+        if (range === 'month') {
+            toDate.setDate(today.getDate() + 30);
+        } else {
+            toDate.setDate(today.getDate() + 7);
+        }
+        
+        const formatDate = (d) => d.toISOString().split('T')[0];
+        const fromDate = formatDate(today);
+        toDate = formatDate(toDate);
+        
+        // Construir URL
+        const url = new URL('/matches/calendar', window.location.origin);
+        url.searchParams.append('from_date', fromDate);
+        url.searchParams.append('to_date', toDate);
         
         if (competitionId) {
             url.searchParams.append('competition_id', competitionId);
         }
         
-        // Por ahora solo mostrar mensaje de carga
-        console.log('Fetching matches:', { competitionId, range });
-        // TODO: Implementar actual fetching
+        // Redirigir a la nueva URL
+        window.location.href = url.toString();
     }
 </script>
 

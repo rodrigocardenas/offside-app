@@ -12,10 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
  * Carga los partidos iniciales
  */
 function loadInitialMatches() {
-    const fromDate = new Date().toISOString().split('T')[0];
-    const toDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-    fetchMatchesFromAPI(fromDate, toDate);
+    // No hacer nada - los partidos ya se cargan en server-side
+    // Este código es para referencia si se necesita cargar dinámicamente
 }
 
 /**
@@ -23,6 +21,8 @@ function loadInitialMatches() {
  */
 async function fetchMatchesFromAPI(fromDate, toDate, competitionId = null) {
     try {
+        showLoadingSpinner();
+        
         const url = new URL('/api/matches/calendar', window.location.origin);
         url.searchParams.append('from_date', fromDate);
         url.searchParams.append('to_date', toDate);
@@ -185,11 +185,11 @@ function createMatchCardHTML(match) {
 
             ${!isFinished ? `
                 <div style="display: flex; gap: 8px; margin-top: 10px;">
-                    <button class="btn-predict" onclick="openPredictModal(${match.id})" 
+                    <button class="btn-predict" onclick="openMatchGroupsModal(${match.id}, '${match.home_team.name} vs ${match.away_team.name}', '${match.competition.name}')" 
                             style="flex: 1; padding: 8px; background: linear-gradient(135deg, #17b796, #00deb0); border: none; border-radius: 6px; color: white; font-weight: 600; font-size: 12px; cursor: pointer;">
                         <i class="fas fa-star"></i> Predecir
                     </button>
-                    <button class="btn-details" onclick="openMatchDetails(${match.id})" 
+                    <button class="btn-details" data-match='${JSON.stringify(match)}' onclick="openMatchDetailsModalFromButton(this)" 
                             style="flex: 1; padding: 8px; background: ${isDark ? 'rgba(255,255,255,0.1)' : '#e8e8e8'}; border: none; border-radius: 6px; color: ${textColor}; font-weight: 600; font-size: 12px; cursor: pointer;">
                         <i class="fas fa-info-circle"></i> Detalles
                     </button>
@@ -221,15 +221,6 @@ function createTeamCrestHTML(team, isDark) {
 }
 
 /**
- * Abre el modal de predicción
- */
-function openPredictModal(matchId) {
-    console.log('Opening predict modal for match:', matchId);
-    // TODO: Implementar modal de predicción
-    alert('Modal de predicción - Match ID: ' + matchId);
-}
-
-/**
  * Abre los detalles del partido
  */
 function openMatchDetails(matchId) {
@@ -249,6 +240,26 @@ function showErrorMessage(message) {
             <p style="font-size: 16px;">${message}</p>
         </div>
     `;
+}
+
+/**
+ * Muestra el spinner de carga
+ */
+function showLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'block';
+    }
+}
+
+/**
+ * Oculta el spinner de carga
+ */
+function hideLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'none';
+    }
 }
 
 // Estilos globales de animación
