@@ -1,0 +1,94 @@
+#!/bin/bash
+# Template de configuración para Nginx
+# Copiar a: /etc/nginx/sites-available/offside-app
+# Luego: ln -s /etc/nginx/sites-available/offside-app /etc/nginx/sites-enabled/
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name app.offsideclub.es;
+
+    root /var/www/html/offside-app/public;
+    index index.php index.html index.htm;
+
+    # Redirigir HTTP a HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name app.offsideclub.es;
+
+    root /var/www/html/offside-app/public;
+    index index.php index.html index.htm;
+
+    # SSL Certificates (generadas con certbot)
+    ssl_certificate /etc/letsencrypt/live/app.offsideclub.es/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.offsideclub.es/privkey.pem;
+
+    # SSL Config
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/css text/javascript text/xml text/plain application/javascript application/xml+rss;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval' *.googleapis.com *.gstatic.com" always;
+
+    # Proxy timeouts
+    proxy_connect_timeout 120s;
+    proxy_send_timeout 120s;
+    proxy_read_timeout 120s;
+
+    # Client upload size
+    client_max_body_size 100M;
+
+    # Laravel routes
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # PHP-FPM
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+
+        # Timeouts
+        fastcgi_connect_timeout 120s;
+        fastcgi_send_timeout 120s;
+        fastcgi_read_timeout 120s;
+    }
+
+    # Static files caching
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Deny access to sensitive files
+    location ~ /\.(?!well-known) {
+        deny all;
+    }
+
+    location ~ ~$ {
+        deny all;
+    }
+
+    # Logging
+    access_log /var/log/nginx/offside-app_access.log combined;
+    error_log /var/log/nginx/offside-app_error.log warn;
+}
