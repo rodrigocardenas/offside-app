@@ -21,7 +21,7 @@ class MatchesCalendarService
     /**
      * API key para Football-Data.org
      */
-    protected string $apiKey;
+    protected ?string $apiKey;
 
     /**
      * Cache duration en minutos
@@ -364,6 +364,13 @@ class MatchesCalendarService
         int $season
     ): ?array {
         try {
+            if (!$this->apiKey) {
+                Log::error('API key no configurada', [
+                    'key_sources' => ['config(services.football_api_key)', 'env(FOOTBALL_API_KEY)']
+                ]);
+                return null;
+            }
+
             $response = Http::timeout(30)
                 ->withHeaders([
                     'X-RapidAPI-Key' => $this->apiKey,
