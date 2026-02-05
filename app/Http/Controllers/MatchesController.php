@@ -362,4 +362,62 @@ class MatchesController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * GET /matches/calendar
+     *
+     * Vista web del calendario de partidos
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function view(Request $request)
+    {
+        try {
+            // Validar parámetros
+            $validated = $request->validate([
+                'from_date' => 'nullable|date_format:Y-m-d',
+                'to_date' => 'nullable|date_format:Y-m-d',
+                'competition_id' => 'nullable|integer|exists:competitions,id',
+            ]);
+
+            // Establecer valores por defecto
+            $fromDate = $validated['from_date'] ?? now()->format('Y-m-d');
+            $toDate = $validated['to_date'] ?? now()->addWeek()->format('Y-m-d');
+            $competitionId = $validated['competition_id'] ?? null;
+
+            // Obtener partidos agrupados por fecha
+            $matchesByDate = $this->matchesService->getMatchesByDate(
+                $fromDate,
+                $toDate,
+                $competitionId,
+                null, // team_ids - null para mostrar todos
+                true  // include_finished
+            );
+
+            // Obtener competiciones disponibles
+            $competitions = $this->matchesService->getAvailableCompetitions();
+
+            // Obtener estadísticas
+            $statistics = $this->matchesService->getStatistics($fromDate, $toDate, $competitionId);
+
+            return view('matches.calendar', [
+                'matchesByDate' => $matchesByDate,
+                'competitions' => $competitions,
+                'statistics' => $statistics,
+                'selectedCompetitionId' => $competitionId,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error al cargar vista de calendario', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return view('matches.calendar', [
+                'matchesByDate' => [],
+                'competitions' => [],
+                'statistics' => null,
+                'selectedCompetitionId' => null,
+            ]);
+        }
+    }
 }

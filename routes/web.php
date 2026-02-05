@@ -15,9 +15,7 @@ use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionControll
 use App\Http\Controllers\Admin\TemplateQuestionController;
 use App\Http\Controllers\TestAvatarController;
 use App\Http\Controllers\SettingsController;
-use App\Models\FootballMatch;
-use App\Models\Group;
-use App\Http\Controllers\MatchGroupsController;
+use App\Http\Controllers\MatchesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +66,10 @@ Route::middleware(['auth'])->group(function () {
     // Página principal (grupos)
     Route::get('/', [GroupController::class, 'index'])->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Calendario de Partidos
+    Route::get('/matches/calendar', [MatchesController::class, 'view'])->name('matches.calendar');
+    
     // Grupos
     Route::resource('groups', GroupController::class);
     Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
