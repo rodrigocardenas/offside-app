@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build",
+        "build": "vite build && node scripts/copy-manifest.js",
         "build:mobile": "npm run build && npx cap sync",
         "cap:sync": "npx cap sync",
         "cap:android": "npm run build && npx cap sync android && npx cap open android",
