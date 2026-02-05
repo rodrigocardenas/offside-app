@@ -47,13 +47,7 @@ apt-get install -y nginx
 systemctl enable nginx
 systemctl start nginx
 
-# 4. INSTALL MySQL 8.0
-echo -e "${BLUE}4️⃣ Instalando MySQL 8.0...${NC}"
-apt-get install -y mysql-server mysql-client
-systemctl enable mysql
-systemctl start mysql
-
-# 5. INSTALL NODE & NPM
+# 4. INSTALL NODE & NPM (MySQL is in AWS RDS)
 echo -e "${BLUE}5️⃣ Instalando Node.js...${NC}"
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 apt-get install -y nodejs
@@ -89,65 +83,74 @@ composer install --optimize-autoloader --no-dev
 echo -e "${BLUE}1️⃣1️⃣ Instalando dependencias Node...${NC}"
 npm install
 
-# 11. SETUP ENV
-echo -e "${BLUE}1️⃣2️⃣ Creando archivo .env (NECESITA EDICIÓN MANUAL)...${NC}"
+# 12. SETUP ENV
+echo -e "${BLUE}1️⃣2️⃣ Creando archivo .env...${NC}"
 if [ ! -f .env ]; then
     cp .env.example .env
-    echo -e "${YELLOW}⚠️  IMPORTANTE: Edita .env con tus valores:${NC}"
-    echo "   - DB_HOST, DB_USERNAME, DB_PASSWORD"
+    echo -e "${YELLOW}⚠️  IMPORTANTE: Edita .env con tus valores de AWS RDS:${NC}"
+    echo "   - DB_HOST: <tu RDS endpoint>"
+    echo "   - DB_USERNAME: <usuario RDS>"
+    echo "   - DB_PASSWORD: <contraseña RDS>"
     echo "   - APP_KEY (php artisan key:generate)"
     echo "   - GEMINI_API_KEY"
     echo "   - FIREBASE_PROJECT_ID"
-    echo "   - Otros valores..."
 fi
 
-# 12. GENERATE APP KEY
+# 13. GENERATE APP KEY
 echo -e "${BLUE}1️⃣3️⃣ Generando APP_KEY...${NC}"
 php artisan key:generate
 
-# 13. CREATE DATABASE
-echo -e "${BLUE}1️⃣4️⃣ Creando base de datos...${NC}"
-echo "⚠️  Ingresa contraseña de MySQL root:"
-mysql -u root -p << MYSQL_COMMANDS
-CREATE DATABASE IF NOT EXISTS offside_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS 'offside'@'localhost' IDENTIFIED BY 'SET_A_STRONG_PASSWORD';
-GRANT ALL PRIVILEGES ON offside_app.* TO 'offside'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-MYSQL_COMMANDS
-
-# 14. RUN MIGRATIONS
-echo -e "${BLUE}1️⃣5️⃣ Ejecutando migraciones...${NC}"
-php artisan migrate --force
+# 14. RUN MIGRATIONS (Asegúrate que .env esté configurado con RDS primero)
+echo -e "${BLUE}1️⃣4️⃣ Ejecutando migraciones...${NC}"
+echo -e "${YELLOW}⚠️  IMPORTANTE: Asegúrate de que .env esté editado con credenciales RDS antes de ejecutar esto${NC}"
+read -p "¿Continuar con migraciones? (s/n): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Ss]$ ]]; then
+    php artisan migrate --force
+fi
 
 # 15. SETUP FILE PERMISSIONS
-echo -e "${BLUE}1️⃣6️⃣ Ajustando permisos...${NC}"
+echo -e "${BLUE}1️⃣5️⃣ Ajustando permisos...${NC}"
 chown -R $APP_USER:$APP_GROUP $APP_DIR
 chmod -R 755 $APP_DIR
 chmod -R 775 $APP_DIR/storage $APP_DIR/bootstrap/cache
 
 # 16. BUILD ASSETS
-echo -e "${BLUE}1️⃣7️⃣ Compilando assets...${NC}"
+echo -e "${BLUE}1️⃣6️⃣ Compilando assets...${NC}"
 npm run build
 
 # 17. CACHE OPTIMIZATION
-echo -e "${BLUE}1️⃣8️⃣ Optimizando aplicación...${NC}"
+echo -e "${BLUE}1️⃣7️⃣ Optimizando aplicación...${NC}"
 sudo -u $APP_USER php artisan config:cache
 sudo -u $APP_USER php artisan route:cache
 sudo -u $APP_USER php artisan view:cache
 sudo -u $APP_USER php artisan optimize
 
 # 18. SETUP SSL
-echo -e "${BLUE}1️⃣9️⃣ Instalando Let's Encrypt Certbot...${NC}"
+echo -e "${BLUE}1️⃣8️⃣ Instalando Let's Encrypt Certbot...${NC}"
 apt-get install -y certbot python3-certbot-nginx
 echo -e "${YELLOW}⚠️  Configura SSL manualmente después con:${NC}"
 echo "   certbot --nginx -d app.offsideclub.es"
 
-# 20. CONFIGURE FIREWALL
-echo -e "${BLUE}2️⃣0️⃣ Configurando Firewall...${NC}"
+# 19. CONFIGURE FIREWALL
+echo -e "${BLUE}1️⃣9️⃣ Configurando Firewall...${NC}"
 ufw --force enable
 ufw default deny incoming
 ufw default allow outgoing
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+
+# 20. INSTALL MYSQL CLIENT (para conectar a RDS)
+echo -e "${BLUE}2️⃣0️⃣ Instalando MySQL Client (para RDS)...${NC}"
+apt-get install -y mysql-client
+
+# 21. ENABLE AUTO UPDATES
+echo -e "${BLUE}2️⃣1️⃣ Habilitando actualizaciones automáticas...${NC}"
+dpkg-reconfigure -plow unattended-upgrades
+
+# 22. FINAL SETUP
+echo -e "${BLUE}2️⃣2️⃣ Configuración final...${NC}"
 ufw allow 22/tcp
 ufw allow 80/tcp
 ufw allow 443/tcp
@@ -168,16 +171,25 @@ echo -e "${GREEN}═════════════════════
 echo ""
 echo -e "${YELLOW}📋 PRÓXIMOS PASOS:${NC}"
 echo ""
-echo "1. EDITAR CONFIGURACIÓN:"
+echo "1. EDITAR CONFIGURACIÓN (.env):"
 echo "   nano /var/www/html/offside-app/.env"
-echo "   - DB_PASSWORD (debe ser la que creaste)"
+echo ""
+echo "   CREDENCIALES RDS (OBTENER DE AWS):"
+echo "   - DB_HOST: <tu-rds-endpoint.amazonaws.com>"
+echo "   - DB_PORT: 3306"
+echo "   - DB_DATABASE: offside_app"
+echo "   - DB_USERNAME: <tu-usuario-rds>"
+echo "   - DB_PASSWORD: <tu-contraseña-rds>"
+echo ""
+echo "   OTRAS VARIABLES:"
 echo "   - APP_KEY (ya se generó)"
 echo "   - GEMINI_API_KEY"
 echo "   - FIREBASE credenciales"
+echo "   - API_FOOTBALL_KEY"
 echo "   - Otros values..."
 echo ""
-echo "2. RESTAURAR BASE DE DATOS (si tienes backup):"
-echo "   mysql -u offside -p offside_app < backup.sql"
+echo "2. EJECUTAR MIGRACIONES (una vez .env está listo):"
+echo "   php artisan migrate --force"
 echo ""
 echo "3. CONFIGURAR NGINX (ver nginx.conf.example):"
 echo "   nano /etc/nginx/sites-available/offside-app"
@@ -191,7 +203,7 @@ echo ""
 echo "5. SETUP SSH KEYS (Regenerar, no usar viejas):"
 echo "   ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519"
 echo ""
-echo "6. SETUP QUEUE WORKER (Supervisor):"
+echo "6. SETUP QUEUE WORKERS (Supervisor):"
 echo "   nano /etc/supervisor/conf.d/offside-queue.conf (ver template)"
 echo "   supervisorctl reread"
 echo "   supervisorctl update"
@@ -201,5 +213,5 @@ echo "   curl http://localhost"
 echo "   php artisan tinker"
 echo "   DB::connection()->getPdo();"
 echo ""
-echo -e "${GREEN}Server está listo en: /var/www/html/offside-app${NC}"
+echo -e "${GREEN}✅ Setup completado. Server en: /var/www/html/offside-app${NC}"
 echo ""
