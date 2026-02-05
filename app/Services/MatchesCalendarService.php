@@ -142,9 +142,18 @@ class MatchesCalendarService
         array $teamIds,
         bool $includeFinished
     ): Collection {
-        $query = FootballMatch::with(['homeTeam:id,name,crest_url', 'awayTeam:id,name,crest_url', 'competition:id,name'])
-            ->whereBetween('match_date', [$fromDate . ' 00:00:00', $toDate . ' 23:59:59'])
-            ->orderBy('match_date', 'asc');
+        $query = FootballMatch::with(['homeTeam:id,name,crest_url', 'awayTeam:id,name,crest_url', 'competition:id,name']);
+        
+        // Buscar por match_date primero, y si no existen resultados, buscar por date
+        $dateField = 'match_date';
+        $hasMatchDate = FootballMatch::whereNotNull('match_date')->exists();
+        
+        if (!$hasMatchDate) {
+            $dateField = 'date';
+        }
+        
+        $query->whereBetween($dateField, [$fromDate . ' 00:00:00', $toDate . ' 23:59:59'])
+            ->orderBy($dateField, 'asc');
 
         // Filtrar por competencia
         if ($competitionId) {
@@ -154,8 +163,8 @@ class MatchesCalendarService
         // Filtrar por equipos
         if (!empty($teamIds)) {
             $query->where(function ($q) use ($teamIds) {
-                $q->whereIn('home_team', $teamIds)
-                  ->orWhereIn('away_team', $teamIds);
+                $q->whereIn('home_team_id', $teamIds)
+                  ->orWhereIn('away_team_id', $teamIds);
             });
         }
 
@@ -179,7 +188,9 @@ class MatchesCalendarService
         $grouped = [];
 
         foreach ($matches as $match) {
-            $date = Carbon::parse($match->match_date)->toDateString();
+            // Usar match_date si existe, si no usar date
+            $dateField = $match->match_date ?? $match->date;
+            $date = Carbon::parse($dateField)->toDateString();
 
             if (!isset($grouped[$date])) {
                 $grouped[$date] = [];
@@ -203,18 +214,20 @@ class MatchesCalendarService
      */
     protected function formatMatch(FootballMatch $match): array
     {
-        $matchDate = Carbon::parse($match->match_date);
+        // Usar match_date si existe, si no usar date
+        $dateField = $match->match_date ?? $match->date;
+        $matchDate = Carbon::parse($dateField);
 
         return [
             'id' => $match->id,
             'external_id' => $match->external_id,
             'home_team' => [
-                'id' => $match->homeTeam?->id,
+                'id' => $match->home_team_id,
                 'name' => $match->homeTeam?->name ?? $match->home_team,
                 'crest_url' => $match->homeTeam?->crest_url,
             ],
             'away_team' => [
-                'id' => $match->awayTeam?->id,
+                'id' => $match->away_team_id,
                 'name' => $match->awayTeam?->name ?? $match->away_team,
                 'crest_url' => $match->awayTeam?->crest_url,
             ],
