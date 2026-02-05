@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PushTokenController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\MatchesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,3 +67,33 @@ Route::post('/actualizar-token', [PushTokenController::class, 'update']);
 
 // Ruta autenticada para registrar tokens de push desde Capacitor
 Route::middleware('auth:sanctum')->post('/push/token', [PushTokenController::class, 'update']);
+
+// ============================================================================
+// RUTAS DE PARTIDOS / CALENDARIO DE PARTIDOS (Públicas)
+// ============================================================================
+Route::prefix('matches')->group(function () {
+    // Obtener partidos agrupados por día
+    Route::get('/calendar', [MatchesController::class, 'calendar']);
+    
+    // Obtener partidos de una competencia
+    Route::get('/by-competition/{competitionId}', [MatchesController::class, 'byCompetition']);
+    
+    // Obtener partidos de equipos específicos
+    Route::get('/by-teams', [MatchesController::class, 'byTeams']);
+    
+    // Obtener lista de competencias disponibles
+    Route::get('/competitions', [MatchesController::class, 'competitions']);
+    
+    // Obtener lista de equipos disponibles
+    Route::get('/teams', [MatchesController::class, 'teams']);
+    
+    // Obtener estadísticas de partidos
+    Route::get('/statistics', [MatchesController::class, 'statistics']);
+});
+
+// ============================================================================
+// RUTAS DE SINCRONIZACIÓN (Requiere autenticación y permisos de admin)
+// ============================================================================
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/matches/sync', [MatchesController::class, 'sync']);
+});
