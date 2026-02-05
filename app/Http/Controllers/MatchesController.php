@@ -47,10 +47,10 @@ class MatchesController extends Controller
                 'include_finished' => 'nullable|boolean',
             ]);
 
-            $fromDate = $validated['from_date'] ?? null;
-            $toDate = $validated['to_date'] ?? null;
-            $competitionId = $validated['competition_id'] ?? null;
-            $teamIds = $validated['team_ids'] ?? [];
+            $fromDate = !empty($validated['from_date']) ? $validated['from_date'] : null;
+            $toDate = !empty($validated['to_date']) ? $validated['to_date'] : null;
+            $competitionId = !empty($validated['competition_id']) ? (int)$validated['competition_id'] : null;
+            $teamIds = !empty($validated['team_ids']) ? $validated['team_ids'] : null;
             $includeFinished = $validated['include_finished'] ?? true;
 
             // Validar que from_date <= to_date
@@ -75,7 +75,7 @@ class MatchesController extends Controller
                     'from_date' => $fromDate,
                     'to_date' => $toDate,
                     'competition_id' => $competitionId,
-                    'teams_count' => count($teamIds),
+                    'teams_count' => $teamIds ? count($teamIds) : 0,
                     'total_matches' => collect($matches)->sum(fn($day) => count($day)),
                 ]
             ]);
