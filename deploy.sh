@@ -35,13 +35,26 @@ npm run build
 # 4. Comprimir
 tar -czf build.tar.gz public/build
 
-# 5. Subir
-scp build.tar.gz $SERVER_ALIAS:$REMOTE_PATH
+# 5. Preparar servidor y subir
+ssh -T $SERVER_ALIAS << 'PRE_EOF'
+    set -e
+    # Asegurar que el directorio existe y tiene permisos correctos
+    sudo mkdir -p /var/www/html/offside-app
+    sudo chown -R $USER:$USER /var/www/html/offside-app || sudo chown -R ubuntu:ubuntu /var/www/html/offside-app
+    sudo chmod -R 755 /var/www/html/offside-app
+PRE_EOF
+
+# Subir el archivo
+scp build.tar.gz $SERVER_ALIAS:/tmp/
 
 # 6. Operaciones en servidor
 ssh -T $SERVER_ALIAS << EOF
     echo "🔄 Desplegando en servidor remoto..."
     set -e
+    
+    # Mover archivo a la ruta final
+    sudo mv /tmp/build.tar.gz $REMOTE_PATH/
+    
     cd $REMOTE_PATH
     sudo git checkout -- .
     echo "� Actualizando código desde Git..."
