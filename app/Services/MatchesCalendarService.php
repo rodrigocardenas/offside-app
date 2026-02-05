@@ -39,7 +39,7 @@ class MatchesCalendarService
      * @param string|null $fromDate Fecha inicio (YYYY-MM-DD)
      * @param string|null $toDate Fecha fin (YYYY-MM-DD)
      * @param int|null $competitionId ID de competencia
-     * @param array $teamIds IDs de equipos (opcional)
+     * @param array|null $teamIds IDs de equipos (opcional)
      * @param bool $includeFinished Incluir partidos finalizados
      *
      * @return array Partidos agrupados por fecha
@@ -48,12 +48,15 @@ class MatchesCalendarService
         ?string $fromDate = null,
         ?string $toDate = null,
         ?int $competitionId = null,
-        array $teamIds = [],
+        ?array $teamIds = null,
         bool $includeFinished = true
     ): array {
         // Validar y establecer rangos de fecha
         $fromDate = $this->validateDate($fromDate) ?? Carbon::today()->toDateString();
         $toDate = $this->validateDate($toDate) ?? Carbon::today()->addDays(7)->toDateString();
+        
+        // Asegurar que teamIds sea un array
+        $teamIds = $teamIds ?? [];
 
         // Generar clave de caché
         $cacheKey = $this->generateCacheKey('matches', [
