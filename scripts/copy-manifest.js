@@ -7,11 +7,15 @@
  * but Laravel expects it at public/build/manifest.json
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const source = path.join(process.cwd(), 'public', 'build', '.vite', 'manifest.json');
-const dest = path.join(process.cwd(), 'public', 'build', 'manifest.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const source = path.join(path.dirname(__dirname), 'public', 'build', '.vite', 'manifest.json');
+const dest = path.join(path.dirname(__dirname), 'public', 'build', 'manifest.json');
 
 try {
     if (fs.existsSync(source)) {
