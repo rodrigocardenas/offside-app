@@ -366,7 +366,7 @@ class MatchesCalendarService
         try {
             $response = Http::timeout(30)
                 ->withHeaders([
-                    'X-RapidAPI-Key' => config('services.football_api_sports_key'),
+                    'X-RapidAPI-Key' => $this->apiKey,
                     'X-RapidAPI-Host' => 'v3.football.api-sports.io',
                 ])
                 ->get("$this->apiBaseUrl/fixtures", [
