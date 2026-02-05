@@ -21,18 +21,18 @@ class MatchesController extends Controller
 
     /**
      * GET /api/matches/calendar
-     * 
+     *
      * Obtiene partidos agrupados por fecha
-     * 
+     *
      * @param Request $request
-     * 
+     *
      * Query Parameters:
      * - from_date: string (YYYY-MM-DD, default: hoy)
      * - to_date: string (YYYY-MM-DD, default: hoy + 7 días)
      * - competition_id: int (opcional)
      * - team_ids: array (opcional, IDs de equipos)
      * - include_finished: bool (default: true)
-     * 
+     *
      * @return JsonResponse
      */
     public function calendar(Request $request): JsonResponse
@@ -102,12 +102,12 @@ class MatchesController extends Controller
 
     /**
      * GET /api/matches/by-competition/{competitionId}
-     * 
+     *
      * Obtiene partidos de una competencia específica
-     * 
+     *
      * @param int $competitionId
      * @param Request $request
-     * 
+     *
      * @return JsonResponse
      */
     public function byCompetition(int $competitionId, Request $request): JsonResponse
@@ -149,16 +149,16 @@ class MatchesController extends Controller
 
     /**
      * GET /api/matches/by-teams
-     * 
+     *
      * Obtiene partidos de equipos específicos
-     * 
+     *
      * @param Request $request
-     * 
+     *
      * Query Parameters:
      * - team_ids: array (IDs de equipos - requerido)
      * - from_date: string (YYYY-MM-DD, optional)
      * - to_date: string (YYYY-MM-DD, optional)
-     * 
+     *
      * @return JsonResponse
      */
     public function byTeams(Request $request): JsonResponse
@@ -207,9 +207,9 @@ class MatchesController extends Controller
 
     /**
      * GET /api/matches/competitions
-     * 
+     *
      * Obtiene lista de competencias disponibles
-     * 
+     *
      * @return JsonResponse
      */
     public function competitions(): JsonResponse
@@ -235,9 +235,9 @@ class MatchesController extends Controller
 
     /**
      * GET /api/matches/teams
-     * 
+     *
      * Obtiene lista de equipos disponibles
-     * 
+     *
      * @return JsonResponse
      */
     public function teams(): JsonResponse
@@ -263,16 +263,16 @@ class MatchesController extends Controller
 
     /**
      * GET /api/matches/statistics
-     * 
+     *
      * Obtiene estadísticas de partidos
-     * 
+     *
      * @param Request $request
-     * 
+     *
      * Query Parameters:
      * - from_date: string (YYYY-MM-DD, optional)
      * - to_date: string (YYYY-MM-DD, optional)
      * - competition_id: int (optional)
-     * 
+     *
      * @return JsonResponse
      */
     public function statistics(Request $request): JsonResponse
@@ -311,16 +311,16 @@ class MatchesController extends Controller
 
     /**
      * POST /api/matches/sync
-     * 
+     *
      * Sincroniza partidos desde API externa (requiere autenticación)
-     * 
+     *
      * @param Request $request
-     * 
+     *
      * Body Parameters:
      * - competition_id: int (requerido)
      * - league_id: int (requerido - ID en API-Sports)
      * - season: int (requerido)
-     * 
+     *
      * @return JsonResponse
      */
     public function sync(Request $request): JsonResponse

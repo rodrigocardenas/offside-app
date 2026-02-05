@@ -35,13 +35,13 @@ class MatchesCalendarService
 
     /**
      * Obtiene partidos agrupados por fecha dentro de un rango
-     * 
+     *
      * @param string|null $fromDate Fecha inicio (YYYY-MM-DD)
      * @param string|null $toDate Fecha fin (YYYY-MM-DD)
      * @param int|null $competitionId ID de competencia
      * @param array $teamIds IDs de equipos (opcional)
      * @param bool $includeFinished Incluir partidos finalizados
-     * 
+     *
      * @return array Partidos agrupados por fecha
      */
     public function getMatchesByDate(
@@ -89,11 +89,11 @@ class MatchesCalendarService
 
     /**
      * Obtiene partidos de una competencia específica
-     * 
+     *
      * @param int $competitionId
      * @param string|null $fromDate
      * @param string|null $toDate
-     * 
+     *
      * @return array
      */
     public function getByCompetition(
@@ -106,11 +106,11 @@ class MatchesCalendarService
 
     /**
      * Obtiene partidos de equipos específicos
-     * 
+     *
      * @param array $teamIds
      * @param string|null $fromDate
      * @param string|null $toDate
-     * 
+     *
      * @return array
      */
     public function getByTeams(
@@ -123,13 +123,13 @@ class MatchesCalendarService
 
     /**
      * Construye y ejecuta la query de partidos
-     * 
+     *
      * @param string $fromDate
      * @param string $toDate
      * @param int|null $competitionId
      * @param array $teamIds
      * @param bool $includeFinished
-     * 
+     *
      * @return Collection
      */
     protected function queryMatches(
@@ -166,9 +166,9 @@ class MatchesCalendarService
 
     /**
      * Agrupa partidos por fecha
-     * 
+     *
      * @param Collection $matches
-     * 
+     *
      * @return array
      */
     protected function groupMatchesByDate(Collection $matches): array
@@ -177,7 +177,7 @@ class MatchesCalendarService
 
         foreach ($matches as $match) {
             $date = Carbon::parse($match->match_date)->toDateString();
-            
+
             if (!isset($grouped[$date])) {
                 $grouped[$date] = [];
             }
@@ -193,15 +193,15 @@ class MatchesCalendarService
 
     /**
      * Formatea un partido para la respuesta
-     * 
+     *
      * @param FootballMatch $match
-     * 
+     *
      * @return array
      */
     protected function formatMatch(FootballMatch $match): array
     {
         $matchDate = Carbon::parse($match->match_date);
-        
+
         return [
             'id' => $match->id,
             'external_id' => $match->external_id,
@@ -237,7 +237,7 @@ class MatchesCalendarService
     /**
      * Obtiene todas las competencias disponibles en la BD
      * que tienen partidos
-     * 
+     *
      * @return Collection
      */
     public function getAvailableCompetitions(): Collection
@@ -260,7 +260,7 @@ class MatchesCalendarService
 
     /**
      * Obtiene todos los equipos disponibles en la BD
-     * 
+     *
      * @return Collection
      */
     public function getAvailableTeams(): Collection
@@ -282,11 +282,11 @@ class MatchesCalendarService
 
     /**
      * Sincroniza partidos desde la API externa
-     * 
+     *
      * @param int $competitionId ID de competencia
      * @param int $leagueId ID de liga en la API-Sports
      * @param int $season Temporada
-     * 
+     *
      * @return array
      */
     public function syncFromExternalAPI(
@@ -349,12 +349,12 @@ class MatchesCalendarService
 
     /**
      * Obtiene partidos desde la API externa de football-data.org
-     * 
+     *
      * @param string $fromDate
      * @param string $toDate
      * @param int $leagueId
      * @param int $season
-     * 
+     *
      * @return array|null
      */
     protected function fetchFromAPIFootballSports(
@@ -396,10 +396,10 @@ class MatchesCalendarService
 
     /**
      * Guarda partidos en la base de datos
-     * 
+     *
      * @param array $apiMatches
      * @param Competition $competition
-     * 
+     *
      * @return int Cantidad de partidos guardados/actualizados
      */
     protected function saveMatches(array $apiMatches, Competition $competition): int
@@ -409,7 +409,7 @@ class MatchesCalendarService
         foreach ($apiMatches as $apiMatch) {
             try {
                 $matchData = $this->transformAPIMatch($apiMatch, $competition);
-                
+
                 FootballMatch::updateOrCreate(
                     ['external_id' => $apiMatch['fixture']['id']],
                     $matchData
@@ -431,10 +431,10 @@ class MatchesCalendarService
 
     /**
      * Transforma datos de API externa al formato de nuestra BD
-     * 
+     *
      * @param array $apiMatch
      * @param Competition $competition
-     * 
+     *
      * @return array
      */
     protected function transformAPIMatch(array $apiMatch, Competition $competition): array
@@ -462,9 +462,9 @@ class MatchesCalendarService
 
     /**
      * Valida una fecha en formato YYYY-MM-DD
-     * 
+     *
      * @param string|null $date
-     * 
+     *
      * @return string|null
      */
     protected function validateDate(?string $date): ?string
@@ -482,10 +482,10 @@ class MatchesCalendarService
 
     /**
      * Genera clave para caché
-     * 
+     *
      * @param string $prefix
      * @param array $params
-     * 
+     *
      * @return string
      */
     protected function generateCacheKey(string $prefix, array $params): string
@@ -506,11 +506,11 @@ class MatchesCalendarService
 
     /**
      * Obtiene estadísticas de partidos para un período
-     * 
+     *
      * @param string|null $fromDate
      * @param string|null $toDate
      * @param int|null $competitionId
-     * 
+     *
      * @return array
      */
     public function getStatistics(

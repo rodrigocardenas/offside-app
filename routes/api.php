@@ -33,7 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/timezone-status', function (Request $request) {
         $user = $request->user();
         $deviceTimezone = $request->query('device_tz');
-        
+
         return response()->json([
             'user_id' => $user->id,
             'saved_timezone' => $user->timezone,
@@ -74,19 +74,19 @@ Route::middleware('auth:sanctum')->post('/push/token', [PushTokenController::cla
 Route::prefix('matches')->group(function () {
     // Obtener partidos agrupados por día
     Route::get('/calendar', [MatchesController::class, 'calendar']);
-    
+
     // Obtener partidos de una competencia
     Route::get('/by-competition/{competitionId}', [MatchesController::class, 'byCompetition']);
-    
+
     // Obtener partidos de equipos específicos
     Route::get('/by-teams', [MatchesController::class, 'byTeams']);
-    
+
     // Obtener lista de competencias disponibles
     Route::get('/competitions', [MatchesController::class, 'competitions']);
-    
+
     // Obtener lista de equipos disponibles
     Route::get('/teams', [MatchesController::class, 'teams']);
-    
+
     // Obtener estadísticas de partidos
     Route::get('/statistics', [MatchesController::class, 'statistics']);
 });
