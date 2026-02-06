@@ -37,12 +37,12 @@
                 </svg>
                 <span style="font-size: 0.75rem; margin-top: 0.25rem;">Resultados</span>
             </a>
-            <a href="{{ route('profile.edit') }}" style="display: flex; flex-direction: column; align-items: center; color: {{ $textSecondary }}; transition: color 0.2s;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
+            {{-- <a href="{{ route('profile.edit') }}" style="display: flex; flex-direction: column; align-items: center; color: {{ $textSecondary }}; transition: color 0.2s;" onmouseover="this.style.color='{{ $textPrimary }}'" onmouseout="this.style.color='{{ $textSecondary }}'">
                 <svg xmlns="http://www.w3.org/2000/svg" style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 <span style="font-size: 0.75rem; margin-top: 0.25rem;">Perfil</span>
-            </a>
+            </a> --}}
         </div>
     </div>
     <!-- Botón flotante del chat -->
