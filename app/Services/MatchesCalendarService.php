@@ -54,7 +54,7 @@ class MatchesCalendarService
         // Validar y establecer rangos de fecha
         $fromDate = $this->validateDate($fromDate) ?? Carbon::today()->toDateString();
         $toDate = $this->validateDate($toDate) ?? Carbon::today()->addDays(7)->toDateString();
-        
+
         // Asegurar que teamIds sea un array
         $teamIds = $teamIds ?? [];
 
@@ -143,15 +143,15 @@ class MatchesCalendarService
         bool $includeFinished
     ): Collection {
         $query = FootballMatch::with(['homeTeam', 'awayTeam', 'competition:id,name']);
-        
+
         // Buscar por match_date primero, y si no existen resultados, buscar por date
         $dateField = 'match_date';
         $hasMatchDate = FootballMatch::whereNotNull('match_date')->exists();
-        
+
         if (!$hasMatchDate) {
             $dateField = 'date';
         }
-        
+
         $query->whereBetween($dateField, [$fromDate . ' 00:00:00', $toDate . ' 23:59:59'])
             ->orderBy($dateField, 'asc');
 
@@ -187,10 +187,16 @@ class MatchesCalendarService
     {
         $grouped = [];
 
+        // Obtener zona horaria del usuario autenticado
+        $userTimezone = auth()->check() ? (auth()->user()->timezone ?? config('app.timezone')) : config('app.timezone');
+
         foreach ($matches as $match) {
             // Usar match_date si existe, si no usar date
             $dateField = $match->match_date ?? $match->date;
-            $date = Carbon::parse($dateField)->toDateString();
+
+            // Convertir a zona horaria del usuario ANTES de agrupar
+            $matchDate = Carbon::parse($dateField)->setTimezone($userTimezone);
+            $date = $matchDate->toDateString();
 
             if (!isset($grouped[$date])) {
                 $grouped[$date] = [];
@@ -217,7 +223,7 @@ class MatchesCalendarService
         // Usar match_date si existe, si no usar date
         $dateField = $match->match_date ?? $match->date;
         $matchDate = Carbon::parse($dateField);
-        
+
         // Convertir a zona horaria del usuario autenticado
         $userTimezone = auth()->check() ? (auth()->user()->timezone ?? config('app.timezone')) : config('app.timezone');
         $matchDateUser = $matchDate->setTimezone($userTimezone);

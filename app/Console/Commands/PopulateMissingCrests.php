@@ -15,12 +15,12 @@ class PopulateMissingCrests extends Command
     {
         $limit = $this->option('limit');
         $fetchAll = $this->option('fetch-all');
-        
+
         $query = Team::whereNull('crest_url');
         if (!$fetchAll) {
             $query->limit($limit);
         }
-        
+
         $teams = $query->get();
 
         $this->info("Procesando " . $teams->count() . " equipos sin logos...\n");
@@ -63,7 +63,7 @@ class PopulateMissingCrests extends Command
         try {
             $logos = Storage::disk('public')->listContents('logos', false);
             $available = [];
-            
+
             foreach ($logos as $logo) {
                 if ($logo['type'] === 'file') {
                     $available[] = [
@@ -72,7 +72,7 @@ class PopulateMissingCrests extends Command
                     ];
                 }
             }
-            
+
             return $available;
         } catch (\Exception $e) {
             return [];
@@ -94,17 +94,17 @@ class PopulateMissingCrests extends Command
 
         foreach ($logos as $logo) {
             $logoNameLower = strtolower($logo['name']);
-            
+
             // Búsqueda exacta
             if (in_array($logoNameLower, $searchNames)) {
                 return $logo['path'];
             }
-            
+
             // Búsqueda parcial - si coinciden palabras importantes
             foreach ($searchNames as $searchName) {
                 // Coincidencia parcial si uno contiene al otro y ambos son suficientemente largos
                 if (strlen($searchName) > 3 && strlen($logoNameLower) > 3) {
-                    if (stripos($logoNameLower, $searchName) !== false || 
+                    if (stripos($logoNameLower, $searchName) !== false ||
                         stripos($searchName, $logoNameLower) !== false) {
                         return $logo['path'];
                     }

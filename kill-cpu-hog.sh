@@ -19,16 +19,16 @@ if pgrep -f "qpAopmVd" > /dev/null; then
     echo "❌ Encontrado proceso sospechoso: qpAopmVd"
     PID=$(pgrep -f "qpAopmVd")
     echo "   PID: $PID"
-    
+
     # Mostrar información del proceso
     echo "   Comando: $(ps -p $PID -o cmd= || true)"
     echo "   Ruta: $(ls -l /proc/$PID/cwd 2>/dev/null || echo 'N/A')"
     echo "   Tiempo ejecutando: $(ps -p $PID -o etime= 2>/dev/null || true)"
-    
+
     echo ""
     echo "🚨 Terminando proceso..."
     kill -9 $PID
-    
+
     if ! pgrep -f "qpAopmVd" > /dev/null; then
         echo "✅ Proceso eliminado exitosamente"
     else

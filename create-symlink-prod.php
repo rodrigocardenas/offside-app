@@ -65,7 +65,7 @@ if (is_link($linkPath) && is_dir($linkPath)) {
     $target = readlink($linkPath);
     echo "✅ Symlink está OK\n";
     echo "   Target: {$target}\n\n";
-    
+
     // Mostrar algunos logos
     $logos = glob($linkPath . '/logos/*.png');
     if (!empty($logos)) {

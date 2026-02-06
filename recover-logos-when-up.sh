@@ -38,7 +38,7 @@ echo "🔗 Creando symlink de storage..."
 ssh -i "$KEY" "ubuntu@$SERVER" << SSHCOMMAND
     set -e
     cd $APP_PATH
-    
+
     # Mostrar estado actual
     echo "Estado actual:"
     if [ -L public/storage ]; then
@@ -49,16 +49,16 @@ ssh -i "$KEY" "ubuntu@$SERVER" << SSHCOMMAND
     else
         echo "  ❌ No existe symlink"
     fi
-    
+
     echo ""
     echo "Creando symlink..."
-    
+
     # Remover si existe
     sudo rm -f public/storage 2>/dev/null || true
-    
+
     # Crear symlink
     sudo ln -s ../storage/app/public public/storage
-    
+
     # Verificar
     if [ -L public/storage ]; then
         echo "✅ Symlink creado exitosamente"
@@ -67,18 +67,18 @@ ssh -i "$KEY" "ubuntu@$SERVER" << SSHCOMMAND
         echo "❌ Error al crear symlink"
         exit 1
     fi
-    
+
     # Mostrar logos
     echo ""
     echo "📸 Verificando logos..."
     LOGO_COUNT=\$(ls $APP_PATH/storage/app/public/logos/ 2>/dev/null | wc -l)
     echo "   Logos encontrados: \$LOGO_COUNT"
-    
+
     # Limpiar caché
     echo ""
     echo "🧹 Limpiando caché..."
     sudo -u www-data php artisan cache:clear 2>/dev/null || true
-    
+
     echo "✅ Completado"
 SSHCOMMAND
 
