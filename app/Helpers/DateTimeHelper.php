@@ -17,7 +17,7 @@ class DateTimeHelper
      */
     public static function toUserTimezone($date, $format = 'd/m/Y H:i', $timezone = null)
     {
-        // Obtener zona horaria del usuario o usar la por defecto
+        // Obtener zona horaria del usuario o usar la por defecto (UTC)
         if (!$timezone && Auth::check()) {
             $timezone = Auth::user()->timezone ?? config('app.timezone');
         } elseif (!$timezone) {
@@ -28,22 +28,13 @@ class DateTimeHelper
         if (is_string($date)) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $date, 'UTC');
         } else {
-            // Si es Carbon object desde el modelo, Laravel ya aplicó app.timezone
-            // así que viene en ese timezone. Necesitamos extraer la hora sin cambios
-            // La clave es: la hora mostrada es la real,pero el timezone está mal marcado
+            // Si es Carbon object desde el modelo Eloquent
+            // Con app.timezone = UTC, el objeto ya está interpretado correctamente como UTC
+            // Solo necesitamos crear una copia para evitar mutaciones
             $date = $date->copy();
-
-            // El objeto está en app.timezone, necesitamos interpretarlo como UTC
-            // para poder convertirlo correctamente a la zona deseada
-            $appTimezone = config('app.timezone');
-
-            // Obtener la hora actual (que es la UTC real)
-            $hour = $date->format('Y-m-d H:i:s');
-
-            // Re-crear como UTC
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $hour, 'UTC');
         }
 
+        // Convertir a la zona horaria del usuario
         return $date->setTimezone($timezone)->format($format);
     }
 
@@ -59,13 +50,8 @@ class DateTimeHelper
         if (is_string($date)) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $date, 'UTC');
         } else {
-            // Si es Carbon object, ya está en app.timezone
-            // Necesitamos extraer la hora sin cambios (porque eso es realmente UTC)
+            // Si es Carbon object, con app.timezone = UTC, ya está en UTC
             $date = $date->copy();
-            $hour = $date->format('Y-m-d H:i:s');
-
-            // Re-crear como UTC
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $hour, 'UTC');
         }
 
         return $date->format($format);
@@ -125,7 +111,7 @@ class DateTimeHelper
      */
     public static function toUserTimestampForCountdown($date, $timezone = null)
     {
-        // Obtener zona horaria del usuario o usar la por defecto
+        // Obtener zona horaria del usuario o usar la por defecto (UTC)
         if (!$timezone && Auth::check()) {
             $timezone = Auth::user()->timezone ?? config('app.timezone');
         } elseif (!$timezone) {
@@ -136,11 +122,9 @@ class DateTimeHelper
         if (is_string($date)) {
             $date = Carbon::createFromFormat('Y-m-d H:i:s', $date, 'UTC');
         } else {
-            // Si es Carbon object desde el modelo, Laravel ya aplicó app.timezone
+            // Si es Carbon object desde el modelo Eloquent
+            // Con app.timezone = UTC, ya está interpretado correctamente
             $date = $date->copy();
-            $hour = $date->format('Y-m-d H:i:s');
-            // Re-crear como UTC
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $hour, 'UTC');
         }
 
         // Convertir a zona horaria del usuario y retornar en formato legible
