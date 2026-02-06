@@ -22,10 +22,10 @@
         <div class="menu-icon"><i class="fas fa-comment"></i></div>
         <div class="menu-label">{{ __('views.rankings.your_opinion') }}</div>
     </button>
-    <a href="{{ route('profile.edit') }}" class="menu-item {{ $activeItem === 'perfil' ? 'active' : '' }}" data-item="perfil" title="{{ __('messages.profile') }}">
+    {{-- <a href="{{ route('profile.edit') }}" class="menu-item {{ $activeItem === 'perfil' ? 'active' : '' }}" data-item="perfil" title="{{ __('messages.profile') }}">
         <div class="menu-icon"><i class="fas fa-user-circle"></i></div>
         <div class="menu-label">{{ __('messages.profile') }}</div>
-    </a>
+    </a> --}}
 
 </div>
 

@@ -68,10 +68,18 @@ ssh -T $SERVER_ALIAS << EOF
     sudo rm build.tar.gz
 
     echo "🔧 Ajustando permisos y caché..."
+    sudo mkdir -p bootstrap/cache
     sudo chown -R www-data:www-data public/build storage bootstrap/cache
+    sudo chmod -R 775 storage bootstrap/cache public
+
+    echo "📦 Ejecutando comandos de optimización..."
+    sudo -u www-data php artisan config:clear || true
+    sudo -u www-data php artisan cache:clear || true
     sudo -u www-data php artisan optimize
     sudo -u www-data php artisan view:cache
-    sudo -u www-data php artisan migrate
+
+    echo "🗄️ Aplicando migraciones..."
+    sudo -u www-data php artisan migrate --force || true
 
     echo "✨ Saliendo del modo mantenimiento..."
     sudo -u www-data php artisan up
