@@ -56,8 +56,9 @@ ssh -T $SERVER_ALIAS << EOF
     sudo mv /tmp/build.tar.gz $REMOTE_PATH/
 
     cd $REMOTE_PATH
-
-
+    echo "🔧 Ajustando permisos previos..."
+    sudo chown -R www-data:www-data . || true
+    sudo chmod -R 775 storage bootstrap/cache public || true
     echo "�🚧 Entrando en modo mantenimiento..."
     sudo -u www-data php artisan down --retry=60
 
