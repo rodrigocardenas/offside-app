@@ -51,10 +51,10 @@ scp build.tar.gz $SERVER_ALIAS:/tmp/
 ssh -T $SERVER_ALIAS << EOF
     echo "🔄 Desplegando en servidor remoto..."
     set -e
-    
+
     # Mover archivo a la ruta final
     sudo mv /tmp/build.tar.gz $REMOTE_PATH/
-    
+
     cd $REMOTE_PATH
     sudo git checkout -- .
     echo "� Actualizando código desde Git..."
