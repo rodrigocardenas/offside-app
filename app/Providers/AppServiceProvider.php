@@ -98,7 +98,10 @@ class AppServiceProvider extends ServiceProvider
 
             $status = ($event->exitCode ?? 0) === 0 ? 'completado' : 'falló';
             $emoji = ($event->exitCode ?? 0) === 0 ? ':white_check_mark:' : ':x:';
-            $runtimeSeconds = $event->runtime > 0 ? number_format($event->runtime / 1000, 2) : '0.00';
+            $runtimeSeconds = '?.??';
+            if (method_exists($event, 'runtime') && $event->runtime > 0) {
+                $runtimeSeconds = number_format($event->runtime / 1000, 2);
+            }
 
             $message = sprintf(
                 '%s `%s` %s en %s [%s] (%ss).',
