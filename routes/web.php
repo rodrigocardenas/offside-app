@@ -160,19 +160,46 @@ Route::get('/test-actualizar-partido/{id}', function($id) {
 
 // Ruta para servir avatares
 Route::get('/avatars/{filename}', function ($filename) {
-    $path = storage_path('app/public/avatars/' . $filename);
-
-    if (!file_exists($path)) {
-        abort(404);
+    // 1. WHITELIST CHECK: Only allow safe filenames
+    // Pattern: alphanumeric, dot, dash, underscore (max 255 chars)
+    if (!preg_match('/^[a-zA-Z0-9._-]{1,255}$/', $filename)) {
+        abort(403, 'Invalid filename format');
     }
-
-    $file = file_get_contents($path);
-    $type = mime_content_type($path);
-
+    
+    // 2. SAFE PATH CONSTRUCTION
+    $basePath = storage_path('app/public/avatars');
+    $path = $basePath . DIRECTORY_SEPARATOR . $filename;
+    
+    // 3. PATH VALIDATION: Ensure path is within avatars directory
+    // This prevents directory traversal even if filename validation fails
+    $realPath = realpath($path);
+    $realBasePath = realpath($basePath);
+    
+    if (!$realPath || !$realBasePath || strpos($realPath, $realBasePath) !== 0) {
+        abort(403, 'Access denied');
+    }
+    
+    // 4. FILE EXISTENCE CHECK
+    if (!file_exists($realPath) || !is_file($realPath)) {
+        abort(404, 'Avatar not found');
+    }
+    
+    // 5. FILE TYPE VALIDATION (optional but recommended)
+    $allowed_mimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    $mime = mime_content_type($realPath);
+    if (!in_array($mime, $allowed_mimes)) {
+        abort(403, 'Invalid file type');
+    }
+    
+    // 6. SAFE FILE DELIVERY
+    $file = file_get_contents($realPath);
+    
     return response($file, 200)
-        ->header('Content-Type', $type)
-        ->header('Cache-Control', 'public, max-age=31536000');
-})->where('filename', '.*');
+        ->header('Content-Type', $mime)
+        ->header('Cache-Control', 'public, max-age=31536000')
+        ->header('X-Content-Type-Options', 'nosniff')
+        ->header('Content-Disposition', 'inline; filename="' . basename($realPath) . '"');
+})->where('filename', '[a-zA-Z0-9._-]{1,255}');
 
 // Ruta de prueba para avatares
 Route::post('/test-avatar-upload', [TestAvatarController::class, 'testUpload']);
