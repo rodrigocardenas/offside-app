@@ -217,6 +217,10 @@ class MatchesCalendarService
         // Usar match_date si existe, si no usar date
         $dateField = $match->match_date ?? $match->date;
         $matchDate = Carbon::parse($dateField);
+        
+        // Convertir a zona horaria del usuario autenticado
+        $userTimezone = auth()->check() ? (auth()->user()->timezone ?? config('app.timezone')) : config('app.timezone');
+        $matchDateUser = $matchDate->setTimezone($userTimezone);
 
         return [
             'id' => $match->id,
@@ -231,7 +235,7 @@ class MatchesCalendarService
                 'name' => $match->awayTeam?->name ?? $match->away_team,
                 'crest_url' => $match->awayTeam?->crest_url,
             ],
-            'kick_off_time' => $matchDate->format('H:i'),
+            'kick_off_time' => $matchDateUser->format('H:i'),
             'kick_off_timestamp' => $matchDate->timestamp,
             'status' => $match->status,
             'score' => [
