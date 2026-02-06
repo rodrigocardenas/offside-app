@@ -4,77 +4,114 @@ namespace App\Console\Commands;
 
 use App\Models\Team;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 
 class PopulateMissingCrests extends Command
 {
-    protected $signature = 'teams:populate-crests {--limit=50}';
-    protected $description = 'Populate missing crest_url for teams from manual database';
+    protected $signature = 'teams:populate-crests {--limit=50} {--fetch-all}';
+    protected $description = 'Link local team crests to teams that are missing crest_url';
 
     public function handle()
     {
         $limit = $this->option('limit');
-        $teams = Team::whereNull('crest_url')->limit($limit)->get();
+        $fetchAll = $this->option('fetch-all');
+        
+        $query = Team::whereNull('crest_url');
+        if (!$fetchAll) {
+            $query->limit($limit);
+        }
+        
+        $teams = $query->get();
 
-        $this->info("Procesando {$teams->count()} equipos sin logos...\n");
+        $this->info("Procesando " . $teams->count() . " equipos sin logos...\n");
+
+        // Cargar lista de logos disponibles
+        $availableLogos = $this->getAvailableLogos();
+        $this->info("Logos disponibles: " . count($availableLogos));
 
         $updated = 0;
-        $failed = 0;
+        $notFound = 0;
 
         foreach ($teams as $team) {
-            $this->output->write("Buscando logo para: {$team->name} ({$team->api_name})... ");
+            $this->output->write("Buscando logo para: {$team->api_name} ({$team->name})... ");
 
-            $crestUrl = $this->getCrestForTeam($team);
+            // Buscar logo coincidente
+            $logoPath = $this->findMatchingLogo($team, $availableLogos);
 
-            if ($crestUrl) {
-                $team->update(['crest_url' => $crestUrl]);
-                $this->info("✓ {$crestUrl}");
+            if ($logoPath) {
+                $team->update(['crest_url' => '/storage/' . $logoPath]);
+                $this->info("✓");
                 $updated++;
             } else {
-                $this->error("✗ No encontrado");
-                $failed++;
+                $this->error("✗");
+                $notFound++;
             }
         }
 
         $this->newLine();
         $this->info("=== RESUMEN ===");
         $this->info("Actualizados: {$updated}");
-        $this->error("No encontrados: {$failed}");
-        $this->info("Total: {$teams->count()}");
+        $this->error("No encontrados: {$notFound}");
+        $this->info("Total procesados: " . $teams->count());
     }
 
-    
-    private function getCrestForTeam(Team $team): ?string
+    /**
+     * Obtener lista de logos disponibles en storage
+     */
+    private function getAvailableLogos(): array
     {
-        $crests = [
-            'Real Madrid' => '/storage/logos/Real_Madrid.png',
-            'Barcelona' => '/storage/logos/FC_Barcelona.png',
-            'Atlético Madrid' => '/storage/logos/Atl__tico_Madrid.png',
-            'Manchester United' => '/storage/logos/Manchester_United.png',
-            'Manchester City' => '/storage/logos/Manchester_City.png',
-            'Liverpool' => '/storage/logos/Liverpool.png',
-            'Arsenal' => '/storage/logos/Arsenal.png',
-            'Chelsea' => '/storage/logos/Chelsea.png',
-            'Tottenham' => '/storage/logos/Tottenham.png',
-            'West Ham' => '/storage/logos/West_Ham.png',
-            'Brighton' => '/storage/logos/Brighton.png',
-            'Crystal Palace' => '/storage/logos/Crystal_Palace.png',
-            'Everton' => '/storage/logos/Everton.png',
-            'Brentford' => '/storage/logos/Brentford.png',
-            'Fulham' => '/storage/logos/Fulham.png',
-            'Bournemouth' => '/storage/logos/Bournemouth.png',
-            'Aston Villa' => '/storage/logos/Aston_Villa.png',
-            'Juventus' => '/storage/logos/Juventus.png',
-            'Inter' => '/storage/logos/Inter.png',
-            'AC Milan' => '/storage/logos/AC_Milan.png',
-            'Roma' => '/storage/logos/Roma.png',
-            'Atalanta' => '/storage/logos/Atalanta.png',
-            'Bayern Munich' => '/storage/logos/Bayern_Munich.png',
-            'Borussia Dortmund' => '/storage/logos/Borussia_Dortmund.png',
-            'Paris Saint-Germain' => '/storage/logos/PSG.png',
-            'Ajax' => '/storage/logos/Ajax.png',
-            'PSV' => '/storage/logos/PSV.png',
+        try {
+            $logos = Storage::disk('public')->listContents('logos', false);
+            $available = [];
+            
+            foreach ($logos as $logo) {
+                if ($logo['type'] === 'file') {
+                    $available[] = [
+                        'path' => $logo['path'],
+                        'name' => pathinfo($logo['path'], PATHINFO_FILENAME),
+                    ];
+                }
+            }
+            
+            return $available;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Buscar un logo coincidente para el equipo
+     */
+    private function findMatchingLogo(Team $team, array $logos): ?string
+    {
+        $searchNames = [
+            strtolower($team->api_name),
+            strtolower(str_replace(' ', '_', $team->api_name)),
+            strtolower(str_replace(' ', '', $team->api_name)),
+            strtolower(str_replace([' ', '-'], '_', $team->name)),
+            strtolower(str_replace([' ', '-'], '', $team->name)),
         ];
 
-        return $crests[$team->name] ?? $crests[$team->api_name] ?? null;
+        foreach ($logos as $logo) {
+            $logoNameLower = strtolower($logo['name']);
+            
+            // Búsqueda exacta
+            if (in_array($logoNameLower, $searchNames)) {
+                return $logo['path'];
+            }
+            
+            // Búsqueda parcial - si coinciden palabras importantes
+            foreach ($searchNames as $searchName) {
+                // Coincidencia parcial si uno contiene al otro y ambos son suficientemente largos
+                if (strlen($searchName) > 3 && strlen($logoNameLower) > 3) {
+                    if (stripos($logoNameLower, $searchName) !== false || 
+                        stripos($searchName, $logoNameLower) !== false) {
+                        return $logo['path'];
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }
