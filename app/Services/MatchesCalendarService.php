@@ -142,7 +142,7 @@ class MatchesCalendarService
         array $teamIds,
         bool $includeFinished
     ): Collection {
-        $query = FootballMatch::with(['homeTeam:id,name,crest_url', 'awayTeam:id,name,crest_url', 'competition:id,name']);
+        $query = FootballMatch::with(['homeTeam:api_name,id,name,crest_url', 'awayTeam:api_name,id,name,crest_url', 'competition:id,name']);
         
         // Buscar por match_date primero, y si no existen resultados, buscar por date
         $dateField = 'match_date';
