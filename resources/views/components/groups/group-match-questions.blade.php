@@ -63,24 +63,24 @@
                     @if($question->templateQuestion->homeTeam)
                         <div class="flex items-center justify-center gap-4 mb-5">
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->templateQuestion->homeTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->homeTeam?->name }}">
+                                <img src="{{ (!empty($question->templateQuestion->homeTeam?->crest_url)) ? $question->templateQuestion->homeTeam->crest_url : asset('images/default-crest.png') }}" alt="{{ $question->templateQuestion->homeTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->homeTeam?->name }}" onerror="this.src='{{ asset('images/default-crest.png') }}'">
                                 <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->homeTeam->name, 20, '') }}</span>
                             </div>
                                 <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->templateQuestion->awayTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->templateQuestion->awayTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->awayTeam?->name }}">
+                                <img src="{{ (!empty($question->templateQuestion->awayTeam?->crest_url)) ? $question->templateQuestion->awayTeam->crest_url : asset('images/default-crest.png') }}" alt="{{ $question->templateQuestion->awayTeam->name }}" class="w-16 h-16 object-contain" title="{{ $question->templateQuestion->awayTeam?->name }}" onerror="this.src='{{ asset('images/default-crest.png') }}'">
                                 <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->templateQuestion->awayTeam->name, 20, '') }}</span>
                             </div>
                         </div>
                     @else
                         <div class="flex items-center justify-center gap-4 mb-5">
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->football_match->homeTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->homeTeam?->name }}">
+                                <img src="{{ (!empty($question->football_match->homeTeam?->crest_url)) ? $question->football_match->homeTeam->crest_url : asset('images/default-crest.png') }}" alt="{{ $question->football_match->homeTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->homeTeam?->name }}" onerror="this.src='{{ asset('images/default-crest.png') }}'">
                                 <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->homeTeam->name ?? $question->football_match->home_team, 20, '') }}</span>
                             </div>
                             <span class="text-sm font-bold" style="color: {{ $accentDark }};">@userTime($question->football_match->date, 'H:i')</span>
                             <div class="flex flex-col items-center gap-1">
-                                <img src="{{ $question->football_match->awayTeam->crest_url ?? asset('images/default-crest.png') }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->awayTeam?->name }}">
+                                <img src="{{ (!empty($question->football_match->awayTeam?->crest_url)) ? $question->football_match->awayTeam->crest_url : asset('images/default-crest.png') }}" alt="{{ $question->football_match->awayTeam?->name }}" class="w-16 h-16 object-contain" title="{{ $question->football_match->awayTeam?->name }}" onerror="this.src='{{ asset('images/default-crest.png') }}'">
                                 <span class="text-xs font-medium" style="color: {{ $textPrimary }};">{{ Str::limit($question->football_match->awayTeam->name ?? $question->football_match->away_team, 20, '') }}</span>
                             </div>
                         </div>
