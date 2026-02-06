@@ -21,7 +21,7 @@ if [ "$CURRENT_BRANCH" != "$REQUIRED_BRANCH" ]; then
 fi
 
 # 2. Validar que no hay cambios sin commitear
-if [ -n "$(git status --porcelain)" ]; then
+if [ -n "$(git status --porcelain | grep -v 'build.tar.gz')" ]; then
     echo "⚠️ ADVERTENCIA: Tienes cambios locales sin guardar en Git. Haz commit antes de desplegar."
     exit 1
 fi
