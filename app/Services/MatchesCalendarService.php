@@ -142,7 +142,7 @@ class MatchesCalendarService
         array $teamIds,
         bool $includeFinished
     ): Collection {
-        $query = FootballMatch::with(['homeTeamById:id,name,crest_url', 'awayTeamById:id,name,crest_url', 'competition:id,name']);
+        $query = FootballMatch::with(['homeTeam:id,name,crest_url', 'awayTeam:id,name,crest_url', 'competition:id,name']);
         
         // Buscar por match_date primero, y si no existen resultados, buscar por date
         $dateField = 'match_date';
@@ -227,13 +227,13 @@ class MatchesCalendarService
             'external_id' => $match->external_id,
             'home_team' => [
                 'id' => $match->home_team_id,
-                'name' => $match->homeTeamById?->name ?? $match->home_team,
-                'crest_url' => $match->homeTeamById?->crest_url,
+                'name' => $match->homeTeam?->name ?? $match->home_team,
+                'crest_url' => $match->homeTeam?->crest_url,
             ],
             'away_team' => [
                 'id' => $match->away_team_id,
-                'name' => $match->awayTeamById?->name ?? $match->away_team,
-                'crest_url' => $match->awayTeamById?->crest_url,
+                'name' => $match->awayTeam?->name ?? $match->away_team,
+                'crest_url' => $match->awayTeam?->crest_url,
             ],
             'kick_off_time' => $matchDateUser->format('H:i'),
             'kick_off_timestamp' => $matchDate->timestamp,

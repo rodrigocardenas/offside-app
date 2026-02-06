@@ -70,16 +70,6 @@ class FootballMatch extends Model
         return $this->belongsTo(Team::class, 'away_team', 'api_name');
     }
 
-    public function homeTeamById()
-    {
-        return $this->belongsTo(Team::class, 'home_team_id', 'id');
-    }
-
-    public function awayTeamById()
-    {
-        return $this->belongsTo(Team::class, 'away_team_id', 'id');
-    }
-
     public function stadium()
     {
         return $this->belongsTo(Stadium::class);
