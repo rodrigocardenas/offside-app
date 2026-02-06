@@ -81,6 +81,13 @@ ssh -T $SERVER_ALIAS << EOF
     echo "🗄️ Aplicando migraciones..."
     sudo -u www-data php artisan migrate --force || true
 
+    echo "🔗 Verificando symlink de storage..."
+    sudo -u www-data php artisan storage:link --force || {
+        echo "⚠️  Creando symlink manualmente..."
+        sudo rm -f $REMOTE_PATH/public/storage
+        sudo ln -s ../storage/app/public $REMOTE_PATH/public/storage
+    }
+
     echo "✨ Saliendo del modo mantenimiento..."
     sudo -u www-data php artisan up
 
