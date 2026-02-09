@@ -20,16 +20,20 @@ Public Key:   C:\Users\rodri\OneDrive\Documentos\aws\offside-new.pem.pub
 ✅ Connection tested and working  
 ✅ Deploy script updated  
 ✅ Changes committed to git  
+✅ **Old key DEACTIVATED** (removed from authorized_keys)  
 
 ## Old Key
 
-The old key (`offside.pem`) should be:
-- Removed from automated backups
-- Deleted from local machine after 30 days (grace period for recovery)
+**Status:** ❌ DEACTIVATED (removed from EC2)
+
+The old key (`offside.pem`) has been:
+- ✅ Removed from `~/.ssh/authorized_keys` on EC2
+- ❌ No longer able to authenticate
 - Treated as compromised (used during malware incidents)
 
+Safe to delete from local machine:
+
 ```bash
-# Schedule deletion (do not delete yet)
 rm "C:\Users\rodri\OneDrive\Documentos\aws\offside.pem"
 rm "C:\Users\rodri\OneDrive\Documentos\aws\offside.pem.pub"
 ```
@@ -42,13 +46,18 @@ Scripts now use the new key automatically:
 
 ## Recommended Next Steps
 
-1. **Keep both keys active for 30 days** (for emergency fallback)
+1. **Delete old key from local machine** (can be done now):
+   ```bash
+   rm "C:\Users\rodri\OneDrive\Documentos\aws\offside.pem"
+   rm "C:\Users\rodri\OneDrive\Documentos\aws\offside.pem.pub"
+   ```
+
 2. **Monitor deployment logs** to ensure new key works
 3. **Rotate other credentials:**
    - Database password
    - API keys
    - AWS IAM credentials
-4. **After 30 days:** Delete the old key
+4. **Verify new key works in production** with `scripts/deploy.sh`
 
 ## Security Notes
 
@@ -59,6 +68,6 @@ Scripts now use the new key automatically:
 
 ---
 
-**Status:** ✅ Key Rotation Complete  
+**Status:** ✅ Key Rotation Complete + Old Key Deactivated  
 **Date:** 2026-02-09  
-**Next Review:** 2026-02-19 (monitor for issues)
+**Security Level:** 🔐 High (single strong Ed25519 key)
