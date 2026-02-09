@@ -53,9 +53,6 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "🔄 Desplegando en servidor remoto..."
     set -e
 
-    # Mover archivo a la ruta final
-    sudo mv /tmp/build.tar.gz $REMOTE_PATH/
-
     cd $REMOTE_PATH
     echo "🔧 Ajustando permisos previos..."
     sudo chown -R www-data:www-data . || true
@@ -65,6 +62,10 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "🔄 Descartando cambios locales sin commitear..."
     sudo -u www-data git checkout -- . || true
     sudo -u www-data git clean -fd || true
+    
+    # Mover archivo después de limpiar git
+    echo "📦 Preparando assets..."
+    sudo mv /tmp/build.tar.gz $REMOTE_PATH/
     
     echo "🚧 Entrando en modo mantenimiento..."
     sudo -u www-data php artisan down --retry=60
