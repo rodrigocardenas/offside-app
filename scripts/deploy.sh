@@ -4,7 +4,7 @@ set -e
 # --- CONFIGURACIÓN ---
 SERVER_ALIAS="ubuntu@ec2-100-30-41-157.compute-1.amazonaws.com"
 REMOTE_PATH="/var/www/html"
-SSH_KEY_PATH="$HOME/OneDrive/Documentos/aws/offside.pem"
+SSH_KEY_PATH="$HOME/OneDrive/Documentos/aws/offside-new.pem"
 REQUIRED_BRANCH="main"
 DEPLOY_INITIATOR=$(whoami)
 COMMIT_SHA=$(git rev-parse --short HEAD)
