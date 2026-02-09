@@ -58,15 +58,15 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     sudo chown -R www-data:www-data . || true
     sudo chmod -R 775 storage bootstrap/cache public || true
     sudo chmod 755 bootstrap || true
-    
+
     echo "🔄 Descartando cambios locales sin commitear..."
     sudo -u www-data git checkout -- . || true
     sudo -u www-data git clean -fd || true
-    
+
     # Mover archivo después de limpiar git
     echo "📦 Preparando assets..."
     sudo mv /tmp/build.tar.gz $REMOTE_PATH/
-    
+
     echo "🚧 Entrando en modo mantenimiento..."
     sudo -u www-data php artisan down --retry=60
 
