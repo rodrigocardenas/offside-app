@@ -91,6 +91,12 @@ class ProfileController extends Controller
                     $avatarFile->move($avatarPath, $avatarName);
                     Log::info('Archivo movido exitosamente');
 
+                    // 🔒 Fijar permisos correctos inmediatamente después
+                    if (file_exists($destination)) {
+                        chmod($destination, 0644);
+                        Log::info('Permisos del archivo fijados a 644: ' . $destination);
+                    }
+
                     $data['avatar'] = $avatarName;
                     Log::info('Avatar agregado a datos: ' . $avatarName);
 
