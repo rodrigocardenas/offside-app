@@ -60,7 +60,8 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "🔧 Ajustando permisos previos..."
     sudo chown -R www-data:www-data . || true
     sudo chmod -R 775 storage bootstrap/cache public || true
-    echo "�🚧 Entrando en modo mantenimiento..."
+    sudo chmod 755 bootstrap || true
+    echo "🚧 Entrando en modo mantenimiento..."
     sudo -u www-data php artisan down --retry=60
 
     echo "🧹 Limpiando y extrayendo..."
@@ -70,8 +71,9 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
 
     echo "🔧 Ajustando permisos y caché..."
     sudo mkdir -p bootstrap/cache
-    sudo chown -R www-data:www-data public/build storage bootstrap/cache
-    sudo chmod -R 775 storage bootstrap/cache public
+    sudo chown -R www-data:www-data . || true
+    sudo chmod -R 775 storage bootstrap/cache public || true
+    sudo chmod 755 bootstrap || true
 
     echo "📦 Ejecutando comandos de optimización..."
     sudo -u www-data php artisan config:clear || true
