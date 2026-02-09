@@ -4,6 +4,7 @@ set -e
 # --- CONFIGURACIÓN ---
 SERVER_ALIAS="ubuntu@ec2-100-30-41-157.compute-1.amazonaws.com"
 REMOTE_PATH="/var/www/html"
+SSH_KEY_PATH="$HOME/OneDrive/Documentos/aws/offside.pem"
 REQUIRED_BRANCH="main"
 DEPLOY_INITIATOR=$(whoami)
 COMMIT_SHA=$(git rev-parse --short HEAD)
@@ -36,7 +37,7 @@ npm run build
 tar -czf build.tar.gz public/build
 
 # 5. Preparar servidor y subir
-ssh -T $SERVER_ALIAS << 'PRE_EOF'
+ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << 'PRE_EOF'
     set -e
     # Asegurar que el directorio existe y tiene permisos correctos
     sudo mkdir -p /var/www/html
@@ -45,10 +46,10 @@ ssh -T $SERVER_ALIAS << 'PRE_EOF'
 PRE_EOF
 
 # Subir el archivo
-scp build.tar.gz $SERVER_ALIAS:/tmp/
+scp -i "$SSH_KEY_PATH" build.tar.gz $SERVER_ALIAS:/tmp/
 
 # 6. Operaciones en servidor
-ssh -T $SERVER_ALIAS << EOF
+ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "🔄 Desplegando en servidor remoto..."
     set -e
 
