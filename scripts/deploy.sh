@@ -2,8 +2,8 @@
 set -e
 
 # --- CONFIGURACIÓN ---
-SERVER_ALIAS="offside-app"
-REMOTE_PATH="/var/www/html/offside-app"
+SERVER_ALIAS="ubuntu@ec2-100-30-41-157.compute-1.amazonaws.com"
+REMOTE_PATH="/var/www/html"
 REQUIRED_BRANCH="main"
 DEPLOY_INITIATOR=$(whoami)
 COMMIT_SHA=$(git rev-parse --short HEAD)
@@ -39,9 +39,9 @@ tar -czf build.tar.gz public/build
 ssh -T $SERVER_ALIAS << 'PRE_EOF'
     set -e
     # Asegurar que el directorio existe y tiene permisos correctos
-    sudo mkdir -p /var/www/html/offside-app
-    sudo chown -R $USER:$USER /var/www/html/offside-app || sudo chown -R ubuntu:ubuntu /var/www/html/offside-app
-    sudo chmod -R 755 /var/www/html/offside-app
+    sudo mkdir -p /var/www/html
+    sudo chown -R $USER:$USER /var/www/html || sudo chown -R ubuntu:ubuntu /var/www/html
+    sudo chmod -R 755 /var/www/html
 PRE_EOF
 
 # Subir el archivo
