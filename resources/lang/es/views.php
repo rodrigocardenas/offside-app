@@ -96,6 +96,7 @@ return [
         'incorrect_answer' => 'Respuesta Incorrecta',
         'calculating' => 'Calculando...',
         'cancel' => 'Cancelar',
+        'next' => 'Próximo',
     ],
     'questions' => [
         'title' => 'Preguntas',

@@ -1220,18 +1220,26 @@ class GroupController extends Controller
     {
         $match = FootballMatch::findOrFail($matchId);
 
+        // Obtener grupos donde el usuario es miembro Y que tengan preguntas de este partido
         $groups = Group::where('competition_id', $match->competition_id)
             ->with(['users', 'competition'])
             ->withCount(['users as members_count'])
-            // and auth user is member
+            // Solo grupos donde el usuario es miembro
             ->whereHas('users', function($q) {
                 $q->where('user_id', auth()->id());
             })
+            // Opcional: filtrar grupos que tengan preguntas de esta competencia
+            ->whereHas('questions', function($q) use ($match) {
+                $q->where('competition_id', $match->competition_id);
+            }, '>=', 1)
+            ->orderBy('members_count', 'desc')
             ->get();
 
         return response()->json([
             'match' => $match,
-            'groups' => $groups
+            'groups' => $groups,
+            'competitionId' => $match->competition_id,
+            'competitionName' => $match->competition->name ?? 'Competition'
         ]);
     }
 }

@@ -1,7 +1,7 @@
 @php
     $themeMode = auth()->user()->theme_mode ?? 'light';
     $isDark = $themeMode === 'dark';
-    
+
     $bgColor = $isDark ? '#1a524e' : '#f5f5f5';
     $textColor = $isDark ? '#f1fff8' : '#333333';
     $borderColor = $isDark ? '#2d7a77' : '#e0e0e0';
@@ -9,16 +9,16 @@
 @endphp
 
 <div class="calendar-filters" style="padding: 16px; background: {{ $bgColor }}; border-bottom: 1px solid {{ $borderColor }};">
-    
+
     {{-- SELECTOR DE COMPETENCIA --}}
     <div style="display: flex; flex-direction: column; gap: 8px;">
         <label style="font-size: 12px; font-weight: 700; color: {{ $textColor }}; text-transform: uppercase;">
             Filtrar por Liga
         </label>
-        
+
         <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px;">
             {{-- Opción "Todas" --}}
-            <button onclick="filterByCompetition(null)" 
+            <button onclick="filterByCompetition(null)"
                     id="filter-all"
                     class="filter-chip active"
                     style="padding: 8px 16px; background: linear-gradient(135deg, #17b796, {{ $accentColor }}); border: none; border-radius: 20px; color: white; font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.3s;">
@@ -27,7 +27,7 @@
 
             {{-- Competencias disponibles --}}
             @foreach($competitions as $comp)
-                <button onclick="filterByCompetition({{ $comp['id'] }})" 
+                <button onclick="filterByCompetition({{ $comp['id'] }})"
                         id="filter-{{ $comp['id'] }}"
                         class="filter-chip"
                         style="padding: 8px 16px; background: {{ $isDark ? 'rgba(255,255,255,0.1)' : '#e8e8e8' }}; border: 2px solid transparent; border-radius: 20px; color: {{ $textColor }}; font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.3s;"
@@ -44,14 +44,14 @@
         <label style="font-size: 12px; font-weight: 700; color: {{ $textColor }}; text-transform: uppercase;">
             Período
         </label>
-        
+
         <div style="display: flex; gap: 8px;">
-            <button onclick="setDateRange('week')" 
+            <button onclick="setDateRange('week')"
                     class="period-chip"
                     style="flex: 1; padding: 8px; background: {{ $isDark ? 'rgba(255,255,255,0.1)' : '#e8e8e8' }}; border: none; border-radius: 6px; color: {{ $textColor }}; font-weight: 600; font-size: 12px; cursor: pointer;">
                 Esta Semana
             </button>
-            <button onclick="setDateRange('month')" 
+            <button onclick="setDateRange('month')"
                     class="period-chip"
                     style="flex: 1; padding: 8px; background: {{ $isDark ? 'rgba(255,255,255,0.1)' : '#e8e8e8' }}; border: none; border-radius: 6px; color: {{ $textColor }}; font-weight: 600; font-size: 12px; cursor: pointer;">
                 Este Mes
@@ -66,50 +66,69 @@
         document.querySelectorAll('.filter-chip').forEach(chip => {
             chip.classList.remove('active');
         });
-        
+
         // Agregar clase active al chip seleccionado
         if (competitionId === null) {
             document.getElementById('filter-all').classList.add('active');
         } else {
             document.getElementById('filter-' + competitionId).classList.add('active');
         }
-        
+
         // Hacer request a la API para filtrar
         fetchMatches(competitionId);
     }
 
     function setDateRange(range) {
+        // Obtener el ID de competencia seleccionado actualmente
+        const activeChip = document.querySelector('.filter-chip.active');
+        const competitionId = activeChip && activeChip.id !== 'filter-all' ? activeChip.id.replace('filter-', '') : null;
+
+        // Marcar botones de período
+        document.querySelectorAll('.period-chip').forEach(chip => {
+            chip.style.background = '{{ $isDark ? "rgba(255,255,255,0.1)" : "#e8e8e8" }}';
+            chip.style.color = '{{ $textColor }}';
+        });
+
+        // Marcar el botón seleccionado
+        event.target.style.background = '{{ $accentColor }}';
+        event.target.style.color = '{{ $isDark ? "#000" : "#000" }}';
+
         // Hacer request a la API
-        fetchMatches(null, range);
+        fetchMatches(competitionId, range);
     }
 
     function fetchMatches(competitionId, range = 'week') {
-        // Mostrar spinner
-        showLoadingSpinner();
-        
         // Construir parámetros de rango de fecha
         const today = new Date();
         let toDate = new Date(today);
-        
+
         if (range === 'month') {
             toDate.setDate(today.getDate() + 30);
         } else {
             toDate.setDate(today.getDate() + 7);
         }
-        
-        const formatDate = (d) => d.toISOString().split('T')[0];
+
+        const formatDate = (d) => {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
         const fromDate = formatDate(today);
         toDate = formatDate(toDate);
-        
+
+        // Mostrar spinner
+        showLoadingSpinner();
+
         // Construir URL
         const url = new URL('/matches/calendar', window.location.origin);
         url.searchParams.append('from_date', fromDate);
         url.searchParams.append('to_date', toDate);
-        
+
         if (competitionId) {
             url.searchParams.append('competition_id', competitionId);
         }
-        
+
         // Redirigir a la nueva URL
         window.location.href = url.toString();
     }

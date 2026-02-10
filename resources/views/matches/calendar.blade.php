@@ -21,10 +21,19 @@
         />
 
         {{-- FILTROS Y CONTROLES --}}
-        <x-matches.calendar-filters 
-            :competitions="$competitions" 
+        <x-matches.calendar-filters
+            :competitions="$competitions"
             :selectedCompetitionId="$selectedCompetitionId ?? null"
         />
+
+        {{-- PARTIDOS DE HOY (si hay) --}}
+        @if(!empty($todaysMatches) || $featuredMatch)
+            <x-matches.todays-matches
+                :matches="$todaysMatches"
+                :is-dark="$isDark"
+                :featured-match="$featuredMatch"
+            />
+        @endif
 
         {{-- SPINNER DE CARGA --}}
         <div id="loadingSpinner" style="display: none; text-align: center; padding: 60px 20px;">
@@ -39,9 +48,9 @@
             </div>
 
             @forelse($matchesByDate as $date => $matches)
-                <x-matches.calendar-day 
-                    :date="$date" 
-                    :matches="$matches" 
+                <x-matches.calendar-day
+                    :date="$date"
+                    :matches="$matches"
                 />
             @empty
                 <div style="text-align: center; padding: 40px 20px; color: #999;">
@@ -52,17 +61,14 @@
             @endforelse
         </div>
 
-        {{-- ESTADÍSTICAS --}}
-        @if($statistics)
-            <x-matches.calendar-stats :stats="$statistics" />
-        @endif
+
 
         {{-- NAVEGACIÓN INFERIOR --}}
         <x-layout.bottom-navigation active-item="partidos" />
-        
+
         {{-- MODAL DE GRUPOS --}}
         <x-matches.match-groups-modal :match="null" :is-dark="$isDark" />
-        
+
         {{-- MODAL DE DETALLES --}}
         <x-matches.match-details-modal :is-dark="$isDark" />
     </div>

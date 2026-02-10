@@ -27,11 +27,39 @@ class CompetitionSeeder extends Seeder
                 'name' => 'Champions League',
                 'type' => 'champions',
                 'description' => 'Liga de campeones de Europa'
-            ]
+            ],
+            [
+                'name' => 'Serie A',
+                'type' => 'serie-a',
+                'description' => 'Liga italiana de fútbol'
+            ],
+            [
+                'name' => 'Bundesliga',
+                'type' => 'bundesliga',
+                'description' => 'Liga alemana de fútbol'
+            ],
+            [
+                'name' => 'FA Cup',
+                'type' => 'fa-cup',
+                'description' => 'Copa de Inglaterra'
+            ],
+            [
+                'name' => 'League Cup',
+                'type' => 'league-cup',
+                'description' => 'Copa de la Liga Inglesa'
+            ],
+            [
+                'name' => 'Copa del Rey',
+                'type' => 'copa-del-rey',
+                'description' => 'Copa de España'
+            ],
         ];
 
         foreach ($competitions as $competition) {
-            Competition::create($competition);
+            Competition::firstOrCreate(
+                ['type' => $competition['type']],
+                $competition
+            );
         }
     }
 }

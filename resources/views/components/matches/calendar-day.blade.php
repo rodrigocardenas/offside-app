@@ -4,7 +4,7 @@
             @php
                 $date = \Carbon\Carbon::parse($date);
                 $today = \Carbon\Carbon::today();
-                
+
                 if ($date->isToday()) {
                     echo '<span class="day-badge today">HOY</span>';
                 } elseif ($date->isTomorrow()) {
@@ -15,7 +15,20 @@
             @endphp
         </span>
         <span class="day-name">
-            {{ $date ? \Carbon\Carbon::parse($date)->format('l') : '' }}
+            @php
+                $locale = app()->getLocale();
+                $date = \Carbon\Carbon::parse($date);
+
+                // Array de nombres de días traducidos
+                $dayNames = [
+                    'es' => ['Monday' => 'Lunes', 'Tuesday' => 'Martes', 'Wednesday' => 'Miércoles', 'Thursday' => 'Jueves', 'Friday' => 'Viernes', 'Saturday' => 'Sábado', 'Sunday' => 'Domingo'],
+                    'en' => ['Monday' => 'Monday', 'Tuesday' => 'Tuesday', 'Wednesday' => 'Wednesday', 'Thursday' => 'Thursday', 'Friday' => 'Friday', 'Saturday' => 'Saturday', 'Sunday' => 'Sunday']
+                ];
+
+                $dayName = $date->format('l');
+                $translatedName = $dayNames[$locale][$dayName] ?? $dayName;
+                echo $translatedName;
+            @endphp
         </span>
     </div>
 

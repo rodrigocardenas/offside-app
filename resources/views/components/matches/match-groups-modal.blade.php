@@ -68,7 +68,7 @@
                 <p style="color: {{ $textSecondary }}; font-size: 13px; margin: 0 0 24px 0;">{{ __('views.groups.no_groups_description') }}</p>
                 <a id="createGroupBtn" href="#" style="display: inline-block; padding: 12px 24px; background: {{ $accentColor }}; color: #000; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s ease;"
                    onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                    <i class="fas fa-plus" style="margin-right: 6px;"></i> {{ __('views.groups.create_group') }}
+                    <i class="fas fa-plus" style="margin-right: 6px;"></i> {{ __('views.groups.create_group_button') }}
                 </a>
             </div>
 

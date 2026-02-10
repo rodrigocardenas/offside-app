@@ -144,13 +144,8 @@ class MatchesCalendarService
     ): Collection {
         $query = FootballMatch::with(['homeTeam', 'awayTeam', 'competition:id,name']);
 
-        // Buscar por match_date primero, y si no existen resultados, buscar por date
-        $dateField = 'match_date';
-        $hasMatchDate = FootballMatch::whereNotNull('match_date')->exists();
-
-        if (!$hasMatchDate) {
-            $dateField = 'date';
-        }
+        // El campo principal es 'date', no 'match_date'
+        $dateField = 'date';
 
         $query->whereBetween($dateField, [$fromDate . ' 00:00:00', $toDate . ' 23:59:59'])
             ->orderBy($dateField, 'asc');
@@ -191,8 +186,8 @@ class MatchesCalendarService
         $userTimezone = auth()->check() ? (auth()->user()->timezone ?? config('app.timezone')) : config('app.timezone');
 
         foreach ($matches as $match) {
-            // Usar match_date si existe, si no usar date
-            $dateField = $match->match_date ?? $match->date;
+            // El campo principal es 'date'
+            $dateField = $match->date;
 
             // Convertir a zona horaria del usuario ANTES de agrupar
             $matchDate = Carbon::parse($dateField)->setTimezone($userTimezone);
@@ -220,8 +215,8 @@ class MatchesCalendarService
      */
     protected function formatMatch(FootballMatch $match): array
     {
-        // Usar match_date si existe, si no usar date
-        $dateField = $match->match_date ?? $match->date;
+        // El campo principal es 'date'
+        $dateField = $match->date;
         $matchDate = Carbon::parse($dateField);
 
         // Convertir a zona horaria del usuario autenticado
@@ -621,5 +616,77 @@ class MatchesCalendarService
             'live' => $live,
             'finished' => $finished,
         ];
+    }
+
+    /**
+     * Obtiene un partido destacado basado en las preferencias del usuario
+     *
+     * Prioridad:
+     * 1. Un partido que incluya el equipo favorito del usuario
+     * 2. Un partido entre 2 equipos destacados (big match)
+     * 3. Un partido de un equipo destacado (cualquiera)
+     *
+     * @param mixed $user Usuario autenticado
+     * @return object|null Partido destacado o null
+     */
+    public function getFeaturedMatch($user = null)
+    {
+        if (!$user) {
+            $user = auth()->check() ? auth()->user() : null;
+        }
+
+        if (!$user) {
+            return null;
+        }
+
+        $today = Carbon::today();
+
+        // PRIORIDAD 1: Partido del equipo favorito del usuario
+        if ($user->favorite_club_id) {
+            $match = FootballMatch::with(['homeTeam', 'awayTeam', 'competition'])
+                ->where(function ($q) use ($user) {
+                    $q->where('home_team_id', $user->favorite_club_id)
+                      ->orWhere('away_team_id', $user->favorite_club_id);
+                })
+                ->where('date', '>=', $today)
+                ->orderBy('date', 'asc')
+                ->first();
+
+            if ($match) {
+                return $match;
+            }
+        }
+
+        // PRIORIDAD 2: Partido entre 2 equipos destacados (big match)
+        $match = FootballMatch::with(['homeTeam', 'awayTeam', 'competition'])
+            ->whereHas('homeTeam', function ($q) {
+                $q->where('is_featured', true);
+            })
+            ->whereHas('awayTeam', function ($q) {
+                $q->where('is_featured', true);
+            })
+            ->where('date', '>=', $today)
+            ->orderBy('date', 'asc')
+            ->first();
+
+        if ($match) {
+            return $match;
+        }
+
+        // PRIORIDAD 3: Cualquier partido de un equipo destacado
+        $match = FootballMatch::with(['homeTeam', 'awayTeam', 'competition'])
+            ->where(function ($q) {
+                $q->whereHas('homeTeam', function ($subQ) {
+                    $subQ->where('is_featured', true);
+                })
+                ->orWhereHas('awayTeam', function ($subQ) {
+                    $subQ->where('is_featured', true);
+                });
+            })
+            ->where('date', '>=', $today)
+            ->orderBy('date', 'asc')
+            ->first();
+
+        return $match;
     }
 }

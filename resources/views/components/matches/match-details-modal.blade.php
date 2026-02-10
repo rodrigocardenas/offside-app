@@ -33,7 +33,7 @@
 <!-- Modal de Detalles del Partido -->
 <div id="matchDetailsModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: {{ $overlayBg }}; display: none; align-items: center; justify-content: center; z-index: 9998; padding: 16px;">
     <div style="background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; border-radius: 16px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; box-shadow: {{ $surfaceShadow }};">
-        
+
         <!-- Header -->
         <div style="padding: 24px; border-bottom: 1px solid {{ $borderColor }}; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background: {{ $bgSecondary }}; z-index: 10;">
             <div style="flex: 1;">
@@ -49,7 +49,7 @@
 
         <!-- Body -->
         <div style="padding: 24px;">
-            
+
             <!-- Equipos -->
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding: 16px; background: {{ $bgTertiary }}; border-radius: 12px;">
                 <div style="flex: 1; text-align: center;">
@@ -76,7 +76,7 @@
 
             <!-- Información General -->
             <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-                
+
                 <!-- Competencia -->
                 <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: {{ $bgTertiary }}; border-radius: 8px;">
                     <i class="fas fa-trophy" style="color: {{ $accentColor }}; width: 20px; text-align: center;"></i>
@@ -145,113 +145,112 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const modal = document.getElementById('matchDetailsModal');
-        const closeBtn = document.getElementById('closeMatchDetailsModal');
+    // Definir funciones globales primero
+    const modal = document.getElementById('matchDetailsModal');
+    const closeBtn = document.getElementById('closeMatchDetailsModal');
 
+    window.closeMatchDetailsModal = function() {
+        modal.style.display = 'none';
+    };
+
+    window.openMatchDetailsModalFromButton = function(buttonElement) {
+        const matchDataJson = buttonElement.getAttribute('data-match');
+        const matchData = JSON.parse(matchDataJson);
+        window.openMatchDetailsModal(matchData);
+    };
+
+    window.openMatchDetailsModal = function(matchData) {
+        if (!matchData) return;
+
+        // Guardar datos actuales para el modal de predicción
+        window.currentMatchId = matchData.id;
+        window.currentMatchTeams = matchData.home_team.name + ' vs ' + matchData.away_team.name;
+        window.currentMatchCompetition = matchData.competition.name;
+
+        // Actualizar equipos
+        const homeTeamCrest = document.getElementById('detailsHomeTeamCrest');
+        const homeTeamCrestPlaceholder = document.querySelector('div[id="detailsHomeTeamCrestPlaceholder"]');
+        const awayTeamCrest = document.getElementById('detailsAwayTeamCrest');
+        const awayTeamCrestPlaceholder = document.querySelector('div[id="detailsAwayTeamCrestPlaceholder"]');
+
+        if (matchData.home_team.crest_url) {
+            homeTeamCrest.src = matchData.home_team.crest_url;
+            homeTeamCrest.style.display = 'block';
+            homeTeamCrestPlaceholder.style.display = 'none';
+        } else {
+            homeTeamCrest.style.display = 'none';
+            homeTeamCrestPlaceholder.style.display = 'flex';
+        }
+
+        if (matchData.away_team.crest_url) {
+            awayTeamCrest.src = matchData.away_team.crest_url;
+            awayTeamCrest.style.display = 'block';
+            awayTeamCrestPlaceholder.style.display = 'none';
+        } else {
+            awayTeamCrest.style.display = 'none';
+            awayTeamCrestPlaceholder.style.display = 'flex';
+        }
+
+        document.getElementById('detailsHomeTeamName').textContent = matchData.home_team.name;
+        document.getElementById('detailsAwayTeamName').textContent = matchData.away_team.name;
+
+        // Actualizar score
+        const isFinished = matchData.status === 'Finished' || matchData.status === 'Match Finished' || matchData.status === 'FINISHED';
+        if (isFinished && matchData.score.home !== null && matchData.score.away !== null) {
+            document.getElementById('detailsScore').textContent = matchData.score.home + ' - ' + matchData.score.away;
+            document.getElementById('detailsStatus').textContent = 'Finalizado';
+        } else {
+            document.getElementById('detailsScore').textContent = 'vs';
+            document.getElementById('detailsStatus').textContent = matchData.kick_off_time || '--:--';
+        }
+
+        // Actualizar información general
+        document.getElementById('detailsCompetition').textContent = matchData.competition.name;
+        document.getElementById('detailsTime').textContent = matchData.kick_off_time || '--:--';
+        document.getElementById('detailsMatchday').textContent = matchData.stage || '-';
+
+        // Mostrar/ocultar secciones opcionales
+        const stadiumSection = document.getElementById('stadiumSection');
+        const refereeSection = document.getElementById('refereeSection');
+
+        if (matchData.stadium) {
+            document.getElementById('detailsStadium').textContent = matchData.stadium;
+            stadiumSection.style.display = 'flex';
+        } else {
+            stadiumSection.style.display = 'none';
+        }
+
+        if (matchData.referee) {
+            document.getElementById('detailsReferee').textContent = matchData.referee;
+            refereeSection.style.display = 'flex';
+        } else {
+            refereeSection.style.display = 'none';
+        }
+
+        // Mostrar/ocultar botón predecir según estado
+        const predictBtn = document.getElementById('detailsPredictBtn');
+        if (isFinished) {
+            predictBtn.style.display = 'none';
+        } else {
+            predictBtn.style.display = 'block';
+        }
+
+        // Abrir modal
+        modal.style.display = 'flex';
+    };
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
         if (closeBtn) {
-            closeBtn.addEventListener('click', closeMatchDetailsModal);
+            closeBtn.addEventListener('click', window.closeMatchDetailsModal);
         }
 
         // Close modal when clicking outside
         window.addEventListener('click', (event) => {
             if (event.target === modal) {
-                closeMatchDetailsModal();
+                window.closeMatchDetailsModal();
             }
         });
-
-        // Expose close function globally
-        window.closeMatchDetailsModal = function() {
-            modal.style.display = 'none';
-        };
-
-        // Expose function to open modal from button with data attribute
-        window.openMatchDetailsModalFromButton = function(buttonElement) {
-            const matchDataJson = buttonElement.getAttribute('data-match');
-            const matchData = JSON.parse(matchDataJson);
-            window.openMatchDetailsModal(matchData);
-        };
-
-        // Expose open function globally
-        window.openMatchDetailsModal = function(matchData) {
-            if (!matchData) return;
-
-            // Guardar datos actuales para el modal de predicción
-            window.currentMatchId = matchData.id;
-            window.currentMatchTeams = matchData.home_team.name + ' vs ' + matchData.away_team.name;
-            window.currentMatchCompetition = matchData.competition.name;
-
-            // Actualizar equipos
-            const homeTeamCrest = document.getElementById('detailsHomeTeamCrest');
-            const homeTeamCrestPlaceholder = document.querySelector('div[id="detailsHomeTeamCrestPlaceholder"]');
-            const awayTeamCrest = document.getElementById('detailsAwayTeamCrest');
-            const awayTeamCrestPlaceholder = document.querySelector('div[id="detailsAwayTeamCrestPlaceholder"]');
-
-            if (matchData.home_team.crest_url) {
-                homeTeamCrest.src = matchData.home_team.crest_url;
-                homeTeamCrest.style.display = 'block';
-                homeTeamCrestPlaceholder.style.display = 'none';
-            } else {
-                homeTeamCrest.style.display = 'none';
-                homeTeamCrestPlaceholder.style.display = 'flex';
-            }
-
-            if (matchData.away_team.crest_url) {
-                awayTeamCrest.src = matchData.away_team.crest_url;
-                awayTeamCrest.style.display = 'block';
-                awayTeamCrestPlaceholder.style.display = 'none';
-            } else {
-                awayTeamCrest.style.display = 'none';
-                awayTeamCrestPlaceholder.style.display = 'flex';
-            }
-
-            document.getElementById('detailsHomeTeamName').textContent = matchData.home_team.name;
-            document.getElementById('detailsAwayTeamName').textContent = matchData.away_team.name;
-
-            // Actualizar score
-            const isFinished = matchData.status === 'Finished' || matchData.status === 'Match Finished';
-            if (isFinished && matchData.score.home !== null && matchData.score.away !== null) {
-                document.getElementById('detailsScore').textContent = matchData.score.home + ' - ' + matchData.score.away;
-                document.getElementById('detailsStatus').textContent = 'Finalizado';
-            } else {
-                document.getElementById('detailsScore').textContent = 'vs';
-                document.getElementById('detailsStatus').textContent = matchData.kick_off_time;
-            }
-
-            // Actualizar información general
-            document.getElementById('detailsCompetition').textContent = matchData.competition.name;
-            document.getElementById('detailsTime').textContent = matchData.kick_off_time;
-            document.getElementById('detailsMatchday').textContent = matchData.stage || '-';
-
-            // Mostrar/ocultar secciones opcionales
-            const stadiumSection = document.getElementById('stadiumSection');
-            const refereeSection = document.getElementById('refereeSection');
-
-            if (matchData.stadium) {
-                document.getElementById('detailsStadium').textContent = matchData.stadium;
-                stadiumSection.style.display = 'flex';
-            } else {
-                stadiumSection.style.display = 'none';
-            }
-
-            if (matchData.referee) {
-                document.getElementById('detailsReferee').textContent = matchData.referee;
-                refereeSection.style.display = 'flex';
-            } else {
-                refereeSection.style.display = 'none';
-            }
-
-            // Mostrar/ocultar botón predecir según estado
-            const predictBtn = document.getElementById('detailsPredictBtn');
-            if (isFinished) {
-                predictBtn.style.display = 'none';
-            } else {
-                predictBtn.style.display = 'block';
-            }
-
-            // Abrir modal
-            modal.style.display = 'flex';
-        };
     });
 </script>
 

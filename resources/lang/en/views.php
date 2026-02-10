@@ -95,6 +95,7 @@ return [
         'points_earned' => '+{points} points',
         'incorrect_answer' => 'Incorrect Answer',
         'calculating' => 'Calculating...',
+        'next' => 'Next',
     ],
     'questions' => [
         'title' => 'Questions',
