@@ -136,7 +136,7 @@ class QuestionController extends Controller
             [
                 'question_option_id' => intval($request->question_option_id),
                 'is_correct' => $question->type === 'social' ? true : null,
-                'points_earned' => $question->type === 'social' ? 0 : 0,
+                'points_earned' => $question->type === 'social' ? 50 : 0,
                 'category' => $question->type,
             ]
         );

@@ -157,7 +157,15 @@ trait HandlesQuestions
             $this->setQuestionModificationStatus($question);
         });
 
-        return $questions->unique('id')->take(17);
+        // Ordenar: preguntas destacadas primero, luego el resto
+        $sorted = $questions
+            ->sortByDesc(function ($q) {
+                return ($q->is_featured ?? false) ? 1 : 0;
+            })
+            ->unique('id')
+            ->take(17);
+
+        return $sorted;
     }
 
     private function setQuestionModificationStatus($question)
@@ -338,7 +346,8 @@ trait HandlesQuestions
                 'group_id' => $group->id,
                 'match_id' => $match->id,
                 'available_until' => $availableUntil,
-                'points' => $template->type === 'predictive' ? 300 : 0,
+                'points' => $template->type === 'predictive' ? ($match->is_featured ? 600 : 300) : 0,
+                'is_featured' => $match->is_featured ?? false,
                 'options' => $options,
                 'template_question_id' => $template->id ?? null,
             ];
@@ -363,7 +372,8 @@ trait HandlesQuestions
                 'group_id' => $questionData['group_id'],
                 'match_id' => $questionData['match_id'],
                 'available_until' => $availableUntil,
-                'points' => $template->type === 'predictive' ? 300 : 0,
+                'points' => $template->type === 'predictive' ? ($match->is_featured ? 600 : 300) : 0,
+                'is_featured' => $match->is_featured ?? false,
                 'template_question_id' => $questionData['template_question_id']
             ]);
 

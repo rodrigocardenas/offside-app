@@ -44,17 +44,25 @@
                     $userHasAnswered = $question->answers->firstWhere('user_id', auth()->id());
                 @endphp
                 <!-- Prediction Section (Similar to HTML design) -->
-                <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" id="question{{ $question->id }}" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px; {{ $shouldDim ? 'opacity-60;' : '' }}">
+                <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" id="question{{ $question->id }}" style="background: {{ $componentsBackground }}; border-color: {{ ($question->is_featured ?? false) ? $accentColor : $borderColor }}; border-width: {{ ($question->is_featured ?? false) ? '2px' : '1px' }}; min-width: 300px; {{ $shouldDim ? 'opacity-60;' : '' }}">
 
                 <!-- Prediction Header -->
                 <div class="text-center mb-5">
                     <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3" style="background: {{ $accentColor }}; color: #000;">
-                        {{ __('views.groups.prediction_of_the_day') }}
+                        @if($question->is_featured ?? false)
+                            ⭐ {{ __('views.groups.prediction_of_the_day') }}
+                        @else
+                            {{ __('views.groups.prediction_of_the_day') }}
+                        @endif
                     </div>
                     <div class="text-xs mb-4" style="color: {{ $textSecondary }};">
                         <i class="fas fa-circle" style="color: {{ $accentColor }}; font-size: 3px;"></i>
                         {{ $question->football_match?->competition_name }} • {{ __('views.groups.matchday') }} {{ $question->football_match->matchday ?? 'TBD' }}
-
+                        @if($question->is_featured ?? false)
+                            <span style="color: {{ $accentColor }}; font-weight: bold; margin-left: 4px;">• 600 pts</span>
+                        @else
+                            <span style="color: {{ $textSecondary }}; margin-left: 4px;">• 300 pts</span>
+                        @endif
                     </div>
                 </div>
 
