@@ -17,6 +17,19 @@ class Competition extends Model
         'crest_url',
     ];
 
+    // link competition to league column in matches table
+    public const LEAGUE_MAPPING = [
+        1 => 'PD',
+        2 => 'PL',
+        3 => 'CL',
+        4 => 'SA',
+    ];
+
+    public function getLeagueCodeAttribute()
+    {
+        return self::LEAGUE_MAPPING[$this->id] ?? null;
+    }
+
     public function groups()
     {
         return $this->hasMany(Group::class);

@@ -30,7 +30,9 @@ class UpdateFootballData extends Command
                 'la-liga' => 'PD',
                 'premier-league' => 'PL',
                 'champions-league' => 'CL',
-                'serie-a' => 'SA'
+                'serie-a' => 'SA',
+                'copa-del-rey' => 'CDR',
+                'league-cup' => 'LC'
             ];
 
             $competitionCode = $competitionMap[$league] ?? $league;
@@ -106,6 +108,8 @@ class UpdateFootballData extends Command
 
         $saved = 0;
 
+        $competitions = Competition::get()->toBase();
+
         foreach ($matches as $match) {
             try {
                 // En api-sports.io, los equipos están en teams.home y teams.away
@@ -139,6 +143,7 @@ class UpdateFootballData extends Command
                         'away_team_score' => $match['goals']['away'] ?? null,
                         'matchday' => $match['league']['round'] ? preg_replace('/\D/', '', $match['league']['round']) : null,
                         'league' => $competitionCode,
+                        'competition_id' => $competitions->where('league_code', $competitionCode)->first()->id ?? null,
                     ]
                 );
 
