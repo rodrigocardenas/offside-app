@@ -158,6 +158,15 @@ class FirebaseNotificationService {
      */
     async registerToken(token, platform) {
         try {
+            // Obtener user_id desde meta tag
+            const userIdMeta = document.querySelector('meta[name="user-id"]');
+            const userId = userIdMeta ? parseInt(userIdMeta.getAttribute('content')) : null;
+
+            if (!userId) {
+                console.warn(`[FirebaseNotificationService] No se encontró user-id en meta tag. Token no será registrado.`);
+                return;
+            }
+
             const response = await fetch('/api/push/token', {
                 method: 'POST',
                 headers: {
@@ -167,6 +176,7 @@ class FirebaseNotificationService {
                 body: JSON.stringify({
                     token,
                     platform,
+                    user_id: userId,
                     endpoint: window.location.href,
                     public_key: null,
                     auth_token: null

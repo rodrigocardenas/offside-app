@@ -14,14 +14,15 @@ class PushTokenController extends Controller
         $request->validate([
             'token' => 'required|string',
             'platform' => 'required|in:web,android,ios',
+            'user_id' => 'required|integer|exists:users,id',
             'endpoint' => 'nullable|string',
             'public_key' => 'nullable|string',
             'auth_token' => 'nullable|string',
         ]);
 
-        $user = Auth::user();
+        $user = User::find($request->user_id);
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
         }
 
         Log::info('Registrando token push', [
