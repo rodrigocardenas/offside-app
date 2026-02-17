@@ -64,6 +64,9 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     sudo -u www-data git reset --hard HEAD || true
     sudo -u www-data git clean -fd || true
     sudo -u www-data git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
+    
+    echo "🔄 Reseteando directorios con cambios..."
+    sudo -u www-data git checkout -- public/ storage/ 2>/dev/null || true
     sudo -u www-data git reset --hard HEAD || true
 
     echo "📦 Instalando dependencias de Composer..."
