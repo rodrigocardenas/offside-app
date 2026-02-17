@@ -63,6 +63,9 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     sudo -u www-data git checkout -- . || true
     sudo -u www-data git clean -fd || true
 
+    echo "🔄 Actualizando código desde repositorio..."
+    sudo -u www-data git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
+
     # Mover archivo después de limpiar git
     echo "📦 Preparando assets..."
     sudo mv /tmp/build.tar.gz $REMOTE_PATH/
