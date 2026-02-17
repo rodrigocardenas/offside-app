@@ -54,19 +54,16 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     set -e
 
     cd $REMOTE_PATH
+    
     echo "🔧 Ajustando permisos previos..."
     sudo chown -R www-data:www-data . || true
     sudo chmod -R 775 storage bootstrap/cache public || true
     sudo chmod 755 bootstrap || true
 
-    echo "🔄 Limpiando estado de git..."
+    echo "🔄 Limpiando estado de git y actualizando..."
     sudo -u www-data git reset --hard HEAD || true
-    sudo -u www-data git clean -fd -x -e "storage/logs" -e "bootstrap/cache" -e "storage/app/public" || true
-
-    echo "🔄 Actualizando código desde repositorio..."
+    sudo -u www-data git clean -fd || true
     sudo -u www-data git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
-
-    echo "🔄 Asegurando estado limpio después del pull..."
     sudo -u www-data git reset --hard HEAD || true
 
     echo "📦 Instalando dependencias de Composer..."
