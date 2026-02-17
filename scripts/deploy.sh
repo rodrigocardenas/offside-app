@@ -118,7 +118,12 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "✨ Saliendo del modo mantenimiento..."
     sudo -u www-data php artisan up
 
-    echo "📣 Notificando despliegue exitoso..."
+    echo "� Reiniciando Horizon..."
+    sudo -u www-data php artisan horizon:terminate || true
+    sleep 3
+    sudo -u www-data php artisan horizon > /dev/null 2>&1 &
+
+    echo "�📣 Notificando despliegue exitoso..."
     sudo -u www-data php artisan deployment:notify success --branch=$REQUIRED_BRANCH --env=production --channel=deployments --initiator="$DEPLOY_INITIATOR" --commit="$COMMIT_SHA" --summary="$COMMIT_MESSAGE"
 
     echo "✅ Servidor actualizado exitosamente."
