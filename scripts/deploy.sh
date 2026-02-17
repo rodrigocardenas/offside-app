@@ -54,7 +54,7 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     set -e
 
     cd $REMOTE_PATH
-    
+
     echo "🔧 Ajustando permisos previos..."
     sudo chown -R www-data:www-data . || true
     sudo chmod -R 775 storage bootstrap/cache public || true
@@ -67,13 +67,19 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     sudo -u www-data git reset --hard HEAD || true
     sudo -u www-data git clean -fd || true
     sudo -u www-data git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
-    
+
     echo "🔄 Reseteando directorios con cambios..."
     sudo -u www-data git checkout -- public/ storage/ 2>/dev/null || true
     sudo -u www-data git reset --hard HEAD || true
 
-    echo "📦 Instalando dependencias de Composer..."
-    sudo -u www-data composer install --no-interaction --optimize-autoloader --no-dev || { echo "❌ Error en composer install"; exit 1; }
+    echo "📦 Verificando dependencias de Composer..."
+    # Verificar si hay cambios en composer.json o composer.lock
+    if git diff HEAD~1 HEAD --name-only | grep -qE 'composer\.(json|lock)'; then
+        echo "🔄 Cambios detectados en composer.json/lock. Instalando dependencias..."
+        sudo -u www-data composer install --no-interaction --optimize-autoloader --no-dev || { echo "❌ Error en composer install"; exit 1; }
+    else
+        echo "✓ Sin cambios en dependencias. Skipping composer install."
+    fi
 
     # Mover archivo después de limpiar git
     echo "📦 Preparando assets..."
