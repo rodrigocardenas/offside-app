@@ -8,6 +8,7 @@
 .env
 .env.backup
 .env.production
+.env.local
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -22,4 +23,11 @@ storage/app/firebase/firebase_credentials.json
 storage/framework/sessions/
 /bootstrap/cache/
 /storage/debugbar/
+/storage/logs/
+/storage/app/public/
+/storage/*.json
+.DS_Store
+composer.lock
+package-lock.json
+
 
