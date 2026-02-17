@@ -50,6 +50,7 @@
 
     <!-- Component Styles (DESPUÉS de Tailwind para que tenga prioridad) -->
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/toasts.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- Pull-to-Refresh (solo en mobile/Capacitor) -->

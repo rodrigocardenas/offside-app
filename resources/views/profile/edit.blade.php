@@ -65,7 +65,7 @@
                         </label>
                         <input type="file" id="avatar" name="avatar" accept="image/*" style="display: none;">
                     </div>
-                    <p style="color: {{ $textColor }}; font-size: 13px; margin: 8px 0 0 0; padding: 0 16px; word-wrap: break-word; overflow-wrap: break-word;">{{ __('views.profile.change_photo') }}</p>
+                    <p style="color: {{ $textColor }}; font-size: 13px; margin: 8px 0 0 0; padding: 0 16px; word-wrap: break-word; overflow-wrap: break-word;">{{ __('views.profile_section.change_photo') }}</p>
                     @error('avatar')
                         <p style="color: #dc3545; font-size: 12px; margin-top: 8px;">{{ $message }}</p>
                     @enderror
@@ -75,7 +75,7 @@
                 <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
                     <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
                         <i class="fas fa-user" style="color: #00deb0; margin-right: 6px;"></i>
-                        {{ __('views.profile.name_label') }}
+                        {{ __('views.profile_section.name_label') }}
                     </label>
                     <input type="text" id="name" name="name"
                            value="{{ old('name', $user->name) }}"
@@ -89,7 +89,7 @@
                 <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
                     <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
                         <i class="fas fa-envelope" style="color: #00deb0; margin-right: 6px;"></i>
-                        {{ __('views.profile.email_label') }}
+                        {{ __('views.profile_section.email_label') }}
                     </label>
                     <input type="email" id="email" name="email"
                            value="{{ old('email', $user->email) }}"
@@ -103,11 +103,11 @@
                 <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
                     <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
                         <i class="fas fa-trophy" style="color: #00deb0; margin-right: 6px;"></i>
-                        {{ __('views.profile.favorite_competition') }}
+                        {{ __('views.profile_section.favorite_competition') }}
                     </label>
                     <select id="favorite_competition_id" name="favorite_competition_id"
                             style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; box-sizing: border-box; background: {{ $inputBg }};">
-                        <option value="">{{ __('views.profile.select_competition') }}</option>
+                        <option value="">{{ __('views.profile_section.select_competition') }}</option>
                         @foreach($competitions as $competition)
                             <option value="{{ $competition->id }}" {{ old('favorite_competition_id', $user->favorite_competition_id) == $competition->id ? 'selected' : '' }}>
                                 {{ $competition->name }}
@@ -123,11 +123,11 @@
                 <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
                     <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
                         <i class="fas fa-shield-alt" style="color: #00deb0; margin-right: 6px;"></i>
-                        {{ __('views.profile.favorite_club') }}
+                        {{ __('views.profile_section.favorite_club') }}
                     </label>
                     <select id="favorite_club_id" name="favorite_club_id"
                             style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; box-sizing: border-box; background: {{ $inputBg }};">
-                        <option value="">{{ __('views.profile.select_club') }}</option>
+                        <option value="">{{ __('views.profile_section.select_club') }}</option>
                         @foreach($clubs as $club)
                             <option value="{{ $club->id }}" {{ old('favorite_club_id', $user->favorite_club_id) == $club->id ? 'selected' : '' }}>
                                 {{ $club->name }}
@@ -143,11 +143,11 @@
                 <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }};">
                     <label style="display: block; font-weight: 600; color: {{ $labelColor }}; font-size: 14px; margin-bottom: 8px;">
                         <i class="fas fa-flag" style="color: #00deb0; margin-right: 6px;"></i>
-                        {{ __('views.profile.favorite_national_team') }}
+                        {{ __('views.profile_section.favorite_national_team') }}
                     </label>
                     <select id="favorite_national_team_id" name="favorite_national_team_id"
                             style="width: 100%; border: 1px solid {{ $cardBorder }}; border-radius: 8px; padding: 10px; font-size: 14px; color: {{ $labelColor }}; box-sizing: border-box; background: {{ $inputBg }};">
-                        <option value="">{{ __('views.profile.select_national_team') }}</option>
+                        <option value=""></option>
                         @foreach($nationalTeams as $team)
                             <option value="{{ $team->id }}" {{ old('favorite_national_team_id', $user->favorite_national_team_id) == $team->id ? 'selected' : '' }}>
                                 {{ $team->name }}
@@ -162,7 +162,7 @@
                 {{-- BOTÓN GUARDAR --}}
                 <button type="submit" style="width: 100%; padding: 12px 16px; background: linear-gradient(135deg, #17b796, #00deb0); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px;">
                     <i class="fas fa-save"></i>
-                    {{ __('views.profile.save_changes') }}
+                    {{ __('views.profile_section.save_changes') }}
                 </button>
             </form>
         </div>
@@ -278,7 +278,7 @@
             if (file) {
                 // Validar que sea una imagen
                 if (!file.type.startsWith('image/')) {
-                    alert('Por favor selecciona un archivo de imagen');
+                    window.showErrorToast('Por favor selecciona un archivo de imagen');
                     return;
                 }
 

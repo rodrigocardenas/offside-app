@@ -25,38 +25,6 @@
             alt-text="Offside Club"
         />
 
-        {{-- 1.5 MENSAJES DE SESIÓN --}}
-        @php
-            $themeMode = auth()->user()->theme_mode ?? 'light';
-            $isDarkMsg = $themeMode === 'dark';
-            $msgBg = $isDarkMsg ? '#1a524e' : '#d4edda';
-            $msgBgError = $isDarkMsg ? '#522a2a' : '#f8d7da';
-            $msgText = $isDarkMsg ? '#00deb0' : '#155724';
-            $msgTextError = $isDarkMsg ? '#f8d7da' : '#721c24';
-            $msgBorder = $isDarkMsg ? '#00deb0' : '#c3e6cb';
-            $msgBorderError = $isDarkMsg ? '#f8d7da' : '#f5c6cb';
-        @endphp
-
-        @if ($message = session('success'))
-            <div style="margin: 16px 16px 0 16px; padding: 16px; background: {{ $msgBg }}; border: 1px solid {{ $msgBorder }}; border-radius: 8px; color: {{ $msgText }}; font-size: 14px; display: flex; align-items: center; gap: 12px;">
-                <i class="fas fa-check-circle" style="font-size: 18px; flex-shrink: 0;"></i>
-                <span>{{ $message }}</span>
-                <button type="button" onclick="this.parentElement.style.display='none'" style="margin-left: auto; background: none; border: none; color: inherit; cursor: pointer; font-size: 16px; padding: 0;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        @endif
-
-        @if ($message = session('error'))
-            <div style="margin: 16px 16px 0 16px; padding: 16px; background: {{ $msgBgError }}; border: 1px solid {{ $msgBorderError }}; border-radius: 8px; color: {{ $msgTextError }}; font-size: 14px; display: flex; align-items: center; gap: 12px;">
-                <i class="fas fa-exclamation-circle" style="font-size: 18px; flex-shrink: 0;"></i>
-                <span>{{ $message }}</span>
-                <button type="button" onclick="this.parentElement.style.display='none'" style="margin-left: auto; background: none; border: none; color: inherit; cursor: pointer; font-size: 16px; padding: 0;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        @endif
-
         {{-- 2. BARRA DE ESTADÍSTICAS --}}
         <x-groups.stats-bar
             :streak="$userStreak"

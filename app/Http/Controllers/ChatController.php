@@ -65,7 +65,9 @@ class ChatController extends Controller
             ]);
         }
 
-        return back()->withFragment('chatForm');
+        return back()
+            ->with('success', __('controllers.chat.message_sent'))
+            ->withFragment('chatForm');
     }
 
     public function markAsRead(Group $group)

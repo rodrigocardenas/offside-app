@@ -199,7 +199,7 @@ return [
         'send_message' => 'Enviar',
         'save' => 'Guardar',
     ],
-    'profile' => [
+    'profile_section' => [
         'title' => 'Perfil de usuario',
         'view_profile' => 'Ver Perfil',
         'edit_profile' => 'Editar Perfil',

@@ -614,7 +614,8 @@ class GroupController extends Controller
                     'code' => $code
                 ]);
 
-                return redirect()->route('groups.show', $group);
+                return redirect()->route('groups.show', $group)
+                    ->with('info', __('controllers.groups.already_member'));
             }
 
             // Verificar si hay una solicitud reciente del mismo usuario para el mismo grupo

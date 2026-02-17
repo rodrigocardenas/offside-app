@@ -47,7 +47,7 @@
     </div>
     <!-- Botón flotante del chat -->
     @if (request()->route()->getName() !== 'groups.predictive-results')
-        <button id="chatToggle" style="position: fixed; bottom: 6rem; right: 2rem; background: {{ $accentColor }}; color: #000; border-radius: 50%; padding: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); transition: all 0.3s; display: flex; align-items: center; justify-content: center; z-index: 50; border: none; cursor: pointer;" class="hover:opacity-90">
+        <button id="chatToggle" style="position: fixed; bottom: 10rem; right: 0.3rem; background: {{ $accentColor }}; color: #000; border-radius: 50%; padding: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); transition: all 0.3s; display: flex; align-items: center; justify-content: center; z-index: 50; border: none; cursor: pointer;" class="hover:opacity-90">
             <svg xmlns="http://www.w3.org/2000/svg" style="height: 24px; width: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>

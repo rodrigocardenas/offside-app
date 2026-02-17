@@ -25,7 +25,7 @@
 
     <!-- Chat Messages Container (Scrollable) -->
     <div class="chat-messages" id="chatMessages"
-        style="display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow-y: auto; flex: 1; background: {{ $bgSecondary }}; border-bottom: 1px solid {{ $borderColor }};">
+        style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 120px 16px; overflow-y: auto; flex: 1; background: {{ $bgSecondary }}; border-bottom: 1px solid {{ $borderColor }};">
         @forelse($group->chatMessages->reverse() as $message)
             @php
                 $chatUser = $message->user;
@@ -378,11 +378,11 @@
                             }, 1200);
                         }
                     } else {
-                        alert('{{ __('views.groups.error_save') }}');
+                        window.showErrorToast('{{ __('views.groups.error_save') }}');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('{{ __('views.groups.error_save') }}');
+                    window.showErrorToast('{{ __('views.groups.error_save') }}');
                 }
             });
         }

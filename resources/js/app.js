@@ -1,6 +1,7 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
 import '@fortawesome/fontawesome-free/js/all';
+import './toast-helper';
 import './header-dropdown';
 import './navigation';
 import './android-back-button';

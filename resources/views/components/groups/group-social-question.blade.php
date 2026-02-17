@@ -22,7 +22,7 @@
     $userDisliked = isset($socialQuestion->templateQuestion) && $socialQuestion->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty();
 @endphp
 
-<div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm text-center"
+<div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm text-center" id="question{{ $socialQuestion->id }}"
      style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px;">
     <div class="text-center mb-5">
         <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-3"
@@ -187,3 +187,22 @@
         </button>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Si hay un fragment en la URL que coindica una pregunta específica
+        if (window.location.hash) {
+            const questionId = window.location.hash.substring(1); // Quitar el #
+            const questionElement = document.getElementById(questionId);
+
+            if (questionElement) {
+                // Esperar un poco para que el DOM esté completamente renderizado
+                setTimeout(() => {
+                    questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+    });
+</script>
+@endpush
