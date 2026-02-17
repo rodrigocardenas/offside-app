@@ -55,13 +55,13 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
 
     cd $REMOTE_PATH
     
-    # Configurar git para ignorar cambios de permisos
-    sudo -u www-data git config core.fileMode false
-    
     echo "🔧 Ajustando permisos previos..."
     sudo chown -R www-data:www-data . || true
     sudo chmod -R 775 storage bootstrap/cache public || true
     sudo chmod 755 bootstrap || true
+
+    # Configurar git para ignorar cambios de permisos
+    sudo -u www-data git config core.fileMode false
 
     echo "🔄 Limpiando estado de git y actualizando..."
     sudo -u www-data git reset --hard HEAD || true
