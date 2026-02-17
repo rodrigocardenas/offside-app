@@ -66,10 +66,10 @@ Route::middleware(['auth'])->group(function () {
     // Página principal (grupos)
     Route::get('/', [GroupController::class, 'index'])->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Calendario de Partidos
     Route::get('/matches/calendar', [MatchesController::class, 'view'])->name('matches.calendar');
-    
+
     // Grupos
     Route::resource('groups', GroupController::class);
     Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
@@ -102,6 +102,8 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/clubs/{competitionId}', [ProfileController::class, 'getClubsByCompetition'])->name('profile.clubs');
+    Route::get('/profile/national-teams', [ProfileController::class, 'getNationalTeams'])->name('profile.national-teams');
 
     // Rutas de configuración
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
@@ -165,35 +167,35 @@ Route::get('/avatars/{filename}', function ($filename) {
     if (!preg_match('/^[a-zA-Z0-9._-]{1,255}$/', $filename)) {
         abort(403, 'Invalid filename format');
     }
-    
+
     // 2. SAFE PATH CONSTRUCTION
     $basePath = storage_path('app/public/avatars');
     $path = $basePath . DIRECTORY_SEPARATOR . $filename;
-    
+
     // 3. PATH VALIDATION: Ensure path is within avatars directory
     // This prevents directory traversal even if filename validation fails
     $realPath = realpath($path);
     $realBasePath = realpath($basePath);
-    
+
     if (!$realPath || !$realBasePath || strpos($realPath, $realBasePath) !== 0) {
         abort(403, 'Access denied');
     }
-    
+
     // 4. FILE EXISTENCE CHECK
     if (!file_exists($realPath) || !is_file($realPath)) {
         abort(404, 'Avatar not found');
     }
-    
+
     // 5. FILE TYPE VALIDATION (optional but recommended)
     $allowed_mimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     $mime = mime_content_type($realPath);
     if (!in_array($mime, $allowed_mimes)) {
         abort(403, 'Invalid file type');
     }
-    
+
     // 6. SAFE FILE DELIVERY
     $file = file_get_contents($realPath);
-    
+
     return response($file, 200)
         ->header('Content-Type', $mime)
         ->header('Cache-Control', 'public, max-age=31536000')
@@ -220,7 +222,7 @@ Route::middleware('auth')->post('/timezone/sync', function (\Illuminate\Http\Req
 
     $user = $request->user();
     $oldTimezone = $user->timezone;
-    
+
     $updated = $user->update([
         'timezone' => $request->timezone,
     ]);

@@ -21,16 +21,22 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
-        $competitions = Competition::all();
+        $competitions = Competition::orderBy('name')->get();
 
-        // Si el usuario tiene una competencia favorita, solo mostramos los clubes de esa competencia
+        // Load clubs for the selected competition
+        $clubs = collect();
         if ($user->favorite_competition_id) {
-            $clubs = Team::where('type', 'club')->get();
-        } else {
-            $clubs = collect(); // Lista vacía si no hay competencia seleccionada
+            $clubs = Team::where('type', 'club')
+                ->whereHas('competitions', function ($query) use ($user) {
+                    $query->where('competitions.id', $user->favorite_competition_id);
+                })
+                ->orderBy('name')
+                ->get();
         }
 
-        $nationalTeams = Team::where('type', 'national')->get();
+        $nationalTeams = Team::where('type', 'national')
+            ->orderBy('name')
+            ->get();
 
         return view('profile.edit', compact('user', 'competitions', 'clubs', 'nationalTeams'));
     }
@@ -136,5 +142,32 @@ class ProfileController extends Controller
         }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated')->with('success', $message);
+    }
+
+    /**
+     * Get clubs by competition
+     */
+    public function getClubsByCompetition($competitionId)
+    {
+        $clubs = Team::where('type', 'club')
+            ->whereHas('competitions', function ($query) use ($competitionId) {
+                $query->where('competitions.id', $competitionId);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json($clubs);
+    }
+
+    /**
+     * Get national teams
+     */
+    public function getNationalTeams()
+    {
+        $nationalTeams = Team::where('type', 'national')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return response()->json($nationalTeams);
     }
 }
