@@ -69,6 +69,9 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "🔄 Asegurando estado limpio después del pull..."
     sudo -u www-data git reset --hard HEAD || true
 
+    echo "📦 Instalando dependencias de Composer..."
+    sudo -u www-data composer install --no-interaction --optimize-autoloader --no-dev || { echo "❌ Error en composer install"; exit 1; }
+
     # Mover archivo después de limpiar git
     echo "📦 Preparando assets..."
     sudo mv /tmp/build.tar.gz $REMOTE_PATH/
