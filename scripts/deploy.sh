@@ -59,12 +59,15 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     sudo chmod -R 775 storage bootstrap/cache public || true
     sudo chmod 755 bootstrap || true
 
-    echo "🔄 Descartando cambios locales sin commitear..."
-    sudo -u www-data git checkout -- . || true
-    sudo -u www-data git clean -fd || true
+    echo "🔄 Limpiando estado de git..."
+    sudo -u www-data git reset --hard HEAD || true
+    sudo -u www-data git clean -fd -x -e "storage/logs" -e "bootstrap/cache" -e "storage/app/public" || true
 
     echo "🔄 Actualizando código desde repositorio..."
     sudo -u www-data git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
+
+    echo "🔄 Asegurando estado limpio después del pull..."
+    sudo -u www-data git reset --hard HEAD || true
 
     # Mover archivo después de limpiar git
     echo "📦 Preparando assets..."
