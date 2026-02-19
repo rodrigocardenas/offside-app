@@ -125,8 +125,19 @@
 
     @stack('modals')
 
-    <!-- Firebase Cloud Messaging Initialization (PASO 10) -->
-    @include('components.firebase-messaging-init')
+    <!-- Firebase Cloud Messaging Scripts (PASO 10) -->
+    @auth
+    <!-- Scripts sin defer - se cargan inmediatamente -->
+    <script src="{{ asset('js/firebase-messaging-native.js') }}"></script>
+    <script src="{{ asset('js/permission-service.js') }}"></script>
+    <script src="{{ asset('js/token-service.js') }}"></script>
+    <script>
+        // Verificar que los servicios están disponibles
+        console.log('🔍 Verificando servicios Firebase...');
+        console.log('initializePushNotifications:', typeof window.initializePushNotifications);
+        console.log('getPushNotificationState:', typeof window.getPushNotificationState);
+    </script>
+    @endauth
 
     <!-- Debug Widget (solo en local) -->
     @if(app()->environment('local'))
