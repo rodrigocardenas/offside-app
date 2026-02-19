@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Colores de la aplicación Offside Club
+  
+  Incluye colores para:
+  - Notificaciones push (notification_color)
+  - Tema de la aplicación
+  
+  PASO 8: Configuración de Firebase Cloud Messaging
+-->
+<resources>
+    <!-- Color primario de la aplicación -->
+    <color name="primary">#1F77D2</color>
+    <!-- Color de acento -->
+    <color name="accent">#FF6B35</color>
+    <!-- Color para notificaciones push -->
+    <!-- Android usará este color como tinte para el ícono de notificación -->
+    <color name="notification_color">#1F77D2</color>
+</resources>
