@@ -125,6 +125,9 @@
 
     @stack('modals')
 
+    <!-- Firebase Cloud Messaging Initialization (PASO 10) -->
+    @include('components.firebase-messaging-init')
+
     <!-- Debug Widget (solo en local) -->
     @if(app()->environment('local'))
         @include('components.timezone-debug-widget')
