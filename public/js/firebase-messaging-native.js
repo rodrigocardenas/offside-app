@@ -40,9 +40,11 @@ class NativeFirebaseMessagingService {
             return window.Capacitor.getPlatform();
         }
         
-        // Fallback: User Agent detection
-        if (/android/i.test(navigator.userAgent)) return 'android';
-        if (/iphone|ipad|ipod/i.test(navigator.userAgent)) return 'ios';
+        // Fallback: User Agent detection (only if navigator exists)
+        if (typeof navigator !== 'undefined' && navigator.userAgent) {
+            if (/android/i.test(navigator.userAgent)) return 'android';
+            if (/iphone|ipad|ipod/i.test(navigator.userAgent)) return 'ios';
+        }
         return 'web';
     }
 
