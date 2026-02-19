@@ -126,16 +126,21 @@
     @stack('modals')
 
     <!-- Firebase Cloud Messaging Scripts (PASO 10) -->
-    @auth
-    <!-- Scripts sin defer - se cargan inmediatamente -->
+    <!-- Scripts se cargan siempre, pero solo se inicializan si está autenticado -->
     <script src="{{ asset('js/firebase-messaging-native.js') }}"></script>
     <script src="{{ asset('js/permission-service.js') }}"></script>
     <script src="{{ asset('js/token-service.js') }}"></script>
+    
+    @auth
     <script>
-        // Verificar que los servicios están disponibles
-        console.log('🔍 Verificando servicios Firebase...');
-        console.log('initializePushNotifications:', typeof window.initializePushNotifications);
-        console.log('getPushNotificationState:', typeof window.getPushNotificationState);
+        // Inicializar servicios Firebase para usuarios autenticados
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Usuario autenticado - inicializando Firebase');
+            console.log('initializePushNotifications:', typeof window.initializePushNotifications);
+            if (typeof window.initializePushNotifications === 'function') {
+                window.initializePushNotifications();
+            }
+        });
     </script>
     @endauth
 
