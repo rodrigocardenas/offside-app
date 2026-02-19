@@ -126,6 +126,9 @@
     @stack('modals')
 
     <!-- Firebase Cloud Messaging Scripts (PASO 10) -->
+    <!-- Test Script Simplísimo (para debug) -->
+    <script src="{{ asset('js/firebase-test-simple.js') }}"></script>
+    
     <!-- Scripts se cargan siempre, pero solo se inicializan si está autenticado -->
     <script>
         console.log('🔍 PRE-LOAD: Verificando estado de funciones antes de cargar scripts');
