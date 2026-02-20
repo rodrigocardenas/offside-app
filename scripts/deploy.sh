@@ -2,16 +2,27 @@
 set -e
 
 # --- CONFIGURACIÓN ---
-SERVER_ALIAS="ubuntu@ec2-100-30-41-157.compute-1.amazonaws.com"
+SERVER_ALIAS="${DEPLOY_SERVER:-ubuntu@ec2-100-30-41-157.compute-1.amazonaws.com}"
 REMOTE_PATH="/var/www/html"
-SSH_KEY_PATH="$HOME/OneDrive/Documentos/aws/offside-new.pem"
+# SSH_KEY_PATH debe estar en variable de entorno para no exponer ruta en Git
+SSH_KEY_PATH="${SSH_KEY_PATH:-}"
 REQUIRED_BRANCH="main"
 DEPLOY_INITIATOR=$(whoami)
 COMMIT_SHA=$(git rev-parse --short HEAD)
 COMMIT_MESSAGE=$(git log -1 --pretty=%s | sed 's/"/\"/g')
+DEPLOY_TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+CLEAN_DUPLICATES="${CLEAN_DUPLICATES:-false}"
 
 
 echo "🔍 Validando entorno de despliegue..."
+
+# 0. Validar que existe SSH_KEY_PATH
+if [ -z "$SSH_KEY_PATH" ] || [ ! -f "$SSH_KEY_PATH" ]; then
+    echo "❌ ERROR: No se encontró SSH_KEY_PATH"
+    echo "   Configura: export SSH_KEY_PATH=/ruta/a/offside-new.pem"
+    echo "   O establece en archivo: ~/.offside-deploy.env"
+    exit 1
+fi
 
 # 1. Validar que estamos en la rama correcta
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -108,7 +119,25 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "🗄️ Aplicando migraciones..."
     sudo -u www-data php artisan migrate --force || true
 
-    echo "🔗 Verificando symlink de storage..."
+    echo "� Ejecutando comandos de seguridad..."
+    # Limpiar logs de seguridad antiguos (>30 días)
+    sudo -u www-data php artisan tinker --execute "
+      \$logPath = storage_path('logs/security.log');
+      if (file_exists(\$logPath) && time() - filemtime(\$logPath) > 2592000) {
+        file_put_contents(\$logPath, '');
+        echo 'Logs de seguridad limpiados.' . PHP_EOL;
+      }
+    " || true
+
+    # Limpiar usuarios duplicados (si CLEAN_DUPLICATES=true)
+    if [ "$CLEAN_DUPLICATES" = "true" ]; then
+        echo "🧹 Eliminando usuarios duplicados..."
+        sudo -u www-data php artisan users:clean-duplicates --delete || {
+            echo "⚠️  Aviso: No se lograron limpiar todos los duplicados"
+        }
+    fi
+
+    echo "�🔗 Verificando symlink de storage..."
     sudo -u www-data php artisan storage:link --force || {
         echo "⚠️  Creando symlink manualmente..."
         sudo rm -f $REMOTE_PATH/public/storage
@@ -131,4 +160,23 @@ EOF
 
 # 7. Limpieza local
 rm build.tar.gz
+
+# 8. Información de despliegue
+echo ""
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║                  ✅ DESPLIEGUE COMPLETADO                 ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo ""
+echo "📊 INFORMACIÓN DE DESPLIEGUE:"
+echo "   Servidor:     $SERVER_ALIAS"
+echo "   Rama:         $REQUIRED_BRANCH"
+echo "   Commit:       $COMMIT_SHA - $COMMIT_MESSAGE"
+echo "   Usuario:      $DEPLOY_INITIATOR"
+echo "   Timestamp:    $DEPLOY_TIMESTAMP"
+echo ""
+echo "🔗 Logs disponibles:"
+echo "   SSH:          ssh -i \$SSH_KEY_PATH $SERVER_ALIAS 'tail -f /var/log/nginx/error.log'"
+echo "   App:          ssh -i \$SSH_KEY_PATH $SERVER_ALIAS 'tail -f /var/www/html/storage/logs/laravel.log'"
+echo "   Seguridad:    ssh -i \$SSH_KEY_PATH $SERVER_ALIAS 'tail -f /var/www/html/storage/logs/security.log'"
+echo ""
 echo "🎉 ¡Todo listo!"
