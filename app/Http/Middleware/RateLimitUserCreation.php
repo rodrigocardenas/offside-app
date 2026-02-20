@@ -104,7 +104,7 @@ class RateLimitUserCreation
             $criticalAnomalies = array_filter($anomalies, fn($a) => $a['severity'] === 'CRITICAL');
             if (!empty($criticalAnomalies)) {
                 AnomalyDetectionService::blockIp($ip, 'CRITICAL anomaly detected');
-                
+
                 return response()->json([
                     'error' => 'Comportamiento sospechoso detectado. Acceso denegado.',
                     'retry_after' => 86400,

@@ -75,7 +75,7 @@ CAPA 4: LÓGICA DE LOGIN
 
 PASO 1: Verificar Implementación (REALIZADO ✓)
    $ bash tests/verify-security-setup.sh
-   
+
    Resultado:
    ✓ AnomalyDetectionService - Sintaxis OK
    ✓ RateLimitUserCreation - Sintaxis OK
@@ -87,13 +87,13 @@ PASO 1: Verificar Implementación (REALIZADO ✓)
 
 PASO 2: Iniciar Servidor (En Laragon)
    $ php artisan serve
-   
+
    Output esperado:
    INFO  Server running on http://127.0.0.1:8000
 
 PASO 3: Monitoreo en Tiempo Real (Nueva terminal)
    $ php artisan security:monitor
-   
+
    Output esperado:
    🔒 Monitor de Seguridad Iniciado
    📁 Archivo: storage/logs/security.log

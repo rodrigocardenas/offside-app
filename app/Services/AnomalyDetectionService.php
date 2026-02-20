@@ -84,11 +84,11 @@ class AnomalyDetectionService
         // - username_ABC123 (letra + números)
         // - username_123 (números al final)
         // - username_5436 (números largos)
-        
+
         if (preg_match('/_[A-Z0-9]{4,}$/', $username)) {
             return true;
         }
-        
+
         if (preg_match('/_\d{2,}$/', $username)) {
             return true;
         }
