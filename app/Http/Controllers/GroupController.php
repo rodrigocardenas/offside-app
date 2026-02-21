@@ -1221,7 +1221,9 @@ class GroupController extends Controller
     {
         $match = FootballMatch::findOrFail($matchId);
 
-        // Obtener grupos donde el usuario es miembro Y que tengan preguntas de este partido
+        // Obtener grupos donde:
+        // 1. El usuario es miembro
+        // 2. Haya una pregunta vigente (available_until > now) de este partido específico
         $groups = Group::where('competition_id', $match->competition_id)
             ->with(['users', 'competition'])
             ->withCount(['users as members_count'])
@@ -1229,9 +1231,10 @@ class GroupController extends Controller
             ->whereHas('users', function($q) {
                 $q->where('user_id', auth()->id());
             })
-            // Opcional: filtrar grupos que tengan preguntas de esta competencia
+            // Filtrar grupos que tengan preguntas vigentes de este partido específico
             ->whereHas('questions', function($q) use ($match) {
-                $q->where('competition_id', $match->competition_id);
+                $q->where('match_id', $match->id)
+                  ->where('available_until', '>', now());
             }, '>=', 1)
             ->orderBy('members_count', 'desc')
             ->get();
