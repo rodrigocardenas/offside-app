@@ -51,11 +51,11 @@ tar -czf build.tar.gz public/build
 ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << 'PRE_EOF'
     set -e
     # Asegurar que el directorio existe y tiene permisos correctos
-    sudo mkdir -p /var/www/html
-    sudo chown -R ubuntu:ubuntu /var/www/html 2>/dev/null || true
+    sudo -n mkdir -p /var/www/html
+    sudo -n chown -R ubuntu:ubuntu /var/www/html 2>/dev/null || true
     # Evitar chmod -R recursivo que consume mucho - usar chmod selectivo
-    sudo chmod 755 /var/www/html 2>/dev/null || true
-    sudo bash -c 'find /var/www/html -maxdepth 1 -type d -exec chmod 755 {} \; 2>/dev/null || true'
+    sudo -n chmod 755 /var/www/html 2>/dev/null || true
+    sudo -n bash -c 'find /var/www/html -maxdepth 1 -type d -exec chmod 755 {} \; 2>/dev/null || true'
 PRE_EOF
 
 # Subir el archivo
@@ -69,9 +69,9 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     cd $REMOTE_PATH
 
     echo "🔧 Ajustando permisos previos..."
-    sudo chown -R www-data:www-data . || true
+    sudo -n chown -R www-data:www-data . || true
     # Permisos selectivos para evitar timeouts
-    sudo bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
+    sudo -n bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     # Configurar git para ignorar cambios de permisos
     sudo -u www-data git config core.fileMode false
@@ -96,21 +96,21 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
 
     # Mover archivo después de limpiar git
     echo "📦 Preparando assets..."
-    sudo mv /tmp/build.tar.gz $REMOTE_PATH/
+    sudo -n mv /tmp/build.tar.gz $REMOTE_PATH/
 
     echo "🚧 Entrando en modo mantenimiento..."
     sudo -u www-data php artisan down --retry=60
 
     echo "🧹 Limpiando y extrayendo..."
-    sudo rm -rf public/build
-    sudo tar -xzf build.tar.gz
-    sudo rm build.tar.gz
+    sudo -n rm -rf public/build
+    sudo -n tar -xzf build.tar.gz
+    sudo -n rm build.tar.gz
 
     echo "🔧 Ajustando permisos y caché..."
-    sudo mkdir -p bootstrap/cache
-    sudo chown -R www-data:www-data . || true
+    sudo -n mkdir -p bootstrap/cache
+    sudo -n chown -R www-data:www-data . || true
     # Permisos selectivos para evitar timeouts
-    sudo bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
+    sudo -n bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     echo "📦 Ejecutando comandos de optimización..."
     sudo -u www-data php artisan config:clear || true
@@ -142,8 +142,8 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "�🔗 Verificando symlink de storage..."
     sudo -u www-data php artisan storage:link --force || {
         echo "⚠️  Creando symlink manualmente..."
-        sudo rm -f $REMOTE_PATH/public/storage
-        sudo ln -s ../storage/app/public $REMOTE_PATH/public/storage
+        sudo -n rm -f $REMOTE_PATH/public/storage
+        sudo -n ln -s ../storage/app/public $REMOTE_PATH/public/storage
     }
 
     echo "✨ Saliendo del modo mantenimiento..."
