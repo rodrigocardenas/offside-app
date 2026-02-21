@@ -1221,35 +1221,21 @@ class GroupController extends Controller
     {
         $match = FootballMatch::findOrFail($matchId);
 
-        // Buscar el match inverso (mismo partido pero con equipos invertidos)
-        // Esto ocurre porque algunos partidos están registrados dos veces en orientaciones diferentes
-        $inverseMatch = FootballMatch::where('competition_id', $match->competition_id)
-            ->where('home_team', $match->away_team)
-            ->where('away_team', $match->home_team)
-            ->where('id', '!=', $match->id)
-            ->first();
+        // Obtener los IDs de grupos que tengan preguntas vigentes para este match
+        // (sin filtrar por competition_id del grupo, ya que puede estar en otra competición)
+        $groupsWithQuestions = Question::where('match_id', $match->id)
+            ->where('available_until', '>', now())
+            ->pluck('group_id')
+            ->unique();
 
-        // Array de match IDs a buscar (el actual y el inverso si existe)
-        $matchIds = [$match->id];
-        if ($inverseMatch) {
-            $matchIds[] = $inverseMatch->id;
-        }
-
-        // Obtener grupos donde:
-        // 1. El usuario es miembro
-        // 2. Haya una pregunta vigente (available_until > now) para este partido (en cualquier orientación)
-        $groups = Group::where('competition_id', $match->competition_id)
+        // Obtener detalles de esos grupos donde el usuario es miembro
+        $groups = Group::whereIn('id', $groupsWithQuestions)
             ->with(['users', 'competition'])
             ->withCount(['users as members_count'])
             // Solo grupos donde el usuario es miembro
             ->whereHas('users', function($q) {
                 $q->where('user_id', auth()->id());
             })
-            // Filtrar grupos que tengan preguntas vigentes de este partido (en cualquier orientación)
-            ->whereHas('questions', function($q) use ($matchIds) {
-                $q->whereIn('match_id', $matchIds)
-                  ->where('available_until', '>', now());
-            }, '>=', 1)
             ->orderBy('members_count', 'desc')
             ->get();
 
