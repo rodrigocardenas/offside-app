@@ -52,8 +52,10 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << 'PRE_EOF'
     set -e
     # Asegurar que el directorio existe y tiene permisos correctos
     sudo mkdir -p /var/www/html
-    sudo chown -R $USER:$USER /var/www/html || sudo chown -R ubuntu:ubuntu /var/www/html
-    sudo chmod -R 755 /var/www/html
+    sudo chown -R ubuntu:ubuntu /var/www/html 2>/dev/null || true
+    # Evitar chmod -R recursivo que consume mucho - usar chmod selectivo
+    sudo chmod 755 /var/www/html 2>/dev/null || true
+    sudo bash -c 'find /var/www/html -maxdepth 1 -type d -exec chmod 755 {} \; 2>/dev/null || true'
 PRE_EOF
 
 # Subir el archivo
@@ -68,8 +70,8 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
 
     echo "🔧 Ajustando permisos previos..."
     sudo chown -R www-data:www-data . || true
-    sudo chmod -R 775 storage bootstrap/cache public || true
-    sudo chmod 755 bootstrap || true
+    # Permisos selectivos para evitar timeouts
+    sudo bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     # Configurar git para ignorar cambios de permisos
     sudo -u www-data git config core.fileMode false
@@ -107,8 +109,8 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "🔧 Ajustando permisos y caché..."
     sudo mkdir -p bootstrap/cache
     sudo chown -R www-data:www-data . || true
-    sudo chmod -R 775 storage bootstrap/cache public || true
-    sudo chmod 755 bootstrap || true
+    # Permisos selectivos para evitar timeouts
+    sudo bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     echo "📦 Ejecutando comandos de optimización..."
     sudo -u www-data php artisan config:clear || true
