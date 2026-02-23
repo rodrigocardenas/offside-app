@@ -361,12 +361,11 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // Encontrar primer gol
+        // Encontrar primer gol (excluyendo penales fallados)
         $firstGoalTeam = null;
         foreach ($events as $event) {
-            // ✅ ACTUALIZADO: Cambiar de 'GOAL' y remover check 'substitution'
-            // Los eventos ahora pueden tener formatos diferentes pero normalizados
-            if ($event['type'] === 'GOAL') {
+            // ✅ VALIDACIÓN MEJORADA: Usar isValidGoal() para excluir penales fallados
+            if ($this->isValidGoal($event)) {
                 $firstGoalTeam = $event['team'];
                 break;
             }
@@ -418,10 +417,11 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // Encontrar primer gol antes del umbral
+        // Encontrar primer gol antes del umbral (excluyendo penales fallados)
         $firstGoalTeamBeforeThreshold = null;
         foreach ($events as $event) {
-            if ($event['type'] !== 'GOAL') {
+            // ✅ VALIDACIÓN MEJORADA: Usar isValidGoal() para excluir penales fallados
+            if (!$this->isValidGoal($event)) {
                 continue;
             }
 
@@ -467,11 +467,11 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // Encontrar último gol
+        // Encontrar último gol (excluyendo penales fallados)
         $lastGoalTeam = null;
         foreach (array_reverse($events) as $event) {
-            // ✅ ACTUALIZADO: Cambiar de 'GOAL' y remover check 'substitution'
-            if ($event['type'] === 'GOAL') {
+            // ✅ VALIDACIÓN MEJORADA: Usar isValidGoal() para excluir penales fallados
+            if ($this->isValidGoal($event)) {
                 $lastGoalTeam = $event['team'];
                 break;
             }
@@ -1000,9 +1000,9 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // Buscar goles en los últimos 15 minutos (minuto >= 75)
+        // Buscar goles en los últimos 15 minutos (minuto >= 75, excluyendo penales fallados)
         $lateGoals = array_filter($events, fn($e) =>
-            $e['type'] === 'GOAL' && ($e['minute'] ?? 0) >= 75
+            $this->isValidGoal($e) && ($e['minute'] ?? 0) >= 75
         );
 
         if (empty($lateGoals)) {
@@ -1215,6 +1215,34 @@ class QuestionEvaluationService
         $cardType = strtoupper($event['card'] ?? $event['detail'] ?? '');
 
         return $cardType === strtoupper($expectedType);
+    }
+
+    /**
+     * Valida si un evento es un gol válido (excluye penales fallados y otros casos inválidos)
+     * 
+     * @param array $event El evento a validar
+     * @return bool true si es un gol válido, false si es inválido (ej: Missed Penalty)
+     */
+    private function isValidGoal(array $event): bool
+    {
+        // Verificar que sea del tipo GOAL (case-insensitive: 'GOAL', 'Goal', 'goal')
+        $type = strtoupper($event['type'] ?? '');
+        if ($type !== 'GOAL') {
+            return false;
+        }
+
+        // Excluir penales fallados
+        $detail = strtolower($event['detail'] ?? '');
+        if (stripos($detail, 'missed penalty') !== false) {
+            return false;
+        }
+
+        // Excluir otros casos inválidos potenciales
+        if (stripos($detail, 'missed') !== false && stripos($detail, 'penalty') !== false) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
