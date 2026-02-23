@@ -1,11 +1,15 @@
-{
-{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.offsideclub.app",
-    "sha256_cert_fingerprints": [
-      "67:65:54:7D:C9:41:E6:02:5E:62:32:AB:CA:E8:67:12:41:A1:2E:D0:23:B1:47:85:1E:2F:A1:5B:B5:79:67:BD"
-    ]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.offsideclub.app",
+      "sha256_cert_fingerprints": [
+        "4C:E2:1F:AC:0A:D6:E2:D7:CF:C1:1F:F8:F0:14:F1:C3:E6:65:86:D5:E6:83:31:5A:1A:3A:1C:1C:EC:A1:BF:27"
+      ]
+    }
   }
-}
+]
