@@ -74,22 +74,22 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     sudo -n bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     # Configurar git para ignorar cambios de permisos
-    sudo -u www-data git config core.fileMode false
+    sudo git config core.fileMode false
 
     echo "🔄 Limpiando estado de git y actualizando..."
-    sudo -u www-data git reset --hard HEAD || true
-    sudo -u www-data git clean -fd || true
-    sudo -u www-data git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
+    sudo git reset --hard HEAD || true
+    sudo git clean -fd || true
+    sudo git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
 
     echo "🔄 Reseteando directorios con cambios..."
-    sudo -u www-data git checkout -- public/ storage/ 2>/dev/null || true
-    sudo -u www-data git reset --hard HEAD || true
+    sudo git checkout -- public/ storage/ 2>/dev/null || true
+    sudo git reset --hard HEAD || true
 
     echo "📦 Verificando dependencias de Composer..."
     # Verificar si hay cambios en composer.json o composer.lock
     if git diff HEAD~1 HEAD --name-only | grep -qE 'composer\.(json|lock)'; then
         echo "🔄 Cambios detectados en composer.json/lock. Instalando dependencias..."
-        sudo -u www-data composer install --no-interaction --optimize-autoloader --no-dev || { echo "❌ Error en composer install"; exit 1; }
+        sudo composer install --no-interaction --optimize-autoloader --no-dev || { echo "❌ Error en composer install"; exit 1; }
     else
         echo "✓ Sin cambios en dependencias. Skipping composer install."
     fi
@@ -99,7 +99,7 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     sudo -n mv /tmp/build.tar.gz $REMOTE_PATH/
 
     echo "🚧 Entrando en modo mantenimiento..."
-    sudo -u www-data php artisan down --retry=60
+    sudo php artisan down --retry=60
 
     echo "🧹 Limpiando y extrayendo..."
     sudo -n rm -rf public/build
@@ -113,17 +113,17 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     sudo -n bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     echo "📦 Ejecutando comandos de optimización..."
-    sudo -u www-data php artisan config:clear || true
-    sudo -u www-data php artisan cache:clear || true
-    sudo -u www-data php artisan optimize
-    sudo -u www-data php artisan view:cache
+    sudo php artisan config:clear || true
+    sudo php artisan cache:clear || true
+    sudo php artisan optimize
+    sudo php artisan view:cache
 
     echo "🗄️ Aplicando migraciones..."
-    sudo -u www-data php artisan migrate --force || true
+    sudo php artisan migrate --force || true
 
     echo "� Ejecutando comandos de seguridad..."
     # Limpiar logs de seguridad antiguos (>30 días)
-    sudo -u www-data php artisan tinker --execute "
+    sudo php artisan tinker --execute "
       \$logPath = storage_path('logs/security.log');
       if (file_exists(\$logPath) && time() - filemtime(\$logPath) > 2592000) {
         file_put_contents(\$logPath, '');
@@ -134,28 +134,28 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     # Limpiar usuarios duplicados (si CLEAN_DUPLICATES=true)
     if [ "$CLEAN_DUPLICATES" = "true" ]; then
         echo "🧹 Eliminando usuarios duplicados..."
-        sudo -u www-data php artisan users:clean-duplicates --delete || {
+        sudo php artisan users:clean-duplicates --delete || {
             echo "⚠️  Aviso: No se lograron limpiar todos los duplicados"
         }
     fi
 
     echo "�🔗 Verificando symlink de storage..."
-    sudo -u www-data php artisan storage:link --force || {
+    sudo php artisan storage:link --force || {
         echo "⚠️  Creando symlink manualmente..."
         sudo -n rm -f $REMOTE_PATH/public/storage
         sudo -n ln -s ../storage/app/public $REMOTE_PATH/public/storage
     }
 
     echo "✨ Saliendo del modo mantenimiento..."
-    sudo -u www-data php artisan up
+    sudo php artisan up
 
-    echo "� Reiniciando Horizon..."
-    sudo -u www-data php artisan horizon:terminate || true
+    echo "🔄 Reiniciando Horizon..."
+    sudo php artisan horizon:terminate || true
     sleep 3
-    sudo -u www-data php artisan horizon > /dev/null 2>&1 &
+    sudo php artisan horizon > /dev/null 2>&1 &
 
-    echo "�📣 Notificando despliegue exitoso..."
-    sudo -u www-data php artisan deployment:notify success --branch=$REQUIRED_BRANCH --env=production --channel=deployments --initiator="$DEPLOY_INITIATOR" --commit="$COMMIT_SHA" --summary="$COMMIT_MESSAGE"
+    echo "📣 Notificando despliegue exitoso..."
+    sudo php artisan deployment:notify success --branch=$REQUIRED_BRANCH --env=production --channel=deployments --initiator="$DEPLOY_INITIATOR" --commit="$COMMIT_SHA" --summary="$COMMIT_MESSAGE"
 
     echo "✅ Servidor actualizado exitosamente."
 EOF
