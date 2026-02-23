@@ -47,8 +47,9 @@ npm run build
 # 4. Comprimir
 tar -czf build.tar.gz public/build
 
-# 5. Subir el archivo
-scp -i "$SSH_KEY_PATH" build.tar.gz $SERVER_ALIAS:/tmp/
+# 5. Subir el archivo directamente al servidor
+echo "Subiendo assets al servidor..."
+scp -i "$SSH_KEY_PATH" build.tar.gz $SERVER_ALIAS:$REMOTE_PATH/ || { echo "Error al subir build.tar.gz"; exit 1; }
 
 # 6. Operaciones en servidor
 ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
@@ -81,11 +82,7 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
         echo "✓ Sin cambios en dependencias. Skipping composer install."
     fi
 
-    # Mover archivo después de limpiar git
-    echo "📦 Preparando assets..."
-    mv /tmp/build.tar.gz $REMOTE_PATH/
-
-    echo "🚧 Entrando en modo mantenimiento..."
+    echo "Entrando en modo mantenimiento..."
     php artisan down --retry=60
 
     echo "🧹 Limpiando y extrayendo..."
