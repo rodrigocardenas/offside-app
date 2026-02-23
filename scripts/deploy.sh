@@ -47,18 +47,7 @@ npm run build
 # 4. Comprimir
 tar -czf build.tar.gz public/build
 
-# 5. Preparar servidor y subir
-ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << 'PRE_EOF'
-    set -e
-    # Asegurar que el directorio existe y tiene permisos correctos
-    sudo mkdir -p /var/www/html
-    sudo chown -R ubuntu:ubuntu /var/www/html 2>/dev/null || true
-    # Evitar chmod -R recursivo que consume mucho - usar chmod selectivo
-    sudo chmod 755 /var/www/html 2>/dev/null || true
-    sudo bash -c 'find /var/www/html -maxdepth 1 -type d -exec chmod 755 {} \; 2>/dev/null || true'
-PRE_EOF
-
-# Subir el archivo
+# 5. Subir el archivo
 scp -i "$SSH_KEY_PATH" build.tar.gz $SERVER_ALIAS:/tmp/
 
 # 6. Operaciones en servidor
@@ -69,61 +58,61 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     cd $REMOTE_PATH
 
     echo "🔧 Ajustando permisos previos..."
-    sudo chown -R www-data:www-data . || true
+    chown -R www-data:www-data . || true
     # Permisos selectivos para evitar timeouts
-    sudo bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
+    bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     # Configurar git para ignorar cambios de permisos
-    sudo git config core.fileMode false
+    git config core.fileMode false
 
     echo "🔄 Limpiando estado de git y actualizando..."
-    sudo git reset --hard HEAD || true
-    sudo git clean -fd || true
-    sudo git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
+    git reset --hard HEAD || true
+    git clean -fd || true
+    git pull origin $REQUIRED_BRANCH || { echo "❌ Error en git pull"; exit 1; }
 
     echo "🔄 Reseteando directorios con cambios..."
-    sudo git checkout -- public/ storage/ 2>/dev/null || true
-    sudo git reset --hard HEAD || true
+    git checkout -- public/ storage/ 2>/dev/null || true
+    git reset --hard HEAD || true
 
     echo "📦 Verificando dependencias de Composer..."
     # Verificar si hay cambios en composer.json o composer.lock
     if git diff HEAD~1 HEAD --name-only | grep -qE 'composer\.(json|lock)'; then
         echo "🔄 Cambios detectados en composer.json/lock. Instalando dependencias..."
-        sudo composer install --no-interaction --optimize-autoloader --no-dev || { echo "❌ Error en composer install"; exit 1; }
+        composer install --no-interaction --optimize-autoloader --no-dev || { echo "❌ Error en composer install"; exit 1; }
     else
         echo "✓ Sin cambios en dependencias. Skipping composer install."
     fi
 
     # Mover archivo después de limpiar git
     echo "📦 Preparando assets..."
-    sudo mv /tmp/build.tar.gz $REMOTE_PATH/
+    mv /tmp/build.tar.gz $REMOTE_PATH/
 
     echo "🚧 Entrando en modo mantenimiento..."
-    sudo php artisan down --retry=60
+    php artisan down --retry=60
 
     echo "🧹 Limpiando y extrayendo..."
-    sudo rm -rf public/build
-    sudo tar -xzf build.tar.gz
-    sudo rm build.tar.gz
+    rm -rf public/build
+    tar -xzf build.tar.gz
+    rm build.tar.gz
 
     echo "🔧 Ajustando permisos y caché..."
-    sudo mkdir -p bootstrap/cache
-    sudo chown -R www-data:www-data . || true
+    mkdir -p bootstrap/cache
+    chown -R www-data:www-data . || true
     # Permisos selectivos para evitar timeouts
-    sudo bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
+    bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     echo "📦 Ejecutando comandos de optimización..."
-    sudo php artisan config:clear || true
-    sudo php artisan cache:clear || true
-    sudo php artisan optimize
-    sudo php artisan view:cache
+    php artisan config:clear || true
+    php artisan cache:clear || true
+    php artisan optimize
+    php artisan view:cache
 
     echo "🗄️ Aplicando migraciones..."
-    sudo php artisan migrate --force || true
+    php artisan migrate --force || true
 
     echo "� Ejecutando comandos de seguridad..."
     # Limpiar logs de seguridad antiguos (>30 días)
-    sudo php artisan tinker --execute "
+    php artisan tinker --execute "
       \$logPath = storage_path('logs/security.log');
       if (file_exists(\$logPath) && time() - filemtime(\$logPath) > 2592000) {
         file_put_contents(\$logPath, '');
@@ -134,28 +123,28 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     # Limpiar usuarios duplicados (si CLEAN_DUPLICATES=true)
     if [ "$CLEAN_DUPLICATES" = "true" ]; then
         echo "🧹 Eliminando usuarios duplicados..."
-        sudo php artisan users:clean-duplicates --delete || {
+        php artisan users:clean-duplicates --delete || {
             echo "⚠️  Aviso: No se lograron limpiar todos los duplicados"
         }
     fi
 
     echo "�🔗 Verificando symlink de storage..."
-    sudo php artisan storage:link --force || {
+    php artisan storage:link --force || {
         echo "⚠️  Creando symlink manualmente..."
-        sudo rm -f $REMOTE_PATH/public/storage
-        sudo ln -s ../storage/app/public $REMOTE_PATH/public/storage
+        rm -f $REMOTE_PATH/public/storage
+        ln -s ../storage/app/public $REMOTE_PATH/public/storage
     }
 
     echo "✨ Saliendo del modo mantenimiento..."
-    sudo php artisan up
+    php artisan up
 
     echo "🔄 Reiniciando Horizon..."
-    sudo php artisan horizon:terminate || true
+    php artisan horizon:terminate || true
     sleep 3
-    sudo php artisan horizon > /dev/null 2>&1 &
+    php artisan horizon > /dev/null 2>&1 &
 
     echo "📣 Notificando despliegue exitoso..."
-    sudo php artisan deployment:notify success --branch=$REQUIRED_BRANCH --env=production --channel=deployments --initiator="$DEPLOY_INITIATOR" --commit="$COMMIT_SHA" --summary="$COMMIT_MESSAGE"
+    php artisan deployment:notify success --branch=$REQUIRED_BRANCH --env=production --channel=deployments --initiator="$DEPLOY_INITIATOR" --commit="$COMMIT_SHA" --summary="$COMMIT_MESSAGE"
 
     echo "✅ Servidor actualizado exitosamente."
 EOF
