@@ -57,10 +57,8 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
 
     cd $REMOTE_PATH
 
-    echo "🔧 Ajustando permisos previos..."
-    chown -R www-data:www-data . || true
-    # Permisos selectivos para evitar timeouts
-    bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
+    echo "🔧 Asegurando directorio de bootstrap/cache..."
+    mkdir -p bootstrap/cache
 
     # Configurar git para ignorar cambios de permisos
     git config core.fileMode false
@@ -95,11 +93,8 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     tar -xzf build.tar.gz
     rm build.tar.gz
 
-    echo "🔧 Ajustando permisos y caché..."
+    echo "🔧 Preparando directorios..."
     mkdir -p bootstrap/cache
-    chown -R www-data:www-data . || true
-    # Permisos selectivos para evitar timeouts
-    bash -c 'chmod 755 . bootstrap 2>/dev/null || true && find storage bootstrap/cache public -maxdepth 2 -type d -exec chmod 775 {} \; 2>/dev/null || true' || true
 
     echo "📦 Ejecutando comandos de optimización..."
     php artisan config:clear || true
