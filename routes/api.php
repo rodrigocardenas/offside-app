@@ -65,8 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/push-subscriptions', [PushSubscriptionController::class, 'store']);
 Route::post('/actualizar-token', [PushTokenController::class, 'update']);
 
-// Ruta autenticada para registrar tokens de push desde Capacitor
-Route::middleware('auth:sanctum')->post('/push/token', [PushTokenController::class, 'update']);
+// Ruta pública para registrar tokens de push desde Capacitor (Web, Android, iOS)
+Route::post('/push/token', [PushTokenController::class, 'update']);
 
 // ============================================================================
 // RUTAS DE PARTIDOS / CALENDARIO DE PARTIDOS (Públicas)

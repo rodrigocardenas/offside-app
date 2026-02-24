@@ -1,0 +1,177 @@
+/* Toast Customization */
+
+/* Container de Toastify */
+.toastify-container {
+    z-index: 9999 !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    padding: 16px !important;
+    top: 20px !important;
+    left: 5% !important;
+    right: auto !important;
+    position: fixed !important;
+}
+
+/* Base toast styling */
+.toastify {
+    padding: 16px 20px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.3px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    min-height: 56px !important;
+    display: flex !important;
+    align-items: center !important;
+    color: white !important;
+    position: relative !important;
+}
+
+/* Toast button close */
+.toastify-close {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    color: white !important;
+}
+
+.toastify-close:hover {
+    opacity: 1;
+}
+
+/* Success Toast */
+.toast-success {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
+}
+
+.toast-success::before {
+    content: '✓ ';
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Error Toast */
+.toast-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+}
+
+.toast-error::before {
+    content: '✕ ';
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Info Toast */
+.toast-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+}
+
+.toast-info::before {
+    content: 'ℹ ';
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Warning Toast */
+.toast-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+}
+
+.toast-warning::before {
+    content: '⚠ ';
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Animaciones */
+@keyframes slideInRight {
+    from {
+        transform: translateX(500px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(500px);
+        opacity: 0;
+    }
+}
+
+.toastify.on {
+    animation: slideInRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.toastify.hide {
+    animation: slideOutRight 0.3s ease-out forwards !important;
+}
+
+/* Responsive para móvil */
+@media (max-width: 640px) {
+    .toastify-container {
+        max-width: calc(100% - 24px) !important;
+        width: 100% !important;
+        left: 12px !important;
+        right: 12px !important;
+    }
+
+    .toastify {
+        padding: 14px 16px !important;
+        font-size: 13px !important;
+        min-height: 48px;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100vw);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100vw);
+            opacity: 0;
+        }
+    }
+}
+
+/* Tablet */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .toastify-container {
+        max-width: 420px !important;
+    }
+}
+
+/* Ultra responsive - teléfono muy pequeño */
+@media (max-width: 380px) {
+    .toastify {
+        padding: 12px 14px !important;
+        font-size: 12px !important;
+        border-radius: 8px !important;
+    }
+
+    .toastify-close {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+    }
+}

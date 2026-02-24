@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ícono de notificación para Firebase Cloud Messaging
+  Este ícono se mostrará en la barra de estado cuando se reciba una notificación push
+  
+  Requisitos de Android:
+  - Debe ser en escala de grises (sin color)
+  - Se usa solo como máscara (colorized por el color de notificación)
+  - Tamaño mínimo recomendado: 48x48 dp
+  
+  Generado automáticamente para PASO 8
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Bell icon / Icono de campana -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M12,22C13.1,22 14,21.1 14,20H10C10,21.1 10.9,22 12,22ZM18,16V11C18,7.93 16.36,5.24 13.5,4.68V4C13.5,3.2 12.81,2.5 12,2.5C11.19,2.5 10.5,3.2 10.5,4V4.68C7.64,5.24 6,7.93 6,11V16L4,18V19H20V18L18,16Z" />
+</vector>

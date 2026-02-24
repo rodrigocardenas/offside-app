@@ -66,9 +66,30 @@
                     android:host="app.offsideclub.es" />
             </intent-filter>
         </receiver>
+
+        <!-- Firebase Cloud Messaging Configuration (PASO 8) -->
+        <!-- Default notification icon para push notifications -->
+        <!-- Ícono debe estar en android/app/src/main/res/drawable/ -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+
+        <!-- Default notification color para push notifications -->
+        <!-- Valores de color en android/app/src/main/res/values/colors.xml -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
+
+        <!-- Default notification channel ID -->
+        <!-- Definido en android/app/src/main/res/values/strings.xml (PASO 9) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
     </application>
 
     <!-- Permissions -->
-
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Google Advertising ID - Required for Android 13+ targeting -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 </manifest>

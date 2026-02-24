@@ -11,6 +11,11 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // PASO 9: Crear canales de notificación para Firebase Cloud Messaging
+        // Requerido para Android 8.0+ (API 26+)
+        NotificationChannelManager.createNotificationChannels(this);
+        
         handleDeepLink(getIntent());
     }
 

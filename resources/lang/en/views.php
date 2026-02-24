@@ -95,6 +95,7 @@ return [
         'points_earned' => '+{points} points',
         'incorrect_answer' => 'Incorrect Answer',
         'calculating' => 'Calculating...',
+        'next' => 'Next',
     ],
     'questions' => [
         'title' => 'Questions',
@@ -197,7 +198,7 @@ return [
         'send_message' => 'Send',
         'save' => 'Save',
     ],
-    'profile' => [
+    'profile_section' => [
         'title' => 'User Profile',
         'view_profile' => 'View Profile',
         'edit_profile' => 'Edit Profile',

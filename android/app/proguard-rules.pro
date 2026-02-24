@@ -5,17 +5,45 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Preserve line numbers for debugging (necesario para Play Store)
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ========== Capacitor ==========
+-keep class com.getcapacitor.** { *; }
+-keep public class com.getcapacitor.Bridge { *; }
+-keep class com.getcapacitor.android.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ========== Firebase ==========
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-keepclassmembers class com.google.firebase.** { *; }
+-keepclassmembers class com.google.android.gms.** { *; }
+
+# ========== Plugins Capacitor ==========
+-keep class io.capawesome.capacitorjs.plugins.firebase.messaging.** { *; }
+-keep class com.capacitorjs.plugins.app.** { *; }
+-keep class com.capacitorjs.plugins.device.** { *; }
+-keep class com.capacitorjs.plugins.applauncherapp.** { *; }
+
+# ========== WebView ==========
+-keep class android.webkit.** { *; }
+-keepclassmembers class android.webkit.** { *; }
+
+# ========== App-specific classes ==========
+-keep class com.offsideclub.app.** { *; }
+-keepclassmembers class com.offsideclub.app.** { *; }
+
+# ========== AndroidX ==========
+-keep class androidx.** { *; }
+-keepclassmembers class androidx.** { *; }
+
+# ========== JSON/Serialization ==========
+-keepclassmembers class * {
+    public <init>(android.content.Context);
+}
+
+# ========== Native methods ==========
+-keepclasseswithmembernames class * {
+    native <methods>;
+}

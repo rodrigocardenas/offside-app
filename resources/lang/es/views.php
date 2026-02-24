@@ -96,6 +96,7 @@ return [
         'incorrect_answer' => 'Respuesta Incorrecta',
         'calculating' => 'Calculando...',
         'cancel' => 'Cancelar',
+        'next' => 'Próximo',
     ],
     'questions' => [
         'title' => 'Preguntas',
@@ -198,7 +199,7 @@ return [
         'send_message' => 'Enviar',
         'save' => 'Guardar',
     ],
-    'profile' => [
+    'profile_section' => [
         'title' => 'Perfil de usuario',
         'view_profile' => 'Ver Perfil',
         'edit_profile' => 'Editar Perfil',

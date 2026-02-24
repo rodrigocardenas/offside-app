@@ -614,7 +614,8 @@ class GroupController extends Controller
                     'code' => $code
                 ]);
 
-                return redirect()->route('groups.show', $group);
+                return redirect()->route('groups.show', $group)
+                    ->with('info', __('controllers.groups.already_member'));
             }
 
             // Verificar si hay una solicitud reciente del mismo usuario para el mismo grupo
@@ -1220,18 +1221,29 @@ class GroupController extends Controller
     {
         $match = FootballMatch::findOrFail($matchId);
 
-        $groups = Group::where('competition_id', $match->competition_id)
+        // Obtener los IDs de grupos que tengan preguntas vigentes para este match
+        // (sin filtrar por competition_id del grupo, ya que puede estar en otra competición)
+        $groupsWithQuestions = Question::where('match_id', $match->id)
+            ->where('available_until', '>', now())
+            ->pluck('group_id')
+            ->unique();
+
+        // Obtener detalles de esos grupos donde el usuario es miembro
+        $groups = Group::whereIn('id', $groupsWithQuestions)
             ->with(['users', 'competition'])
             ->withCount(['users as members_count'])
-            // and auth user is member
+            // Solo grupos donde el usuario es miembro
             ->whereHas('users', function($q) {
                 $q->where('user_id', auth()->id());
             })
+            ->orderBy('members_count', 'desc')
             ->get();
 
         return response()->json([
             'match' => $match,
-            'groups' => $groups
+            'groups' => $groups,
+            'competitionId' => $match->competition_id,
+            'competitionName' => $match->competition->name ?? 'Competition'
         ]);
     }
 }

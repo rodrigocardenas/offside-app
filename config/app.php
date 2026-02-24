@@ -188,4 +188,15 @@ return [
         'Image' => Intervention\Image\Facades\Image::class,
     ])->toArray(),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Firebase Cloud Messaging (FCM) Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuración para Firebase Cloud Messaging en Capacitor 6
+    | PASO 10: Blade View de Inicialización
+    |
+    */
+    'enable_fcm_notifications' => env('ENABLE_FCM_NOTIFICATIONS', true),
+
 ];

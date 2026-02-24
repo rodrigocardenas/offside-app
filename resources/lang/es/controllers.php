@@ -25,6 +25,9 @@ return [
     'feedback' => [
         'sent_successfully' => 'Feedback enviado correctamente',
     ],
+    'chat' => [
+        'message_sent' => 'Mensaje enviado correctamente',
+    ],
     'template_questions' => [
         'created_successfully' => 'Plantilla de pregunta creada exitosamente',
         'updated_successfully' => 'Plantilla de pregunta actualizada exitosamente',

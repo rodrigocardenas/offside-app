@@ -27,10 +27,16 @@ class LoginController extends Controller
 
         $wasCreated = false;
 
-        // Buscar usuario por ID completo (unique_id)
-        $user = User::where('unique_id', $request->name)->first();
+        // Buscar usuario PRIMERO por nombre ('name'), LUEGO por unique_id
+        // Esto previene crear múltiples usuarios con el mismo nombre
+        $user = User::where('name', trim($request->name))->first();
+        
+        if (!$user) {
+            // Si no existe por nombre, intentar por unique_id
+            $user = User::where('unique_id', $request->name)->first();
+        }
 
-        // Si no se encuentra por ID completo, crear un nuevo usuario
+        // Si no se encuentra, crear un nuevo usuario
         if (!$user) {
             // Generar un username único basado en el nombre ingresado
             $baseName = trim($request->name);

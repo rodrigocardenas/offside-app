@@ -1,13 +1,16 @@
 /.phpunit.cache
 /node_modules
+/public/*
+!/public/index.php
 /public/build
 /public/hot
 /public/storage
-/storage/*.key
 /vendor
 .env
 .env.backup
 .env.production
+.env.local
+.env.deploy
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -22,4 +25,13 @@ storage/app/firebase/firebase_credentials.json
 storage/framework/sessions/
 /bootstrap/cache/
 /storage/debugbar/
+/storage/logs/
+/storage/app/public/
+/storage/*.json
+.DS_Store
+composer.lock
+package-lock.json
+build.tar.gz
+
+
 

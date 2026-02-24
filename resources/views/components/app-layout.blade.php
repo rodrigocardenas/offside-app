@@ -313,25 +313,8 @@
         />
 
         <!-- Page Content -->
-        <main @class([
-            'mt-12' => session('success') || session('error')
-        ])>
-            @if (session('success'))
-                <div class="max-w-7xl mx-auto mt-12 px-4 sm:px-6 lg:px-8">
-                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                        <span class="block sm:inline">{{ session('success') }}</span>
-                    </div>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="max-w-7xl mx-auto mt-12 px-4 sm:px-6 lg:px-8">
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                        <span class="block sm:inline">{{ session('error') }}</span>
-                    </div>
-                </div>
-            @endif
-
+        <main>
+            {{-- Mensajes de sesión ahora se manejan con Toast messages component --}}
             {{ $slot }}
         </main>
     </div>
@@ -387,5 +370,72 @@
     <!-- Navigation Module (UX Redesign) -->
     <script src="{{ asset('js/common/navigation.js') }}" defer></script>
     <script src="{{ asset('js/common/modal-handler.js') }}" defer></script>
+
+    <!-- Toast Initialization Script (inline para garantizar ejecución) -->
+    <script>
+        console.log('🔔 Script de toast iniciando en app-layout...');
+        console.log('window.showSuccessToast:', typeof window.showSuccessToast);
+
+        const initToasts = () => {
+            // Bandera para evitar ejecución múltiple
+            if (window.__toastsInitialized) {
+                console.log('⏭️ Toasts ya inicializados, saltando...');
+                return;
+            }
+            window.__toastsInitialized = true;
+
+            console.log('🔔 initToasts ejecutándose en app-layout');
+            console.log('showSuccessToast disponible:', typeof window.showSuccessToast);
+
+            @if(session('success'))
+                console.log('✅ Session success detectada: "{{ addslashes(session('success')) }}"');
+                if (typeof window.showSuccessToast === 'function') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.showSuccessToast('{{ addslashes(session('success')) }}');
+                    console.log('✅ Toast mostrado');
+                } else {
+                    console.error('❌ showSuccessToast no es función');
+                }
+            @endif
+
+            @if(session('error'))
+                console.log('❌ Session error detectada: "{{ addslashes(session('error')) }}"');
+                if (typeof window.showErrorToast === 'function') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.showErrorToast('{{ addslashes(session('error')) }}');
+                } else {
+                    console.error('❌ showErrorToast no es función');
+                }
+            @endif
+
+            @if(session('warning'))
+                console.log('⚠️ Session warning detectada: "{{ addslashes(session('warning')) }}"');
+                if (typeof window.showWarningToast === 'function') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    window.showWarningToast('{{ addslashes(session('warning')) }}');
+                }
+            @endif
+
+            @if($errors->any())
+                console.log('❌ Errores detectados');
+                @foreach($errors->all() as $error)
+                    if (typeof window.showErrorToast === 'function') {
+                        window.showErrorToast('{{ addslashes($error) }}');
+                    }
+                @endforeach
+            @endif
+        };
+
+        // Una sola forma de disparo - usar DOMContentLoaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('DOMContentLoaded ejecutado en app-layout');
+                setTimeout(initToasts, 100);
+            });
+        } else {
+            console.log('DOM ya cargado en app-layout, ejecutando initToasts');
+            setTimeout(initToasts, 100);
+        }
+    </script>
 </body>
 </html>

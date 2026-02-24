@@ -386,6 +386,17 @@ class MatchesController extends Controller
             $toDate = $validated['to_date'] ?? now()->addWeek()->format('Y-m-d');
             $competitionId = $validated['competition_id'] ?? null;
 
+            // Obtener partidos de hoy (con resultados/estado en vivo)
+            $todaysMatches = $this->matchesService->getMatchesByDate(
+                now()->format('Y-m-d'),
+                now()->format('Y-m-d'),
+                $competitionId,
+                null,
+                true
+            );
+            // Aplanar el array de partidos de hoy
+            $todaysMatches = $todaysMatches[now()->format('Y-m-d')] ?? [];
+
             // Obtener partidos agrupados por fecha
             $matchesByDate = $this->matchesService->getMatchesByDate(
                 $fromDate,
@@ -401,11 +412,16 @@ class MatchesController extends Controller
             // Obtener estadísticas
             $statistics = $this->matchesService->getStatistics($fromDate, $toDate, $competitionId);
 
+            // Obtener partido destacado basado en preferencias del usuario
+            $featuredMatch = $this->matchesService->getFeaturedMatch(auth()->user());
+
             return view('matches.calendar', [
+                'todaysMatches' => $todaysMatches,
                 'matchesByDate' => $matchesByDate,
                 'competitions' => $competitions,
                 'statistics' => $statistics,
                 'selectedCompetitionId' => $competitionId,
+                'featuredMatch' => $featuredMatch,
             ]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error al cargar vista de calendario', [
@@ -413,6 +429,7 @@ class MatchesController extends Controller
             ]);
 
             return view('matches.calendar', [
+                'todaysMatches' => [],
                 'matchesByDate' => [],
                 'competitions' => [],
                 'statistics' => null,

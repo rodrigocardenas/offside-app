@@ -165,6 +165,18 @@ class QuestionEvaluationService
                 // ❌ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateCornerGoal($question, $match);
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'últimos.*15|últimos.*quince|últimos.*minutos|late.*goal')) {
+                // ❌ Event-based: Gol en últimos 15 minutos
+                $questionHandled = true;
+                $correctOptions = $this->evaluateLateGoal($question, $match);
+            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'antes.*descanso|first.*half|primer.*tiempo|minuto.*45')) {
+                // ❌ Event-based: Gol antes del descanso
+                $questionHandled = true;
+                $correctOptions = $this->evaluateGoalBeforeHalftime($question, $match);
+            } elseif ($this->isQuestionAbout($questionText, 'tiros.*arco|shots.*target|remates.*portería|tiro al arco')) {
+                // ✅ Statistics-based: Tiros al arco
+                $questionHandled = true;
+                $correctOptions = $this->evaluateShotsOnTarget($question, $match);
             } elseif ($this->isQuestionAbout($questionText, 'posesión|possession')) {
                 // ✅ Statistics-based: Posesión está en statistics, no requiere Gemini
                 $questionHandled = true;
@@ -349,10 +361,11 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // Encontrar primer gol
+        // Encontrar primer gol (excluyendo penales fallados)
         $firstGoalTeam = null;
         foreach ($events as $event) {
-            if ($event['type'] === 'GOAL' && $event['team'] !== 'substitution') {
+            // ✅ VALIDACIÓN MEJORADA: Usar isValidGoal() para excluir penales fallados
+            if ($this->isValidGoal($event)) {
                 $firstGoalTeam = $event['team'];
                 break;
             }
@@ -404,14 +417,16 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // Encontrar primer gol antes del umbral
+        // Encontrar primer gol antes del umbral (excluyendo penales fallados)
         $firstGoalTeamBeforeThreshold = null;
         foreach ($events as $event) {
-            if ($event['type'] !== 'GOAL') {
+            // ✅ VALIDACIÓN MEJORADA: Usar isValidGoal() para excluir penales fallados
+            if (!$this->isValidGoal($event)) {
                 continue;
             }
 
-            $minute = $this->parseMinuteValue($event['minute'] ?? null);
+            // ✅ ACTUALIZADO: 'minute' ya está normalizado en $event (en segundos o int)
+            $minute = $event['minute'] ?? null;
 
             if ($minute === null) {
                 continue;
@@ -452,10 +467,11 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // Encontrar último gol
+        // Encontrar último gol (excluyendo penales fallados)
         $lastGoalTeam = null;
         foreach (array_reverse($events) as $event) {
-            if ($event['type'] === 'GOAL' && $event['team'] !== 'substitution') {
+            // ✅ VALIDACIÓN MEJORADA: Usar isValidGoal() para excluir penales fallados
+            if ($this->isValidGoal($event)) {
                 $lastGoalTeam = $event['team'];
                 break;
             }
@@ -625,7 +641,7 @@ class QuestionEvaluationService
      * TIPO: GOLES DE PENAL
      *
      * ✅ AHORA FUNCIONA: API Football PRO SÍ proporciona el campo 'detail' con "Penalty"
-     * 
+     *
      * Buscamos en el campo 'detail':
      * - "Penalty" → Gol de penal
      * - "Own Goal" → Autogol
@@ -973,6 +989,113 @@ class QuestionEvaluationService
     }
 
     /**
+     * TIPO: GOL EN ÚLTIMOS 15 MINUTOS (Late Goal)
+     * ✅ NUEVA: S1 - Gol en los últimos 15 minutos del partido
+     *
+     * Ejemplo: "¿Habrá gol en los últimos 15 minutos?"
+     * Opciones: Sí/No o Equipo
+     */
+    private function evaluateLateGoal(Question $question, FootballMatch $match): array
+    {
+        $correctOptionIds = [];
+        $events = $this->parseEvents($match->events ?? []);
+
+        // Buscar goles en los últimos 15 minutos (minuto >= 75, excluyendo penales fallados)
+        $lateGoals = array_filter($events, fn($e) =>
+            $this->isValidGoal($e) && ($e['minute'] ?? 0) >= 75
+        );
+
+        if (empty($lateGoals)) {
+            // No hubo goles en últimos 15 minutos
+            foreach ($question->options as $option) {
+                if ($this->isNegativeOption(strtolower(trim($option->text)))) {
+                    $correctOptionIds[] = $option->id;
+                }
+            }
+            return $correctOptionIds;
+        }
+
+        // Hubo goles - intentar resolver como pregunta binaria (Sí/No)
+        $binaryResult = $this->resolveBinaryQuestionOptions($question, true);
+        if (!empty($binaryResult)) {
+            return $binaryResult;
+        }
+
+        // Si no es binaria, buscar por equipo
+        $firstLateGoal = array_values($lateGoals)[0];
+        $scoringTeam = $firstLateGoal['team'];
+
+        foreach ($question->options as $option) {
+            if ($this->teamNameMatches($option->text, $scoringTeam)) {
+                $correctOptionIds[] = $option->id;
+            }
+        }
+
+        return $correctOptionIds;
+    }
+
+    /**
+     * TIPO: GOL ANTES DEL DESCANSO (Goal Before Halftime)
+     * ✅ NUEVA: S5 - Gol antes del minuto 45 (primer tiempo)
+     *
+     * Ejemplo: "¿Habrá gol en el primer tiempo?"
+     * Opciones: Sí/No
+     */
+    private function evaluateGoalBeforeHalftime(Question $question, FootballMatch $match): array
+    {
+        // Reutilizar el método existente con threshold de 45
+        return $this->evaluateGoalBeforeMinute($question, $match, 45);
+    }
+
+    /**
+     * TIPO: TIROS AL ARCO (Shots on Target)
+     * ✅ NUEVA: S2 - Cuál equipo tuvo más tiros al arco
+     *
+     * Ejemplo: "¿Cuál equipo tuvo más tiros al arco?"
+     * Opciones: Home/Away
+     * Datos: statistics.home.shots_on_target, statistics.away.shots_on_target
+     */
+    private function evaluateShotsOnTarget(Question $question, FootballMatch $match): array
+    {
+        $correctOptionIds = [];
+        $statistics = $this->parseStatistics($match->statistics ?? []);
+
+        // Obtener tiros al arco por equipo
+        $homeShotsOnTarget = $statistics['home']['shots_on_target'] ?? 0;
+        $awayShotsOnTarget = $statistics['away']['shots_on_target'] ?? 0;
+
+        // Si no hay datos de tiros al arco, retornar vacío
+        if ($homeShotsOnTarget === 0 && $awayShotsOnTarget === 0) {
+            Log::warning('No shots on target data available', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'statistics_keys' => array_keys($statistics['home'] ?? [])
+            ]);
+            return $correctOptionIds;
+        }
+
+        // Comparar y encontrar opciones correctas
+        foreach ($question->options as $option) {
+            $optionText = strtolower(trim($option->text));
+
+            if ($homeShotsOnTarget > $awayShotsOnTarget) {
+                if ($this->teamNameMatches($optionText, $match->home_team)) {
+                    $correctOptionIds[] = $option->id;
+                }
+            } elseif ($awayShotsOnTarget > $homeShotsOnTarget) {
+                if ($this->teamNameMatches($optionText, $match->away_team)) {
+                    $correctOptionIds[] = $option->id;
+                }
+            } elseif ($homeShotsOnTarget === $awayShotsOnTarget && strpos($optionText, 'igual') !== false) {
+                // Si son iguales, buscar opción "Igual" o "Same amount"
+                $correctOptionIds[] = $option->id;
+            }
+        }
+
+        return $correctOptionIds;
+    }
+
+    /**
      * Determina si la pregunta habla de gol antes de cierto minuto
      */
     private function isGoalBeforeMinuteQuestion(string $questionText): bool
@@ -1095,6 +1218,34 @@ class QuestionEvaluationService
     }
 
     /**
+     * Valida si un evento es un gol válido (excluye penales fallados y otros casos inválidos)
+     * 
+     * @param array $event El evento a validar
+     * @return bool true si es un gol válido, false si es inválido (ej: Missed Penalty)
+     */
+    private function isValidGoal(array $event): bool
+    {
+        // Verificar que sea del tipo GOAL (case-insensitive: 'GOAL', 'Goal', 'goal')
+        $type = strtoupper($event['type'] ?? '');
+        if ($type !== 'GOAL') {
+            return false;
+        }
+
+        // Excluir penales fallados
+        $detail = strtolower($event['detail'] ?? '');
+        if (stripos($detail, 'missed penalty') !== false) {
+            return false;
+        }
+
+        // Excluir otros casos inválidos potenciales
+        if (stripos($detail, 'missed') !== false && stripos($detail, 'penalty') !== false) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Fuzzy matching: Intenta matchear un texto contra un nombre de equipo
      * Útil cuando hay variaciones en nombres (ej: "Manchester City" vs "Man City")
      *
@@ -1181,7 +1332,33 @@ class QuestionEvaluationService
             return [];
         }
 
-        return $events;
+        // ✅ NORMALIZAR eventos para manejar múltiples formatos
+        return array_map(fn($event) => $this->normalizeEvent($event), $events);
+    }
+
+    /**
+     * Normaliza eventos de diferentes formatos a un formato estándar.
+     *
+     * Formatos soportados:
+     * - Antiguo: {'minute': '15', 'type': 'GOAL', 'team': 'HOME', ...}
+     * - Nuevo (API Football): {'time': 16, 'type': 'Goal', 'team': 'Inter', ...}
+     *
+     * Retorna formato estándar: {'minute': 15, 'type': 'GOAL', 'team': 'equipo_name', ...}
+     */
+    private function normalizeEvent(array $event): array
+    {
+        return [
+            // Normalizar minuto (puede ser 'minute' o 'time', string o int)
+            'minute' => $this->parseMinuteValue($event['minute'] ?? $event['time'] ?? null),
+            // Normalizar tipo de evento a UPPERCASE
+            'type' => strtoupper($event['type'] ?? ''),
+            // Mantener el equipo tal cual (puede ser HOME/AWAY o nombre real)
+            'team' => $event['team'] ?? null,
+            // Campos adicionales opcionales
+            'player' => $event['player'] ?? null,
+            'detail' => $event['detail'] ?? null,
+            'assist' => $event['assist'] ?? null,
+        ];
     }
 
     /**
@@ -1241,13 +1418,13 @@ class QuestionEvaluationService
         }
 
         // Garantizar que los valores principales estén disponibles también en el nivel raíz
-        $result['possession_home'] = $result['possession_home'] 
+        $result['possession_home'] = $result['possession_home']
             ?? $this->extractPercentage($result['home']['possession'] ?? null)
             ?? null;
-        $result['possession_away'] = $result['possession_away'] 
+        $result['possession_away'] = $result['possession_away']
             ?? $this->extractPercentage($result['away']['possession'] ?? null)
             ?? null;
-        
+
         return $result;
     }
 
