@@ -21,6 +21,11 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
+        if (!$user) {
+            abort(403, 'Usuario no autenticado');
+        }
+        // Asegurar que los roles estén cargados
+        $user->load('roles');
         $competitions = Competition::orderBy('name')->get();
 
         // Load clubs for the selected competition
