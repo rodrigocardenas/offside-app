@@ -13,7 +13,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $with = ['roles'];
+    // protected $with = ['roles'];  // Comentado para evitar problemas con auth()->user()
 
     /**
      * The attributes that are mass assignable.
