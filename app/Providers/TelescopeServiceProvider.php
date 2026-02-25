@@ -56,10 +56,8 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewTelescope', function ($user) {
-            return in_array($user->email, [
-                'admin@offsideclub.com',
-                // Agrega aquí los emails de los administradores
-            ]);
+            // Permitir acceso si el usuario es admin
+            return $user && $user->hasRole('admin');
         });
     }
 }

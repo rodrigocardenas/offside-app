@@ -273,75 +273,90 @@
 
     <script>
         // Variables globales desde Blade
-        const initialCompetitionId = "{{ $user->favorite_competition_id ?? '' }}";
-        const initialClubId = "{{ $user->favorite_club_id ?? '' }}";
+        const initialCompetitionId = "{{ $user->favorite_competition_id ?? NULL }}";
+        const initialClubId = "{{ $user->favorite_club_id ?? NULL }}";
+        const competitionSelectEl = document.getElementById('favorite_competition_id');
+        const clubSelectEl = document.getElementById('favorite_club_id');
 
         // Mostrar vista previa de la imagen seleccionada
-        document.getElementById('avatar').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Validar que sea una imagen
-                if (!file.type.startsWith('image/')) {
-                    window.showErrorToast('Por favor selecciona un archivo de imagen');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.classList.add('avatar-preview');
-                    img.style.display = 'block';
-
-                    const avatarContainer = document.querySelector('div[style*="position: relative"]');
-                    const existingElement = avatarContainer.querySelector('img, .avatar-placeholder');
-
-                    if (existingElement) {
-                        avatarContainer.replaceChild(img, existingElement);
+        const avatarInput = document.getElementById('avatar');
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validar que sea una imagen
+                    if (!file.type.startsWith('image/')) {
+                        window.showErrorToast('Por favor selecciona un archivo de imagen');
+                        return;
                     }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('avatar-preview');
+                        img.style.display = 'block';
+
+                        const avatarContainer = document.querySelector('div[style*="position: relative"]');
+                        const existingElement = avatarContainer.querySelector('img, .avatar-placeholder');
+
+                        if (existingElement) {
+                            avatarContainer.replaceChild(img, existingElement);
+                        }
+                    }
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
-            }
-        });
+            });
+        }
 
         // Función para cargar clubs de una competencia
         function loadClubsForCompetition(competitionId, selectedClubId = null) {
-            const clubSelect = document.getElementById('favorite_club_id');
+            if (!clubSelectEl) return;
 
             // Limpiar el selector de clubes
-            clubSelect.innerHTML = '<option value="">Selecciona un club</option>';
+            clubSelectEl.innerHTML = '<option value="">Selecciona un club</option>';
 
             if (competitionId) {
                 // Hacer la petición AJAX para obtener los clubes de la competencia
                 fetch(`/api/competitions/${competitionId}/teams`)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.forEach(team => {
-                            const option = document.createElement('option');
-                            option.value = team.id;
-                            option.textContent = team.name;
-
-                            // Si hay un equipo seleccionado, marcarlo como selected
-                            if (selectedClubId && String(team.id) === String(selectedClubId)) {
-                                option.selected = true;
-                            }
-
-                            clubSelect.appendChild(option);
-                        });
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response error');
+                        return response.json();
                     })
-                    .catch(error => console.error('Error:', error));
+                    .then(data => {
+                        if (Array.isArray(data)) {
+                            data.forEach(team => {
+                                const option = document.createElement('option');
+                                option.value = team.id;
+                                option.textContent = team.name;
+                                
+                                // Si hay un equipo seleccionado, marcarlo como selected
+                                if (selectedClubId && String(team.id) === String(selectedClubId)) {
+                                    option.selected = true;
+                                }
+                                
+                                clubSelectEl.appendChild(option);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading clubs:', error);
+                        clubSelectEl.innerHTML = '<option value="">Error al cargar clubes</option>';
+                    });
             }
         }
 
         // Actualizar clubes cuando cambie la competencia
-        document.getElementById('favorite_competition_id').addEventListener('change', function(e) {
-            const competitionId = e.target.value;
-            loadClubsForCompetition(competitionId);
-        });
+        if (competitionSelectEl) {
+            competitionSelectEl.addEventListener('change', function(e) {
+                const competitionId = e.target.value;
+                loadClubsForCompetition(competitionId);
+            });
+        }
 
         // Cargar clubes al iniciar la página si hay competencia seleccionada
         document.addEventListener('DOMContentLoaded', function() {
-            if (initialCompetitionId) {
+            if (competitionSelectEl && initialCompetitionId) {
                 loadClubsForCompetition(initialCompetitionId, initialClubId);
             }
         });
