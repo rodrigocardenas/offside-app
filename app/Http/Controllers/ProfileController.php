@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -20,30 +21,56 @@ class ProfileController extends Controller
      */
     public function edit()
     {
-        $user = auth()->user();
-        if (!$user) {
-            abort(403, 'Usuario no autenticado');
-        }
-        // Asegurar que los roles estén cargados
-        $user->load('roles');
-        $competitions = Competition::orderBy('name')->get();
+        try {
+            Log::info('ProfileController::edit - iniciando');
+            
+            $user = auth()->user();
+            Log::info('ProfileController::edit - usuario obtenido: ' . ($user ? $user->email : 'null'));
+            
+            if (!$user) {
+                Log::error('ProfileController::edit - usuario no encontrado');
+                abort(403, 'Usuario no autenticado');
+            }
+            
+            Log::info('ProfileController::edit - cargando roles');
+            $user->load('roles');
+            Log::info('ProfileController::edit - roles cargados: ' . $user->roles->count());
+            
+            Log::info('ProfileController::edit - obteniendo competiciones');
+            $competitions = Competition::orderBy('name')->get();
+            Log::info('ProfileController::edit - competiciones obtenidas: ' . $competitions->count());
 
-        // Load clubs for the selected competition
-        $clubs = collect();
-        if ($user->favorite_competition_id) {
-            $clubs = Team::where('type', 'club')
-                ->whereHas('competitions', function ($query) use ($user) {
-                    $query->where('competitions.id', $user->favorite_competition_id);
-                })
+            // Load clubs for the selected competition
+            $clubs = collect();
+            if ($user->favorite_competition_id) {
+                Log::info('ProfileController::edit - cargando clubes para competicion: ' . $user->favorite_competition_id);
+                $clubs = Team::where('type', 'club')
+                    ->whereHas('competitions', function ($query) use ($user) {
+                        $query->where('competitions.id', $user->favorite_competition_id);
+                    })
+                    ->orderBy('name')
+                    ->get();
+                Log::info('ProfileController::edit - clubes cargados: ' . $clubs->count());
+            } else {
+                Log::info('ProfileController::edit - sin competicion favorita');
+            }
+
+            Log::info('ProfileController::edit - obteniendo equipos nacionales');
+            $nationalTeams = Team::where('type', 'national')
                 ->orderBy('name')
                 ->get();
+            Log::info('ProfileController::edit - equipos nacionales: ' . $nationalTeams->count());
+
+            Log::info('ProfileController::edit - completado exitosamente');
+            return view('profile.edit', compact('user', 'competitions', 'clubs', 'nationalTeams'));
+        } catch (Exception $e) {
+            Log::error('ProfileController::edit - ERROR: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw $e;
         }
-
-        $nationalTeams = Team::where('type', 'national')
-            ->orderBy('name')
-            ->get();
-
-        return view('profile.edit', compact('user', 'competitions', 'clubs', 'nationalTeams'));
     }
 
     /**
