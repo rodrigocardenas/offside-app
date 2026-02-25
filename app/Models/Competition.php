@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\FootballMatch;
+use App\Models\Team;
 
 class Competition extends Model
 {
@@ -52,6 +54,6 @@ class Competition extends Model
 
     public function teams()
     {
-        return $this->belongsToMany(Team::class);
+        return $this->hasMany(Team::class, 'competition_id');
     }
 }

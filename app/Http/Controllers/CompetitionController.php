@@ -62,4 +62,15 @@ class CompetitionController extends Controller
         return redirect()->route('competitions.index')
             ->with('success', 'Competición eliminada exitosamente.');
     }
+
+    // get teams for a competition
+    public function getTeams(Competition $competition)
+    {
+        try {
+            $teams = $competition->teams()->get();
+            return response()->json($teams);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

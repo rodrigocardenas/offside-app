@@ -272,6 +272,10 @@
     </style>
 
     <script>
+        // Variables globales desde Blade
+        const initialCompetitionId = "{{ $user->favorite_competition_id ?? '' }}";
+        const initialClubId = "{{ $user->favorite_club_id ?? '' }}";
+
         // Mostrar vista previa de la imagen seleccionada
         document.getElementById('avatar').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -300,9 +304,8 @@
             }
         });
 
-        // Actualizar clubes cuando cambie la competencia
-        document.getElementById('favorite_competition_id').addEventListener('change', function(e) {
-            const competitionId = e.target.value;
+        // Función para cargar clubs de una competencia
+        function loadClubsForCompetition(competitionId, selectedClubId = null) {
             const clubSelect = document.getElementById('favorite_club_id');
 
             // Limpiar el selector de clubes
@@ -317,10 +320,29 @@
                             const option = document.createElement('option');
                             option.value = team.id;
                             option.textContent = team.name;
+
+                            // Si hay un equipo seleccionado, marcarlo como selected
+                            if (selectedClubId && String(team.id) === String(selectedClubId)) {
+                                option.selected = true;
+                            }
+
                             clubSelect.appendChild(option);
                         });
                     })
                     .catch(error => console.error('Error:', error));
+            }
+        }
+
+        // Actualizar clubes cuando cambie la competencia
+        document.getElementById('favorite_competition_id').addEventListener('change', function(e) {
+            const competitionId = e.target.value;
+            loadClubsForCompetition(competitionId);
+        });
+
+        // Cargar clubes al iniciar la página si hay competencia seleccionada
+        document.addEventListener('DOMContentLoaded', function() {
+            if (initialCompetitionId) {
+                loadClubsForCompetition(initialCompetitionId, initialClubId);
             }
         });
     </script>
