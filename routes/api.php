@@ -22,11 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/competitions/{competition}/teams', function (App\Models\Competition $competition) {
-    return $competition->teams()
-        ->select('teams.id', 'teams.name')
-        ->get();
-});
+Route::get('/competitions/{competition}/teams', [App\Http\Controllers\CompetitionController::class, 'getTeams']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/push-subscriptions', [PushSubscriptionController::class, 'destroy']);
