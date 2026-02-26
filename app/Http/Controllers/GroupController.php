@@ -330,8 +330,9 @@ class GroupController extends Controller
         });
 
         if (!$cachedData['group']->users->contains('id', auth()->id())) {
-            // si el grupo es el id 83 (grupo oficial de la app) AGREGAR al usuario al grupo automáticamente
-            if ($group->id === 83) {
+            // si el grupo es el id 83 (grupo oficial de la app) O es un grupo de quiz (categoría 'quiz')
+            // AGREGAR al usuario al grupo automáticamente
+            if ($group->id === 83 || $group->category === 'quiz') {
                 $group->users()->attach(auth()->id());
                 // Limpiar caché relacionada
                 Cache::forget('user_' . auth()->id() . '_groups');

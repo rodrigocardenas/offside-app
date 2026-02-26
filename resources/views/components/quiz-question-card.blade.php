@@ -39,7 +39,6 @@
                         {{ $userAnswer && $userAnswer->question_option_id === $option->id ? 'checked' : '' }}
                         class="w-4 h-4"
                         style="accent-color: {{ $accentColor ?? '#3b82f6' }};"
-                        {{ $question->available_until->addHours(4) < now() ? 'disabled' : '' }}
                     >
 
                     <div class="ml-4 flex-1">
@@ -65,19 +64,15 @@
             @endforelse
 
             <!-- Submit Button -->
-            @if(!$userAnswer && $question->available_until->addHours(4) > now())
+            @if(!$userAnswer)
                 <button
                     type="submit"
                     class="w-full mt-6 px-4 py-2 text-white font-semibold rounded-lg transition-colors"
                     style="background-color: {{ $accentColor ?? '#3b82f6' }};"
-                    onmouseover="this.style.backgroundColor='{{ $buttonBgHover ?? '#1e40af' }}'" 
+                    onmouseover="this.style.backgroundColor='{{ $buttonBgHover ?? '#1e40af' }}'"
                     onmouseout="this.style.backgroundColor='{{ $accentColor ?? '#3b82f6' }}'">
                     <i class="fas fa-check mr-2"></i>Enviar Respuesta
                 </button>
-            @elseif($question->available_until->addHours(4) < now())
-                <div class="mt-4 p-4 border rounded-lg text-sm" style="background-color: rgba(202, 138, 4, 0.1); border-color: #ca8a04; color: #78350f;">
-                    <i class="fas fa-clock mr-2"></i>Esta pregunta ya no está disponible
-                </div>
             @else
                 <div class="mt-4 p-4 border rounded-lg text-sm" style="background-color: rgba(34, 197, 94, 0.1); border-color: #22c55e; color: #166534;">
                     <i class="fas fa-check-circle mr-2"></i>Pregunta respondida
