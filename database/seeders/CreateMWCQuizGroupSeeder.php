@@ -11,7 +11,7 @@ class CreateMWCQuizGroupSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * Crea un grupo público dedicado para el Mobile World Congress Quiz.
      * Este grupo contendrá 10 preguntas de tipo 'quiz'.
      */
@@ -19,7 +19,7 @@ class CreateMWCQuizGroupSeeder extends Seeder
     {
         // Buscar o crear usuario admin para el grupo
         $admin = User::where('email', 'admin@offsideclub.com')->first();
-        
+
         if (!$admin) {
             $admin = User::create([
                 'name' => 'Admin',

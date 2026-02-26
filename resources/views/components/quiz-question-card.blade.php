@@ -1,4 +1,4 @@
-<!-- 
+<!--
     🎮 QUIZ QUESTION CARD COMPONENT
     Tarjeta para mostrar y responder preguntas de tipo quiz
 -->
@@ -29,18 +29,18 @@
             @csrf
 
             @forelse($question->options as $option)
-                <label class="flex items-center p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors 
+                <label class="flex items-center p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors
                     {{ $userAnswer && $userAnswer->question_option_id === $option->id ? 'border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/20' : '' }}">
-                    
-                    <input 
-                        type="radio" 
-                        name="question_option_id" 
+
+                    <input
+                        type="radio"
+                        name="question_option_id"
                         value="{{ $option->id }}"
                         {{ $userAnswer && $userAnswer->question_option_id === $option->id ? 'checked' : '' }}
                         class="w-4 h-4 text-blue-600 dark:text-blue-400"
                         {{ $question->available_until->addHours(4) < now() ? 'disabled' : '' }}
                     >
-                    
+
                     <div class="ml-4 flex-1">
                         <p class="font-medium text-gray-900 dark:text-white">{{ $option->text }}</p>
                     </div>
@@ -65,8 +65,8 @@
 
             <!-- Submit Button -->
             @if(!$userAnswer && $question->available_until->addHours(4) > now())
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     class="w-full mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
                     <i class="fas fa-check mr-2"></i>Enviar Respuesta
                 </button>

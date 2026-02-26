@@ -1,4 +1,4 @@
-<!-- 
+<!--
     🎮 QUIZ RANKING VIEW
     Vista para mostrar el ranking dinámico del quiz MWC
     Ordena por: Puntos (DESC) y Tiempo (ASC) como desempate
@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-    
+
     <!-- Header -->
     <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 shadow-lg">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function fetchQuizRanking() {
     const groupId = {{ $group->id }};
-    
+
     fetch(`/groups/${groupId}/quiz-ranking`)
         .then(response => response.json())
         .then(data => {
@@ -208,12 +208,12 @@ function renderRanking(data) {
 
     tbody.innerHTML = players.map((player, index) => {
         const isCurrentUser = player.is_current_user;
-        const rowClass = isCurrentUser 
-            ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500' 
+        const rowClass = isCurrentUser
+            ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500'
             : 'hover:bg-gray-50 dark:hover:bg-gray-700/50';
-        
+
         const medalEmoji = ['🥇', '🥈', '🥉'][index] || '•';
-        
+
         return `
             <tr class="${rowClass}">
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -225,7 +225,7 @@ function renderRanking(data) {
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                         <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold overflow-hidden">
-                            ${player.avatar 
+                            ${player.avatar
                                 ? `<img src="${player.avatar}" alt="${player.name}" class="w-full h-full object-cover">`
                                 : player.name.charAt(0).toUpperCase()
                             }
@@ -256,7 +256,7 @@ function renderRanking(data) {
 function renderPodium(data) {
     const { players } = data;
     const podiumEl = document.getElementById('podium');
-    
+
     if (players.length === 0) {
         podiumEl.innerHTML = `
             <div class="col-span-3 text-center py-8 text-gray-500 dark:text-gray-400">
@@ -269,11 +269,11 @@ function renderPodium(data) {
     const positions = [0, 1, 2]; // 1st, 2nd, 3rd
     const medals = ['🥇', '🥈', '🥉'];
     const ranks = ['first', 'second', 'third'];
-    
+
     podiumEl.innerHTML = positions.map((pos) => {
         const player = players[pos];
         if (!player) return '';
-        
+
         return `
             <div class="text-center">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transform ${pos === 0 ? 'scale-105 mb-4' : 'mb-8'}">
@@ -286,7 +286,7 @@ function renderPodium(data) {
                     </div>
                     <div class="p-4">
                         <div class="h-16 w-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
-                            ${player.avatar 
+                            ${player.avatar
                                 ? `<img src="${player.avatar}" alt="${player.name}" class="w-full h-full object-cover">`
                                 : player.name.charAt(0).toUpperCase()
                             }

@@ -13,7 +13,7 @@ class CreateMWCQuizQuestionsSeeder extends Seeder
      * Crea 10 preguntas de tipo 'quiz' para el Mobile World Congress.
      * Estas son preguntas de conocimiento general sobre fútbol.
      * Cada pregunta tiene respuestas de múltiple opción.
-     * 
+     *
      * El valor correcto se marca con 'is_correct' => true
      */
     public function run(): void

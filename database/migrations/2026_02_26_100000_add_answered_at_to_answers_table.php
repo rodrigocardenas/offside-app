@@ -8,8 +8,8 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
-     * Agrega columna `answered_at` a tabla answers para registrar 
+     *
+     * Agrega columna `answered_at` a tabla answers para registrar
      * el momento exacto en que el usuario respondió.
      * Necesario para calcular tiempo total de respuesta en rankings de quiz.
      */

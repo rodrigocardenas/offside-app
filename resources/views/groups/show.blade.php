@@ -125,6 +125,16 @@
                     <!-- Preguntas de Partidos -->
                     <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :group="$group" :social-question="$socialQuestion ?? null" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
 
+                    <!-- 🎮 Preguntas Quiz -->
+                    @if(!empty($quizQuestions) && count($quizQuestions) > 0)
+                        <div class="mt-8">
+                            <h2 class="text-2xl font-bold mb-4" style="color: {{ $textPrimary }};">🎮 Quiz</h2>
+                            @foreach($quizQuestions as $question)
+                                <x-quiz-question-card :question="$question" :userAnswer="$question->answers->first()" />
+                            @endforeach
+                        </div>
+                    @endif
+
                     <!-- Pregunta Social -->
                     {{-- @if($group->users->count() >= 2)
                         @if($socialQuestion)

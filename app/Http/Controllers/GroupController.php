@@ -317,11 +317,13 @@ class GroupController extends Controller
             $matchQuestions = $this->getMatchQuestions($group, $roles);
             // dd($matchQuestions);
             $socialQuestion = $this->getSocialQuestion($group, $roles);
+            $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
             $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
             return [
                 'group' => $group,
                 'matchQuestions' => $matchQuestions,
+                'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
                 'userAnswers' => $userAnswers,
                 'socialQuestion' => $socialQuestion
             ];
@@ -364,11 +366,13 @@ class GroupController extends Controller
 
                 $matchQuestions = $this->getMatchQuestions($group, $this->groupRoleService->getGroupRoles($group));
                 $socialQuestion = $this->getSocialQuestion($group, $this->groupRoleService->getGroupRoles($group));
+                $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
                 $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
                 return view('groups.show', [
                     'group' => $group,
                     'matchQuestions' => $matchQuestions,
+                    'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
                     'userAnswers' => $userAnswers,
                     'socialQuestion' => $socialQuestion,
                     'currentMatchday' => null
@@ -1219,7 +1223,7 @@ class GroupController extends Controller
 
     /**
      * 🎮 Get Quiz Ranking - Ordenado por puntos (respuestas correctas) y tiempo de respuesta
-     * 
+     *
      * Para grupos tipo quiz (ej: MWC), retorna ranking con:
      * 1. Puntos totales (respuestas correctas) - DESCENDENTE
      * 2. Tiempo total de respuesta - ASCENDENTE (desempate)
@@ -1252,16 +1256,20 @@ class GroupController extends Controller
             ]);
         }
 
-        // Get users with their stats for quiz questions
-        $rankedUsers = $group->users()
+        // 🎯 FIX: Usar subquery en lugar de relación many-to-many para evitar GROUP BY issues
+        $rankedUsers = User::query()
+            ->whereHas('groups', function($q) use ($group) {
+                $q->where('group_id', $group->id);
+            })
             ->select('users.id', 'users.name', 'users.avatar')
             ->selectRaw('COALESCE(SUM(CASE WHEN answers.is_correct = 1 THEN answers.points_earned ELSE 0 END), 0) as total_points')
             ->selectRaw('COALESCE(SUM(TIMESTAMPDIFF(SECOND, questions.created_at, answers.answered_at)), 0) as total_time_seconds')
             ->leftJoin('answers', 'users.id', '=', 'answers.user_id')
-            ->leftJoin('questions', 'answers.question_id', '=', 'questions.id')
-            ->whereIn('questions.id', $quizQuestions)
-            ->where('answers.question_id', '!=', null) // Solo usuarios que respondieron
-            ->groupBy('users.id', 'users.name', 'users.avatar')
+            ->leftJoin('questions', function($join) use ($quizQuestions) {
+                $join->on('answers.question_id', '=', 'questions.id')
+                    ->whereIn('questions.id', $quizQuestions);
+            })
+            ->groupBy('users.id')
             ->orderBy('total_points', 'desc')
             ->orderBy('total_time_seconds', 'asc')
             ->get()
@@ -1304,7 +1312,7 @@ class GroupController extends Controller
         $hours = intdiv($seconds, 3600);
         $minutes = intdiv($seconds % 3600, 60);
         $secs = $seconds % 60;
-        
+
         return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
     }
 

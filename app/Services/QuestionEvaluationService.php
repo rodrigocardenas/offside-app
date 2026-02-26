@@ -1219,7 +1219,7 @@ class QuestionEvaluationService
 
     /**
      * Valida si un evento es un gol válido (excluye penales fallados y otros casos inválidos)
-     * 
+     *
      * @param array $event El evento a validar
      * @return bool true si es un gol válido, false si es inválido (ej: Missed Penalty)
      */
@@ -1896,7 +1896,7 @@ PROMPT;
 
     /**
      * Evalúa una pregunta de tipo 'quiz'.
-     * 
+     *
      * Las preguntas quiz son de conocimiento general sin relación a partidos.
      * Se evalúan basándose en la opción marcada como correcta en el template.
      *
@@ -1920,7 +1920,7 @@ PROMPT;
 
         // Obtener la opción seleccionada
         $selectedOption = \App\Models\QuestionOption::find($selectedOptionId);
-        
+
         if (!$selectedOption || $selectedOption->question_id !== $question->id) {
             Log::warning('Invalid question option for quiz evaluation', [
                 'question_id' => $question->id,
