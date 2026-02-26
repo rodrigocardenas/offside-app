@@ -130,7 +130,7 @@
                         <div class="mt-8">
                             <h2 class="text-2xl font-bold mb-4" style="color: {{ $textPrimary }};">🎮 Quiz</h2>
                             @foreach($quizQuestions as $question)
-                                <x-quiz-question-card :question="$question" :userAnswer="$question->answers->first()" />
+                                <x-quiz-question-card :question="$question" :userAnswer="$question->answers->first()" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
                             @endforeach
                         </div>
                     @endif
