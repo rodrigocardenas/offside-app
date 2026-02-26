@@ -16,10 +16,12 @@ class Answer extends Model
         'is_correct',
         'points_earned',
         'category',
+        'answered_at',
     ];
 
     protected $casts = [
-        'is_correct' => 'boolean'
+        'is_correct' => 'boolean',
+        'answered_at' => 'datetime',
     ];
 
     public function user()

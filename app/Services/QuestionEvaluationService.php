@@ -1893,4 +1893,61 @@ PROMPT;
             return null;
         }
     }
+
+    /**
+     * Evalúa una pregunta de tipo 'quiz'.
+     * 
+     * Las preguntas quiz son de conocimiento general sin relación a partidos.
+     * Se evalúan basándose en la opción marcada como correcta en el template.
+     *
+     * @param Question $question Pregunta de tipo quiz
+     * @return bool True si la opción seleccionada es correcta
+     */
+    public function evaluateQuizQuestion(Question $question, ?int $selectedOptionId = null): bool
+    {
+        if ($question->type !== 'quiz') {
+            Log::warning('evaluateQuizQuestion called with non-quiz question', [
+                'question_id' => $question->id,
+                'type' => $question->type
+            ]);
+            return false;
+        }
+
+        // Si no se proporciona selectedOptionId, significa que se está validando después que el usuario respondió
+        if ($selectedOptionId === null) {
+            return false;
+        }
+
+        // Obtener la opción seleccionada
+        $selectedOption = \App\Models\QuestionOption::find($selectedOptionId);
+        
+        if (!$selectedOption || $selectedOption->question_id !== $question->id) {
+            Log::warning('Invalid question option for quiz evaluation', [
+                'question_id' => $question->id,
+                'selected_option_id' => $selectedOptionId
+            ]);
+            return false;
+        }
+
+        // Retornar si la opción seleccionada es correcta
+        return (bool) $selectedOption->is_correct;
+    }
+
+    /**
+     * Obtiene la opción correcta de una pregunta quiz
+     *
+     * @param Question $question
+     * @return \App\Models\QuestionOption|null
+     */
+    public function getQuizCorrectOption(Question $question): ?\App\Models\QuestionOption
+    {
+        if ($question->type !== 'quiz') {
+            return null;
+        }
+
+        return $question->options()
+            ->where('is_correct', true)
+            ->first();
+    }
 }
+

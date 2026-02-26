@@ -1217,6 +1217,97 @@ class GroupController extends Controller
         ]);
     }
 
+    /**
+     * 🎮 Get Quiz Ranking - Ordenado por puntos (respuestas correctas) y tiempo de respuesta
+     * 
+     * Para grupos tipo quiz (ej: MWC), retorna ranking con:
+     * 1. Puntos totales (respuestas correctas) - DESCENDENTE
+     * 2. Tiempo total de respuesta - ASCENDENTE (desempate)
+     */
+    public function getQuizRanking(Group $group)
+    {
+        // Verify user has access or group is public
+        $isPublicGroup = $group->category === 'quiz';
+        if (!$isPublicGroup && !$group->users->contains('id', auth()->id())) {
+            return response()->json([
+                'error' => 'No tienes acceso a este grupo'
+            ], 403);
+        }
+
+        // Get all quiz questions in this group
+        $quizQuestions = $group->questions()
+            ->where('type', 'quiz')
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($quizQuestions)) {
+            return response()->json([
+                'players' => [],
+                'stats' => [
+                    'total_players' => 0,
+                    'user_position' => null,
+                    'user_points' => 0,
+                    'user_time' => 0
+                ]
+            ]);
+        }
+
+        // Get users with their stats for quiz questions
+        $rankedUsers = $group->users()
+            ->select('users.id', 'users.name', 'users.avatar')
+            ->selectRaw('COALESCE(SUM(CASE WHEN answers.is_correct = 1 THEN answers.points_earned ELSE 0 END), 0) as total_points')
+            ->selectRaw('COALESCE(SUM(TIMESTAMPDIFF(SECOND, questions.created_at, answers.answered_at)), 0) as total_time_seconds')
+            ->leftJoin('answers', 'users.id', '=', 'answers.user_id')
+            ->leftJoin('questions', 'answers.question_id', '=', 'questions.id')
+            ->whereIn('questions.id', $quizQuestions)
+            ->where('answers.question_id', '!=', null) // Solo usuarios que respondieron
+            ->groupBy('users.id', 'users.name', 'users.avatar')
+            ->orderBy('total_points', 'desc')
+            ->orderBy('total_time_seconds', 'asc')
+            ->get()
+            ->values()
+            ->map(function($user, $index) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'avatar' => $user->avatar,
+                    'total_points' => $user->total_points ?? 0,
+                    'total_time_seconds' => (int) $user->total_time_seconds,
+                    'total_time_formatted' => $this->formatSeconds($user->total_time_seconds ?? 0),
+                    'rank' => $index + 1,
+                    'position' => ['🥇', '🥈', '🥉'][$index] ?? '•',
+                    'is_current_user' => $user->id === auth()->id()
+                ];
+            });
+
+        // Get current user stats
+        $currentUser = $rankedUsers->firstWhere('is_current_user', true);
+
+        return response()->json([
+            'players' => $rankedUsers->values(),
+            'stats' => [
+                'total_players' => $rankedUsers->count(),
+                'user_position' => $currentUser['rank'] ?? null,
+                'user_points' => $currentUser['total_points'] ?? 0,
+                'user_time' => $currentUser['total_time_seconds'] ?? 0,
+                'user_time_formatted' => $currentUser['total_time_formatted'] ?? '00:00:00'
+            ]
+        ]);
+    }
+
+    /**
+     * Helper: Format seconds to mm:ss format
+     */
+    private function formatSeconds($seconds): string
+    {
+        $seconds = (int) $seconds;
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+        $secs = $seconds % 60;
+        
+        return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
+    }
+
     function getGroupsByMatch($matchId)
     {
         $match = FootballMatch::findOrFail($matchId);
