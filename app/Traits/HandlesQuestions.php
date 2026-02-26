@@ -98,25 +98,23 @@ trait HandlesQuestions
     /**
      * 🎮 Obtiene preguntas de tipo quiz para mostrar en el grupo
      * Las preguntas quiz se cargan todas para que el usuario pueda responderlas
+     * NO se cachean para mostrar respuestas actualizadas inmediatamente
      */
     protected function getQuizQuestions($group)
     {
-        $quizQuestionsCacheKey = "group_{$group->id}_quiz_questions";
-        return Cache::remember($quizQuestionsCacheKey, now()->addMinutes(5), function () use ($group) {
-            $questions = Question::where('type', 'quiz')
-                ->where('group_id', $group->id)
-                ->where('available_until', '>', now())
-                ->with([
-                    'options',
-                    'answers' => function ($query) {
-                        $query->where('user_id', auth()->id());
-                    }
-                ])
-                ->orderBy('created_at', 'asc')
-                ->get();
+        $questions = Question::where('type', 'quiz')
+            ->where('group_id', $group->id)
+            ->where('available_until', '>', now())
+            ->with([
+                'options',
+                'answers' => function ($query) {
+                    $query->where('user_id', auth()->id());
+                }
+            ])
+            ->orderBy('created_at', 'asc')
+            ->get();
 
-            return $this->processQuestions($questions);
-        });
+        return $this->processQuestions($questions);
     }
 
     protected function getUserAnswers($group, $matchQuestions, $socialQuestion)

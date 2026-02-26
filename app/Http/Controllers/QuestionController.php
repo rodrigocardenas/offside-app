@@ -168,6 +168,7 @@ class QuestionController extends Controller
         Cache::forget("group_{$question->group_id}_user_answers");
         Cache::forget("group_{$question->group_id}_show_data");
         Cache::forget("group_{$question->group_id}_quiz_ranking");  // 🎮 Clear quiz ranking cache
+        // NOTE: group_quiz_questions no se cachea para mantener respuestas actualizadas
 
         Log::info('Respuesta guardada o actualizada', [
             'question_id' => $question->id,

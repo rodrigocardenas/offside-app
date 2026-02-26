@@ -25,7 +25,7 @@
         @endif
 
         <!-- Question Form -->
-        <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-4">
+        <form action="{{ route('questions.answer', $question) }}" method="POST" class="space-y-4 quiz-answer-form" data-question-id="{{ $question->id }}">
             @csrf
 
             @forelse($question->options as $option)
@@ -86,3 +86,26 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[data-question-id="{{ $question->id }}"]');
+    if (!form) return;
+    
+    // Si el usuario ya respondió, deshabilitar el formulario
+    @if($userAnswer)
+        const inputs = form.querySelectorAll('input[name="question_option_id"], button[type="submit"]');
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+    @endif
+    
+    form.addEventListener('submit', function(e) {
+        // Deshabilitar todos los inputs para prevenir múltiples envíos
+        const inputs = form.querySelectorAll('input, button');
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+    });
+});
+</script>
