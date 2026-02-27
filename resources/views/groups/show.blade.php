@@ -934,15 +934,20 @@
 
 <!-- Auto-scroll to answered quiz question on page load -->
 <script>
+// Prevenir auto-scroll nativo del navegador y hacer el nuestro
 window.addEventListener('load', function() {
     const fragment = window.location.hash.substring(1);
     if (fragment && fragment.startsWith('question')) {
+        // Scroll al top primero para resetear
+        window.scrollTo(0, 0);
+        
+        // Luego después de que el DOM esté listo, hacer scroll a la pregunta
         setTimeout(() => {
             const element = document.getElementById(fragment);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-        }, 100);
+        }, 200);
     }
 });
 </script>
