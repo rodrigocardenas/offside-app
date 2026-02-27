@@ -80,10 +80,51 @@
             @endif
         </form>
     </div>
+
+    <!-- Navigation Button -->
+    <div class="flex justify-center px-6 pb-6">
+        <button type="button" class="text-2xl" onclick="scrollToNextQuestion({{ $question->id }})" title="Ir a la siguiente pregunta">
+            <i class="fas fa-chevron-down" style="color: {{ $accentColor ?? '#3b82f6' }};"></i>
+        </button>
+    </div>
 </div>
 
 <script>
+// Scroll automático al elemento identificado por el fragment
+function scrollToFragment() {
+    const fragment = window.location.hash.substring(1);
+    if (fragment) {
+        const element = document.getElementById(fragment);
+        if (element) {
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }
+}
+
+// Función para scrollear a la siguiente pregunta
+function scrollToNextQuestion(currentQuestionId) {
+    // Encontrar el siguiente elemento question
+    const currentElement = document.getElementById('question' + currentQuestionId);
+    if (!currentElement) return;
+    
+    let nextElement = currentElement.nextElementSibling;
+    while (nextElement && !nextElement.id?.startsWith('question')) {
+        nextElement = nextElement.nextElementSibling;
+    }
+    
+    if (nextElement) {
+        nextElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Opcionalmente, actualizar el fragment en la URL
+        window.history.pushState(null, null, '#' + nextElement.id);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Scroll al fragment si existe
+    scrollToFragment();
+    
     const form = document.querySelector('form[data-question-id="{{ $question->id }}"]');
     if (!form) return;
     
@@ -105,4 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Scroll al fragment si se carga desde un link externo
+window.addEventListener('hashchange', scrollToFragment);
 </script>
