@@ -2,303 +2,308 @@
     🎮 QUIZ RANKING VIEW
     Vista para mostrar el ranking dinámico del quiz MWC
     Ordena por: Puntos (DESC) y Tiempo (ASC) como desempate
+    Usa componentes y estilos de la aplicación
 -->
 
-@extends('layouts.app')
+<x-app-layout>
+    @section('navigation-title', '🎮 ' . $group->name)
 
-@section('title', 'Quiz Ranking - ' . $group->name)
+    @php
+        // Variables de tema compartidas globalmente
+        $isDark = $isDark ?? true;
+        $bgPrimary = $bgPrimary ?? '#0a2e2c';
+        $bgSecondary = $bgSecondary ?? '#0f3d3a';
+        $bgTertiary = $bgTertiary ?? '#1a524e';
+        $textPrimary = $textPrimary ?? '#ffffff';
+        $textSecondary = $textSecondary ?? '#b0b0b0';
+        $borderColor = $borderColor ?? '#2a4a47';
+        $componentsBackground = $componentsBackground ?? '#1a524e';
+        $accentColor = $accentColor ?? '#00deb0';
+        $accentDark = $accentDark ?? '#17b796';
+    @endphp
 
-@section('content')
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-8 shadow-lg">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between mb-4">
-                <a href="{{ route('groups.show', $group) }}" class="text-blue-100 hover:text-white transition">
-                    <i class="fas fa-arrow-left mr-2"></i>Volver al Grupo
-                </a>
-            </div>
-            <h1 class="text-4xl font-bold mb-2">🎮 {{ $group->name }}</h1>
-            <p class="text-blue-100">Código: <span class="font-mono font-semibold">{{ $group->code }}</span></p>
-        </div>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <!-- Total Players -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
+    <div class="min-h-screen" style="background: {{ $bgPrimary }}; padding: 1rem; padding-top: 5rem; padding-bottom: 6rem;">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header con información del grupo -->
+            <div class="mb-8 text-center">
+                <div class="flex items-center justify-center gap-4 mb-4">
+                    @if($group->logo)
+                        <img src="{{ asset('storage/' . $group->logo) }}" alt="{{ $group->name }}" class="h-16 w-16 rounded-lg shadow-md">
+                    @endif
                     <div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Jugadores</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1" id="totalPlayers">0</p>
-                    </div>
-                    <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                        <i class="fas fa-users text-blue-600 dark:text-blue-300 text-xl"></i>
+                        <h1 class="text-4xl font-bold" style="color: {{ $textPrimary }};">🎮 {{ $group->name }}</h1>
                     </div>
                 </div>
-            </div>
-
-            <!-- Your Position -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Tu Posición</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1" id="userPosition">—</p>
-                    </div>
-                    <div class="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-full">
-                        <i class="fas fa-crown text-yellow-600 dark:text-yellow-300 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Your Points -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Tus Puntos</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1" id="userPoints">0</p>
-                    </div>
-                    <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
-                        <i class="fas fa-star text-green-600 dark:text-green-300 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Your Time -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Tu Tiempo Total</p>
-                        <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1" id="userTime">00:00:00</p>
-                    </div>
-                    <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
-                        <i class="fas fa-clock text-purple-600 dark:text-purple-300 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ranking Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ranking Global</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Ordenado por puntos (descendente) y tiempo de respuesta (ascendente)
+                <p class="text-sm font-medium mt-3" style="color: {{ $textSecondary }};">
+                    <i class="fas fa-sync-alt mr-2" style="color: {{ $accentColor }};"></i>Ranking actualizado cada 10 segundos
                 </p>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                        <tr>
-                            <th class="px-6 py-3 text-left">
-                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Posición</span>
-                            </th>
-                            <th class="px-6 py-3 text-left">
-                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Jugador</span>
-                            </th>
-                            <th class="px-6 py-3 text-center">
-                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Puntos</span>
-                            </th>
-                            <th class="px-6 py-3 text-center">
-                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">Tiempo Total</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="rankingBody" class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr class="text-center py-8">
-                            <td colspan="4" class="px-6 py-8">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-spinner fa-spin text-gray-400 text-2xl mr-2"></i>
-                                    <span class="text-gray-500 dark:text-gray-400">Cargando ranking...</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Podium (Top 3) -->
-        <div class="mt-12">
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">🏆 Podio</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="podium">
-                <!-- Podium items will be injected here -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    .podium-position {
-        @apply relative;
-    }
-
-    .podium-medal {
-        @apply text-4xl mb-2 text-center;
-    }
-
-    .podium-badge {
-        @apply inline-block px-3 py-1 rounded-full text-xs font-semibold text-white;
-    }
-
-    .podium-rank-1 {
-        @apply bg-yellow-500;
-    }
-
-    .podium-rank-2 {
-        @apply bg-gray-400;
-    }
-
-    .podium-rank-3 {
-        @apply bg-orange-600;
-    }
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    fetchQuizRanking();
-    // Refresh every 10 seconds
-    setInterval(fetchQuizRanking, 10000);
-});
-
-function fetchQuizRanking() {
-    const groupId = {{ $group->id }};
-
-    fetch(`/groups/${groupId}/quiz-ranking`)
-        .then(response => response.json())
-        .then(data => {
-            renderRanking(data);
-            renderPodium(data);
-        })
-        .catch(error => {
-            console.error('Error fetching ranking:', error);
-            document.getElementById('rankingBody').innerHTML = `
-                <tr>
-                    <td colspan="4" class="px-6 py-8 text-center text-red-600 dark:text-red-400">
-                        Error al cargar el ranking. Intenta nuevamente.
-                    </td>
-                </tr>
-            `;
-        });
-}
-
-function renderRanking(data) {
-    const tbody = document.getElementById('rankingBody');
-    const { players, stats } = data;
-
-    // Update stats
-    document.getElementById('totalPlayers').textContent = stats.total_players;
-    document.getElementById('userPosition').textContent = stats.user_position ? `#${stats.user_position}` : '—';
-    document.getElementById('userPoints').textContent = stats.user_points;
-    document.getElementById('userTime').textContent = stats.user_time_formatted || '00:00:00';
-
-    if (players.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="4" class="px-6 py-8 text-center">
-                    <p class="text-gray-500 dark:text-gray-400">No hay jugadores en el ranking aún</p>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    tbody.innerHTML = players.map((player, index) => {
-        const isCurrentUser = player.is_current_user;
-        const rowClass = isCurrentUser
-            ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50';
-
-        const medalEmoji = ['🥇', '🥈', '🥉'][index] || '•';
-
-        return `
-            <tr class="${rowClass}">
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center gap-2">
-                        <span class="text-2xl">${medalEmoji}</span>
-                        <span class="text-lg font-bold text-gray-900 dark:text-white">#${player.rank}</span>
-                    </div>
-                </td>
-                <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold overflow-hidden">
-                            ${player.avatar
-                                ? `<img src="${player.avatar}" alt="${player.name}" class="w-full h-full object-cover">`
-                                : player.name.charAt(0).toUpperCase()
-                            }
-                        </div>
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <!-- Total Players -->
+                <div class="rounded-lg p-6 shadow-md transition-shadow hover:shadow-lg" style="background: {{ $componentsBackground }}; border: 1px solid {{ $borderColor }};">
+                    <div class="flex items-center justify-between">
                         <div>
-                            <p class="font-semibold text-gray-900 dark:text-white">
-                                ${player.name}
-                                ${isCurrentUser ? '<span class="ml-2 inline-block px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded">TÚ</span>' : ''}
-                            </p>
+                            <p class="text-sm font-medium" style="color: {{ $textSecondary }};">Jugadores</p>
+                            <p class="text-3xl font-bold mt-1" style="color: {{ $textPrimary }};" id="totalPlayers">0</p>
+                        </div>
+                        <div class="p-3 rounded-full" style="background: rgba(0, 222, 176, 0.1);">
+                            <i class="fas fa-users text-xl" style="color: {{ $accentColor }};"></i>
                         </div>
                     </div>
-                </td>
-                <td class="px-6 py-4 text-center">
-                    <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full font-semibold">
-                        ${player.total_points} pts
-                    </span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                    <span class="text-gray-600 dark:text-gray-400 font-mono text-sm">
-                        ${player.total_time_formatted}
-                    </span>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
+                </div>
 
-function renderPodium(data) {
-    const { players } = data;
-    const podiumEl = document.getElementById('podium');
-
-    if (players.length === 0) {
-        podiumEl.innerHTML = `
-            <div class="col-span-3 text-center py-8 text-gray-500 dark:text-gray-400">
-                Sin participantes aún
-            </div>
-        `;
-        return;
-    }
-
-    const positions = [0, 1, 2]; // 1st, 2nd, 3rd
-    const medals = ['🥇', '🥈', '🥉'];
-    const ranks = ['first', 'second', 'third'];
-
-    podiumEl.innerHTML = positions.map((pos) => {
-        const player = players[pos];
-        if (!player) return '';
-
-        return `
-            <div class="text-center">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transform ${pos === 0 ? 'scale-105 mb-4' : 'mb-8'}">
-                    <div class="h-32 bg-gradient-to-br ${
-                        pos === 0 ? 'from-yellow-400 to-yellow-600' :
-                        pos === 1 ? 'from-gray-300 to-gray-400' :
-                        'from-orange-400 to-orange-600'
-                    } flex items-center justify-center">
-                        <span class="text-6xl">${medals[pos]}</span>
-                    </div>
-                    <div class="p-4">
-                        <div class="h-16 w-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-2xl font-bold overflow-hidden">
-                            ${player.avatar
-                                ? `<img src="${player.avatar}" alt="${player.name}" class="w-full h-full object-cover">`
-                                : player.name.charAt(0).toUpperCase()
-                            }
+                <!-- Your Position -->
+                <div class="rounded-lg p-6 shadow-md transition-shadow hover:shadow-lg" style="background: {{ $componentsBackground }}; border: 1px solid {{ $borderColor }};">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium" style="color: {{ $textSecondary }};">Tu Posición</p>
+                            <p class="text-3xl font-bold mt-1" style="color: {{ $accentColor }};" id="userPosition">—</p>
                         </div>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white">${player.name}</h4>
-                        <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">${player.total_points} pts</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">${player.total_time_formatted}</p>
+                        <div class="p-3 rounded-full" style="background: rgba(0, 222, 176, 0.1);">
+                            <i class="fas fa-crown text-xl" style="color: {{ $accentColor }};"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Your Points -->
+                <div class="rounded-lg p-6 shadow-md transition-shadow hover:shadow-lg" style="background: {{ $componentsBackground }}; border: 1px solid {{ $borderColor }};">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium" style="color: {{ $textSecondary }};">Tus Puntos</p>
+                            <p class="text-3xl font-bold mt-1" style="color: {{ $textPrimary }};" id="userPoints">0</p>
+                        </div>
+                        <div class="p-3 rounded-full" style="background: rgba(0, 222, 176, 0.1);">
+                            <i class="fas fa-star text-xl" style="color: {{ $accentColor }};"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Your Time -->
+                <div class="rounded-lg p-6 shadow-md transition-shadow hover:shadow-lg" style="background: {{ $componentsBackground }}; border: 1px solid {{ $borderColor }};">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium" style="color: {{ $textSecondary }};">Tu Tiempo</p>
+                            <p class="text-3xl font-bold mt-1" style="color: {{ $textPrimary }};" id="userTime">00:00:00</p>
+                        </div>
+                        <div class="p-3 rounded-full" style="background: rgba(0, 222, 176, 0.1);">
+                            <i class="fas fa-clock text-xl" style="color: {{ $accentColor }};"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        `;
-    }).join('');
-}
-</script>
-@endsection
+
+            <!-- Podium (Top 3) -->
+            <div class="mb-12" id="podiumContainer" style="display: none;">
+                <h2 class="text-2xl font-bold mb-6" style="color: {{ $textPrimary }};">🏆 Podio</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="podium">
+                    <!-- Podium items will be injected here -->
+                </div>
+            </div>
+
+            <!-- Ranking de todos los jugadores -->
+            <div class="rounded-lg shadow-md overflow-hidden" style="background: {{ $componentsBackground }}; border: 1px solid {{ $borderColor }};">
+                <div class="px-6 py-4" style="border-bottom: 1px solid {{ $borderColor }};">
+                    <h3 class="text-lg font-bold" style="color: {{ $textPrimary }};">📊 Ranking Completo</h3>
+                    <p class="text-xs mt-1" style="color: {{ $textSecondary }};">
+                        Ordenado por puntos (descendente) y tiempo total (ascendente)
+                    </p>
+                </div>
+
+                <div id="rankingBody" class="divide-y" style="border-color: {{ $borderColor }};">
+                    <!-- Ranking items will be injected here -->
+                </div>
+            </div>
+
+            <!-- Botón de volver -->
+            <div class="mt-8 text-center">
+                <a href="{{ route('groups.show', $group) }}" class="inline-flex items-center px-6 py-2 rounded-lg font-medium transition-all duration-300 hover:shadow-lg"
+                   style="background: {{ $accentColor }}; color: #000; cursor: pointer;"
+                   onmouseover="this.style.background='{{ $accentDark }}'"
+                   onmouseout="this.style.background='{{ $accentColor }}'">
+                    <i class="fas fa-arrow-left mr-2"></i>Volver al grupo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menú inferior fijo -->
+    <x-layout.bottom-navigation active-item="grupo" />
+
+    <!-- Modal de Feedback -->
+    <x-feedback-modal />
+
+    <script>
+    const themeColors = {
+        bgPrimary: '{{ $bgPrimary }}',
+        bgSecondary: '{{ $bgSecondary }}',
+        bgTertiary: '{{ $bgTertiary }}',
+        textPrimary: '{{ $textPrimary }}',
+        textSecondary: '{{ $textSecondary }}',
+        borderColor: '{{ $borderColor }}',
+        componentsBackground: '{{ $componentsBackground }}',
+        accentColor: '{{ $accentColor }}',
+        accentDark: '{{ $accentDark }}'
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchQuizRanking();
+        // Refresh every 10 seconds
+        setInterval(fetchQuizRanking, 10000);
+    });
+
+    function fetchQuizRanking() {
+        const groupId = {{ $group->id }};
+
+        fetch(`/groups/${groupId}/quiz-ranking`)
+            .then(response => response.json())
+            .then(data => {
+                renderRanking(data);
+                renderPodium(data);
+            })
+            .catch(error => {
+                console.error('Error fetching ranking:', error);
+                document.getElementById('rankingBody').innerHTML = `
+                    <div style="padding: 2rem; text-align: center; color: #ef4444;">
+                        <i class="fas fa-exclamation-circle mr-2"></i>Error al cargar el ranking. Intenta nuevamente.
+                    </div>
+                `;
+            });
+    }
+
+    function renderRanking(data) {
+        const tbody = document.getElementById('rankingBody');
+        const { players, stats } = data;
+
+        // Update stats
+        document.getElementById('totalPlayers').textContent = stats.total_players;
+        document.getElementById('userPosition').textContent = stats.user_position ? `#${stats.user_position}` : '—';
+        document.getElementById('userPoints').textContent = stats.user_points;
+        document.getElementById('userTime').textContent = stats.user_time_formatted || '00:00:00';
+
+        if (players.length === 0) {
+            tbody.innerHTML = `
+                <div style="padding: 3rem 1.5rem; text-align: center; color: ${themeColors.textSecondary};">
+                    <i class="fas fa-chart-line text-3xl mb-3" style="display: block; margin-bottom: 1rem; color: ${themeColors.textSecondary};"></i>
+                    <p>Aún no hay jugadores en el ranking</p>
+                </div>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = players.map((player, index) => {
+            const isCurrentUser = player.is_current_user;
+            const medalEmoji = ['🥇', '🥈', '🥉'][index] || '•';
+            
+            let medalColor = '';
+            if (index === 0) {
+                medalColor = '#fbbf24';
+            } else if (index === 1) {
+                medalColor = '#d1d5db';
+            } else if (index === 2) {
+                medalColor = '#f97316';
+            } else {
+                medalColor = themeColors.accentColor;
+            }
+
+            const backgroundColor = isCurrentUser ? 
+                `rgba(0, 222, 176, 0.1)` : 
+                `${themeColors.bgSecondary}`;
+            
+            const borderStyle = isCurrentUser ? 
+                `4px solid ${themeColors.accentColor}` : 
+                `1px solid ${themeColors.borderColor}`;
+
+            return `
+                <div style="display: flex; align-items: center; padding: 1rem 1.5rem; background: ${backgroundColor}; border-left: ${borderStyle}; transition: all 0.2s ease; cursor: default; hover-effect: true;"
+                     onmouseover="this.style.background='${themeColors.bgTertiary}'"
+                     onmouseout="this.style.background='${backgroundColor}'">
+                    
+                    <!-- Avatar -->
+                    <div style="flex-shrink: 0; margin-right: 1rem; position: relative;">
+                        <div style="width: 3rem; height: 3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem; overflow: hidden; border: 3px solid ${medalColor}; background: ${themeColors.accentColor}; color: #000;">
+                            ${player.avatar 
+                                ? `<img src="${player.avatar}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                                : player.name.charAt(0).toUpperCase()
+                            }
+                        </div>
+                        ${index < 3 ? `<div style="position: absolute; bottom: -4px; right: -4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: ${medalColor}; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                            ${index === 0 ? '👑' : (index === 1 ? '🎖️' : '🏅')}
+                        </div>` : ''}
+                    </div>
+
+                    <!-- Player Info -->
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; color: ${themeColors.textPrimary};">
+                            <span style="font-size: 1.5rem; margin-right: 0.5rem;">${medalEmoji}</span>
+                            <span style="margin-right: 0.5rem;">#${player.rank}</span>
+                            ${player.name}
+                            ${isCurrentUser ? `<span style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; background: ${themeColors.accentColor}; color: #000; border-radius: 0.25rem; font-size: 0.75rem; font-weight: bold;">TÚ</span>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Points -->
+                    <div style="flex-shrink: 0; text-align: right; margin-right: 2rem;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${themeColors.accentColor};">${player.total_points}</div>
+                        <div style="font-size: 0.75rem; color: ${themeColors.textSecondary};">pts</div>
+                    </div>
+
+                    <!-- Time -->
+                    <div style="flex-shrink: 0; text-align: right;">
+                        <div style="font-size: 0.875rem; color: ${themeColors.textPrimary}; font-family: monospace; font-weight: 500;">${player.total_time_formatted}</div>
+                        <div style="font-size: 0.75rem; color: ${themeColors.textSecondary};">tiempo</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderPodium(data) {
+        const { players } = data;
+        const podiumEl = document.getElementById('podium');
+        const podiumContainer = document.getElementById('podiumContainer');
+
+        if (players.length === 0) {
+            podiumContainer.style.display = 'none';
+            return;
+        }
+
+        podiumContainer.style.display = 'block';
+
+        const positions = [0, 1, 2];
+        const medals = ['🥇', '🥈', '🥉'];
+        const colors = ['#fbbf24', '#d1d5db', '#f97316'];
+
+        podiumEl.innerHTML = positions.map((pos) => {
+            const player = players[pos];
+            if (!player) return '';
+
+            const scale = pos === 0 ? 'transform: scale(1.05);' : '';
+            const marginTop = pos === 0 ? 'margin-bottom: 1rem;' : 'margin-bottom: 2rem;';
+
+            return `
+                <div style="text-align: center;">
+                    <div style="background: ${themeColors.componentsBackground}; border: 1px solid ${themeColors.borderColor}; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.2); ${scale} ${marginTop}">
+                        <div style="height: 8rem; background: linear-gradient(to bottom right, ${colors[pos]}, ${colors[pos]}); display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 3rem;">${medals[pos]}</span>
+                        </div>
+                        <div style="padding: 1rem;">
+                            <div style="width: 4rem; height: 4rem; margin: 0 auto 0.75rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; overflow: hidden; background: ${themeColors.accentColor}; color: #000; border: 3px solid ${colors[pos]};">
+                                ${player.avatar 
+                                    ? `<img src="${player.avatar}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                                    : player.name.charAt(0).toUpperCase()
+                                }
+                            </div>
+                            <h4 style="font-size: 1.125rem; font-weight: bold; color: ${themeColors.textPrimary}; margin: 0.5rem 0;">${player.name}</h4>
+                            <p style="font-size: 1.5rem; font-weight: bold; color: ${themeColors.accentColor}; margin: 0.5rem 0;">⭐ ${player.total_points} pts</p>
+                            <p style="font-size: 0.75rem; color: ${themeColors.textSecondary}; font-family: monospace; margin: 0.5rem 0;">${player.total_time_formatted}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    </script>
+
+</x-app-layout>
