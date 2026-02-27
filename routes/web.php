@@ -75,7 +75,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
     Route::delete('groups/{group}/leave', [GroupController::class, 'leave'])->name('groups.leave');
     Route::get('groups/by-match/{matchId}', [GroupController::class, 'getGroupsByMatch']);
-    Route::get('groups/{group}/quiz-ranking', [GroupController::class, 'getQuizRanking'])->name('groups.quiz-ranking');  // 🎮 Quiz Ranking
+    Route::get('groups/{group}/ranking-quiz', [GroupController::class, 'showQuizRanking'])->name('groups.ranking-quiz');  // 🎮 Quiz Ranking View
+    Route::get('groups/{group}/quiz-ranking', [GroupController::class, 'getQuizRanking'])->name('groups.quiz-ranking');  // 🎮 Quiz Ranking API
 
     // Preguntas
     Route::resource('questions', QuestionController::class);

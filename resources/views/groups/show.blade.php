@@ -128,7 +128,14 @@
                     <!-- 🎮 Preguntas Quiz -->
                     @if(!empty($quizQuestions) && count($quizQuestions) > 0)
                         <div class="mt-8">
-                            <h2 class="text-2xl font-bold mb-4" style="color: {{ $textPrimary }};">🎮 Quiz</h2>
+                            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 12px; font-size: 18px; font-weight: 700; color: {{ $textPrimary }};">
+                                🎮 Quiz
+                                <a href="{{ route('groups.ranking-quiz', $group) }}" style="margin-left: auto; font-size: 12px; color: {{ $textSecondary }}; cursor: pointer; padding: 6px 12px; border-radius: 12px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease; text-decoration: none; display: inline-block;"
+                                    onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#f0f0f0' }}'; this.style.color='{{ $textPrimary }}';"
+                                    onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
+                                    <i class="fas fa-chart-bar mr-1"></i>Ver Ranking
+                                </a>
+                            </div>
                             @foreach($quizQuestions as $question)
                                 <x-quiz-question-card :question="$question" :userAnswer="$question->answers->first()" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
                             @endforeach

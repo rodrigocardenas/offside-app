@@ -1371,6 +1371,21 @@ class GroupController extends Controller
     }
 
     /**
+     * 🎮 Show Quiz Ranking View - Retorna la vista HTML del ranking
+     */
+    public function showQuizRanking(Group $group)
+    {
+        // Verify group is quiz type
+        if ($group->category !== 'quiz') {
+            abort(404, 'Este grupo no es un quiz');
+        }
+
+        return view('groups.quiz-ranking', [
+            'group' => $group
+        ]);
+    }
+
+    /**
      * Helper: Format seconds to mm:ss format
      */
     private function formatSeconds($seconds): string
