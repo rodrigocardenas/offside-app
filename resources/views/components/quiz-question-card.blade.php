@@ -101,6 +101,8 @@ document.addEventListener('DOMContentLoaded', function() {
         inputs.forEach(input => {
             input.disabled = true;
         });
+        // Dejar que se envíe el formulario normalmente
+        // No prevenir el default para que se haga el POST normal
     });
 });
 </script>

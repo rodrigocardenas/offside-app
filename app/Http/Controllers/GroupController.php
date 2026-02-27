@@ -276,6 +276,11 @@ class GroupController extends Controller
 
     public function show(Group $group, FootballService $service)
     {
+        // 🎮 Para grupos de quiz, no cachear para evitar token CSRF stale
+        if ($group->category === 'quiz') {
+            return $this->showGroupData($group);
+        }
+
         // Cache key para el grupo
         $cacheKey = "group_{$group->id}_show_data";
 
@@ -387,6 +392,66 @@ class GroupController extends Controller
         }
 
         return view('groups.show', array_merge($cachedData, ['currentMatchday' => null]));
+    }
+
+    /**
+     * Construir datos del grupo sin caché (para grupos de quiz)
+     */
+    protected function showGroupData(Group $group)
+    {
+        // Auto-agregar usuario a grupo de quiz
+        if (!$group->users->contains('id', auth()->id())) {
+            $group->users()->attach(auth()->id());
+            Cache::forget('user_' . auth()->id() . '_groups');
+            Cache::forget('groups_list');
+        }
+
+        // Obtener roles
+        $roles = $this->groupRoleService->getGroupRoles($group);
+
+        // Cargar relaciones del grupo
+        $group->load([
+            'competition:id,name,type,crest_url',
+            'users' => function ($query) use ($group) {
+                $query->select('users.id', 'users.name', 'users.avatar')
+                      ->with([
+                          'answers' => function ($query) use ($group) {
+                              $query->select('answers.id', 'answers.user_id', 'answers.points_earned', 'answers.question_id')
+                                    ->whereHas('question', function ($questionQuery) use ($group) {
+                                        $questionQuery->where('group_id', $group->id);
+                                    });
+                          }
+                      ])->withSum(['answers as total_points' => function ($query) use ($group) {
+                          $query->whereHas('question', function ($questionQuery) use ($group) {
+                              $questionQuery->where('group_id', $group->id);
+                          });
+                      }], 'points_earned');
+            },
+            'chatMessages' => function ($query) {
+                $query->select('chat_messages.id', 'chat_messages.message', 'chat_messages.user_id', 'chat_messages.group_id', 'chat_messages.created_at')
+                      ->with('user:id,name,avatar')
+                      ->latest()
+                      ->limit(50);
+            }
+        ]);
+
+        // Asignar roles
+        $this->groupRoleService->assignRolesToUsers($group, $roles);
+
+        // Obtener preguntas y respuestas
+        $matchQuestions = $this->getMatchQuestions($group, $roles);
+        $socialQuestion = $this->getSocialQuestion($group, $roles);
+        $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
+        $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
+
+        return view('groups.show', [
+            'group' => $group,
+            'matchQuestions' => $matchQuestions,
+            'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
+            'userAnswers' => $userAnswers,
+            'socialQuestion' => $socialQuestion,
+            'currentMatchday' => null
+        ]);
     }
 
     protected function generateMatchQuestions($matches, $group)
