@@ -90,19 +90,6 @@
 </div>
 
 <script>
-// Scroll automático al elemento identificado por el fragment
-function scrollToFragment() {
-    const fragment = window.location.hash.substring(1);
-    if (fragment) {
-        const element = document.getElementById(fragment);
-        if (element) {
-            setTimeout(() => {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-        }
-    }
-}
-
 // Función para scrollear a la siguiente pregunta
 function scrollToNextQuestion(currentQuestionId) {
     // Encontrar el siguiente elemento question
@@ -122,9 +109,6 @@ function scrollToNextQuestion(currentQuestionId) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Scroll al fragment si existe
-    scrollToFragment();
-    
     const form = document.querySelector('form[data-question-id="{{ $question->id }}"]');
     if (!form) return;
     
@@ -146,7 +130,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-// Scroll al fragment si se carga desde un link externo
-window.addEventListener('hashchange', scrollToFragment);
 </script>

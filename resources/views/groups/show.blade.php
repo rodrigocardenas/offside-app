@@ -932,3 +932,17 @@
     }
 </script>
 
+<!-- Auto-scroll to answered quiz question on page load -->
+<script>
+window.addEventListener('load', function() {
+    const fragment = window.location.hash.substring(1);
+    if (fragment && fragment.startsWith('question')) {
+        setTimeout(() => {
+            const element = document.getElementById(fragment);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    }
+});
+</script>
