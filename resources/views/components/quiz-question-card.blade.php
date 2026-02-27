@@ -95,14 +95,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     @endif
     
+    // Agregar event listener para deshabilitar formulario al enviar (evitar doble envío)
     form.addEventListener('submit', function(e) {
-        // Deshabilitar todos los inputs para prevenir múltiples envíos
-        const inputs = form.querySelectorAll('input, button');
-        inputs.forEach(input => {
-            input.disabled = true;
-        });
-        // Dejar que se envíe el formulario normalmente
-        // No prevenir el default para que se haga el POST normal
+        // Solo deshabilitar, dejar que se envíe normalmente
+        const button = form.querySelector('button[type="submit"]');
+        if (button) {
+            button.disabled = true;
+            button.style.opacity = '0.6';
+        }
     });
 });
 </script>

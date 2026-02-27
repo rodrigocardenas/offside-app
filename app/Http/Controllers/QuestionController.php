@@ -96,6 +96,11 @@ class QuestionController extends Controller
 
     public function answer(Request $request, Question $question)
     {
+        // Asegurar que el usuario está autenticado
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Debes estar autenticado para responder preguntas.');
+        }
+
         // 🎮 Las preguntas de quiz no tienen límite de tiempo
         if ($question->type !== 'quiz' && $question->available_until->addHours(4) < Carbon::now()) {
             Log::info('No puedes responder a esta pregunta en este momento. Disponible desde: ' . $question->available_from . ' hasta: ' . $question->available_until);

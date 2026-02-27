@@ -276,8 +276,9 @@ class GroupController extends Controller
 
     public function show(Group $group, FootballService $service)
     {
-        // 🎮 Para grupos de quiz, no cachear para evitar token CSRF stale
+        // 🎮 Regenerar sesión para quiz groups para asegurar token CSRF válido
         if ($group->category === 'quiz') {
+            \Illuminate\Support\Facades\Session::regenerate();
             return $this->showGroupData($group);
         }
 
