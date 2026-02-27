@@ -1330,7 +1330,7 @@ class GroupController extends Controller
             })
             ->select('users.id', 'users.name', 'users.avatar')
             ->selectRaw('COALESCE(SUM(CASE WHEN answers.is_correct = 1 THEN answers.points_earned ELSE 0 END), 0) as total_points')
-            ->selectRaw('COALESCE(SUM(TIMESTAMPDIFF(SECOND, questions.created_at, answers.answered_at)), 0) as total_time_seconds')
+            ->selectRaw('COALESCE(TIMESTAMPDIFF(SECOND, MIN(answers.answered_at), MAX(answers.answered_at)), 0) as total_time_seconds')
             ->leftJoin('answers', 'users.id', '=', 'answers.user_id')
             ->leftJoin('questions', function($join) use ($quizQuestions) {
                 $join->on('answers.question_id', '=', 'questions.id')
