@@ -276,6 +276,12 @@ class GroupController extends Controller
 
     public function show(Group $group, FootballService $service)
     {
+        // 🎮 Regenerar sesión para quiz groups para asegurar token CSRF válido
+        if ($group->category === 'quiz') {
+            \Illuminate\Support\Facades\Session::regenerate();
+            return $this->showGroupData($group);
+        }
+
         // Cache key para el grupo
         $cacheKey = "group_{$group->id}_show_data";
 
@@ -317,19 +323,22 @@ class GroupController extends Controller
             $matchQuestions = $this->getMatchQuestions($group, $roles);
             // dd($matchQuestions);
             $socialQuestion = $this->getSocialQuestion($group, $roles);
+            $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
             $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
             return [
                 'group' => $group,
                 'matchQuestions' => $matchQuestions,
+                'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
                 'userAnswers' => $userAnswers,
                 'socialQuestion' => $socialQuestion
             ];
         });
 
         if (!$cachedData['group']->users->contains('id', auth()->id())) {
-            // si el grupo es el id 83 (grupo oficial de la app) AGREGAR al usuario al grupo automáticamente
-            if ($group->id === 83) {
+            // si el grupo es el id 83 (grupo oficial de la app) O es un grupo de quiz (categoría 'quiz')
+            // AGREGAR al usuario al grupo automáticamente
+            if ($group->id === 83 || $group->category === 'quiz') {
                 $group->users()->attach(auth()->id());
                 // Limpiar caché relacionada
                 Cache::forget('user_' . auth()->id() . '_groups');
@@ -364,11 +373,13 @@ class GroupController extends Controller
 
                 $matchQuestions = $this->getMatchQuestions($group, $this->groupRoleService->getGroupRoles($group));
                 $socialQuestion = $this->getSocialQuestion($group, $this->groupRoleService->getGroupRoles($group));
+                $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
                 $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
                 return view('groups.show', [
                     'group' => $group,
                     'matchQuestions' => $matchQuestions,
+                    'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
                     'userAnswers' => $userAnswers,
                     'socialQuestion' => $socialQuestion,
                     'currentMatchday' => null
@@ -382,6 +393,66 @@ class GroupController extends Controller
         }
 
         return view('groups.show', array_merge($cachedData, ['currentMatchday' => null]));
+    }
+
+    /**
+     * Construir datos del grupo sin caché (para grupos de quiz)
+     */
+    protected function showGroupData(Group $group)
+    {
+        // Auto-agregar usuario a grupo de quiz
+        if (!$group->users->contains('id', auth()->id())) {
+            $group->users()->attach(auth()->id());
+            Cache::forget('user_' . auth()->id() . '_groups');
+            Cache::forget('groups_list');
+        }
+
+        // Obtener roles
+        $roles = $this->groupRoleService->getGroupRoles($group);
+
+        // Cargar relaciones del grupo
+        $group->load([
+            'competition:id,name,type,crest_url',
+            'users' => function ($query) use ($group) {
+                $query->select('users.id', 'users.name', 'users.avatar')
+                      ->with([
+                          'answers' => function ($query) use ($group) {
+                              $query->select('answers.id', 'answers.user_id', 'answers.points_earned', 'answers.question_id')
+                                    ->whereHas('question', function ($questionQuery) use ($group) {
+                                        $questionQuery->where('group_id', $group->id);
+                                    });
+                          }
+                      ])->withSum(['answers as total_points' => function ($query) use ($group) {
+                          $query->whereHas('question', function ($questionQuery) use ($group) {
+                              $questionQuery->where('group_id', $group->id);
+                          });
+                      }], 'points_earned');
+            },
+            'chatMessages' => function ($query) {
+                $query->select('chat_messages.id', 'chat_messages.message', 'chat_messages.user_id', 'chat_messages.group_id', 'chat_messages.created_at')
+                      ->with('user:id,name,avatar')
+                      ->latest()
+                      ->limit(50);
+            }
+        ]);
+
+        // Asignar roles
+        $this->groupRoleService->assignRolesToUsers($group, $roles);
+
+        // Obtener preguntas y respuestas
+        $matchQuestions = $this->getMatchQuestions($group, $roles);
+        $socialQuestion = $this->getSocialQuestion($group, $roles);
+        $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
+        $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
+
+        return view('groups.show', [
+            'group' => $group,
+            'matchQuestions' => $matchQuestions,
+            'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
+            'userAnswers' => $userAnswers,
+            'socialQuestion' => $socialQuestion,
+            'currentMatchday' => null
+        ]);
     }
 
     protected function generateMatchQuestions($matches, $group)
@@ -1215,6 +1286,125 @@ class GroupController extends Controller
                 'user_points' => $currentUser['total_points'] ?? 0
             ]
         ]);
+    }
+
+    /**
+     * 🎮 Get Quiz Ranking - Ordenado por puntos (respuestas correctas) y tiempo de respuesta
+     *
+     * Para grupos tipo quiz (ej: MWC), retorna ranking con:
+     * 1. Puntos totales (respuestas correctas) - DESCENDENTE
+     * 2. Tiempo total de respuesta - ASCENDENTE (desempate)
+     *
+     * Tiempo total = Diferencia entre timestamp de ÚLTIMA respuesta y PRIMERA respuesta
+     * Ej: Si respondiste Q1 a las 14:00 y Q10 a las 14:08 = 8 minutos total
+     *
+     * IMPORTANTE: Solo cuenta respuestas de categoría 'quiz', ignorando social/predictive
+     */
+    public function getQuizRanking(Group $group)
+    {
+        // Verify user has access or group is public
+        $isPublicGroup = $group->category === 'quiz';
+        if (!$isPublicGroup && !$group->users->contains('id', auth()->id())) {
+            return response()->json([
+                'error' => 'No tienes acceso a este grupo'
+            ], 403);
+        }
+
+        // Get all quiz questions in this group
+        $quizQuestions = $group->questions()
+            ->where('type', 'quiz')
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($quizQuestions)) {
+            return response()->json([
+                'players' => [],
+                'stats' => [
+                    'total_players' => 0,
+                    'user_position' => null,
+                    'user_points' => 0,
+                    'user_time' => 0
+                ]
+            ]);
+        }
+
+        // 🎯 FIX: Usar subquery en lugar de relación many-to-many para evitar GROUP BY issues
+        // IMPORTANTE: Filtrar por answers.category = 'quiz' para solo contar respuestas de tipo quiz
+        $rankedUsers = User::query()
+            ->whereHas('groups', function($q) use ($group) {
+                $q->where('group_id', $group->id);
+            })
+            ->select('users.id', 'users.name', 'users.avatar')
+            ->selectRaw('COALESCE(SUM(CASE WHEN answers.is_correct = 1 THEN answers.points_earned ELSE 0 END), 0) as total_points')
+            ->selectRaw('COALESCE(TIMESTAMPDIFF(SECOND, MIN(answers.answered_at), MAX(answers.answered_at)), 0) as total_time_seconds')
+            ->leftJoin('answers', function($join) {
+                $join->on('users.id', '=', 'answers.user_id')
+                    ->where('answers.category', 'quiz');  // 🎮 Solo contar respuestas de tipo quiz
+            })
+            ->leftJoin('questions', function($join) use ($quizQuestions) {
+                $join->on('answers.question_id', '=', 'questions.id')
+                    ->whereIn('questions.id', $quizQuestions);
+            })
+            ->groupBy('users.id')
+            ->orderBy('total_points', 'desc')
+            ->orderBy('total_time_seconds', 'asc')
+            ->get()
+            ->values()
+            ->map(function($user, $index) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'avatar' => $user->avatar,
+                    'total_points' => $user->total_points ?? 0,
+                    'total_time_seconds' => (int) $user->total_time_seconds,
+                    'total_time_formatted' => $this->formatSeconds($user->total_time_seconds ?? 0),
+                    'rank' => $index + 1,
+                    'position' => ['🥇', '🥈', '🥉'][$index] ?? '•',
+                    'is_current_user' => $user->id === auth()->id()
+                ];
+            });
+
+        // Get current user stats
+        $currentUser = $rankedUsers->firstWhere('is_current_user', true);
+
+        return response()->json([
+            'players' => $rankedUsers->values(),
+            'stats' => [
+                'total_players' => $rankedUsers->count(),
+                'user_position' => $currentUser['rank'] ?? null,
+                'user_points' => $currentUser['total_points'] ?? 0,
+                'user_time' => $currentUser['total_time_seconds'] ?? 0,
+                'user_time_formatted' => $currentUser['total_time_formatted'] ?? '00:00:00'
+            ]
+        ]);
+    }
+
+    /**
+     * 🎮 Show Quiz Ranking View - Retorna la vista HTML del ranking
+     */
+    public function showQuizRanking(Group $group)
+    {
+        // Verify group is quiz type
+        if ($group->category !== 'quiz') {
+            abort(404, 'Este grupo no es un quiz');
+        }
+
+        return view('groups.quiz-ranking', [
+            'group' => $group
+        ]);
+    }
+
+    /**
+     * Helper: Format seconds to mm:ss format
+     */
+    private function formatSeconds($seconds): string
+    {
+        $seconds = (int) $seconds;
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+        $secs = $seconds % 60;
+
+        return sprintf('%02d:%02d:%02d', $hours, $minutes, $secs);
     }
 
     function getGroupsByMatch($matchId)

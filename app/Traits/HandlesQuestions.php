@@ -95,6 +95,28 @@ trait HandlesQuestions
         return $question;
     }
 
+    /**
+     * 🎮 Obtiene preguntas de tipo quiz para mostrar en el grupo
+     * Las preguntas quiz se cargan todas para que el usuario pueda responderlas
+     * NO se cachean para mostrar respuestas actualizadas inmediatamente
+     */
+    protected function getQuizQuestions($group)
+    {
+        $questions = Question::where('type', 'quiz')
+            ->where('group_id', $group->id)
+            ->where('available_until', '>', now())
+            ->with([
+                'options',
+                'answers' => function ($query) {
+                    $query->where('user_id', auth()->id());
+                }
+            ])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return $this->processQuestions($questions);
+    }
+
     protected function getUserAnswers($group, $matchQuestions, $socialQuestion)
     {
         $userAnswersCacheKey = "user_{$group->id}_answers";
@@ -218,9 +240,11 @@ trait HandlesQuestions
 
         // 2. Buscar partidos próximos en el calendario
         // IMPORTANTE: Los partidos están en UTC, así que comparamos con now()->utc()
+        // 🎯 PRIORIZACIÓN: Ordenar por is_featured DESC (destacados primero), luego por fecha ASC
         $matches = \App\Models\FootballMatch::where('status', 'Not Started')
             ->where('date', '>=', now()->utc())
-            ->orderBy('date')
+            ->orderBy('is_featured', 'desc')  // 🎯 Prioridad 1: Partidos destacados
+            ->orderBy('date', 'asc')          // 🎯 Prioridad 2: Proximidad en fecha
             ->get();
 
         // 3. Filtrar partidos que ya tengan pregunta vigente o reciente (últimas 24 horas) en el grupo
@@ -243,6 +267,8 @@ trait HandlesQuestions
 
         $nuevas = collect();
         // 5. Crear preguntas para partidos próximos sin pregunta
+        // Ahora $matchesSinPregunta ya viene ordenado por is_featured DESC, date ASC
+        // por lo que la priorización ocurre naturalmente sin necesidad de lógica adicional
         foreach ($matchesSinPregunta as $match) {
             if ($faltantes <= 0) break;
             $plantilla = $plantillas[$plantillaIndex % $plantillas->count()];
@@ -251,24 +277,6 @@ trait HandlesQuestions
             if ($pregunta) {
                 $nuevas->push($pregunta);
                 $faltantes--;
-            }
-        }
-
-        // 6. Si aún faltan, usar el partido destacado
-        if ($faltantes > 0) {
-            $destacado = $matches->where('is_featured', true)->sortBy('date')->first();
-            if ($destacado) {
-                while ($faltantes > 0) {
-                    $plantilla = $plantillas[$plantillaIndex % $plantillas->count()];
-                    $plantillaIndex++;
-                    $pregunta = $this->createQuestionFromTemplate($plantilla, $destacado, $group);
-                    if ($pregunta) {
-                        $nuevas->push($pregunta);
-                        $faltantes--;
-                    } else {
-                        break;
-                    }
-                }
             }
         }
 

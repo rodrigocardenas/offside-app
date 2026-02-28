@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Question;
 use App\Models\TemplateQuestion;
 use App\Models\Answer;
+use App\Services\QuestionEvaluationService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -95,7 +96,13 @@ class QuestionController extends Controller
 
     public function answer(Request $request, Question $question)
     {
-        if ($question->available_until->addHours(4) < Carbon::now()) {
+        // Asegurar que el usuario está autenticado
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Debes estar autenticado para responder preguntas.');
+        }
+
+        // 🎮 Las preguntas de quiz no tienen límite de tiempo
+        if ($question->type !== 'quiz' && $question->available_until->addHours(4) < Carbon::now()) {
             Log::info('No puedes responder a esta pregunta en este momento. Disponible desde: ' . $question->available_from . ' hasta: ' . $question->available_until);
             throw new QuestionException(
                 'No puedes responder a esta pregunta en este momento.',
@@ -127,6 +134,25 @@ class QuestionController extends Controller
             'question_option_id' => 'required|exists:question_options,id',
         ]);
 
+        // 🎮 QUIZ HANDLING: Evaluar respuesta de quiz
+        $isCorrect = null;
+        $pointsEarned = 0;
+
+        if ($question->type === 'quiz') {
+            $evaluationService = new QuestionEvaluationService();
+            $isCorrect = $evaluationService->evaluateQuizQuestion(
+                $question,
+                intval($request->question_option_id)
+            );
+            $pointsEarned = $isCorrect ? ($question->points ?? 100) : 0;
+            $answeredAt = now();
+        } else {
+            // Para preguntas social/predictive, usar lógica existente
+            $isCorrect = $question->type === 'social' ? true : null;
+            $pointsEarned = $question->type === 'social' ? 50 : 0;
+            $answeredAt = null;
+        }
+
         // Usar updateOrCreate para crear o actualizar la respuesta
         Answer::updateOrCreate(
             [
@@ -135,9 +161,10 @@ class QuestionController extends Controller
             ],
             [
                 'question_option_id' => intval($request->question_option_id),
-                'is_correct' => $question->type === 'social' ? true : null,
-                'points_earned' => $question->type === 'social' ? 50 : 0,
+                'is_correct' => $isCorrect,
+                'points_earned' => $pointsEarned,
                 'category' => $question->type,
+                'answered_at' => $answeredAt,
             ]
         );
 
@@ -146,8 +173,17 @@ class QuestionController extends Controller
         Cache::forget("group_{$question->group_id}_match_questions");
         Cache::forget("group_{$question->group_id}_user_answers");
         Cache::forget("group_{$question->group_id}_show_data");
+        Cache::forget("group_{$question->group_id}_quiz_ranking");  // 🎮 Clear quiz ranking cache
+        // NOTE: group_quiz_questions no se cachea para mantener respuestas actualizadas
 
-        Log::info('Respuesta guardada o actualizada: ' . $question->id . ' - ' . $request->question_option_id);
+        Log::info('Respuesta guardada o actualizada', [
+            'question_id' => $question->id,
+            'option_id' => $request->question_option_id,
+            'type' => $question->type,
+            'is_correct' => $isCorrect,
+            'points_earned' => $pointsEarned,
+            'user_id' => auth()->id(),
+        ]);
 
         return redirect()->route('groups.show', $question->group)->withFragment('question' . $question->id);
     }
