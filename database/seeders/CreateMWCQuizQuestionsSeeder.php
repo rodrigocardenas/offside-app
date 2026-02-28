@@ -66,12 +66,12 @@ class CreateMWCQuizQuestionsSeeder extends Seeder
             // Q5
             [
                 'type' => 'quiz',
-                'text' => '¿Cuál es el equipo español que más veces ha ganado la Champions League?',
+                'text' => '¿En qué país se disputó la final de la Copa del Mundo de 2010?',
                 'options' => [
-                    ['text' => 'Barcelona', 'is_correct' => false],
-                    ['text' => 'Atlético de Madrid', 'is_correct' => false],
-                    ['text' => 'Real Madrid', 'is_correct' => true],
-                    ['text' => 'Valencia', 'is_correct' => false],
+                    ['text' => 'España', 'is_correct' => false],
+                    ['text' => 'Sudáfrica', 'is_correct' => true],
+                    ['text' => 'Brasil', 'is_correct' => false],
+                    ['text' => 'Alemania', 'is_correct' => false],
                 ]
             ],
             // Q6
@@ -88,12 +88,12 @@ class CreateMWCQuizQuestionsSeeder extends Seeder
             // Q7
             [
                 'type' => 'quiz',
-                'text' => '¿Cuántos equipos participan en la Premier League inglesa?',
+                'text' => '¿Quién es el máximo goleador histórico de la selección de España?',
                 'options' => [
-                    ['text' => '18', 'is_correct' => false],
-                    ['text' => '20', 'is_correct' => true],
-                    ['text' => '22', 'is_correct' => false],
-                    ['text' => '24', 'is_correct' => false],
+                    ['text' => 'Raúl', 'is_correct' => false],
+                    ['text' => 'Fernando Torres', 'is_correct' => false],
+                    ['text' => 'David Villa', 'is_correct' => true],
+                    ['text' => 'Sergio Ramos', 'is_correct' => false],
                 ]
             ],
             // Q8
@@ -110,23 +110,23 @@ class CreateMWCQuizQuestionsSeeder extends Seeder
             // Q9
             [
                 'type' => 'quiz',
-                'text' => '¿Cuál es el uniforme tradicional de la selección de Argentina?',
+                'text' => '¿Qué selección tiene más Mundiales de fútbol femenino?',
                 'options' => [
-                    ['text' => 'Azul y blanco', 'is_correct' => true],
-                    ['text' => 'Rojo y blanco', 'is_correct' => false],
-                    ['text' => 'Amarillo y azul', 'is_correct' => false],
-                    ['text' => 'Blanco y negro', 'is_correct' => false],
+                    ['text' => 'EEUU', 'is_correct' => true],
+                    ['text' => 'Brasil', 'is_correct' => false],
+                    ['text' => 'Noruega', 'is_correct' => false],
+                    ['text' => 'Alemania', 'is_correct' => false],
                 ]
             ],
             // Q10
             [
                 'type' => 'quiz',
-                'text' => '¿Cuántos jugadores por equipo juegan en un partido de fútbol?',
+                'text' => '¿Quién es el jugador más joven en disputar un mundial?',
                 'options' => [
-                    ['text' => '10', 'is_correct' => false],
-                    ['text' => '11', 'is_correct' => true],
-                    ['text' => '12', 'is_correct' => false],
-                    ['text' => '13', 'is_correct' => false],
+                    ['text' => 'Luke Brooke-Smith', 'is_correct' => true],
+                    ['text' => 'Norman Whiteside', 'is_correct' => false],
+                    ['text' => 'Pelé', 'is_correct' => false],
+                    ['text' => 'Hugo Sánchez', 'is_correct' => false],
                 ]
             ],
         ];
