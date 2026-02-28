@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Migrati>ons\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB;>
 
 return new class extends Migration
 {
@@ -12,8 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Restaurar AUTO_INCREMENT en la columna id
-        DB::statement("ALTER TABLE answers MODIFY COLUMN id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY");
+        // Restaurar AUTO_INCREMENT en la columna id (solo auto_increment, NO redefinir PRIMARY KEY)
+        // Already exists as primary key, we just need to restore AUTO_INCREMENT
+        DB::statement("ALTER TABLE answers MODIFY COLUMN id BIGINT UNSIGNED AUTO_INCREMENT");
     }
 
     /**
@@ -21,7 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remover AUTO_INCREMENT (revert to non-auto-incrementing)
-        DB::statement("ALTER TABLE answers MODIFY COLUMN id BIGINT UNSIGNED");
+        // No hacer nada en reverse, el AUTO_INCREMENT es crítico
     }
 };
