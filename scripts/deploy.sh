@@ -44,8 +44,8 @@ echo "🚀 Rama validada. Iniciando despliegue de '$REQUIRED_BRANCH'..."
 echo "📦 Compilando assets..."
 npm run build
 
-# 4. Comprimir
-tar -czf build.tar.gz public/build
+# 4. Comprimir - incluye build assets Y storage publicos (avatares, logos)
+tar -czf build.tar.gz public/build storage/app/public
 
 # 5. Subir el archivo directamente al servidor
 echo "Subiendo assets al servidor..."
@@ -92,6 +92,9 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
 
     echo "🔧 Preparando directorios..."
     mkdir -p bootstrap/cache
+    # Asegurar permisos correctos en storage (para avatares y logos de usuarios)
+    chmod -R 777 storage/app/public 2>/dev/null || true
+    chown -R www-data:www-data storage/app/public 2>/dev/null || true
 
     echo "📦 Ejecutando comandos de optimización..."
     php artisan config:clear || true
