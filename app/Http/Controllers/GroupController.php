@@ -1345,7 +1345,7 @@ class GroupController extends Controller
                 $join->on('answers.question_id', '=', 'questions.id')
                     ->whereIn('questions.id', $quizQuestions);
             })
-            ->groupBy('users.id')
+            ->groupBy('users.id', 'users.name', 'users.avatar')
             ->orderBy('total_points', 'desc')
             ->orderBy('total_time_seconds', 'asc')
             ->get()
