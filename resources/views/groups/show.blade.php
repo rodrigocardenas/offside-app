@@ -122,8 +122,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
 
-                    <!-- Preguntas de Partidos -->
-                    <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :group="$group" :social-question="$socialQuestion ?? null" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
+                    <!-- Preguntas de Partidos (solo si NO es grupo quiz) -->
+                    @if($group->category !== 'quiz')
+                        <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :group="$group" :social-question="$socialQuestion ?? null" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
+                    @endif
 
                     <!-- 🎮 Preguntas Quiz -->
                     @if(!empty($quizQuestions) && count($quizQuestions) > 0)

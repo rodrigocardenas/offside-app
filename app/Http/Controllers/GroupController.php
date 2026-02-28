@@ -1294,6 +1294,11 @@ class GroupController extends Controller
      * Para grupos tipo quiz (ej: MWC), retorna ranking con:
      * 1. Puntos totales (respuestas correctas) - DESCENDENTE
      * 2. Tiempo total de respuesta - ASCENDENTE (desempate)
+     * 
+     * Tiempo total = Diferencia entre timestamp de ÚLTIMA respuesta y PRIMERA respuesta
+     * Ej: Si respondiste Q1 a las 14:00 y Q10 a las 14:08 = 8 minutos total
+     * 
+     * IMPORTANTE: Solo cuenta respuestas de categoría 'quiz', ignorando social/predictive
      */
     public function getQuizRanking(Group $group)
     {
@@ -1324,6 +1329,7 @@ class GroupController extends Controller
         }
 
         // 🎯 FIX: Usar subquery en lugar de relación many-to-many para evitar GROUP BY issues
+        // IMPORTANTE: Filtrar por answers.category = 'quiz' para solo contar respuestas de tipo quiz
         $rankedUsers = User::query()
             ->whereHas('groups', function($q) use ($group) {
                 $q->where('group_id', $group->id);
@@ -1331,7 +1337,10 @@ class GroupController extends Controller
             ->select('users.id', 'users.name', 'users.avatar')
             ->selectRaw('COALESCE(SUM(CASE WHEN answers.is_correct = 1 THEN answers.points_earned ELSE 0 END), 0) as total_points')
             ->selectRaw('COALESCE(TIMESTAMPDIFF(SECOND, MIN(answers.answered_at), MAX(answers.answered_at)), 0) as total_time_seconds')
-            ->leftJoin('answers', 'users.id', '=', 'answers.user_id')
+            ->leftJoin('answers', function($join) {
+                $join->on('users.id', '=', 'answers.user_id')
+                    ->where('answers.category', 'quiz');  // 🎮 Solo contar respuestas de tipo quiz
+            })
             ->leftJoin('questions', function($join) use ($quizQuestions) {
                 $join->on('answers.question_id', '=', 'questions.id')
                     ->whereIn('questions.id', $quizQuestions);
