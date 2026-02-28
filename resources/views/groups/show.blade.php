@@ -943,64 +943,52 @@
 
 <!-- Auto-scroll to answered quiz question on page load -->
 <script>
-// Función para hacer scroll a la pregunta del fragment con múltiples intentos
-function scrollToQuestion() {
-    const fragment = window.location.hash.substring(1);
-    if (!fragment || !fragment.startsWith('question')) {
-        return;
-    }
-
-    let attemptCount = 0;
-    const maxAttempts = 5;
-    
-    const tryScroll = () => {
-        const element = document.getElementById(fragment);
+document.addEventListener('DOMContentLoaded', function() {
+    // Pequeño delay para asegurar que TODOS los elementos están renderizados
+    setTimeout(() => {
+        const fragment = window.location.hash.substring(1);
         
-        if (element) {
-            // Elemento encontrado, hacer scroll
-            const elementRect = element.getBoundingClientRect();
-            const absoluteElementTop = elementRect.top + window.pageYOffset;
-            const headerHeight = 80; // Altura aproximada del header
+        if (fragment && fragment.startsWith('question')) {
+            console.log('🎯 Buscando elemento:', fragment);
             
-            // Scroll a la posición con la altura del header en cuenta
-            window.scrollTo({
-                top: absoluteElementTop - headerHeight,
-                behavior: 'smooth'
-            });
+            const element = document.getElementById(fragment);
             
-            // Hacer focus para mantener la posición visible
-            element.focus({ preventScroll: true });
-            
-            return true;
+            if (element) {
+                console.log('✅ Elemento encontrado, haciendo scroll...');
+                
+                // Obtener la posición del elemento
+                const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+                const headerOffset = 100; // Offset para el header
+                const targetScroll = elementPosition - headerOffset;
+                
+                // Hacer scroll directo (sin smooth para que sea más confiable)
+                window.scrollTo(0, targetScroll);
+                
+                // Después de un pequeño delay, hacer smooth scroll como confirmación
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: targetScroll,
+                        behavior: 'smooth'
+                    });
+                }, 100);
+            } else {
+                console.warn('❌ No se encontró elemento con ID:', fragment);
+                console.log('📋 IDs disponibles:', Array.from(document.querySelectorAll('[id^="question"]')).map(el => el.id));
+            }
         }
-        
-        // Si no encontramos el elemento y tenemos más intentos, reintentar
-        if (attemptCount < maxAttempts) {
-            attemptCount++;
-            const delay = Math.min(300 + (attemptCount * 200), 1500); // Aumentar delay progresivamente
-            setTimeout(tryScroll, delay);
-            return false;
-        }
-        
-        return false;
-    };
-    
-    // Primer intento después de un delay inicial
-    setTimeout(tryScroll, 100);
-}
-
-// Ejecutar cuando el documento esté listo
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', scrollToQuestion);
-} else {
-    scrollToQuestion();
-}
-
-// También ejecutar en el evento load
-window.addEventListener('load', () => {
-    setTimeout(scrollToQuestion, 200);
+    }, 500); // Delay mayor para asegurar renderización completa
 });
 
-// Ejecutar también cuando se haya renderizado todo (redundancia para mayor seguridad)
-window.addEventListener('pageshow', scrollToQuestion);
+// También ejecutar en load como fallback
+window.addEventListener('load', function() {
+    setTimeout(() => {
+        const fragment = window.location.hash.substring(1);
+        if (fragment && fragment.startsWith('question')) {
+            const element = document.getElementById(fragment);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    }, 300);
+});
 </script>
