@@ -137,7 +137,7 @@
                                 </a>
                             </div>
                             @foreach($quizQuestions as $question)
-                                <x-quiz-question-card :question="$question" :userAnswer="$question->answers->first()" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
+                                <x-quiz-question-card :question="$question" :question-number="$loop->iteration" :userAnswer="$question->answers->first()" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
                             @endforeach
                         </div>
                     @endif

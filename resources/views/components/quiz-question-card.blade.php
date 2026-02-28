@@ -10,7 +10,7 @@
             <div class="flex-1">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full" style="background-color: {{ $accentColor ?? '#3b82f6' }}; color: white;">
-                        🎮 QUIZ
+                        🎮 PREGUNTA #{{ $questionNumber ?? '?' }}
                     </span>
                     <span class="text-sm" style="color: {{ $textSecondary ?? '#6b7280' }};">
                         {{ $question->points ?? 100 }} puntos

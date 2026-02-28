@@ -66,7 +66,7 @@ class CreateMWCQuizQuestionsSeeder extends Seeder
             // Q5
             [
                 'type' => 'quiz',
-                'text' => '¿Cuál es el único equipo español que ha ganado la Champions League?',
+                'text' => '¿Cuál es el equipo español que más veces ha ganado la Champions League?',
                 'options' => [
                     ['text' => 'Barcelona', 'is_correct' => false],
                     ['text' => 'Atlético de Madrid', 'is_correct' => false],
