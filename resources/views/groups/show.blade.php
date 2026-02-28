@@ -943,32 +943,64 @@
 
 <!-- Auto-scroll to answered quiz question on page load -->
 <script>
-// Función para hacer scroll a la pregunta del fragment
+// Función para hacer scroll a la pregunta del fragment con múltiples intentos
 function scrollToQuestion() {
     const fragment = window.location.hash.substring(1);
-    if (fragment && fragment.startsWith('question')) {
-        const element = document.getElementById(fragment);
-        if (element) {
-            // Usar setTimeout para asegurar que el DOM esté completamente renderizado
-            setTimeout(() => {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Hacer focus al elemento para mantener la posición
-                element.focus({ preventScroll: true });
-            }, 300);
-        }
+    if (!fragment || !fragment.startsWith('question')) {
+        return;
     }
+
+    let attemptCount = 0;
+    const maxAttempts = 5;
+    
+    const tryScroll = () => {
+        const element = document.getElementById(fragment);
+        
+        if (element) {
+            // Elemento encontrado, hacer scroll
+            const elementRect = element.getBoundingClientRect();
+            const absoluteElementTop = elementRect.top + window.pageYOffset;
+            const headerHeight = 80; // Altura aproximada del header
+            
+            // Scroll a la posición con la altura del header en cuenta
+            window.scrollTo({
+                top: absoluteElementTop - headerHeight,
+                behavior: 'smooth'
+            });
+            
+            // Hacer focus para mantener la posición visible
+            element.focus({ preventScroll: true });
+            
+            return true;
+        }
+        
+        // Si no encontramos el elemento y tenemos más intentos, reintentar
+        if (attemptCount < maxAttempts) {
+            attemptCount++;
+            const delay = Math.min(300 + (attemptCount * 200), 1500); // Aumentar delay progresivamente
+            setTimeout(tryScroll, delay);
+            return false;
+        }
+        
+        return false;
+    };
+    
+    // Primer intento después de un delay inicial
+    setTimeout(tryScroll, 100);
 }
 
 // Ejecutar cuando el documento esté listo
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', scrollToQuestion);
 } else {
-    // Si el documento ya está cargado (en recargas rápidas)
     scrollToQuestion();
 }
 
-// También ejecutar en el evento load con delay adicional
+// También ejecutar en el evento load
 window.addEventListener('load', () => {
-    setTimeout(scrollToQuestion, 100);
+    setTimeout(scrollToQuestion, 200);
 });
+
+// Ejecutar también cuando se haya renderizado todo (redundancia para mayor seguridad)
+window.addEventListener('pageshow', scrollToQuestion);
 </script>
