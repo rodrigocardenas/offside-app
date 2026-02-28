@@ -1294,10 +1294,10 @@ class GroupController extends Controller
      * Para grupos tipo quiz (ej: MWC), retorna ranking con:
      * 1. Puntos totales (respuestas correctas) - DESCENDENTE
      * 2. Tiempo total de respuesta - ASCENDENTE (desempate)
-     * 
+     *
      * Tiempo total = Diferencia entre timestamp de ÚLTIMA respuesta y PRIMERA respuesta
      * Ej: Si respondiste Q1 a las 14:00 y Q10 a las 14:08 = 8 minutos total
-     * 
+     *
      * IMPORTANTE: Solo cuenta respuestas de categoría 'quiz', ignorando social/predictive
      */
     public function getQuizRanking(Group $group)

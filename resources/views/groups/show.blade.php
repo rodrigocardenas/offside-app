@@ -946,27 +946,27 @@
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         const fragment = window.location.hash.substring(1);
-        
+
         if (fragment && fragment.startsWith('question')) {
             console.log('🎯 Buscando elemento:', fragment);
-            
+
             const element = document.getElementById(fragment);
-            
+
             if (element) {
                 console.log('✅ Elemento encontrado:', element);
                 console.log('📍 Posición del elemento:', element.getBoundingClientRect());
-                
+
                 // Método 1: scrollIntoView más simple
                 element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 console.log('✨ scrollIntoView ejecutado');
-                
+
                 // Método 2: forzar scroll con window.scrollTo después de un delay
                 setTimeout(() => {
                     const scrollPos = element.getBoundingClientRect().top + window.pageYOffset - 100;
                     window.scrollTo({ top: scrollPos, behavior: 'smooth' });
                     console.log('📜 window.scrollTo ejecutado a:', scrollPos);
                 }, 200);
-                
+
             } else {
                 console.warn('❌ No se encontró elemento con ID:', fragment);
             }

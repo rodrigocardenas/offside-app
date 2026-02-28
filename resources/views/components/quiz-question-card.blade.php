@@ -29,7 +29,7 @@
             @csrf
 
             @forelse($question->options as $option)
-                <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-all" 
+                <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:opacity-80 transition-all"
                     style="border-color: {{ $userAnswer && $userAnswer->question_option_id === $option->id ? $accentColor ?? '#3b82f6' : $borderColor ?? '#e5e7eb' }}; background-color: {{ $userAnswer && $userAnswer->question_option_id === $option->id ? 'rgba(59, 130, 246, 0.05)' : $componentsBackground ?? '#ffffff' }};">
 
                     <input
@@ -95,12 +95,12 @@ function scrollToNextQuestion(currentQuestionId) {
     // Encontrar el siguiente elemento question
     const currentElement = document.getElementById('question' + currentQuestionId);
     if (!currentElement) return;
-    
+
     let nextElement = currentElement.nextElementSibling;
     while (nextElement && !nextElement.id?.startsWith('question')) {
         nextElement = nextElement.nextElementSibling;
     }
-    
+
     if (nextElement) {
         nextElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         // Opcionalmente, actualizar el fragment en la URL
@@ -111,7 +111,7 @@ function scrollToNextQuestion(currentQuestionId) {
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form[data-question-id="{{ $question->id }}"]');
     if (!form) return;
-    
+
     // Si el usuario ya respondió, deshabilitar el formulario
     @if($userAnswer)
         const inputs = form.querySelectorAll('input[name="question_option_id"], button[type="submit"]');
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
             input.disabled = true;
         });
     @endif
-    
+
     // Agregar event listener para deshabilitar formulario al enviar (evitar doble envío)
     form.addEventListener('submit', function(e) {
         // Solo deshabilitar, dejar que se envíe normalmente
