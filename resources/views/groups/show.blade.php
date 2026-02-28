@@ -944,7 +944,6 @@
 <!-- Auto-scroll to answered quiz question on page load -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Pequeño delay para asegurar que TODOS los elementos están renderizados
     setTimeout(() => {
         const fragment = window.location.hash.substring(1);
         
@@ -954,41 +953,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const element = document.getElementById(fragment);
             
             if (element) {
-                console.log('✅ Elemento encontrado, haciendo scroll...');
+                console.log('✅ Elemento encontrado:', element);
+                console.log('📍 Posición del elemento:', element.getBoundingClientRect());
                 
-                // Obtener la posición del elemento
-                const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-                const headerOffset = 100; // Offset para el header
-                const targetScroll = elementPosition - headerOffset;
+                // Método 1: scrollIntoView más simple
+                element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                console.log('✨ scrollIntoView ejecutado');
                 
-                // Hacer scroll directo (sin smooth para que sea más confiable)
-                window.scrollTo(0, targetScroll);
-                
-                // Después de un pequeño delay, hacer smooth scroll como confirmación
+                // Método 2: forzar scroll con window.scrollTo después de un delay
                 setTimeout(() => {
-                    window.scrollTo({
-                        top: targetScroll,
-                        behavior: 'smooth'
-                    });
-                }, 100);
+                    const scrollPos = element.getBoundingClientRect().top + window.pageYOffset - 100;
+                    window.scrollTo({ top: scrollPos, behavior: 'smooth' });
+                    console.log('📜 window.scrollTo ejecutado a:', scrollPos);
+                }, 200);
+                
             } else {
                 console.warn('❌ No se encontró elemento con ID:', fragment);
-                console.log('📋 IDs disponibles:', Array.from(document.querySelectorAll('[id^="question"]')).map(el => el.id));
             }
         }
-    }, 500); // Delay mayor para asegurar renderización completa
-});
-
-// También ejecutar en load como fallback
-window.addEventListener('load', function() {
-    setTimeout(() => {
-        const fragment = window.location.hash.substring(1);
-        if (fragment && fragment.startsWith('question')) {
-            const element = document.getElementById(fragment);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }
-    }, 300);
+    }, 800); // Aumentar a 800ms
 });
 </script>
