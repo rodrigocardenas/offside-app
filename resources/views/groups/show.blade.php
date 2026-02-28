@@ -941,20 +941,32 @@
 
 <!-- Auto-scroll to answered quiz question on page load -->
 <script>
-// Prevenir auto-scroll nativo del navegador y hacer el nuestro
-window.addEventListener('load', function() {
+// Función para hacer scroll a la pregunta del fragment
+function scrollToQuestion() {
     const fragment = window.location.hash.substring(1);
     if (fragment && fragment.startsWith('question')) {
-        // Scroll al top primero para resetear
-        window.scrollTo(0, 0);
-        
-        // Luego después de que el DOM esté listo, hacer scroll a la pregunta
-        setTimeout(() => {
-            const element = document.getElementById(fragment);
-            if (element) {
+        const element = document.getElementById(fragment);
+        if (element) {
+            // Usar setTimeout para asegurar que el DOM esté completamente renderizado
+            setTimeout(() => {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, 200);
+                // Hacer focus al elemento para mantener la posición
+                element.focus({ preventScroll: true });
+            }, 300);
+        }
     }
+}
+
+// Ejecutar cuando el documento esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scrollToQuestion);
+} else {
+    // Si el documento ya está cargado (en recargas rápidas)
+    scrollToQuestion();
+}
+
+// También ejecutar en el evento load con delay adicional
+window.addEventListener('load', () => {
+    setTimeout(scrollToQuestion, 100);
 });
 </script>
