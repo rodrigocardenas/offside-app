@@ -50,7 +50,41 @@ class ProfileController extends Controller
     {
         Log::info('ProfileController::update iniciado');
 
-        auth()->user()->update($request->validated());
+        $user = auth()->user();
+        $data = $request->validated();
+
+        // Procesar avatar si se subió
+        if ($request->hasFile('avatar')) {
+            Log::info('Avatar detectado en request, procesando...');
+            try {
+                $file = $request->file('avatar');
+                
+                // Generar nombre único
+                $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+                
+                // Guardar en storage/app/public/avatars
+                $path = $file->storeAs('avatars', $filename, 'public');
+                Log::info('Avatar guardado en: ' . $path);
+                
+                // Guardar solo el nombre del archivo en la BD
+                $data['avatar'] = $filename;
+                
+            } catch (\Exception $e) {
+                Log::error('Error guardando avatar: ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]);
+                // Continuar sin avatar si hay error
+                unset($data['avatar']);
+            }
+        } else {
+            // Si no hay archivo, no actualizar el campo avatar
+            unset($data['avatar']);
+        }
+
+        $user->update($data);
+        Log::info('Perfil actualizado exitosamente');
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
