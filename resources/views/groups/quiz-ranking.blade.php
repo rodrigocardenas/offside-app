@@ -224,7 +224,7 @@
                     <div style="flex-shrink: 0; margin-right: 1rem; position: relative;">
                         <div style="width: 3rem; height: 3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem; overflow: hidden; border: 3px solid ${medalColor}; background: ${themeColors.accentColor}; color: #000;">
                             ${player.avatar 
-                                ? `<img src="${player.avatar}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                                ? `<img src="/storage/avatars/${player.avatar}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
                                 : player.name.charAt(0).toUpperCase()
                             }
                         </div>
@@ -291,7 +291,7 @@
                         <div style="padding: 1rem;">
                             <div style="width: 4rem; height: 4rem; margin: 0 auto 0.75rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; overflow: hidden; background: ${themeColors.accentColor}; color: #000; border: 3px solid ${colors[pos]};">
                                 ${player.avatar 
-                                    ? `<img src="${player.avatar}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                                    ? `<img src="/storage/avatars/${player.avatar}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
                                     : player.name.charAt(0).toUpperCase()
                                 }
                             </div>
