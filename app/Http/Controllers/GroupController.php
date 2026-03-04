@@ -1354,7 +1354,7 @@ class GroupController extends Controller
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
-                    'avatar' => $user->avatar,
+                    'avatar' => $user->avatar_url,
                     'total_points' => $user->total_points ?? 0,
                     'total_time_seconds' => (int) $user->total_time_seconds,
                     'total_time_formatted' => $this->formatSeconds($user->total_time_seconds ?? 0),
