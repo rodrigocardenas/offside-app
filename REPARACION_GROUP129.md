@@ -205,4 +205,16 @@ Si encuentras problemas:
 
 ---
 
-**LISTO PARA EJECUTAR**: Los cambios están en main (commit bc28226)
+## 🔧 NUEVO: Comando Genérico `repair:group-questions`
+
+Se ha agregado un comando más genérico que funciona para cualquier grupo y fecha:
+
+```bash
+php artisan repair:group-questions --group=129 --date=2026-03-10
+```
+
+Ver documentación completa en: [COMANDO_REPAIR_GROUP_QUESTIONS.md](COMANDO_REPAIR_GROUP_QUESTIONS.md)
+
+---
+
+**LISTO PARA EJECUTAR**: Los cambios están en main (commit d77d6b5)
