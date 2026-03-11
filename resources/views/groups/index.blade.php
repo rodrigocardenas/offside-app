@@ -39,11 +39,11 @@
             type="warning"
         />
 
-        {{-- 4. PARTIDO DESTACADO --}}
-        @if($featuredMatch)
-            <x-matches.featured-match
-                :match="$featuredMatch"
-                title="{{ __('views.groups.featured_match') }}"
+        {{-- 4. GRUPO PÚBLICO DESTACADO --}}
+        @if($featuredGroup)
+            <x-groups.featured-group
+                :group="$featuredGroup"
+                title="{{ __('views.groups.featured_public_group') }}"
             />
         @endif
 

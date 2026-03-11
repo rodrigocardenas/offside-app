@@ -24,6 +24,7 @@ class Team extends Model
         'club_colors',
         'venue',
         'stadium_id',
+        'is_featured',
     ];
 
     protected $casts = [

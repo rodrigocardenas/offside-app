@@ -63,7 +63,7 @@ class FeaturedMatchService
 
             foreach ($upcomingMatches as $match) {
                 $isFeatured = $this->shouldBeFeatured($match);
-                
+
                 // Actualizar solo si el estado ha cambiado
                 if ($match->is_featured !== $isFeatured) {
                     $match->update(['is_featured' => $isFeatured]);
@@ -83,18 +83,56 @@ class FeaturedMatchService
      */
     protected function shouldBeFeatured(FootballMatch $match): bool
     {
-        // 1. Verificar si es un clásico o derby
+        // 1. Verificar si ambos equipos son destacados (equipos grandes de su liga)
+        if ($this->areBothTeamsFeatured($match)) {
+            return true;
+        }
+
+        // 2. Verificar si es un clásico o derby
         if ($this->isClassicMatch($match)) {
             return true;
         }
 
-        // 2. Verificar si alguno de los equipos está en los primeros puestos
+        // 3. Verificar si alguno de los equipos está en los primeros puestos
         if ($this->isTopTeamMatch($match)) {
             return true;
         }
 
-        // 3. Verificar si es un partido de fases finales o eliminatorias
+        // 4. Verificar si es un partido de fases finales o eliminatorias
         if ($this->isKnockoutStage($match)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifica si ambos equipos son destacados (equipos grandes/importantes)
+     * Busca en la tabla teams si ambos tienen is_featured = true
+     */
+    protected function areBothTeamsFeatured(FootballMatch $match): bool
+    {
+        if (!$match->home_team || !$match->away_team) {
+            return false;
+        }
+
+        // Buscar ambos equipos por nombre en la tabla teams
+        $homeTeam = Team::where('name', $match->home_team)
+            ->orWhere('api_name', $match->home_team)
+            ->first();
+
+        $awayTeam = Team::where('name', $match->away_team)
+            ->orWhere('api_name', $match->away_team)
+            ->first();
+
+        // Ambos equipos deben existir y estar marcados como destacados
+        if ($homeTeam && $awayTeam && $homeTeam->is_featured && $awayTeam->is_featured) {
+            Log::info('Match is featured: Both teams are featured', [
+                'home_team' => $match->home_team,
+                'away_team' => $match->away_team,
+                'home_team_featured' => $homeTeam->is_featured,
+                'away_team_featured' => $awayTeam->is_featured,
+            ]);
             return true;
         }
 
@@ -125,7 +163,7 @@ class FeaturedMatchService
 
     /**
      * Verifica si alguno de los equipos está en los primeros puestos de su liga
-     * 
+     *
      * Por ahora, consideraremos equipos destacados basados en su reputación
      * hasta que se implemente un sistema de posiciones de liga
      */
@@ -171,12 +209,12 @@ class FeaturedMatchService
         ];
 
         // Verificar si alguno de los equipos está en la lista de equipos destacados
-        return in_array($match->home_team, $topTeams) || 
+        return in_array($match->home_team, $topTeams) ||
                in_array($match->away_team, $topTeams);
     }
 
     /**
-     * Verifica si es un partido de fases finales o eliminatorias
+     * Verifica si es un partido de semi final o final
      */
     protected function isKnockoutStage(FootballMatch $match): bool
     {
@@ -184,31 +222,71 @@ class FeaturedMatchService
             return false;
         }
 
-        $knockoutStages = [
-            'QUARTER_FINALS',
-            'SEMI_FINALS',
-            'FINAL',
-            // 'ROUND_OF_16',
-            // 'ROUND_OF_32',
-            // 'LAST_32',
-            // 'LAST_64',
-            'QUARTER_FINAL',
-            'SEMI_FINAL',
-            'FINAL',
-            'ELIMINATORIAS',
-            'PLAYOFFS',
-            'OCTAVOS',
-            'CUARTOS',
-            'SEMIFINALES',
-            'FINALES'
-        ];
-
         $stage = !empty($match->stage) ? strtoupper($match->stage) : '';
         $group = !empty($match->group) ? strtoupper($match->group) : '';
 
-        return in_array($stage, $knockoutStages) || 
-               in_array($group, $knockoutStages) ||
-               str_contains($stage, 'FINAL') ||
-               str_contains($group, 'FINAL');
+        // Variaciones del nombre de semifinal
+        $semiFinalsPatterns = [
+            'SEMI_FINALS',
+            'SEMI_FINAL',
+            'SEMIFINALES',
+            'SEMI-FINAL',
+            'SEMI-FINALS',
+            'SEMIS',
+        ];
+
+        // Variaciones del nombre de final
+        $finalsPatterns = [
+            'FINAL',
+            'FINALES',
+        ];
+
+        // Verificar en stage
+        foreach ($semiFinalsPatterns as $pattern) {
+            if ($stage === $pattern || str_contains($stage, $pattern)) {
+                Log::info('Match is featured: Semi-final detected', [
+                    'home_team' => $match->home_team,
+                    'away_team' => $match->away_team,
+                    'stage' => $match->stage,
+                ]);
+                return true;
+            }
+        }
+
+        foreach ($finalsPatterns as $pattern) {
+            if ($stage === $pattern || str_contains($stage, $pattern)) {
+                Log::info('Match is featured: Final detected', [
+                    'home_team' => $match->home_team,
+                    'away_team' => $match->away_team,
+                    'stage' => $match->stage,
+                ]);
+                return true;
+            }
+        }
+
+        // Verificar en group
+        foreach ($semiFinalsPatterns as $pattern) {
+            if ($group === $pattern || str_contains($group, $pattern)) {
+                Log::info('Match is featured: Semi-final detected in group', [
+                    'home_team' => $match->home_team,
+                    'away_team' => $match->away_team,
+                    'group' => $match->group,
+                ]);
+                return true;
+            }
+        }
+
+        foreach ($finalsPatterns as $pattern) {
+            if ($group === $pattern || str_contains($group, $pattern)) {
+                Log::info('Match is featured: Final detected in group', [
+                    'home_team' => $match->home_team,
+                    'away_team' => $match->away_team,
+                    'group' => $match->group,
+                ]);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -83,6 +83,22 @@ class Kernel extends ConsoleKernel
                     'error' => $exception->getMessage(),
                 ]);
             });
+
+        // 5️⃣ Diaria (00:00): Eliminar grupos públicos expirados
+        // Limpia automáticamente los grupos públicos que han pasado su fecha de expiración
+        $schedule->command('groups:delete-expired')
+            ->dailyAt('00:00')
+            ->timezone('America/Mexico_City')
+            ->name('delete-expired-groups')
+            ->withoutOverlapping(10)
+            ->onSuccess(function () {
+                Log::info('✅ delete-expired-groups completado: grupos públicos expirados eliminados');
+            })
+            ->onFailure(function ($exception) {
+                Log::error('❌ delete-expired-groups falló', [
+                    'error' => $exception->getMessage(),
+                ]);
+            });
     }
 
     /**

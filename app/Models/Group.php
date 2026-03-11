@@ -15,7 +15,12 @@ class Group extends Model
         'created_by',
         'competition_id',
         'category',
-        'reward_or_penalty'
+        'reward_or_penalty',
+        'expires_at'
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime'
     ];
 
     public function creator()
@@ -119,5 +124,48 @@ class Group extends Model
             ->groupBy('users.id')
             ->orderBy('total_points', 'desc')
             ->get();
+    }
+
+    /**
+     * Check if the group has expired
+     *
+     * @return bool
+     */
+    public function isExpired(): bool
+    {
+        return $this->expires_at && $this->expires_at->isPast();
+    }
+
+    /**
+     * Check if the group is public
+     *
+     * @return bool
+     */
+    public function isPublic(): bool
+    {
+        return $this->category === 'public';
+    }
+
+    /**
+     * Scope: Get only active (non-expired) groups
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->where(function($q) {
+            $q->whereNull('expires_at')
+              ->orWhere('expires_at', '>', now());
+        });
+    }
+
+    /**
+     * Scope: Get only public groups
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePublic($query)
+    {
+        return $query->where('category', 'public');
     }
 }

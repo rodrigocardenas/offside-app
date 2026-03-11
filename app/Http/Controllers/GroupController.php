@@ -121,7 +121,8 @@ class GroupController extends Controller
         $userAccuracy = $this->calculateUserAccuracy($user);
         $totalGroups = $groups->count();
 
-        // Get featured match (next match in user's groups)
+        // Get featured public group and featured match
+        $featuredGroup = $this->getFeaturedPublicGroup();
         $featuredMatch = $this->getFeaturedMatch($groups);
 
         // Check for pending predictions
@@ -133,6 +134,7 @@ class GroupController extends Controller
             'userStreak',
             'userAccuracy',
             'totalGroups',
+            'featuredGroup',
             'featuredMatch',
             'hasPendingPredictions'
         ));
@@ -145,7 +147,10 @@ class GroupController extends Controller
             'premier',
             'champions',
         ])->get();
-        return view('groups.create', compact('competitions'));
+        
+        $isAdmin = auth()->user()->hasRole('admin');
+        
+        return view('groups.create', compact('competitions', 'isAdmin'));
     }
 
     public function store(Request $request)
@@ -164,8 +169,19 @@ class GroupController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'competition_id' => 'nullable|exists:competitions,id',
-            'category' => 'required|in:official,amateur',
+            'category' => 'required|in:official,amateur,public',
+            'expires_at' => [
+                'required_if:category,public',
+                'nullable',
+                'date_format:Y-m-d\TH:i',
+                'after:now'
+            ],
         ]);
+
+        // Validación de seguridad: solo admins pueden crear grupos públicos
+        if ($request->category === 'public' && !auth()->user()->hasRole('admin')) {
+            abort(403, 'Solo administradores pueden crear grupos públicos');
+        }
 
         // Usar una transacción para asegurar la atomicidad
         return DB::transaction(function () use ($request) {
@@ -193,6 +209,7 @@ class GroupController extends Controller
                 'competition_id' => $request->competition_id,
                 'category' => $request->category,
                 'reward_or_penalty' => $request->reward_or_penalty,
+                'expires_at' => $request->category === 'public' ? $request->expires_at : null,
             ]);
 
             if (!$group->users()->where('user_id', auth()->id())->exists()) {
@@ -977,6 +994,10 @@ class GroupController extends Controller
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
 
+            // Determinar puntos y si es destacada basado en el partido
+            $isMatchFeatured = $match['is_featured'] ?? false;
+            $points = $template->type === 'predictive' ? ($isMatchFeatured ? 600 : 300) : 0;
+
             $questionData = [
                 'type' => $template->type,
                 'title' => $questionText,
@@ -985,7 +1006,8 @@ class GroupController extends Controller
                 'group_id' => $group->id,
                 'match_id' => $match['id'],
                 'available_until' => $availableUntil,
-                'points' => $template->type === 'predictive' ? 300 : 0,
+                'points' => $points,
+                'is_featured' => $isMatchFeatured,
                 'options' => $options,
                 'template_question_id' => $template->id ?? null,
             ];
@@ -1011,7 +1033,8 @@ class GroupController extends Controller
                 'group_id' => $questionData['group_id'],
                 'match_id' => $questionData['match_id'],
                 'available_until' => $availableUntil,
-                'points' => $template->type === 'predictive' ? 300 : 0,
+                'points' => $points,
+                'is_featured' => $isMatchFeatured,
                 'template_question_id' => $questionData['template_question_id']
             ]);
 
@@ -1220,6 +1243,20 @@ class GroupController extends Controller
             ->where('date', '>', now())
             ->with(['homeTeam', 'awayTeam', 'competition'])
             ->orderBy('date', 'asc')
+            ->first();
+    }
+
+    /**
+     * Get the featured public group (first active public group)
+     *
+     * @return \App\Models\Group|null
+     */
+    protected function getFeaturedPublicGroup()
+    {
+        return Group::public()
+            ->active()
+            ->with('creator', 'users')
+            ->orderBy('created_at', 'desc')
             ->first();
     }
 

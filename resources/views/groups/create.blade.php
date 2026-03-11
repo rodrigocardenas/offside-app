@@ -41,12 +41,40 @@
                     {{-- category --}}
                     <div>
                         <label for="category" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.category_label') }}</label>
-                        <select id="category" name="category" required readonly
-                            style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; cursor: pointer;">
-                            <option value="official" selected>{{ __('views.groups.category_official') }}</option>
-                            <option value="aficionado">{{ __('views.groups.category_amateur') }}</option>
+                        <select id="category" name="category" required
+                            style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; cursor: pointer;"
+                            onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
+                            onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'">
+                            <option value="official">{{ __('views.groups.category_official') }}</option>
+                            <option value="amateur">{{ __('views.groups.category_amateur') }}</option>
+                            @if($isAdmin)
+                                <option value="public">{{ __('views.groups.public') }} (Admin)</option>
+                            @endif
                         </select>
+                        @error('category')
+                            <p style="margin-top: 6px; font-size: 13px; color: #ef4444;">{{ $message }}</p>
+                        @enderror
                     </div>
+
+                    {{-- Fecha de expiración (solo para admins con categoría public) --}}
+                    @if($isAdmin)
+                    <div id="expirationField" style="display: none;">
+                        <label for="expires_at" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">
+                            {{ __('views.groups.scheduled_expiration') }}
+                        </label>
+                        <input id="expires_at" type="datetime-local" name="expires_at" value="{{ old('expires_at') }}"
+                            style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease;"
+                            onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
+                            onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'"
+                        />
+                        <p style="margin-top: 6px; font-size: 13px; color: {{ $textSecondary }};">
+                            {{ __('views.groups.expiration_help_text') }}
+                        </p>
+                        @error('expires_at')
+                            <p style="margin-top: 6px; font-size: 13px; color: #ef4444;">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    @endif
 
                     <div>
                         <label for="competition_id" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.competition_label') }}</label>
@@ -115,6 +143,33 @@
                         const buttonText = document.getElementById('buttonText');
                         const loadingSpinner = document.getElementById('loadingSpinner');
                         let isSubmitting = false;
+
+                        // Mostrar/ocultar campo de expiración según categoría
+                        const categorySelect = document.getElementById('category');
+                        const expirationField = document.getElementById('expirationField');
+                        const expiresAtInput = document.getElementById('expires_at');
+
+                        function toggleExpirationField() {
+                            if (categorySelect.value === 'public') {
+                                if (expirationField) {
+                                    expirationField.style.display = 'block';
+                                    // Hacer requerido si existe el campo
+                                    if (expiresAtInput) {
+                                        expiresAtInput.required = true;
+                                    }
+                                }
+                            } else {
+                                if (expirationField) {
+                                    expirationField.style.display = 'none';
+                                    if (expiresAtInput) {
+                                        expiresAtInput.required = false;
+                                    }
+                                }
+                            }
+                        }
+
+                        categorySelect.addEventListener('change', toggleExpirationField);
+                        toggleExpirationField();
 
                         // Generar un token único para este formulario
                         const formToken = Math.random().toString(36).substring(2);
