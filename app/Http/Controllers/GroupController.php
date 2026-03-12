@@ -147,9 +147,9 @@ class GroupController extends Controller
             'premier',
             'champions',
         ])->get();
-        
+
         $isAdmin = auth()->user()->hasRole('admin');
-        
+
         return view('groups.create', compact('competitions', 'isAdmin'));
     }
 

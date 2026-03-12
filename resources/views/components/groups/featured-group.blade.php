@@ -18,9 +18,9 @@
 
 @if($group)
 <div class="featured-group">
-    <div class="featured-title" style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; margin-bottom: 12px; color: {{ $badgeBg }}; margin-left: 15px; margin-right: 15px;">
+    {{-- <div class="featured-title" style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; margin-bottom: 12px; color: {{ $badgeBg }}; margin-left: 15px; margin-right: 15px;">
         <i class="fas fa-globe"></i> {{ $title }}
-    </div>
+    </div> --}}
 
     <div class="group-card" style="margin: 0 15px 20px 15px; background: {{ $bgColor }}; border: 2px solid {{ $borderColor }}; border-radius: 12px; padding: 20px; color: {{ $textColor }}; box-shadow: {{ $shadowLight }}; cursor: pointer; transition: all 0.3s ease;" onclick="window.location.href='{{ route('groups.show', $group->id) }}'" onmouseover="this.style.boxShadow='{{ $shadowDark }}'; this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='{{ $shadowLight }}'; this.style.transform='translateY(0)'">
 
@@ -37,13 +37,13 @@
         {{-- Información del grupo --}}
         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
             {{-- Creador --}}
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
+            {{-- <div style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
                 <i class="fas fa-user-circle" style="color: {{ $accentColor }}; width: 20px; text-align: center;"></i>
                 <span style="color: {{ $secondaryText }};">
-                    {{ __('views.groups.created_by') }}: 
+                    {{ __('views.groups.created_by') }}:
                     <strong style="color: {{ $textColor }};">{{ $group->creator->name }}</strong>
                 </span>
-            </div>
+            </div> --}}
 
             {{-- Miembros --}}
             <div style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
@@ -79,9 +79,9 @@
         </button>
 
         {{-- Hint text --}}
-        <p style="font-size: 12px; color: {{ $secondaryText }}; margin-top: 12px; margin-bottom: 0; text-align: center;">
+        {{-- <p style="font-size: 12px; color: {{ $secondaryText }}; margin-top: 12px; margin-bottom: 0; text-align: center;">
             <i class="fas fa-mouse"></i> {{ __('views.groups.click_to_see_group') }}
-        </p>
+        </p> --}}
     </div>
 </div>
 
@@ -89,12 +89,12 @@
     window.joinPublicGroup = function(groupId) {
         // Verificar si ya es miembro
         const isAlreadyMember = document.querySelector(`button[onclick*="joinPublicGroup(${groupId})"]`)?.textContent.includes('{{ __('views.groups.already_member') }}');
-        
+
         if (isAlreadyMember) {
             window.location.href = '/groups/' + groupId;
             return;
         }
-        
+
         // Abrir modal de unirse al grupo
         const code = prompt('{{ __('views.settings.group_code_placeholder') }}');
         if (code) {
@@ -118,3 +118,4 @@
         }
     };
 </script>
+@endif

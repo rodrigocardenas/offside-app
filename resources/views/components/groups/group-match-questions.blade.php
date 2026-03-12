@@ -289,7 +289,7 @@
                 $hasEnoughMembers = $group->users->count() >= 2;
                 $themeColorsData = compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover');
             @endphp
-            @if($hasEnoughMembers)
+            @if($hasEnoughMembers && !$group->isPublic())
                 @if($socialQuestion ?? false)
                     <div class="snap-center flex-none w-full" style="min-width: 300px;">
                         <x-groups.group-social-question :social-question="$socialQuestion" :user-answers="$userAnswers" :theme-colors="$themeColorsData" />
