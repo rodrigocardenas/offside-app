@@ -77,6 +77,24 @@
                     </div>
                     @endif
 
+                    {{-- Sección de Preguntas para Quiz --}}
+                    @if($isAdmin)
+                    <div id="quizQuestionsSection" style="display: none; border: 2px dashed {{ $borderColor }}; border-radius: 12px; padding: 20px; background: {{ $isDark ? 'rgba(0, 222, 176, 0.03)' : 'rgba(0, 222, 176, 0.02)' }};">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                            <i class="fas fa-question-circle" style="color: {{ $accentColor }}; font-size: 20px;"></i>
+                            <h3 style="font-size: 16px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">Preguntas del Quiz</h3>
+                        </div>
+
+                        <div id="questionsContainer" style="display: flex; flex-direction: column; gap: 20px;">
+                            {{-- Plantilla de pregunta será insertada aquí por JS --}}
+                        </div>
+
+                        <button type="button" onclick="addQuestion()" style="width: 100%; margin-top: 16px; padding: 12px; background: {{ $isDark ? 'rgba(0, 222, 176, 0.15)' : 'rgba(0, 222, 176, 0.1)' }}; color: {{ $accentColor }}; border: 1px solid {{ $accentColor }}; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='{{ $isDark ? 'rgba(0, 222, 176, 0.25)' : 'rgba(0, 222, 176, 0.15)' }}'" onmouseout="this.style.background='{{ $isDark ? 'rgba(0, 222, 176, 0.15)' : 'rgba(0, 222, 176, 0.1)' }}'">
+                            <i class="fas fa-plus"></i> Agregar Pregunta
+                        </button>
+                    </div>
+                    @endif
+
                     <div>
                         <label for="competition_id" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.competition_label') }}</label>
                         <select id="competition_id" name="competition_id" required
@@ -151,7 +169,8 @@
                         const expiresAtInput = document.getElementById('expires_at');
 
                         function toggleExpirationField() {
-                            if (categorySelect.value === 'public') {
+                            // Mostrar expiración para public Y quiz
+                            if (categorySelect.value === 'public' || categorySelect.value === 'quiz') {
                                 if (expirationField) {
                                     expirationField.style.display = 'block';
                                     // Hacer requerido si existe el campo
@@ -167,10 +186,90 @@
                                     }
                                 }
                             }
+
+                            // Mostrar sección de preguntas solo para quiz
+                            const quizQuestionsSection = document.getElementById('quizQuestionsSection');
+                            if (categorySelect.value === 'quiz') {
+                                if (quizQuestionsSection) {
+                                    quizQuestionsSection.style.display = 'block';
+                                }
+                            } else {
+                                if (quizQuestionsSection) {
+                                    quizQuestionsSection.style.display = 'none';
+                                }
+                            }
                         }
 
                         categorySelect.addEventListener('change', toggleExpirationField);
                         toggleExpirationField();
+
+                        // Sistema de preguntas dinámicas para Quiz
+                        let questionCount = 0;
+
+                        window.addQuestion = function() {
+                            const container = document.getElementById('questionsContainer');
+                            if (!container) return;
+
+                            const questionIndex = questionCount++;
+                            const questionHTML = `
+                                <div class="quiz-question-block" id="question-${questionIndex}" style="border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 16px; background: {{ $inputBg }};">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <label style="font-size: 13px; font-weight: 700; color: {{ $labelColor }};">Pregunta #${questionIndex + 1}</label>
+                                        <button type="button" onclick="removeQuestion(${questionIndex})" style="background: #ef4444; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">
+                                            <i class="fas fa-trash"></i> Eliminar
+                                        </button>
+                                    </div>
+
+                                    <input type="text" name="quiz_questions[${questionIndex}][title]" 
+                                        placeholder="Enunciado de la pregunta" required
+                                        style="width: 100%; background: {{ $bgPrimary }}; border: 1px solid {{ $borderColor }}; border-radius: 6px; padding: 10px 12px; color: {{ $textPrimary }}; font-size: 14px; margin-bottom: 12px;"
+                                    />
+
+                                    <label style="display: block; font-size: 13px; font-weight: 600; color: {{ $labelColor }}; margin-top: 12px; margin-bottom: 8px;">Opciones</label>
+                                    <div class="options-container-${questionIndex}" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;"></div>
+
+                                    <button type="button" onclick="addOption(${questionIndex})" style="width: 100%; padding: 8px; background: {{ $isDark ? 'rgba(0, 222, 176, 0.1)' : 'rgba(0, 222, 176, 0.08)' }}; color: {{ $accentColor }}; border: 1px dashed {{ $accentColor }}; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.3s ease;\" onmouseover=\"this.style.background='{{ $isDark ? 'rgba(0, 222, 176, 0.2)' : 'rgba(0, 222, 176, 0.12)' }}'\" onmouseout=\"this.style.background='{{ $isDark ? 'rgba(0, 222, 176, 0.1)' : 'rgba(0, 222, 176, 0.08)' }}'\">\n                                        <i class="fas fa-plus"></i> Agregar Opción\n                                    </button>
+                                </div>
+                            `;
+
+                            const div = document.createElement('div');
+                            div.innerHTML = questionHTML;
+                            container.appendChild(div.firstElementChild);
+
+                            // Agregar automáticamente 2 opciones iniciales
+                            addOption(questionIndex);
+                            addOption(questionIndex);
+                        };
+
+                        window.removeQuestion = function(index) {
+                            const questionBlock = document.getElementById(`question-${index}`);
+                            if (questionBlock) {
+                                questionBlock.remove();
+                            }
+                        };
+
+                        window.addOption = function(questionIndex) {
+                            const container = document.querySelector(`.options-container-${questionIndex}`);
+                            if (!container) return;
+
+                            const optionIndex = container.children.length;
+                            const optionHTML = `
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <input type="radio" name="quiz_questions[${questionIndex}][correct_option]" value="${optionIndex}" style="cursor: pointer; padding: 0; margin: 0; width: 18px; height: 18px;" title="Marcar como respuesta correcta" />
+                                    <input type="text" name="quiz_questions[${questionIndex}][options][]" 
+                                        placeholder="Opción ${optionIndex + 1}" required
+                                        style="flex: 1; background: {{ $bgPrimary }}; border: 1px solid {{ $borderColor }}; border-radius: 6px; padding: 10px 12px; color: {{ $textPrimary }}; font-size: 13px;"
+                                    />
+                                    <button type="button" onclick="removeOption(this)" style="background: #ef4444; color: white; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 12px;\">\n                                        <i class="fas fa-times"></i>\n                                    </button>\n                                </div>\n                            `;
+
+                            const div = document.createElement('div');
+                            div.innerHTML = optionHTML;
+                            container.appendChild(div.firstElementChild);
+                        };
+
+                        window.removeOption = function(button) {
+                            button.parentElement.remove();
+                        };
 
                         // Generar un token único para este formulario
                         const formToken = Math.random().toString(36).substring(2);

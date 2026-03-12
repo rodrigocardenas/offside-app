@@ -23,10 +23,10 @@
 @if($group || $quizGroup)
 <div class="mt-4">
     {{-- Título del carrusel --}}
-    <div class="flex items-center gap-2 mb-6 px-4">
+    {{-- <div class="flex items-center gap-2 mb-6 px-4">
         <i class="fas fa-rocket" style="color: {{ $badgeBg }};"></i>
         <h2 class="text-base font-semibold" style="color: {{ $textColor }};">Grupos Destacados</h2>
-    </div>
+    </div> --}}
 
     {{-- Carrusel --}}
     <div class="relative flex items-center">
@@ -35,7 +35,7 @@
             {{-- Card de Grupo Público --}}
             @if($group)
                 <div class="featured-carousel-card" style="background: {{ $componentsBg }}; border-color: {{ $borderColor }}; min-width: 310px; cursor: pointer; transition: all 0.3s ease;" onclick="window.location.href='{{ route('groups.show', $group->id) }}'" onmouseover="this.style.boxShadow='{{ $shadowDark }}'; this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='{{ $shadowLight }}'; this.style.transform='translateY(0)'">
-                    
+
                     {{-- Badge de categoría --}}
                     <div style="text-align: center; margin-bottom: 16px;">
                         <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; background: {{ $badgeBg }}; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -73,7 +73,7 @@
 
                     {{-- Botón de acción --}}
                     <button onclick="event.stopPropagation(); joinPublicGroup({{ $group->id }})"
-                            style="width: 100%; padding: 12px; background: linear-gradient(135deg, {{ $accentColor }}, {{ $badgeBg }}); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.3s ease;" 
+                            style="width: 100%; padding: 12px; background: linear-gradient(135deg, {{ $accentColor }}, {{ $badgeBg }}); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.3s ease;"
                             onmouseover="this.style.opacity='0.9'"
                             onmouseout="this.style.opacity='1'">
                         @if(auth()->user()->groups->contains($group->id))
@@ -88,7 +88,7 @@
             {{-- Card de Grupo Quiz --}}
             @if($quizGroup)
                 <div class="featured-carousel-card" style="background: {{ $componentsBg }}; border-color: {{ $borderColor }}; min-width: 310px; cursor: pointer; transition: all 0.3s ease;" onclick="window.location.href='{{ route('groups.show', $quizGroup->id) }}'" onmouseover="this.style.boxShadow='{{ $shadowDark }}'; this.style.transform='translateY(-4px)'" onmouseout="this.style.boxShadow='{{ $shadowLight }}'; this.style.transform='translateY(0)'">
-                    
+
                     {{-- Badge de categoría --}}
                     <div style="text-align: center; margin-bottom: 16px;">
                         <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #8b5cf6; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -110,31 +110,13 @@
                             </span>
                         </div>
 
-                        @if($quizGroup->expires_at)
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; color: {{ $quizGroup->isExpired() ? '#ff5252' : '#ff9800' }};">
-                                <i class="fas fa-clock"></i>
-                                <span>
-                                    @if($quizGroup->isExpired())
-                                        {{ __('views.groups.expired') }}
-                                    @else
-                                        {{ __('views.groups.expires_in') }}: <strong>{{ $quizGroup->expires_at->diffForHumans() }}</strong>
-                                    @endif
-                                </span>
-                            </div>
-                        @endif
-                    </div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;">
+                            <i class="fas fa-brain" style="color: #8b5cf6;"></i>
+                            <span style="color: {{ $secondaryText }};">
+                                <strong style="color: {{ $textColor }};">{{ $quizGroup->questions ? $quizGroup->questions()->count() : 0 }}</strong> preguntas
+                            </span>
+                        </div>
 
-                    {{-- Botón de acción --}}
-                    <button onclick="event.stopPropagation(); joinPublicGroup({{ $quizGroup->id }})"
-                            style="width: 100%; padding: 12px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.3s ease;"
-                            onmouseover="this.style.opacity='0.9'"
-                            onmouseout="this.style.opacity='1'">
-                        @if(auth()->user()->groups->contains($quizGroup->id))
-                            <i class="fas fa-check"></i> {{ __('views.groups.already_member') }}
-                        @else
-                            <i class="fas fa-sign-in-alt"></i> {{ __('views.groups.join_now') }}
-                        @endif
-                    </button>
                 </div>
             @endif
         </div>
@@ -186,7 +168,7 @@
 
     .featured-carousel-btn {
         position: absolute;
-        top: 50%;
+        top: 30%;
         transform: translateY(-50%);
         z-index: 10;
         border-radius: 50%;
