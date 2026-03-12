@@ -49,6 +49,7 @@
                             <option value="amateur">{{ __('views.groups.category_amateur') }}</option>
                             @if($isAdmin)
                                 <option value="public">{{ __('views.groups.public') }} (Admin)</option>
+                                <option value="quiz">Quiz (Admin)</option>
                             @endif
                         </select>
                         @error('category')

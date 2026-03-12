@@ -123,6 +123,7 @@ class GroupController extends Controller
 
         // Get featured public group and featured match
         $featuredGroup = $this->getFeaturedPublicGroup();
+        $featuredQuizGroup = $this->getFeaturedQuizGroup();
         $featuredMatch = $this->getFeaturedMatch($groups);
 
         // Check for pending predictions
@@ -135,6 +136,7 @@ class GroupController extends Controller
             'userAccuracy',
             'totalGroups',
             'featuredGroup',
+            'featuredQuizGroup',
             'featuredMatch',
             'hasPendingPredictions'
         ));
@@ -169,18 +171,18 @@ class GroupController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'competition_id' => 'nullable|exists:competitions,id',
-            'category' => 'required|in:official,amateur,public',
+            'category' => 'required|in:official,amateur,public,quiz',
             'expires_at' => [
-                'required_if:category,public',
+                'required_if:category,public,quiz',
                 'nullable',
                 'date_format:Y-m-d\TH:i',
                 'after:now'
             ],
         ]);
 
-        // Validación de seguridad: solo admins pueden crear grupos públicos
-        if ($request->category === 'public' && !auth()->user()->hasRole('admin')) {
-            abort(403, 'Solo administradores pueden crear grupos públicos');
+        // Validación de seguridad: solo admins pueden crear grupos públicos y quiz
+        if (($request->category === 'public' || $request->category === 'quiz') && !auth()->user()->hasRole('admin')) {
+            abort(403, 'Solo administradores pueden crear este tipo de grupos');
         }
 
         // Usar una transacción para asegurar la atomicidad
@@ -209,7 +211,7 @@ class GroupController extends Controller
                 'competition_id' => $request->competition_id,
                 'category' => $request->category,
                 'reward_or_penalty' => $request->reward_or_penalty,
-                'expires_at' => $request->category === 'public' ? $request->expires_at : null,
+                'expires_at' => ($request->category === 'public' || $request->category === 'quiz') ? $request->expires_at : null,
             ]);
 
             if (!$group->users()->where('user_id', auth()->id())->exists()) {
@@ -1254,6 +1256,20 @@ class GroupController extends Controller
     protected function getFeaturedPublicGroup()
     {
         return Group::public()
+            ->active()
+            ->with('creator', 'users')
+            ->orderBy('created_at', 'desc')
+            ->first();
+    }
+
+    /**
+     * Get the featured quiz group (first active quiz group)
+     *
+     * @return \App\Models\Group|null
+     */
+    protected function getFeaturedQuizGroup()
+    {
+        return Group::where('category', 'quiz')
             ->active()
             ->with('creator', 'users')
             ->orderBy('created_at', 'desc')

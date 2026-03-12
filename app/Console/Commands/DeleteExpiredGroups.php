@@ -19,18 +19,18 @@ class DeleteExpiredGroups extends Command
      *
      * @var string
      */
-    protected $description = 'Delete expired public groups that are past their expiration date';
+    protected $description = 'Delete expired public and quiz groups that are past their expiration date';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $deletedCount = Group::where('category', 'public')
+        $deletedCount = Group::whereIn('category', ['public', 'quiz'])
             ->where('expires_at', '<', now())
             ->delete();
 
-        $this->info("✓ Eliminados {$deletedCount} grupos públicos expirados");
+        $this->info("✓ Eliminados {$deletedCount} grupos (públicos y quiz) expirados");
 
         return Command::SUCCESS;
     }

@@ -39,10 +39,11 @@
             type="warning"
         />
 
-        {{-- 4. GRUPO PÚBLICO DESTACADO --}}
-        @if($featuredGroup)
+        {{-- 4. GRUPOS DESTACADOS (CARRUSEL: Público + Quiz) --}}
+        @if($featuredGroup || $featuredQuizGroup)
             <x-groups.featured-group
                 :group="$featuredGroup"
+                :quiz-group="$featuredQuizGroup"
                 title="{{ __('views.groups.featured_public_group') }}"
             />
         @endif
