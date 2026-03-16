@@ -107,6 +107,16 @@ class VerifyAllQuestionsJob implements ShouldQueue
 
         $correctOptionIds = $evaluationService->evaluateQuestion($question, $match);
 
+        // CRITICAL FIX: Don't mark as verified if evaluator returned empty array
+        // This prevents "stuck" questions that failed evaluation from never being re-verified
+        if (empty($correctOptionIds)) {
+            Log::warning('VerifyAllQuestionsJob - evaluator returned no results (question will be re-tried)', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+            ]);
+            return;
+        }
+
         foreach ($question->options as $option) {
             $option->is_correct = in_array($option->id, $correctOptionIds);
             $option->save();
