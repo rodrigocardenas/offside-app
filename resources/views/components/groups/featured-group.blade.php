@@ -206,10 +206,9 @@
             return;
         }
 
-        const code = prompt('{{ __('views.settings.group_code_placeholder') }}');
-        if (code) {
-            window.location.href = '/groups/invite/' + groupCode;
-        }
+
+        window.location.href = '/groups/invite/' + groupCode;
+
     };
 
     // Actualizar indicadores al hacer scroll
