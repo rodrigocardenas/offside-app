@@ -29,7 +29,7 @@
     </div> --}}
 
     {{-- Carrusel --}}
-    <div class="relative flex items-center">
+    <div class="relative flex items-center mt-2">
         <!-- Contenedor de scroll con snap-scroll personalizado -->
         <div class="featured-carousel-wrapper" id="featuredGroupsCarousel">
             {{-- Card de Grupo Público --}}
@@ -122,14 +122,14 @@
         </div>
 
         {{-- Botón Flecha Izquierda --}}
-        <button class="featured-carousel-btn featured-carousel-btn-left" style="color: {{ $accentColor }}; background: {{ $componentsBg }};" onclick="document.getElementById('featuredGroupsCarousel').scrollBy({left: -350, behavior: 'smooth'})">
+        {{-- <button class="featured-carousel-btn featured-carousel-btn-left" style="color: {{ $accentColor }}; background: {{ $componentsBg }};" onclick="document.getElementById('featuredGroupsCarousel').scrollBy({left: -350, behavior: 'smooth'})">
             <i class="fas fa-chevron-left"></i>
-        </button>
+        </button> --}}
 
         {{-- Botón Flecha Derecha --}}
-        <button class="featured-carousel-btn featured-carousel-btn-right" style="color: {{ $accentColor }}; background: {{ $componentsBg }};" onclick="document.getElementById('featuredGroupsCarousel').scrollBy({left: 350, behavior: 'smooth'})">
+        {{-- <button class="featured-carousel-btn featured-carousel-btn-right" style="color: {{ $accentColor }}; background: {{ $componentsBg }};" onclick="document.getElementById('featuredGroupsCarousel').scrollBy({left: 350, behavior: 'smooth'})">
             <i class="fas fa-chevron-right"></i>
-        </button>
+        </button> --}}
     </div>
 
     {{-- Indicadores de navegación --}}
