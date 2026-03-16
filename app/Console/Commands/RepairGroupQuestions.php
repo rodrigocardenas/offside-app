@@ -13,11 +13,11 @@ use ReflectionMethod;
 
 class RepairGroupQuestions extends Command
 {
-    protected $signature = 'repair:group-questions 
+    protected $signature = 'repair:group-questions
                           {--group= : Group ID to repair}
                           {--date= : Date in format YYYY-MM-DD}
                           {--force : Apply changes without confirmation}';
-    
+
     protected $description = 'Repara automáticamente preguntas de un grupo en una fecha específica re-evaluándolas';
 
     public function handle()
@@ -104,7 +104,7 @@ class RepairGroupQuestions extends Command
 
         foreach ($questions as $question) {
             $match = $question->football_match;
-            
+
             $this->line("  Evaluando Q{$question->id}: " . substr($question->title, 0, 50) . "...");
 
             // Evaluar con el servicio
@@ -126,14 +126,18 @@ class RepairGroupQuestions extends Command
                 ->pluck('id')
                 ->toArray();
 
-            if (sort($evaluatedCorrectIds) !== sort($currentCorrectIds)) {
+            // Ordenar ambos arrays para comparación correcta
+            sort($evaluatedCorrectIds);
+            sort($currentCorrectIds);
+
+            if (implode(',', $evaluatedCorrectIds) !== implode(',', $currentCorrectIds)) {
                 $updates[$question->id] = [
                     'question' => $question,
                     'match' => $match,
                     'evaluated_ids' => $evaluatedCorrectIds,
                     'current_ids' => $currentCorrectIds,
                 ];
-                
+
                 $this->line("    🔄 CAMBIO NECESARIO");
             } else {
                 $this->line("    ✓ Sin cambios");
@@ -157,27 +161,27 @@ class RepairGroupQuestions extends Command
 
             $this->line("📝 Pregunta {$qid}: {$question->title}");
             $this->line("   Match: {$match->home_team} vs {$match->away_team} ({$match->home_team_score}-{$match->away_team_score})");
-            
+
             $this->line("   Opciones correctas actual: " . (empty($currentIds) ? 'NINGUNA' : implode(', ', $currentIds)));
             $this->line("   Opciones correctas evaluadas: " . implode(', ', $evaluatedIds));
-            
+
             // Mostrar textos de opciones
             $this->line("   Detalles:");
             foreach ($question->options as $opt) {
                 $isEvaluatedCorrect = in_array($opt->id, $evaluatedIds);
                 $isCurrentCorrect = in_array($opt->id, $currentIds);
-                
+
                 $change = '';
                 if ($isEvaluatedCorrect && !$isCurrentCorrect) {
                     $change = ' ← MARCARÁ COMO CORRECTA';
                 } elseif (!$isEvaluatedCorrect && $isCurrentCorrect) {
                     $change = ' ← DESMARCARÁ';
                 }
-                
+
                 $mark = $isEvaluatedCorrect ? '✅' : '  ';
                 $this->line("     {$mark} [{$opt->id}] {$opt->text}{$change}");
             }
-            
+
             $this->line("");
         }
     }
