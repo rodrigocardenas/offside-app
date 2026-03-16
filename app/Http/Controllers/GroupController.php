@@ -654,12 +654,6 @@ class GroupController extends Controller
                 ->with('error', __('controllers.groups.not_member'));
         }
 
-        // Verificar que no sea el creador del grupo
-        if ($group->created_by === auth()->id()) {
-            return redirect()->route('groups.index')
-                ->with('error', __('controllers.groups.cannot_leave_owned'));
-        }
-
         // Remover solo al usuario actual
         $group->users()->detach(auth()->id());
 

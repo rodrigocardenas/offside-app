@@ -72,7 +72,7 @@
                     </div>
 
                     {{-- Botón de acción --}}
-                    <button onclick="event.stopPropagation(); joinPublicGroup({{ $group->id }})"
+                    <button onclick="event.stopPropagation(); joinPublicGroup({{ $group->id }}, '{{ $group->code }}')"
                             style="width: 100%; padding: 12px; background: linear-gradient(135deg, {{ $accentColor }}, {{ $badgeBg }}); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.3s ease;"
                             onmouseover="this.style.opacity='0.9'"
                             onmouseout="this.style.opacity='1'">
@@ -198,7 +198,7 @@
 </style>
 
 <script>
-    window.joinPublicGroup = function(groupId) {
+    window.joinPublicGroup = function(groupId, groupCode = null) {
         const isAlreadyMember = document.querySelector(`button[onclick*="joinPublicGroup(${groupId})"]`)?.textContent.includes('{{ __('views.groups.already_member') }}');
 
         if (isAlreadyMember) {
@@ -208,23 +208,7 @@
 
         const code = prompt('{{ __('views.settings.group_code_placeholder') }}');
         if (code) {
-            fetch('{{ route('groups.join') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
-                },
-                body: JSON.stringify({ code: code })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/groups/' + groupId;
-                } else {
-                    alert(data.message || 'Error al unirse al grupo');
-                }
-            })
-            .catch(error => console.error('Error:', error));
+            window.location.href = '/groups/invite/' + groupCode;
         }
     };
 
