@@ -111,9 +111,9 @@
                         </div>
 
                         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;">
-                            <i class="fas fa-brain" style="color: #8b5cf6;"></i>
+                            {{-- <i class="fas fa-info" style="color: #8b5cf6;"></i> --}}
                             <span style="color: {{ $secondaryText }};">
-                                <strong style="color: {{ $textColor }};">{{ $quizGroup->questions ? $quizGroup->questions()->count() : 0 }}</strong> preguntas
+                                <small>{{ __('views.groups.quiz_group_description') }}</small>
                             </span>
                         </div>
 

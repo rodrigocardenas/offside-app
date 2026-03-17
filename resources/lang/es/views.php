@@ -107,6 +107,7 @@ return [
         'expiration_help_text' => 'El grupo será eliminado automáticamente cuando llegue esta fecha',
         'cancel' => 'Cancelar',
         'next' => 'Próximo',
+        'quiz_group_description' => 'Solo puedes responder una vez, desde que respondes la 1era pregunta comienza el contador de tiempo',
     ],
     'questions' => [
         'title' => 'Preguntas',
