@@ -1359,6 +1359,7 @@ class GroupController extends Controller
 
         // Get all quiz questions in this group
         $quizQuestions = $group->questions()
+            ->where('group_id', $group->id)
             ->where('type', 'quiz')
             ->pluck('id')
             ->toArray();
