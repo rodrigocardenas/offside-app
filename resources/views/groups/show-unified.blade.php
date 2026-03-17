@@ -95,17 +95,14 @@
                                      style="background: {{ $bgTertiary }}; border: 1px solid {{ $borderColor }};">
                                     <!-- Avatar con borde coloreado según posición -->
                                     <div class="flex-shrink-0 mr-4 relative">
-                                        @if($user->avatar)
-                                            <img src="{{ $user->avatar_url }}"
-                                                 alt="{{ $user->name }}"
-                                                 class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-lg object-cover"
-                                                 style="border: 3px solid {{ $medalColor }};">
-                                        @else
-                                            <div class="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-lg"
-                                                 style="background: {{ $accentColor }}; border: 3px solid {{ $medalColor }};">
-                                                {{ substr($user->name, 0, 1) }}
-                                            </div>
-                                        @endif
+                                        @php
+                                            $avatarUrl = $user->getAvatarUrl('medium');
+                                        @endphp
+                                        <img src="{{ $avatarUrl }}"
+                                             alt="{{ $user->name }}"
+                                             class="w-12 h-12 md:w-16 md:h-16 rounded-full shadow-lg object-cover"
+                                             style="border: 3px solid {{ $medalColor }};"
+                                             loading="lazy">
                                         @if($index < 3)
                                             <div class="absolute -bottom-1 -right-1 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold shadow-md"
                                                  style="background: {{ $medalBg }}; color: {{ $medalText }};">

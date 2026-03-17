@@ -50,22 +50,40 @@
                 @endphp
                 <div style="background: {{ $cardBg }}; border-radius: 12px; padding: 20px; margin-bottom: 12px; border: 1px solid {{ $cardBorder }}; text-align: center;">
                     <div style="position: relative; display: inline-block; margin-bottom: 16px;">
-                        @if($user->avatar)
-                            <img src="{{ $user->avatar_url }}"
+                        @if($user->avatar || $user->avatar_cloudflare_id)
+                            <img src="{{ $user->getAvatarUrl('small') }}"
                                  alt="{{ $user->name }}"
                                  class="avatar-preview"
-                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #00deb0; display: block;">
+                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #00deb0; display: block;"
+                                 loading="lazy">
                         @else
                             <div class="avatar-placeholder" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #17b796, #00deb0); display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; font-weight: bold; border: 3px solid #00deb0; margin: 0 auto;">
                                 {{ substr($user->name, 0, 1) }}
                             </div>
                         @endif
+                        
+                        {{-- Cloudflare indicator --}}
+                        @if($user->avatar_provider === 'cloudflare' && config('cloudflare.images.enabled'))
+                            <div title="Optimized by Cloudflare Images" style="position: absolute; top: -8px; left: -8px; background: #faad14; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 8px rgba(250, 173, 20, 0.3);">
+                                <svg style="width: 16px; height: 16px; color: white;" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        @endif
+                        
                         <label for="avatar" style="position: absolute; bottom: -8px; right: -8px; background: #00deb0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 222, 176, 0.3); transition: all 0.3s ease; border: 3px solid white;">
                             <i class="fas fa-camera" style="color: white; font-size: 16px;"></i>
                         </label>
                         <input type="file" id="avatar" name="avatar" accept="image/*" style="display: none;">
                     </div>
-                    <p style="color: {{ $textColor }}; font-size: 13px; margin: 8px 0 0 0; padding: 0 16px; word-wrap: break-word; overflow-wrap: break-word;">{{ __('views.profile_section.change_photo') }}</p>
+                    <p style="color: {{ $textColor }}; font-size: 13px; margin: 8px 0 0 0; padding: 0 16px; word-wrap: break-word; overflow-wrap: break-word;">
+                        {{ __('views.profile_section.change_photo') }}
+                        @if(config('cloudflare.images.enabled'))
+                            <span style="font-size: 12px; color: #00deb0; margin-left: 6px;">
+                                ({{ __('views.profile_section.cloudflare_optimized') }})
+                            </span>
+                        @endif
+                    </p>
                     @error('avatar')
                         <p style="color: #dc3545; font-size: 12px; margin-top: 8px;">{{ $message }}</p>
                     @enderror

@@ -67,11 +67,7 @@
               <div class="podium-position second">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    @if($topUsers[1]->avatar)
-                      <img src="{{ $topUsers[1]->avatar_url }}" alt="{{ $topUsers[1]->name }}" class="podium-avatar">
-                    @else
-                      <div class="podium-avatar-placeholder">{{ substr($topUsers[1]->name, 0, 1) }}</div>
-                    @endif
+                    <img src="{{ $topUsers[1]->getAvatarUrl('medium') }}" alt="{{ $topUsers[1]->name }}" class="podium-avatar" loading="lazy">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[1]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
@@ -83,11 +79,7 @@
               <div class="podium-position first">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    @if($topUsers[0]->avatar)
-                      <img src="{{ $topUsers[0]->avatar_url }}" alt="{{ $topUsers[0]->name }}" class="podium-avatar">
-                    @else
-                      <div class="podium-avatar-placeholder">{{ substr($topUsers[0]->name, 0, 1) }}</div>
-                    @endif
+                    <img src="{{ $topUsers[0]->getAvatarUrl('medium') }}" alt="{{ $topUsers[0]->name }}" class="podium-avatar" loading="lazy">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[0]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
@@ -99,11 +91,7 @@
               <div class="podium-position third">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    @if($topUsers[2]->avatar)
-                      <img src="{{ $topUsers[2]->avatar_url }}" alt="{{ $topUsers[2]->name }}" class="podium-avatar">
-                    @else
-                      <div class="podium-avatar-placeholder">{{ substr($topUsers[2]->name, 0, 1) }}</div>
-                    @endif
+                    <img src="{{ $topUsers[2]->getAvatarUrl('medium') }}" alt="{{ $topUsers[2]->name }}" class="podium-avatar" loading="lazy">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[2]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
