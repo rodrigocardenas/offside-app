@@ -1376,8 +1376,7 @@ class GroupController extends Controller
             ]);
         }
 
-        // 🎯 FIX: Usar subquery en lugar de relación many-to-many para evitar GROUP BY issues
-        // IMPORTANTE: Filtrar por answers.category = 'quiz' para solo contar respuestas de tipo quiz
+        // 🎯 FIX: Filtrar SOLO respuestas para preguntas de este grupo específico
         $rankedUsers = User::query()
             ->whereHas('groups', function($q) use ($group) {
                 $q->where('group_id', $group->id);
@@ -1385,13 +1384,9 @@ class GroupController extends Controller
             ->select('users.id', 'users.name', 'users.avatar')
             ->selectRaw('COALESCE(SUM(CASE WHEN answers.is_correct = 1 THEN answers.points_earned ELSE 0 END), 0) as total_points')
             ->selectRaw('COALESCE(TIMESTAMPDIFF(SECOND, MIN(answers.answered_at), MAX(answers.answered_at)), 0) as total_time_seconds')
-            ->leftJoin('answers', function($join) {
+            ->leftJoin('answers', function($join) use ($quizQuestions) {
                 $join->on('users.id', '=', 'answers.user_id')
-                    ->where('answers.category', 'quiz');  // 🎮 Solo contar respuestas de tipo quiz
-            })
-            ->leftJoin('questions', function($join) use ($quizQuestions) {
-                $join->on('answers.question_id', '=', 'questions.id')
-                    ->whereIn('questions.id', $quizQuestions);
+                    ->whereIn('answers.question_id', $quizQuestions);  // 🎮 Solo respuestas de preguntas en este grupo
             })
             ->groupBy('users.id', 'users.name', 'users.avatar')
             ->orderBy('total_points', 'desc')
