@@ -26,7 +26,7 @@
             <img src="@yield('navigation-logo')" style="width: 32px; height: 32px; border-radius: 50%; background-color: white; object-fit: cover;"/>
         </div>
     @elseif(View::hasSection('navigation-title'))
-        <div style="position: sticky; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 1rem; font-weight: 600; color: {{ $headerTitleColor }};">
+        <div style="position: sticky; margin-left:5%; font-size: 1rem; font-weight: 600; color: {{ $headerTitleColor }};">
             @yield('navigation-title', 'Offside Club')
         </div>
     @endif
