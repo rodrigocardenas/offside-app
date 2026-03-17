@@ -295,6 +295,9 @@
                         <x-groups.group-social-question :social-question="$socialQuestion" :user-answers="$userAnswers" :theme-colors="$themeColorsData" />
                     </div>
                 @endif
+            @elseif ($group->isPublic())
+                {{-- <span class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm text-center" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px; color: {{ $textSecondary }};">
+                </span> --}}
             @else
                 <!-- Slide de Invitación para Agregar Miembros -->
                 <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" style="background: {{ $componentsBackground }}; border-color: {{ $borderColor }}; min-width: 300px;">
