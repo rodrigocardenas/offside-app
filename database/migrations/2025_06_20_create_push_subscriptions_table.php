@@ -15,7 +15,11 @@ return new class extends Migration
             $table->string('public_key')->nullable();
             $table->string('auth_token')->nullable();
             $table->string('device_token')->nullable();
+            $table->string('platform')->default('web')->comment('Platform: web, android, ios');
             $table->timestamps();
+            
+            // Index for efficient searches
+            $table->index(['user_id', 'platform']);
         });
     }
 

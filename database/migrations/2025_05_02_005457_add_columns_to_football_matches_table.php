@@ -11,17 +11,38 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('football_matches', function (Blueprint $table) {
-            $table->string('external_id')->unique()->nullable();
-            $table->string('home_team');
-            $table->string('away_team');
-            $table->timestamp('date');
-            $table->string('status');
-            $table->string('stadium')->nullable();
-            $table->string('league');
-            $table->string('score')->nullable();
-            $table->text('events')->nullable();
-        });
+        // Only alter if table exists
+        if (Schema::hasTable('football_matches')) {
+            Schema::table('football_matches', function (Blueprint $table) {
+                if (!Schema::hasColumn('football_matches', 'external_id')) {
+                    $table->string('external_id')->unique()->nullable();
+                }
+                if (!Schema::hasColumn('football_matches', 'home_team')) {
+                    $table->string('home_team');
+                }
+                if (!Schema::hasColumn('football_matches', 'away_team')) {
+                    $table->string('away_team');
+                }
+                if (!Schema::hasColumn('football_matches', 'date')) {
+                    $table->timestamp('date');
+                }
+                if (!Schema::hasColumn('football_matches', 'status')) {
+                    $table->string('status');
+                }
+                if (!Schema::hasColumn('football_matches', 'stadium')) {
+                    $table->string('stadium')->nullable();
+                }
+                if (!Schema::hasColumn('football_matches', 'league')) {
+                    $table->string('league');
+                }
+                if (!Schema::hasColumn('football_matches', 'score')) {
+                    $table->string('score')->nullable();
+                }
+                if (!Schema::hasColumn('football_matches', 'events')) {
+                    $table->text('events')->nullable();
+                }
+            });
+        }
     }
 
     /**
@@ -29,18 +50,25 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('football_matches', function (Blueprint $table) {
-            $table->dropColumn([
-                'external_id',
-                'home_team',
-                'away_team',
-                'date',
-                'status',
-                'stadium',
-                'league',
-                'score',
-                'events'
-            ]);
-        });
-    }
+        if (Schema::hasTable('football_matches')) {
+            Schema::table('football_matches', function (Blueprint $table) {
+                $columns = [
+                    'external_id',
+                    'home_team',
+                    'away_team',
+                    'date',
+                    'status',
+                    'stadium',
+                    'league',
+                    'score',
+                    'events'
+                ];
+                
+                foreach ($columns as $column) {
+                    if (Schema::hasColumn('football_matches', $column)) {
+                        $table->dropColumn($column);
+                    }
+                }
+            });
+        }    }
 };

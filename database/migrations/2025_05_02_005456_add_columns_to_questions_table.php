@@ -12,8 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('questions', function (Blueprint $table) {
-            $table->foreignId('football_match_id')->nullable()->constrained('football_matches')->onDelete('set null');
-            $table->timestamp('result_verified_at')->nullable();
+            // Only add foreign key if football_matches table exists
+            if (Schema::hasTable('football_matches') && !Schema::hasColumn('questions', 'football_match_id')) {
+                $table->foreignId('football_match_id')->nullable()->constrained('football_matches')->onDelete('set null');
+            }
+            if (!Schema::hasColumn('questions', 'result_verified_at')) {
+                $table->timestamp('result_verified_at')->nullable();
+            }
         });
     }
 
@@ -23,9 +28,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('questions', function (Blueprint $table) {
-            $table->dropForeign(['football_match_id']);
-            $table->dropColumn('football_match_id');
-            $table->dropColumn('result_verified_at');
-        });
+            if (Schema::hasColumn('questions', 'football_match_id')) {
+                $table->dropForeign(['football_match_id']);
+                $table->dropColumn('football_match_id');
+            }
+            if (Schema::hasColumn('questions', 'result_verified_at')) {
+                $table->dropColumn('result_verified_at');
+            }        });
     }
 };

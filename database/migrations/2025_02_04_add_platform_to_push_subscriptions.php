@@ -11,12 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('push_subscriptions', function (Blueprint $table) {
-            // Agregar columna platform para distinguir entre web, android, ios
-            $table->string('platform')->default('web')->after('device_token');
-            // Agregar índice compuesto para búsquedas eficientes
-            $table->index(['user_id', 'platform']);
-        });
+        // Only add platform column if table exists and column doesn't exist
+        if (Schema::hasTable('push_subscriptions') && !Schema::hasColumn('push_subscriptions', 'platform')) {
+            Schema::table('push_subscriptions', function (Blueprint $table) {
+                // Agregar columna platform para distinguir entre web, android, ios
+                $table->string('platform')->default('web')->after('device_token');
+                // Agregar índice compuesto para búsquedas eficientes
+                $table->index(['user_id', 'platform']);
+            });
+        }
     }
 
     /**
@@ -24,9 +27,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('push_subscriptions', function (Blueprint $table) {
-            $table->dropIndex(['user_id', 'platform']);
-            $table->dropColumn('platform');
-        });
+        if (Schema::hasTable('push_subscriptions') && Schema::hasColumn('push_subscriptions', 'platform')) {
+            Schema::table('push_subscriptions', function (Blueprint $table) {
+                $table->dropIndex(['user_id', 'platform']);
+                $table->dropColumn('platform');
+            });
+        }
     }
 };

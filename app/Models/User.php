@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Storage;
+use App\Facades\CloudflareImages;
 
 class User extends Authenticatable
 {
@@ -27,6 +28,8 @@ class User extends Authenticatable
         'unique_id',
         'is_admin',
         'avatar',
+        'avatar_cloudflare_id',
+        'avatar_provider',
         'favorite_competition_id',
         'favorite_club_id',
         'favorite_national_team_id',
@@ -57,30 +60,78 @@ class User extends Authenticatable
 
     /**
      * Get the user's avatar URL.
+     * Supports both Cloudflare Images and local storage.
      *
+     * @param string $size Size preset: small, medium (default is small)
      * @return string
      */
-    public function getAvatarUrlAttribute()
+    public function getAvatarUrl(string $size = 'small'): string
     {
+        // Try Cloudflare first if available and configured
+        if ($this->avatar_provider === 'cloudflare' && $this->avatar_cloudflare_id) {
+            try {
+                $transformKey = "avatar_{$size}";
+                $url = CloudflareImages::getTransformedUrl(
+                    $this->avatar_cloudflare_id,
+                    $transformKey
+                );
+                if ($url) {
+                    return $url;
+                }
+            } catch (\Exception $e) {
+                // Fallback to local if Cloudflare fails
+            }
+        }
+
+        // Fallback to local storage
         if ($this->avatar) {
-            // Verificar si el archivo existe en el storage público
             if (Storage::disk('public')->exists('avatars/' . $this->avatar)) {
                 return asset('storage/avatars/' . $this->avatar);
             }
 
-            // Si no existe en storage público, intentar con la ruta directa
             $directPath = storage_path('app/public/avatars/' . $this->avatar);
             if (file_exists($directPath)) {
                 return asset('storage/avatars/' . $this->avatar);
             }
 
-            // Si el archivo no existe, limpiar el campo avatar
+            // Clean up if file doesn't exist
             $this->update(['avatar' => null]);
         }
 
-        // Retornar un avatar por defecto basado en el nombre del usuario
+        // Default avatar
         $name = urlencode($this->name);
         return "https://ui-avatars.com/api/?name={$name}&background=random";
+    }
+
+    /**
+     * Get responsive srcset for avatar (Cloudflare only)
+     *
+     * @return string
+     */
+    public function getAvatarSrcset(): string
+    {
+        if ($this->avatar_provider === 'cloudflare' && $this->avatar_cloudflare_id) {
+            try {
+                return CloudflareImages::getResponsiveSet(
+                    $this->avatar_cloudflare_id,
+                    'avatar'
+                );
+            } catch (\Exception $e) {
+                return '';
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Get the user's avatar URL via attribute accessor.
+     * Kept for backward compatibility.
+     *
+     * @return string
+     */
+    public function getAvatarUrlAttribute()
+    {
+        return $this->getAvatarUrl('small');
     }
 
     public function roles()
