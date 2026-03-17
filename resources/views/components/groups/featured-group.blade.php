@@ -112,9 +112,9 @@
 
                         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px;">
                             {{-- <i class="fas fa-info" style="color: #8b5cf6;"></i> --}}
-                            <span style="color: {{ $secondaryText }};">
+                            <p style="color: {{ $secondaryText }}; max-width: 240px; text-align: center; font-style: italic;">
                                 <small>{{ __('views.groups.quiz_group_description') }}</small>
-                            </span>
+                            </p>
                         </div>
 
                 </div>
