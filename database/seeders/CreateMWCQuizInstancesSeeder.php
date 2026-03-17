@@ -19,17 +19,17 @@ class CreateMWCQuizInstancesSeeder extends Seeder
     public function run(): void
     {
         // Obtener el grupo MWC
-        $group = Group::where('code', 'MWC-2026-QUIZ')->first();
+        $group = Group::where('code', '1DipTC')->first();
 
         if (!$group) {
-            $this->command->error('❌ Grupo MWC Quiz no encontrado. Por favor ejecuta CreateMWCQuizGroupSeeder primero.');
+            $this->command->error('❌ Grupo no encontrado. Por favor ejecuta CreateMWCQuizGroupSeeder primero.');
             return;
         }
 
         // Obtener todas las preguntas template de tipo 'quiz'
         $templateQuestions = TemplateQuestion::where('type', 'quiz')
-            ->orderBy('created_at', 'asc')
-            ->take(10)
+            ->orderBy('created_at', 'desc')
+            ->take(7)
             ->get();
 
         if ($templateQuestions->isEmpty()) {
@@ -43,7 +43,7 @@ class CreateMWCQuizInstancesSeeder extends Seeder
             // Crear pregunta relacionada con el template
             $question = Question::create([
                 'title' => $template->text,
-                'description' => 'Pregunta del quiz MWC 2026 - Conocimiento de Fútbol',
+                'description' => 'Preguntas de quiz - Conocimiento de Fútbol',
                 'type' => 'quiz',
                 'category' => 'quiz',
                 'points' => 100, // 100 puntos por respuesta correcta

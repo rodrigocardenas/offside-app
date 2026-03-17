@@ -22,113 +22,81 @@ class CreateMWCQuizQuestionsSeeder extends Seeder
             // Q1
             [
                 'type' => 'quiz',
-                'text' => '¿Cuál es el equipo que más veces ha ganado la Champions League?',
+                'text' => '¿Cuál fue el primer cambio del partido entre Tottenham vs Atlético de Madrid?',
                 'options' => [
-                    ['text' => 'Real Madrid', 'is_correct' => true],
-                    ['text' => 'AC Milan', 'is_correct' => false],
-                    ['text' => 'Bayern Munich', 'is_correct' => false],
-                    ['text' => 'Liverpool', 'is_correct' => false],
+                    ['text' => 'Hugo Lloris', 'is_correct' => false],
+                    ['text' => 'Jan Oblak', 'is_correct' => false],
+                    ['text' => 'Antonin Kinsky', 'is_correct' => true],
+                    ['text' => 'Mathys Tel', 'is_correct' => false],
                 ]
             ],
             // Q2
             [
                 'type' => 'quiz',
-                'text' => '¿En qué año se disputó el primer Mundial de Fútbol?',
+                'text' => '¿Cuál de estos jugadores ha vestido la camiseta del PSG y también la del Chelsea?',
                 'options' => [
-                    ['text' => '1926', 'is_correct' => false],
-                    ['text' => '1930', 'is_correct' => true],
-                    ['text' => '1934', 'is_correct' => false],
-                    ['text' => '1938', 'is_correct' => false],
+                    ['text' => 'Eden Hazard', 'is_correct' => false],
+                    ['text' => 'Kylian Mbappé', 'is_correct' => false],
+                    ['text' => 'Thiago Silva', 'is_correct' => true],
+                    ['text' => 'Didier Drogba', 'is_correct' => false],
                 ]
             ],
             // Q3
             [
                 'type' => 'quiz',
-                'text' => '¿Cuál fue el máximo goleador en la historia de los Mundiales de Fútbol?',
+                'text' => '¿Cuál sería el rival del Bodo en caso de pasar a 4tos?',
                 'options' => [
-                    ['text' => 'Pelé', 'is_correct' => false],
-                    ['text' => 'Cristiano Ronaldo', 'is_correct' => false],
-                    ['text' => 'Miroslav Klose', 'is_correct' => true],
-                    ['text' => 'Gerd Müller', 'is_correct' => false],
+                    ['text' => 'Arsenal/Sporting Lisboa', 'is_correct' => true],
+                    ['text' => 'Barcelona/Westham', 'is_correct' => false],
+                    ['text' => 'Arsenal/Benfica', 'is_correct' => false],
+                    ['text' => 'Barcelona/Newcastle', 'is_correct' => false],
                 ]
             ],
             // Q4
             [
                 'type' => 'quiz',
-                'text' => '¿Cuántos títulos de Copa del Mundo tiene Brasil?',
+                'text' => '¿Cómo apodan popularmente al Leverkusen debido a sus orígenes?',
                 'options' => [
-                    ['text' => '4', 'is_correct' => false],
-                    ['text' => '5', 'is_correct' => true],
-                    ['text' => '6', 'is_correct' => false],
-                    ['text' => '7', 'is_correct' => false],
+                    ['text' => 'Los Mineros', 'is_correct' => false],
+                    ['text' => 'Los Toros', 'is_correct' => false],
+                    ['text' => 'El equipo de las aspirinas', 'is_correct' => true],
+                    ['text' => 'Los Gunners', 'is_correct' => false],
                 ]
             ],
             // Q5
             [
                 'type' => 'quiz',
-                'text' => '¿En qué país se disputó la final de la Copa del Mundo de 2010?',
+                'text' => '¿Cuál de estos entrenadores ha ganado la Champions como jugador y como director técnico?',
                 'options' => [
-                    ['text' => 'España', 'is_correct' => false],
-                    ['text' => 'Sudáfrica', 'is_correct' => true],
-                    ['text' => 'Brasil', 'is_correct' => false],
-                    ['text' => 'Alemania', 'is_correct' => false],
+                    ['text' => 'Carlo Ancelotti', 'is_correct' => true],
+                    ['text' => 'Luis Enrique', 'is_correct' => false],
+                    ['text' => 'Mikel Arteta', 'is_correct' => false],
+                    ['text' => 'Xabi Alonso', 'is_correct' => false],
                 ]
             ],
             // Q6
             [
                 'type' => 'quiz',
-                'text' => '¿En qué país se juega la Serie A?',
+                'text' => '¿Cuál es la instancia más lejana que ha alcanzado el Sporting de Lisboa en la historia de la Champions League?',
                 'options' => [
-                    ['text' => 'España', 'is_correct' => false],
-                    ['text' => 'Italia', 'is_correct' => true],
-                    ['text' => 'Portugal', 'is_correct' => false],
-                    ['text' => 'Francia', 'is_correct' => false],
+                    ['text' => 'Final', 'is_correct' => false],
+                    ['text' => 'Semifinales', 'is_correct' => false],
+                    ['text' => 'Cuartos de final', 'is_correct' => true],
+                    ['text' => 'Octavos de final', 'is_correct' => false],
                 ]
             ],
             // Q7
             [
                 'type' => 'quiz',
-                'text' => '¿Quién es el máximo goleador histórico de la selección de España?',
+                'text' => '¿Qué resultado le sirve al Chelsea para pasar a 4tos?',
                 'options' => [
-                    ['text' => 'Raúl', 'is_correct' => false],
-                    ['text' => 'Fernando Torres', 'is_correct' => false],
-                    ['text' => 'David Villa', 'is_correct' => true],
-                    ['text' => 'Sergio Ramos', 'is_correct' => false],
+                    ['text' => '6-3', 'is_correct' => false],
+                    ['text' => '4-1', 'is_correct' => false],
+                    ['text' => '2-0', 'is_correct' => false],
+                    ['text' => '5-1', 'is_correct' => true],
                 ]
             ],
-            // Q8
-            [
-                'type' => 'quiz',
-                'text' => '¿Cuál es la competición de fútbol más antigua del mundo?',
-                'options' => [
-                    ['text' => 'Copa del Mundo', 'is_correct' => false],
-                    ['text' => 'FA Cup', 'is_correct' => true],
-                    ['text' => 'Copa Libertadores', 'is_correct' => false],
-                    ['text' => 'Liga de Campeones', 'is_correct' => false],
-                ]
-            ],
-            // Q9
-            [
-                'type' => 'quiz',
-                'text' => '¿Qué selección tiene más Mundiales de fútbol femenino?',
-                'options' => [
-                    ['text' => 'EEUU', 'is_correct' => true],
-                    ['text' => 'Brasil', 'is_correct' => false],
-                    ['text' => 'Noruega', 'is_correct' => false],
-                    ['text' => 'Alemania', 'is_correct' => false],
-                ]
-            ],
-            // Q10
-            [
-                'type' => 'quiz',
-                'text' => '¿Quién es el jugador más joven en disputar un mundial?',
-                'options' => [
-                    ['text' => 'Luke Brooke-Smith', 'is_correct' => true],
-                    ['text' => 'Norman Whiteside', 'is_correct' => false],
-                    ['text' => 'Pelé', 'is_correct' => false],
-                    ['text' => 'Hugo Sánchez', 'is_correct' => false],
-                ]
-            ],
+
         ];
 
         foreach ($quizQuestions as $questionData) {
