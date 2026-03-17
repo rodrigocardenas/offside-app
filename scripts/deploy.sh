@@ -92,7 +92,7 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
 
     echo "🔧 Preparando directorios..."
     mkdir -p bootstrap/cache storage/app/public/avatars
-    
+
     # Asegurar permisos correctos en storage (para avatares y logos de usuarios)
     chmod -R 777 storage/app/public 2>/dev/null || true
     chmod -R 777 storage/framework 2>/dev/null || true
