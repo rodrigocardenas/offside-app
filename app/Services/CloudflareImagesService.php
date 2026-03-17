@@ -250,6 +250,67 @@ class CloudflareImagesService
     }
 
     /**
+     * Get account statistics from Cloudflare
+     *
+     * @return array Account stats including image count and metadata
+     */
+    public function getAccountStats(): array
+    {
+        if (!$this->enabled || !$this->isHealthy()) {
+            return [
+                'available' => false,
+                'total_images' => 0,
+                'today_uploads' => 0,
+                'cloudflare_users' => 0,
+                'local_avatars' => 0,
+                'status' => 'Cloudflare Images no está disponible'
+            ];
+        }
+
+        try {
+            // Get total images from Cloudflare
+            $response = Http::withToken($this->apiToken)
+                ->timeout(10)
+                ->get("{$this->apiUrl}/accounts/{$this->accountId}/images/v1?per_page=1");
+
+            $totalImages = $response->json('result_info.count', 0);
+
+            // Get local and Cloudflare counts from database
+            $cloudflareUsers = \App\Models\User::where('avatar_provider', 'cloudflare')->count();
+            $cloudflareGroups = \App\Models\Group::where('cover_provider', 'cloudflare')->count();
+            $localAvatars = \App\Models\User::where('avatar_provider', 'local')->count();
+
+            // Get today's uploads count
+            $todayUploads = \App\Models\User::where('avatar_provider', 'cloudflare')
+                ->whereDate('updated_at', now()->toDateString())
+                ->count();
+
+            return [
+                'available' => true,
+                'total_images' => $totalImages,
+                'today_uploads' => $todayUploads,
+                'cloudflare_users' => $cloudflareUsers,
+                'cloudflare_groups' => $cloudflareGroups,
+                'local_avatars' => $localAvatars,
+                'status' => '✓ Conectado',
+            ];
+        } catch (Exception $e) {
+            $this->logError('Error fetching account stats', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'available' => false,
+                'total_images' => 0,
+                'today_uploads' => 0,
+                'cloudflare_users' => 0,
+                'local_avatars' => 0,
+                'status' => 'Error al conectar a Cloudflare'
+            ];
+        }
+    }
+
+    /**
      * Upload to local storage (fallback)
      *
      * @param UploadedFile $file

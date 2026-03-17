@@ -13,6 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CompetitionController;
 use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionController;
 use App\Http\Controllers\Admin\TemplateQuestionController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TestAvatarController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\MatchesController;
@@ -129,6 +130,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/cloudflare-images', [AdminController::class, 'cloudflareImagesDashboard'])->name('cloudflare-dashboard');
     Route::get('/competitions/{competition}/teams', [AdminCompetitionController::class, 'getTeams'])->name('competitions.teams');
     Route::get('/competitions/{competition}/matches', [AdminCompetitionController::class, 'getMatches'])->name('competitions.matches');
     Route::get('/matches/{match}', [AdminCompetitionController::class, 'getMatch'])->name('matches.show');

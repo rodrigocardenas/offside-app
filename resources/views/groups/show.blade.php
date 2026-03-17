@@ -46,6 +46,18 @@
                     onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
                     {{ __('messages.more') }}
                 </a>
+                <!-- Edit Group Button (Only for Creator) -->
+                @if (auth()->user()->id === $group->created_by)
+                <div class="flex justify-end px-1 mb-4" style="margin-right: 8px;">
+                    <a href="{{ route('groups.edit', $group) }}"
+                       title="Editar grupo"
+                       style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: {{ $isDark ? '#1a524e' : '#e5f3f0' }}; color: {{ $accentColor }}; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid {{ $accentColor }}; transition: all 0.2s ease; text-decoration: none;"
+                       onmouseover="this.style.background='{{ $accentColor }}'; this.style.color='#003b2f';"
+                       onmouseout="this.style.background='{{ $isDark ? '#1a524e' : '#e5f3f0' }}'; this.style.color='{{ $accentColor }}';">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+                @endif
                 <!-- Share Group Button -->
                 <div class="flex justify-end px-1 mb-4" style="margin-top: 14px;">
                     <button type="button"
