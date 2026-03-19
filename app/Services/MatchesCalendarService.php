@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\FootballMatch;
 use App\Models\Competition;
 use App\Models\Team;
+use App\Services\Features\FeaturedMatchService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -504,6 +505,12 @@ class MatchesCalendarService
             }
         }
 
+        // Después de sincronizar todos los partidos, actualizar su estado de featured
+        if ($synced > 0) {
+            $featuredMatchService = new FeaturedMatchService();
+            $featuredMatchService->updateFeaturedMatches();
+        }
+
         return $synced;
     }
 
@@ -535,6 +542,7 @@ class MatchesCalendarService
             'home_team_penalties' => $score['penalty']['home'],
             'away_team_penalties' => $score['penalty']['away'],
             'matchday' => $fixture['round'] ?? null,
+            'is_featured' => false, // Se actualiza después por FeaturedMatchService
         ];
     }
 

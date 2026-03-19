@@ -124,53 +124,53 @@ class QuestionEvaluationService
                 // ✅ Score-based: Siempre se puede verificar
                 $questionHandled = true;
                 $correctOptions = $this->evaluateWinner($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'primer gol|anotará.*primer')) {
-                // ❌ Event-based: Solo si hay datos verificados
+            } elseif ($this->isQuestionAbout($questionText, 'primer gol|anotará.*primer')) {
+                // ✅ Event-based: Try deterministic evaluation first
                 $questionHandled = true;
                 $correctOptions = $this->evaluateFirstGoal($question, $match);
-            } elseif ($hasVerifiedData && $this->isGoalBeforeMinuteQuestion($questionText)) {
-                // ❌ Event-based: Gol antes de cierto minuto
+            } elseif ($this->isGoalBeforeMinuteQuestion($questionText)) {
+                // ✅ Event-based: Try deterministic evaluation first
                 $threshold = $this->extractMinuteThreshold($questionText) ?? 15;
                 $questionHandled = true;
                 $correctOptions = $this->evaluateGoalBeforeMinute($question, $match, $threshold);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'ultimo gol|anotará.*último')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'ultimo gol|anotará.*último')) {
+                // ✅ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateLastGoal($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'más.*faltas|faltas')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'más.*faltas|faltas')) {
+                // ✅ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateFouls($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tarjetas amarillas|amarillas')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'tarjetas amarillas|amarillas')) {
+                // ✅ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateYellowCards($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tarjetas rojas|rojas')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'tarjetas rojas|rojas')) {
+                // ✅ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateRedCards($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'autogol|auto gol')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'autogol|auto gol')) {
+                // ✅ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateOwnGoal($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'penal|penalty')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'penal|penalty')) {
+                // ✅ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluatePenaltyGoal($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'tiro libre|free kick')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'tiro libre|free kick')) {
+                // ✅ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateFreeKickGoal($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'córner|corner')) {
-                // ❌ Event-based
+            } elseif ($this->isQuestionAbout($questionText, 'córner|corner')) {
+                // ✅ Event-based
                 $questionHandled = true;
                 $correctOptions = $this->evaluateCornerGoal($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'últimos.*15|últimos.*quince|últimos.*minutos|late.*goal')) {
-                // ❌ Event-based: Gol en últimos 15 minutos
+            } elseif ($this->isQuestionAbout($questionText, 'últimos.*15|últimos.*quince|últimos.*minutos|late.*goal')) {
+                // ✅ Event-based: Gol en últimos 15 minutos
                 $questionHandled = true;
                 $correctOptions = $this->evaluateLateGoal($question, $match);
-            } elseif ($hasVerifiedData && $this->isQuestionAbout($questionText, 'antes.*descanso|first.*half|primer.*tiempo|minuto.*45')) {
-                // ❌ Event-based: Gol antes del descanso
+            } elseif ($this->isQuestionAbout($questionText, 'antes.*descanso|first.*half|primer.*tiempo|minuto.*45')) {
+                // ✅ Event-based: Gol antes del descanso
                 $questionHandled = true;
                 $correctOptions = $this->evaluateGoalBeforeHalftime($question, $match);
             } elseif ($this->isQuestionAbout($questionText, 'tiros.*arco|shots.*target|remates.*portería|tiro al arco')) {
@@ -1219,7 +1219,7 @@ class QuestionEvaluationService
 
     /**
      * Valida si un evento es un gol válido (excluye penales fallados y otros casos inválidos)
-     * 
+     *
      * @param array $event El evento a validar
      * @return bool true si es un gol válido, false si es inválido (ej: Missed Penalty)
      */
@@ -1893,4 +1893,61 @@ PROMPT;
             return null;
         }
     }
+
+    /**
+     * Evalúa una pregunta de tipo 'quiz'.
+     *
+     * Las preguntas quiz son de conocimiento general sin relación a partidos.
+     * Se evalúan basándose en la opción marcada como correcta en el template.
+     *
+     * @param Question $question Pregunta de tipo quiz
+     * @return bool True si la opción seleccionada es correcta
+     */
+    public function evaluateQuizQuestion(Question $question, ?int $selectedOptionId = null): bool
+    {
+        if ($question->type !== 'quiz') {
+            Log::warning('evaluateQuizQuestion called with non-quiz question', [
+                'question_id' => $question->id,
+                'type' => $question->type
+            ]);
+            return false;
+        }
+
+        // Si no se proporciona selectedOptionId, significa que se está validando después que el usuario respondió
+        if ($selectedOptionId === null) {
+            return false;
+        }
+
+        // Obtener la opción seleccionada
+        $selectedOption = \App\Models\QuestionOption::find($selectedOptionId);
+
+        if (!$selectedOption || $selectedOption->question_id !== $question->id) {
+            Log::warning('Invalid question option for quiz evaluation', [
+                'question_id' => $question->id,
+                'selected_option_id' => $selectedOptionId
+            ]);
+            return false;
+        }
+
+        // Retornar si la opción seleccionada es correcta
+        return (bool) $selectedOption->is_correct;
+    }
+
+    /**
+     * Obtiene la opción correcta de una pregunta quiz
+     *
+     * @param Question $question
+     * @return \App\Models\QuestionOption|null
+     */
+    public function getQuizCorrectOption(Question $question): ?\App\Models\QuestionOption
+    {
+        if ($question->type !== 'quiz') {
+            return null;
+        }
+
+        return $question->options()
+            ->where('is_correct', true)
+            ->first();
+    }
 }
+

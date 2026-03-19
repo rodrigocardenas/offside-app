@@ -65,13 +65,13 @@ class User extends Authenticatable
         if ($this->avatar) {
             // Verificar si el archivo existe en el storage público
             if (Storage::disk('public')->exists('avatars/' . $this->avatar)) {
-                return url('/avatars/' . $this->avatar);
+                return asset('storage/avatars/' . $this->avatar);
             }
 
             // Si no existe en storage público, intentar con la ruta directa
             $directPath = storage_path('app/public/avatars/' . $this->avatar);
             if (file_exists($directPath)) {
-                return url('/avatars/' . $this->avatar);
+                return asset('storage/avatars/' . $this->avatar);
             }
 
             // Si el archivo no existe, limpiar el campo avatar

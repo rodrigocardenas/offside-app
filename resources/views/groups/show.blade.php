@@ -122,8 +122,15 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
 
-                    <!-- Preguntas de Partidos -->
-                    <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :group="$group" :social-question="$socialQuestion ?? null" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
+                    <!-- Preguntas de Partidos (solo si NO es grupo quiz) -->
+                    @if($group->category !== 'quiz')
+                        <x-groups.group-match-questions :match-questions="$matchQuestions" :user-answers="$userAnswers" :current-matchday="$currentMatchday" :group="$group" :social-question="$socialQuestion ?? null" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
+                    @endif
+
+                    <!-- 🎮 Preguntas Quiz -->
+                    @if(!empty($quizQuestions) && count($quizQuestions) > 0)
+                        <x-quiz-carousel :quiz-questions="$quizQuestions" :group="$group" :theme-colors="compact('isDark', 'bgPrimary', 'bgSecondary', 'bgTertiary', 'textPrimary', 'textSecondary', 'borderColor', 'accentColor', 'accentDark', 'componentsBackground', 'buttonBgHover')" />
+                    @endif
 
                     <!-- Pregunta Social -->
                     {{-- @if($group->users->count() >= 2)
@@ -922,3 +929,36 @@
     }
 </script>
 
+<!-- Auto-scroll to answered quiz question on page load -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const fragment = window.location.hash.substring(1);
+
+        if (fragment && fragment.startsWith('question')) {
+            console.log('🎯 Buscando elemento:', fragment);
+
+            const element = document.getElementById(fragment);
+
+            if (element) {
+                console.log('✅ Elemento encontrado:', element);
+                console.log('📍 Posición del elemento:', element.getBoundingClientRect());
+
+                // Método 1: scrollIntoView más simple
+                element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                console.log('✨ scrollIntoView ejecutado');
+
+                // Método 2: forzar scroll con window.scrollTo después de un delay
+                setTimeout(() => {
+                    const scrollPos = element.getBoundingClientRect().top + window.pageYOffset - 100;
+                    window.scrollTo({ top: scrollPos, behavior: 'smooth' });
+                    console.log('📜 window.scrollTo ejecutado a:', scrollPos);
+                }, 200);
+
+            } else {
+                console.warn('❌ No se encontró elemento con ID:', fragment);
+            }
+        }
+    }, 800); // Aumentar a 800ms
+});
+</script>

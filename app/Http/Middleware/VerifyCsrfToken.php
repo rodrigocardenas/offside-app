@@ -12,6 +12,6 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        // Las rutas de answers todavía requieren CSRF pero con regeneración de sesión
     ];
 }

@@ -296,6 +296,7 @@ return [
         'points_earned' => '+{points} points',
         'incorrect_answer' => 'Incorrect Answer',
         'calculating' => 'Calculating...',
+        'quiz_group_description' => 'You can only answer once, the timer starts when you answer the first question',
     ],
     'feedback' => [
         'title' => 'Your opinion helps us improve',

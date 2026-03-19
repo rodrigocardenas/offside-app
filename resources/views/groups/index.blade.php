@@ -39,11 +39,12 @@
             type="warning"
         />
 
-        {{-- 4. PARTIDO DESTACADO --}}
-        @if($featuredMatch)
-            <x-matches.featured-match
-                :match="$featuredMatch"
-                title="{{ __('views.groups.featured_match') }}"
+        {{-- 4. GRUPOS DESTACADOS (CARRUSEL: Público + Quiz) --}}
+        @if($featuredGroup || $featuredQuizGroup)
+            <x-groups.featured-group
+                :group="$featuredGroup"
+                :quiz-group="$featuredQuizGroup"
+                title="{{ __('views.groups.featured_public_group') }}"
             />
         @endif
 
@@ -354,5 +355,15 @@
             window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
         };
     </script>
+
+    <style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 
 </x-dynamic-layout>

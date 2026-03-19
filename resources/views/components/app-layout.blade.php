@@ -205,7 +205,7 @@
         .header-profile-btn {
             position: relative !important;
             flex-shrink: 0 !important;
-            margin-left: auto !important;
+            /* margin-left: auto !important; */
         }
 
         .profile-btn {

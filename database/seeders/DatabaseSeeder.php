@@ -30,6 +30,10 @@ class DatabaseSeeder extends Seeder
             SocialQuestionsSeeder::class,
             TemplateQuestionSeeder::class,
             NationalTeamsSeeder::class,
+            // 🎮 QUIZ GAME MWC
+            CreateMWCQuizGroupSeeder::class,
+            CreateMWCQuizQuestionsSeeder::class,
+            CreateMWCQuizInstancesSeeder::class,
         ]);
 
         if (app()->environment(['local', 'testing'])) {

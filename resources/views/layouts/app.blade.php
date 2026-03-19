@@ -47,6 +47,7 @@
 
     <!-- Scripts & Base Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ asset('css/carousels.css') }}">
 
     <!-- Component Styles (DESPUÉS de Tailwind para que tenga prioridad) -->
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
