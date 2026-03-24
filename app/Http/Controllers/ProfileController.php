@@ -61,7 +61,7 @@ class ProfileController extends Controller
                 $file = $request->file('avatar');
                 
                 // Intentar subir a Cloudflare si está habilitado
-                if (config('cloudflare.images.enabled')) {
+                if (config('cloudflare.enabled')) {
                     try {
                         // Eliminar avatar anterior de Cloudflare si existe
                         if ($user->avatar_provider === 'cloudflare' && $user->avatar_cloudflare_id) {
@@ -75,19 +75,18 @@ class ProfileController extends Controller
 
                         // Subir nuevo avatar a Cloudflare
                         $uploadResponse = CloudflareImages::upload(
-                            fopen($file->getRealPath(), 'r'),
-                            'avatar_' . $user->id . '_' . time(),
-                            ['user_id' => $user->id]
+                            $file,
+                            'avatar_' . $user->id . '_' . time()
                         );
 
-                        if ($uploadResponse && isset($uploadResponse['result']['id'])) {
-                            $data['avatar_cloudflare_id'] = $uploadResponse['result']['id'];
+                        if ($uploadResponse) {
+                            $data['avatar_cloudflare_id'] = $uploadResponse;
                             $data['avatar_provider'] = 'cloudflare';
                             // No actualizar el campo 'avatar' cuando usamos Cloudflare
                             unset($data['avatar']);
                             
                             Log::info('Avatar subido a Cloudflare exitosamente', [
-                                'cloudflare_id' => $uploadResponse['result']['id']
+                                'cloudflare_id' => $uploadResponse
                             ]);
                         } else {
                             throw new Exception('Invalid Cloudflare response');
@@ -141,7 +140,7 @@ class ProfileController extends Controller
         // Guardar solo el nombre del archivo en la BD
         $data['avatar'] = $filename;
         $data['avatar_provider'] = 'local';
-        unset($data['avatar_cloudflare_id']);
+        $data['avatar_cloudflare_id'] = null;
         
         // Eliminar avatar anterior de Cloudflare si existe
         if ($user->avatar_provider === 'cloudflare' && $user->avatar_cloudflare_id) {

@@ -33,7 +33,7 @@ class MigrateImagesToCloudflare extends Command
      */
     public function handle(): int
     {
-        if (!config('cloudflare.images.enabled')) {
+        if (!config('cloudflare.enabled')) {
             $this->error('✗ Cloudflare Images is not enabled. Enable it in config/cloudflare.php');
             return self::FAILURE;
         }

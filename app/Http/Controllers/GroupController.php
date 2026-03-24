@@ -603,7 +603,7 @@ class GroupController extends Controller
                 $file = $request->file('cover_image');
                 
                 // Intentar subir a Cloudflare si está habilitado
-                if (config('cloudflare.images.enabled')) {
+                if (config('cloudflare.enabled')) {
                     try {
                         // Eliminar imagen anterior de Cloudflare si existe
                         if ($group->cover_provider === 'cloudflare' && $group->cover_cloudflare_id) {

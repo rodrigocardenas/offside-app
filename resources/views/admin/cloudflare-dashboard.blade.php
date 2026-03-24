@@ -106,7 +106,7 @@
                 <div style="background: {{ $bgTertiary }}; border: 1px solid {{ $borderColor }}; border-radius: 12px; padding: 16px;">
                     <h4 style="font-size: 12px; color: {{ $textSecondary }}; margin: 0 0 8px 0; font-weight: 600;">Estado</h4>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: {{ config('cloudflare.images.enabled') ? '#10b981' : '#ef4444' }};"></span>
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: {{ config('cloudflare.enabled') ? '#10b981' : '#ef4444' }};"></span>
                         <span style="color: {{ $textPrimary }}; font-weight: 500;">{{ config('cloudflare.images.enabled') ? 'Activo' : 'Inactivo' }}</span>
                     </div>
                 </div>

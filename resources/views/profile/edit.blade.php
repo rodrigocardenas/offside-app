@@ -63,7 +63,7 @@
                         @endif
                         
                         {{-- Cloudflare indicator --}}
-                        @if($user->avatar_provider === 'cloudflare' && config('cloudflare.images.enabled'))
+                        @if($user->avatar_provider === 'cloudflare' && config('cloudflare.enabled'))
                             <div title="Optimized by Cloudflare Images" style="position: absolute; top: -8px; left: -8px; background: #faad14; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 8px rgba(250, 173, 20, 0.3);">
                                 <svg style="width: 16px; height: 16px; color: white;" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -78,7 +78,7 @@
                     </div>
                     <p style="color: {{ $textColor }}; font-size: 13px; margin: 8px 0 0 0; padding: 0 16px; word-wrap: break-word; overflow-wrap: break-word;">
                         {{ __('views.profile_section.change_photo') }}
-                        @if(config('cloudflare.images.enabled'))
+                        @if(config('cloudflare.enabled'))
                             <span style="font-size: 12px; color: #00deb0; margin-left: 6px;">
                                 ({{ __('views.profile_section.cloudflare_optimized') }})
                             </span>
