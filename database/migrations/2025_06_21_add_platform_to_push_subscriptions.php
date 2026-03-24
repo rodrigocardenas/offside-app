@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::table('push_subscriptions', function (Blueprint $table) {
             // Agregar columna platform para distinguir entre web, android, ios
-            $table->string('platform')->default('web')->after('device_token');
-            // Agregar índice compuesto para búsquedas eficientes
-            $table->index(['user_id', 'platform']);
+            if (!Schema::hasColumn('push_subscriptions', 'platform')) {
+                $table->string('platform')->default('web')->after('device_token');
+                // Solo agregar índice si no existe la columna
+                $table->index(['user_id', 'platform']);
+            }
         });
     }
 
