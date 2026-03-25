@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Group;
 use App\Facades\CloudflareImages;
 use Illuminate\Console\Command;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -132,24 +133,32 @@ class MigrateImagesToCloudflare extends Command
                     continue;
                 }
 
-                // Get file content
+                // Get file content and create UploadedFile instance
                 $fileContent = Storage::disk('public')->get($avatarPath);
                 
                 // Create temporary file
                 $tempFile = tempnam(sys_get_temp_dir(), 'avatar_');
                 file_put_contents($tempFile, $fileContent);
                 
+                // Create UploadedFile instance
+                $uploadedFile = new UploadedFile(
+                    $tempFile,
+                    $user->avatar,
+                    mime_content_type($tempFile),
+                    null,
+                    true
+                );
+                
                 // Upload to Cloudflare
-                $uploadResponse = CloudflareImages::upload(
-                    fopen($tempFile, 'r'),
-                    'avatar_' . $user->id . '_migration',
-                    ['user_id' => $user->id, 'migrated_at' => now()->toIso8601String()]
+                $cloudflareId = CloudflareImages::upload(
+                    $uploadedFile,
+                    'avatar_' . $user->id . '_migration'
                 );
 
-                if ($uploadResponse && isset($uploadResponse['result']['id'])) {
+                if ($cloudflareId) {
                     // Update user record
                     $user->update([
-                        'avatar_cloudflare_id' => $uploadResponse['result']['id'],
+                        'avatar_cloudflare_id' => $cloudflareId,
                         'avatar_provider' => 'cloudflare',
                     ]);
 
@@ -158,7 +167,7 @@ class MigrateImagesToCloudflare extends Command
 
                     $migrated++;
                     $this->info(" ✓ Migrated avatar for {$user->name}");
-                    Log::info("Migrated avatar for user {$user->id}", ['cloudflare_id' => $uploadResponse['result']['id']]);
+                    Log::info("Migrated avatar for user {$user->id}", ['cloudflare_id' => $cloudflareId]);
                 } else {
                     $failed++;
                     $this->error(" ✗ Failed to upload {$user->name}'s avatar to Cloudflare");
@@ -225,24 +234,32 @@ class MigrateImagesToCloudflare extends Command
                     continue;
                 }
 
-                // Get file content
+                // Get file content and create UploadedFile instance
                 $fileContent = Storage::disk('public')->get($coverPath);
                 
                 // Create temporary file
                 $tempFile = tempnam(sys_get_temp_dir(), 'cover_');
                 file_put_contents($tempFile, $fileContent);
                 
+                // Create UploadedFile instance
+                $uploadedFile = new UploadedFile(
+                    $tempFile,
+                    $group->cover_image,
+                    mime_content_type($tempFile),
+                    null,
+                    true
+                );
+                
                 // Upload to Cloudflare
-                $uploadResponse = CloudflareImages::upload(
-                    fopen($tempFile, 'r'),
-                    'group_cover_' . $group->id . '_migration',
-                    ['group_id' => $group->id, 'type' => 'cover', 'migrated_at' => now()->toIso8601String()]
+                $cloudflareId = CloudflareImages::upload(
+                    $uploadedFile,
+                    'cover_' . $group->id . '_migration'
                 );
 
-                if ($uploadResponse && isset($uploadResponse['result']['id'])) {
+                if ($cloudflareId) {
                     // Update group record
                     $group->update([
-                        'cover_cloudflare_id' => $uploadResponse['result']['id'],
+                        'cover_cloudflare_id' => $cloudflareId,
                         'cover_provider' => 'cloudflare',
                     ]);
 
@@ -251,7 +268,7 @@ class MigrateImagesToCloudflare extends Command
 
                     $migrated++;
                     $this->info(" ✓ Migrated cover for {$group->name}");
-                    Log::info("Migrated cover for group {$group->id}", ['cloudflare_id' => $uploadResponse['result']['id']]);
+                    Log::info("Migrated cover for group {$group->id}", ['cloudflare_id' => $cloudflareId]);
                 } else {
                     $failed++;
                     $this->error(" ✗ Failed to upload {$group->name}'s cover to Cloudflare");
