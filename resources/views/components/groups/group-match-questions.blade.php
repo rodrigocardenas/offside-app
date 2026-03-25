@@ -123,28 +123,12 @@
                                         @if($answers->count() > 0)
                                             <div class="flex items-center {{ $isStacked ? '-space-x-4' : 'space-x-1' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
                                                 @foreach($answers->take(3) as $answer)
-                                                    @if($answer->user->avatar)
-                                                        <img src="{{ $answer->user->avatar_url }}"
-                                                             alt="{{ $answer->user->name }}"
-                                                             class="w-5 h-5 rounded-full border border-white shadow-sm object-cover {{ $isStacked ? 'ring-1 ring-white' : '' }}"
-                                                             title="{{ $answer->user->name }}"
-                                                             style="pointer-events: none;">
-                                                    @else
-                                                        @php
-                                                            $initials = '';
-                                                            $nameParts = explode(' ', $answer->user->name);
-                                                            foreach($nameParts as $part) {
-                                                                $initials .= strtoupper(substr($part, 0, 1));
-                                                            }
-                                                            $colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-                                                            $color = $colors[array_rand($colors)];
-                                                        @endphp
-                                                        <div class="w-5 h-5 rounded-full text-white flex items-center justify-center text-xs font-bold border border-white shadow-sm {{ $isStacked ? 'ring-1 ring-white' : '' }}"
-                                                             style="background: {{ $color }}; pointer-events: none;"
-                                                             title="{{ $answer->user->name }}">
-                                                            {{ substr($initials, 0, 1) }}
-                                                        </div>
-                                                    @endif
+                                                    <img src="{{ $answer->user->getAvatarUrl('small') }}"
+                                                         alt="{{ $answer->user->name }}"
+                                                         class="w-5 h-5 rounded-full border border-white shadow-sm object-cover {{ $isStacked ? 'ring-1 ring-white' : '' }}"
+                                                         title="{{ $answer->user->name }}"
+                                                         style="pointer-events: none;"
+                                                         loading="lazy">
                                                 @endforeach
                                                 @if($isStacked && $answers->count() > 3)
                                                     <span class="text-xs font-bold ml-1" style="color: {{ $textSecondary }}; pointer-events: none;">+{{ $answers->count() - 3 }}</span>

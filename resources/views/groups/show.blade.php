@@ -46,6 +46,18 @@
                     onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
                     {{ __('messages.more') }}
                 </a>
+                <!-- Edit Group Button (Only for Creator) -->
+                @if (auth()->user()->id === $group->created_by)
+                <div class="flex justify-end px-1 mb-4" style="margin-right: 8px;">
+                    <a href="{{ route('groups.edit', $group) }}"
+                       title="Editar grupo"
+                       style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: {{ $isDark ? '#1a524e' : '#e5f3f0' }}; color: {{ $accentColor }}; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid {{ $accentColor }}; transition: all 0.2s ease; text-decoration: none;"
+                       onmouseover="this.style.background='{{ $accentColor }}'; this.style.color='#003b2f';"
+                       onmouseout="this.style.background='{{ $isDark ? '#1a524e' : '#e5f3f0' }}'; this.style.color='{{ $accentColor }}';">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+                @endif
                 <!-- Share Group Button -->
                 <div class="flex justify-end px-1 mb-4" style="margin-top: 14px;">
                     <button type="button"
@@ -67,11 +79,7 @@
               <div class="podium-position second">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    @if($topUsers[1]->avatar)
-                      <img src="{{ $topUsers[1]->avatar_url }}" alt="{{ $topUsers[1]->name }}" class="podium-avatar">
-                    @else
-                      <div class="podium-avatar-placeholder">{{ substr($topUsers[1]->name, 0, 1) }}</div>
-                    @endif
+                    <img src="{{ $topUsers[1]->getAvatarUrl('medium') }}" alt="{{ $topUsers[1]->name }}" class="podium-avatar" loading="lazy">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[1]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
@@ -83,11 +91,7 @@
               <div class="podium-position first">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    @if($topUsers[0]->avatar)
-                      <img src="{{ $topUsers[0]->avatar_url }}" alt="{{ $topUsers[0]->name }}" class="podium-avatar">
-                    @else
-                      <div class="podium-avatar-placeholder">{{ substr($topUsers[0]->name, 0, 1) }}</div>
-                    @endif
+                    <img src="{{ $topUsers[0]->getAvatarUrl('medium') }}" alt="{{ $topUsers[0]->name }}" class="podium-avatar" loading="lazy">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[0]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
@@ -99,11 +103,7 @@
               <div class="podium-position third">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    @if($topUsers[2]->avatar)
-                      <img src="{{ $topUsers[2]->avatar_url }}" alt="{{ $topUsers[2]->name }}" class="podium-avatar">
-                    @else
-                      <div class="podium-avatar-placeholder">{{ substr($topUsers[2]->name, 0, 1) }}</div>
-                    @endif
+                    <img src="{{ $topUsers[2]->getAvatarUrl('medium') }}" alt="{{ $topUsers[2]->name }}" class="podium-avatar" loading="lazy">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[2]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>

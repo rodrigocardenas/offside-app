@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Esta migración original está vacía - la tabla ya existe
-        // Las columnas necesarias se han agregado en migraciones posteriores
-        // Esta migración se deja vacía para mantener compatibilidad
+        Schema::create('football_matches', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -21,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // No hacer nada - la tabla ya existe desde antes
+        Schema::dropIfExists('football_matches');
     }
 };

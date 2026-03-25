@@ -32,11 +32,11 @@
             onclick="document.querySelector('.profile-dropdown').classList.toggle('hidden')"
         >
             @auth
-                @if(Auth::user()->avatar)
-                    <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="profile-avatar">
-                @else
-                    <div class="profile-avatar-placeholder">{{ substr(Auth::user()->name, 0, 1) }}</div>
-                @endif
+                <x-user-avatar 
+                    :user="Auth::user()" 
+                    size="small"
+                    imgClass="profile-avatar"
+                />
             @else
                 <i class="fas fa-user-circle"></i>
             @endauth

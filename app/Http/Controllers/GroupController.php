@@ -562,6 +562,133 @@ class GroupController extends Controller
         })->toArray();
     }
 
+    /**
+     * Show the form for editing the group.
+     */
+    public function edit(Group $group)
+    {
+        // Solo el creador del grupo puede editar
+        $this->authorize('update', $group);
+
+        $competitions = Competition::whereIn('type', [
+            'laliga',
+            'premier',
+            'champions',
+        ])->get();
+
+        return view('groups.edit', compact('group', 'competitions'));
+    }
+
+    /**
+     * Update the group information.
+     */
+    public function update(Request $request, Group $group)
+    {
+        // Solo el creador del grupo puede editar
+        $this->authorize('update', $group);
+
+        Log::info('GroupController::update iniciado para grupo: ' . $group->id);
+
+        $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,webp,gif|max:5120',
+        ]);
+
+        $data = $request->only(['name']);
+
+        // Procesar imagen de portada si se subió
+        if ($request->hasFile('cover_image')) {
+            Log::info('Imagen de portada detectada en request, procesando...');
+            try {
+                $file = $request->file('cover_image');
+                
+                // Intentar subir a Cloudflare si está habilitado
+                if (config('cloudflare.enabled')) {
+                    try {
+                        // Eliminar imagen anterior de Cloudflare si existe
+                        if ($group->cover_provider === 'cloudflare' && $group->cover_cloudflare_id) {
+                            try {
+                                CloudflareImages::delete($group->cover_cloudflare_id);
+                                Log::info('Imagen de portada anterior de Cloudflare eliminada: ' . $group->cover_cloudflare_id);
+                            } catch (\Exception $e) {
+                                Log::warning('Error eliminando imagen anterior de Cloudflare: ' . $e->getMessage());
+                            }
+                        }
+
+                        // Subir nueva imagen a Cloudflare
+                        $uploadResponse = CloudflareImages::upload(
+                            fopen($file->getRealPath(), 'r'),
+                            'group_cover_' . $group->id . '_' . time(),
+                            ['group_id' => $group->id, 'type' => 'cover']
+                        );
+
+                        if ($uploadResponse && isset($uploadResponse['result']['id'])) {
+                            $data['cover_cloudflare_id'] = $uploadResponse['result']['id'];
+                            $data['cover_provider'] = 'cloudflare';
+                            
+                            Log::info('Imagen de portada subida a Cloudflare exitosamente', [
+                                'cloudflare_id' => $uploadResponse['result']['id'],
+                                'group_id' => $group->id
+                            ]);
+                        } else {
+                            throw new Exception('Invalid Cloudflare response');
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning('Error subiendo a Cloudflare, usando almacenamiento local: ' . $e->getMessage());
+                        // Fallback a storage local
+                        $this->storeCoverImageLocally($file, $group, $data);
+                    }
+                } else {
+                    // Cloudflare deshabilitado, usar storage local
+                    $this->storeCoverImageLocally($file, $group, $data);
+                }
+                
+            } catch (\Exception $e) {
+                Log::error('Error procesando imagen de portada: ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]);
+                return redirect()->route('groups.edit', $group)
+                    ->withErrors(['cover_image' => 'Error al procesar la imagen. Por favor intenta de nuevo.']);
+            }
+        }
+
+        $group->update($data);
+        Log::info('Grupo actualizado exitosamente');
+
+        return redirect()->route('groups.show', $group)
+            ->with('status', 'group-updated');
+    }
+
+    /**
+     * Store cover image in local storage.
+     * Helper method for fallback storage.
+     */
+    private function storeCoverImageLocally($file, $group, &$data): void
+    {
+        $filename = 'cover_' . $group->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        
+        // Guardar en storage/app/public/covers
+        $path = $file->storeAs('covers', $filename, 'public');
+        Log::info('Imagen de portada guardada localmente en: ' . $path);
+        
+        // Guardar el nombre del archivo en la BD
+        $data['cover_image'] = $filename;
+        $data['cover_provider'] = 'local';
+        unset($data['cover_cloudflare_id']);
+        
+        // Eliminar imagen anterior de Cloudflare si existe
+        if ($group->cover_provider === 'cloudflare' && $group->cover_cloudflare_id) {
+            try {
+                CloudflareImages::delete($group->cover_cloudflare_id);
+                Log::info('Imagen anterior de Cloudflare eliminada al cambiar a local: ' . $group->cover_cloudflare_id);
+            } catch (\Exception $e) {
+                Log::warning('Error eliminando imagen anterior de Cloudflare: ' . $e->getMessage());
+            }
+        }
+    }
+
     public function join(Request $request)
     {
         $request->validate([
@@ -1381,14 +1508,14 @@ class GroupController extends Controller
             ->whereHas('groups', function($q) use ($group) {
                 $q->where('group_id', $group->id);
             })
-            ->select('users.id', 'users.name', 'users.avatar')
+            ->selectRaw('users.id, users.name, users.avatar, users.avatar_cloudflare_id, users.avatar_provider')
             ->selectRaw('COALESCE(SUM(CASE WHEN answers.is_correct = 1 THEN answers.points_earned ELSE 0 END), 0) as total_points')
             ->selectRaw('COALESCE(TIMESTAMPDIFF(SECOND, MIN(answers.answered_at), MAX(answers.answered_at)), 0) as total_time_seconds')
             ->leftJoin('answers', function($join) use ($quizQuestions) {
                 $join->on('users.id', '=', 'answers.user_id')
                     ->whereIn('answers.question_id', $quizQuestions);  // 🎮 Solo respuestas de preguntas en este grupo
             })
-            ->groupBy('users.id', 'users.name', 'users.avatar')
+            ->groupBy('users.id', 'users.name', 'users.avatar', 'users.avatar_cloudflare_id', 'users.avatar_provider')
             ->orderBy('total_points', 'desc')
             ->orderBy('total_time_seconds', 'asc')
             ->get()
@@ -1398,6 +1525,7 @@ class GroupController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'avatar' => $user->avatar,
+                    'avatar_url' => $user->getAvatarUrl('medium'),  // 🌐 Include Cloudflare URL
                     'total_points' => $user->total_points ?? 0,
                     'total_time_seconds' => (int) $user->total_time_seconds,
                     'total_time_formatted' => $this->formatSeconds($user->total_time_seconds ?? 0),

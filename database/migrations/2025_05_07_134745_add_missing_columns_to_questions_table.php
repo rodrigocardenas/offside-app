@@ -13,7 +13,11 @@ return new class extends Migration
     {
         // Primero, hacer que la columna category sea nullable
         Schema::table('questions', function (Blueprint $table) {
-            $table->string('category')->nullable()->change();
+            try {
+                $table->string('category')->nullable()->change();
+            } catch (\Exception $e) {
+                // Column might already be nullable
+            }
         });
 
         // Luego, agregar las nuevas columnas
@@ -22,7 +26,9 @@ return new class extends Migration
             // $table->boolean('is_featured')->default(false);
             // $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             // $table->foreignId('template_question_id')->nullable()->constrained('template_questions')->onDelete('set null');
-            $table->foreignId('competition_id')->nullable()->constrained('competitions')->onDelete('cascade');
+            if (!Schema::hasColumn('questions', 'competition_id')) {
+                $table->foreignId('competition_id')->nullable()->constrained('competitions')->onDelete('cascade');
+            }
         });
     }
 

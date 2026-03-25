@@ -24,15 +24,13 @@
 
                                 <!-- Avatar del usuario -->
                                 <div class="flex-shrink-0 mr-4">
-                                    @if($user->avatar)
-                                        <img src="{{ $user->avatar_url }}"
-                                             alt="{{ $user->name }}"
-                                             class="w-12 h-12 rounded-full border-2 border-offside-primary">
-                                    @else
-                                        <div class="w-12 h-12 rounded-full bg-offside-primary flex items-center justify-center text-white font-bold">
-                                            {{ substr($user->name, 0, 1) }}
-                                        </div>
-                                    @endif
+                                    @php
+                                        $avatarUrl = $user->getAvatarUrl('small');
+                                    @endphp
+                                    <img src="{{ $avatarUrl }}"
+                                         alt="{{ $user->name }}"
+                                         class="w-12 h-12 rounded-full border-2 border-offside-primary object-cover"
+                                         loading="lazy">
                                 </div>
 
                                 <!-- Nombre y puntuación -->
