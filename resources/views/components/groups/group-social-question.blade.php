@@ -56,12 +56,16 @@
                             @if($answers->count() > 0)
                                 <div class="flex items-center {{ $isStacked ? '-space-x-4' : 'space-x-1' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
                                     @foreach($answers->take(3) as $answer)
-                                        <img src="{{ $answer->user->getAvatarUrl('small') }}" alt="{{ $answer->user->name }}"
-                                             class="w-5 h-5 rounded-full border border-white shadow-sm object-cover {{ $isStacked ? 'ring-1 ring-white' : '' }}"
-                                             title="{{ $answer->user->name }}" style="pointer-events: none;"
-                                             loading="lazy">
-                                    @endforeach
-                                                {{ substr($initials, 0, 1) }}
+                                        @if($answer->user->avatar)
+                                            <img src="{{ $answer->user->getAvatarUrl('small') }}" alt="{{ $answer->user->name }}"
+                                                 class="w-5 h-5 rounded-full border border-white shadow-sm object-cover {{ $isStacked ? 'ring-1 ring-white' : '' }}"
+                                                 title="{{ $answer->user->name }}" style="pointer-events: none;"
+                                                 loading="lazy">
+                                        @else
+                                            <div class="w-5 h-5 rounded-full border border-white shadow-sm flex items-center justify-center text-xs font-bold {{ $isStacked ? 'ring-1 ring-white' : '' }}"
+                                                 style="background: {{ $accentColor }}; color: #000; pointer-events: none;"
+                                                 title="{{ $answer->user->name }}">
+                                                {{ substr($answer->user->name, 0, 1) }}
                                             </div>
                                         @endif
                                     @endforeach
@@ -71,6 +75,14 @@
                                 </div>
                             @endif
                         </div>
+                                    @endif
+                                @endforeach
+                                @if($isStacked && $answers->count() > 3)
+                                    <span class="text-xs font-bold ml-1" style="color: {{ $textSecondary }}; pointer-events: none;">+{{ $answers->count() - 3 }}</span>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
                     </label>
                 @endforeach
             </div>
@@ -111,7 +123,8 @@
                                              class="w-5 h-5 rounded-full border border-white shadow-sm object-cover {{ $isStacked ? 'ring-1 ring-white' : '' }}"
                                              title="{{ $answer->user->name }}" style="pointer-events: none;"
                                              loading="lazy">
-                                    @endforeach
+                                    @endif
+                                @endforeach
                                 @if($isStacked && $answers->count() > 3)
                                     <span class="text-xs font-bold ml-1" style="color: {{ $textSecondary }}; pointer-events: none;">+{{ $answers->count() - 3 }}</span>
                                 @endif
