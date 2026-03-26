@@ -616,18 +616,17 @@ class GroupController extends Controller
                         }
 
                         // Subir nueva imagen a Cloudflare
-                        $uploadResponse = CloudflareImages::upload(
-                            fopen($file->getRealPath(), 'r'),
-                            'group_cover_' . $group->id . '_' . time(),
-                            ['group_id' => $group->id, 'type' => 'cover']
+                        $cloudflareId = CloudflareImages::upload(
+                            $file,
+                            'group_cover_' . $group->id
                         );
 
-                        if ($uploadResponse && isset($uploadResponse['result']['id'])) {
-                            $data['cover_cloudflare_id'] = $uploadResponse['result']['id'];
+                        if ($cloudflareId) {
+                            $data['cover_cloudflare_id'] = $cloudflareId;
                             $data['cover_provider'] = 'cloudflare';
 
                             Log::info('Imagen de portada subida a Cloudflare exitosamente', [
-                                'cloudflare_id' => $uploadResponse['result']['id'],
+                                'cloudflare_id' => $cloudflareId,
                                 'group_id' => $group->id
                             ]);
                         } else {
