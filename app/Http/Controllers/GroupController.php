@@ -588,6 +588,8 @@ class GroupController extends Controller
         $this->authorize('update', $group);
 
         Log::info('GroupController::update iniciado para grupo: ' . $group->id);
+        Log::info('Request files:', ['files' => array_keys($request->allFiles()), 'has_cover_image' => $request->hasFile('cover_image')]);
+        Log::info('Config cloudflare:', ['enabled' => config('cloudflare.enabled')]);
 
         $request->validate([
             'name' => 'sometimes|required|string|max:255',
@@ -598,9 +600,10 @@ class GroupController extends Controller
 
         // Procesar imagen de portada si se subió
         if ($request->hasFile('cover_image')) {
-            Log::info('Imagen de portada detectada en request, procesando...');
+            Log::info('✅ Imagen de portada detectada en request, procesando...');
             try {
                 $file = $request->file('cover_image');
+                Log::info('Archivo recibido:', ['name' => $file->getClientOriginalName(), 'size' => $file->getSize(), 'mime' => $file->getMimeType()]);
 
                 // Intentar subir a Cloudflare si está habilitado
                 if (config('cloudflare.enabled')) {
@@ -639,6 +642,7 @@ class GroupController extends Controller
                     }
                 } else {
                     // Cloudflare deshabilitado, usar storage local
+                    Log::info('📁 Cloudflare deshabilitado, guardando localmente...');
                     $this->storeCoverImageLocally($file, $group, $data);
                 }
 
@@ -651,8 +655,11 @@ class GroupController extends Controller
                 return redirect()->route('groups.edit', $group)
                     ->withErrors(['cover_image' => 'Error al procesar la imagen. Por favor intenta de nuevo.']);
             }
+        } else {
+            Log::info('❌ NO se detectó archivo cover_image en el request');
         }
 
+        Log::info('Datos a actualizar:', $data);
         $group->update($data);
         Log::info('Grupo actualizado exitosamente');
 
