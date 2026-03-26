@@ -27,9 +27,13 @@
 
         <div class="group-header">
             <div class="group-avatar">
-                @if($group->competition && $group->competition->crest_url)
-                    {{-- <img src="{{ asset('images/competitions/' . $group->competition->crest_url) }}" alt="{{ $group->name }}"> --}}
-                    <i class="fas fa-trophy" style="color: #000;"></i>
+                @php
+                    $coverImageUrl = $group->getCoverImageUrl();
+                    $hasImage = $coverImageUrl && !str_contains($coverImageUrl, 'group-default-cover');
+                @endphp
+                
+                @if($hasImage)
+                    <img src="{{ $coverImageUrl }}" alt="{{ $group->name }}" style="width: 100%; height: 100%; object-fit: cover;">
                 @else
                     <i class="fas fa-trophy" style="color: #000;"></i>
                 @endif
