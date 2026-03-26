@@ -66,21 +66,26 @@
                             </div>
                         @endif
 
-                        <!-- File Input -->
+                        <!-- File Input (hidden, stays outside the visual zone) -->
+                        <input id="cover_image" type="file" name="cover_image" accept=".png,.jpg,.jpeg,.webp,.gif" style="display: none;">
+
+                        <!-- Visual Drop Zone -->
                         <div style="position: relative; border: 2px dashed {{ $borderColor }}; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: {{ $bgSecondary }};"
                              id="coverDropZone"
                              onmouseover="this.style.borderColor='{{ $accentColor }}'; this.style.background='{{ $isDark ? '#1a524e' : '#f0f8f6' }}'"
                              onmouseout="this.style.borderColor='{{ $borderColor }}'; this.style.background='{{ $bgSecondary }}'">
-                            <i class="fas fa-image" style="font-size: 32px; color: {{ $accentColor }}; margin-bottom: 8px; display: block;"></i>
-                            <p style="margin: 0 0 4px 0; color: {{ $textPrimary }}; font-weight: 500;">{{ __('Arrastra o haz clic para subir') }}</p>
-                            <p style="margin: 0; font-size: 12px; color: {{ $textSecondary }};">PNG, JPG, WebP (máx. 5MB)</p>
-                            <input id="cover_image" type="file" name="cover_image" accept=".png,.jpg,.jpeg,.webp,.gif" style="display: none;">
+                            <div id="coverDisplayContent">
+                                <i class="fas fa-image" style="font-size: 32px; color: {{ $accentColor }}; margin-bottom: 8px; display: block;"></i>
+                                <p style="margin: 0 0 4px 0; color: {{ $textPrimary }}; font-weight: 500;">{{ __('Arrastra o haz clic para subir') }}</p>
+                                <p style="margin: 0; font-size: 12px; color: {{ $textSecondary }};">PNG, JPG, WebP (máx. 5MB)</p>
+                            </div>
                         </div>
                         
-                        <!-- File input label replacement -->
+                        <!-- File input handler script -->
                         <script>
                             const coverDropZone = document.getElementById('coverDropZone');
                             const coverInput = document.getElementById('cover_image');
+                            const coverDisplayContent = document.getElementById('coverDisplayContent');
                             
                             coverDropZone.addEventListener('click', () => coverInput.click());
                             
@@ -109,7 +114,7 @@
                                 if (coverInput.files.length > 0) {
                                     const file = coverInput.files[0];
                                     const sizeInMB = (file.size / 1024 / 1024).toFixed(2);
-                                    coverDropZone.innerHTML = `
+                                    coverDisplayContent.innerHTML = `
                                         <i class="fas fa-check-circle" style="font-size: 32px; color: {{ $accentColor }}; margin-bottom: 8px; display: block;"></i>
                                         <p style="margin: 0 0 4px 0; color: {{ $textPrimary }}; font-weight: 500;">${file.name}</p>
                                         <p style="margin: 0; font-size: 12px; color: {{ $textSecondary }};">${sizeInMB}MB</p>
