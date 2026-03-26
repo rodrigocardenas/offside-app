@@ -93,15 +93,16 @@ class Group extends Model
             }
         }
 
-        // Fallback to local storage
-        if ($this->cover_image) {
-            if (Storage::disk('public')->exists('groups/' . $this->cover_image)) {
-                return asset('storage/groups/' . $this->cover_image);
+        // Fallback to local storage - safely access cover_image attribute
+        $coverImage = $this->getAttribute('cover_image');
+        if ($coverImage) {
+            if (Storage::disk('public')->exists('covers/' . $coverImage)) {
+                return asset('storage/covers/' . $coverImage);
             }
 
-            $directPath = storage_path('app/public/groups/' . $this->cover_image);
+            $directPath = storage_path('app/public/covers/' . $coverImage);
             if (file_exists($directPath)) {
-                return asset('storage/groups/' . $this->cover_image);
+                return asset('storage/covers/' . $coverImage);
             }
 
             // Clean up if file doesn't exist
@@ -136,17 +137,13 @@ class Group extends Model
      * Get the group's cover image URL via attribute accessor.
      * Kept for backward compatibility.
      *
-     * @return string
+     * @return string|null
      */
     public function getCoverImageAttribute()
     {
-        // This is to handle both the new URL method and legacy attribute
-        // If it's being accessed as an attribute, return the URL instead of the filename
-        $value = $this->attributes['cover_image'] ?? null;
-        if ($value && !str_starts_with($value, 'http')) {
-            return $this->getCoverImageUrl('medium');
-        }
-        return $value;
+        // Simply return the raw value from attributes without processing
+        // This prevents infinite loops and undefined property errors
+        return $this->attributes['cover_image'] ?? null;
     }
 
     /**
