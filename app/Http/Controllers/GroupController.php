@@ -601,7 +601,7 @@ class GroupController extends Controller
             Log::info('Imagen de portada detectada en request, procesando...');
             try {
                 $file = $request->file('cover_image');
-                
+
                 // Intentar subir a Cloudflare si está habilitado
                 if (config('cloudflare.enabled')) {
                     try {
@@ -625,7 +625,7 @@ class GroupController extends Controller
                         if ($uploadResponse && isset($uploadResponse['result']['id'])) {
                             $data['cover_cloudflare_id'] = $uploadResponse['result']['id'];
                             $data['cover_provider'] = 'cloudflare';
-                            
+
                             Log::info('Imagen de portada subida a Cloudflare exitosamente', [
                                 'cloudflare_id' => $uploadResponse['result']['id'],
                                 'group_id' => $group->id
@@ -642,7 +642,7 @@ class GroupController extends Controller
                     // Cloudflare deshabilitado, usar storage local
                     $this->storeCoverImageLocally($file, $group, $data);
                 }
-                
+
             } catch (\Exception $e) {
                 Log::error('Error procesando imagen de portada: ' . $e->getMessage(), [
                     'exception' => $e,
@@ -668,16 +668,16 @@ class GroupController extends Controller
     private function storeCoverImageLocally($file, $group, &$data): void
     {
         $filename = 'cover_' . $group->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-        
+
         // Guardar en storage/app/public/covers
         $path = $file->storeAs('covers', $filename, 'public');
         Log::info('Imagen de portada guardada localmente en: ' . $path);
-        
+
         // Guardar el nombre del archivo en la BD
         $data['cover_image'] = $filename;
         $data['cover_provider'] = 'local';
         unset($data['cover_cloudflare_id']);
-        
+
         // Eliminar imagen anterior de Cloudflare si existe
         if ($group->cover_provider === 'cloudflare' && $group->cover_cloudflare_id) {
             try {

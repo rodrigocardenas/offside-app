@@ -17,7 +17,7 @@ class MigrateImagesToCloudflare extends Command
      *
      * @var string
      */
-    protected $signature = 'cloudflare:migrate 
+    protected $signature = 'cloudflare:migrate
                             {--type=avatars : Type of images to migrate (avatars, covers, or all)}
                             {--limit=0 : Limit number of images to migrate (0 = unlimited)}
                             {--force : Skip confirmation prompt}';
@@ -125,7 +125,7 @@ class MigrateImagesToCloudflare extends Command
         foreach ($users as $user) {
             try {
                 $avatarPath = 'avatars/' . $user->avatar;
-                
+
                 // Check if file exists in local storage
                 if (!Storage::disk('public')->exists($avatarPath)) {
                     $skipped++;
@@ -135,11 +135,11 @@ class MigrateImagesToCloudflare extends Command
 
                 // Get file content and create UploadedFile instance
                 $fileContent = Storage::disk('public')->get($avatarPath);
-                
+
                 // Create temporary file
                 $tempFile = tempnam(sys_get_temp_dir(), 'avatar_');
                 file_put_contents($tempFile, $fileContent);
-                
+
                 // Create UploadedFile instance
                 $uploadedFile = new UploadedFile(
                     $tempFile,
@@ -148,7 +148,7 @@ class MigrateImagesToCloudflare extends Command
                     null,
                     true
                 );
-                
+
                 // Upload to Cloudflare
                 $cloudflareId = CloudflareImages::upload(
                     $uploadedFile,
@@ -226,7 +226,7 @@ class MigrateImagesToCloudflare extends Command
         foreach ($groups as $group) {
             try {
                 $coverPath = 'covers/' . $group->cover_image;
-                
+
                 // Check if file exists in local storage
                 if (!Storage::disk('public')->exists($coverPath)) {
                     $skipped++;
@@ -236,11 +236,11 @@ class MigrateImagesToCloudflare extends Command
 
                 // Get file content and create UploadedFile instance
                 $fileContent = Storage::disk('public')->get($coverPath);
-                
+
                 // Create temporary file
                 $tempFile = tempnam(sys_get_temp_dir(), 'cover_');
                 file_put_contents($tempFile, $fileContent);
-                
+
                 // Create UploadedFile instance
                 $uploadedFile = new UploadedFile(
                     $tempFile,
@@ -249,7 +249,7 @@ class MigrateImagesToCloudflare extends Command
                     null,
                     true
                 );
-                
+
                 // Upload to Cloudflare
                 $cloudflareId = CloudflareImages::upload(
                     $uploadedFile,

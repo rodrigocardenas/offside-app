@@ -61,7 +61,7 @@
                                 {{ substr($user->name, 0, 1) }}
                             </div>
                         @endif
-                        
+
                         {{-- Cloudflare indicator --}}
                         @if($user->avatar_provider === 'cloudflare' && config('cloudflare.enabled'))
                             <div title="Optimized by Cloudflare Images" style="position: absolute; top: -8px; left: -8px; background: #faad14; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 8px rgba(250, 173, 20, 0.3);">
@@ -70,7 +70,7 @@
                                 </svg>
                             </div>
                         @endif
-                        
+
                         <label for="avatar" style="position: absolute; bottom: -8px; right: -8px; background: #00deb0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0, 222, 176, 0.3); transition: all 0.3s ease; border: 3px solid white;">
                             <i class="fas fa-camera" style="color: white; font-size: 16px;"></i>
                         </label>
@@ -347,12 +347,12 @@
                                 const option = document.createElement('option');
                                 option.value = team.id;
                                 option.textContent = team.name;
-                                
+
                                 // Si hay un equipo seleccionado, marcarlo como selected
                                 if (selectedClubId && String(team.id) === String(selectedClubId)) {
                                     option.selected = true;
                                 }
-                                
+
                                 clubSelectEl.appendChild(option);
                             });
                         }

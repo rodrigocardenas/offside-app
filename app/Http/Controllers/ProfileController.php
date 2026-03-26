@@ -23,7 +23,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
-        
+
         $competitions = Competition::orderBy('name')->get();
 
         // Load clubs for the selected competition
@@ -59,7 +59,7 @@ class ProfileController extends Controller
             Log::info('Avatar detectado en request, procesando...');
             try {
                 $file = $request->file('avatar');
-                
+
                 // Intentar subir a Cloudflare si está habilitado
                 if (config('cloudflare.enabled')) {
                     try {
@@ -84,7 +84,7 @@ class ProfileController extends Controller
                             $data['avatar_provider'] = 'cloudflare';
                             // No actualizar el campo 'avatar' cuando usamos Cloudflare
                             unset($data['avatar']);
-                            
+
                             Log::info('Avatar subido a Cloudflare exitosamente', [
                                 'cloudflare_id' => $uploadResponse
                             ]);
@@ -100,7 +100,7 @@ class ProfileController extends Controller
                     // Cloudflare deshabilitado, usar storage local
                     $this->storeAvatarLocally($file, $user, $data);
                 }
-                
+
             } catch (\Exception $e) {
                 Log::error('Error procesando avatar: ' . $e->getMessage(), [
                     'exception' => $e,
@@ -132,16 +132,16 @@ class ProfileController extends Controller
     private function storeAvatarLocally($file, $user, &$data): void
     {
         $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-        
+
         // Guardar en storage/app/public/avatars
         $path = $file->storeAs('avatars', $filename, 'public');
         Log::info('Avatar guardado localmente en: ' . $path);
-        
+
         // Guardar solo el nombre del archivo en la BD
         $data['avatar'] = $filename;
         $data['avatar_provider'] = 'local';
         $data['avatar_cloudflare_id'] = null;
-        
+
         // Eliminar avatar anterior de Cloudflare si existe
         if ($user->avatar_provider === 'cloudflare' && $user->avatar_cloudflare_id) {
             try {

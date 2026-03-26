@@ -55,7 +55,7 @@ class ProfileControllerTest extends TestCase
         ]);
 
         $response->assertRedirect(route('profile.edit'));
-        
+
         $user->refresh();
         $this->assertEquals('cloudflare', $user->avatar_provider);
         $this->assertEquals('test-cloudflare-id-123', $user->avatar_cloudflare_id);
