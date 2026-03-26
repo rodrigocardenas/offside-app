@@ -75,14 +75,6 @@
                                 </div>
                             @endif
                         </div>
-                                    @endif
-                                @endforeach
-                                @if($isStacked && $answers->count() > 3)
-                                    <span class="text-xs font-bold ml-1" style="color: {{ $textSecondary }}; pointer-events: none;">+{{ $answers->count() - 3 }}</span>
-                                @endif
-                            </div>
-                        @endif
-                    </div>
                     </label>
                 @endforeach
             </div>
