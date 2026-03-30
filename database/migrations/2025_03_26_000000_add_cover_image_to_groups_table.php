@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('groups', function (Blueprint $table) {
             // Add cover_image column if it doesn't exist
             if (!Schema::hasColumn('groups', 'cover_image')) {
-                $table->string('cover_image')->nullable()->after('cover_provider');
+                $table->string('cover_image')->nullable();
             }
         });
     }
