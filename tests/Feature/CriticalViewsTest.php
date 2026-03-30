@@ -58,6 +58,7 @@ class CriticalViewsTest extends TestCase
             'group_id' => $this->group->id,
             'title' => 'Test Match Question',
             'type' => 'match',
+            'points' => 10,
             'expires_at' => now()->addHours(24),
             'correct_option_id' => null,
             'category' => 'goals'
@@ -203,6 +204,7 @@ class CriticalViewsTest extends TestCase
             'group_id' => $this->group->id,
             'title' => 'Test Social Question',
             'type' => 'social',
+            'points' => 5,
             'expires_at' => now()->addHours(24),
             'correct_option_id' => null,
             'category' => 'other'
@@ -269,6 +271,7 @@ class CriticalViewsTest extends TestCase
             'group_id' => $this->group->id,
             'title' => 'Expired Question',
             'type' => 'match',
+            'points' => 10,
             'expires_at' => now()->subHours(1),
             'correct_option_id' => null,
             'category' => 'goals'
@@ -385,6 +388,7 @@ class CriticalViewsTest extends TestCase
             'group_id' => $this->group->id,
             'title' => 'Another Question',
             'type' => 'match',
+            'points' => 10,
             'expires_at' => now()->addHours(24),
             'correct_option_id' => null,
             'category' => 'goals'
@@ -402,6 +406,7 @@ class CriticalViewsTest extends TestCase
             'group_id' => $this->group->id,
             'title' => 'Another Question',
             'type' => 'match',
+            'points' => 10,
             'expires_at' => now()->addHours(24),
             'correct_option_id' => null,
             'category' => 'goals'
