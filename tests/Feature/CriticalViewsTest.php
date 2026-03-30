@@ -8,14 +8,14 @@ use App\Models\Group;
 use App\Models\Competition;
 use App\Models\Question;
 use App\Models\Answer;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
  * @group deploy
  */
 class CriticalViewsTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected $user;
     protected $group;
