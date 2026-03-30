@@ -37,11 +37,11 @@ jobs:
       - name: Create bootstrap/cache directory
         run: mkdir -p bootstrap/cache && chmod 755 bootstrap/cache
 
-      - name: Install PHP dependencies
-        run: composer install --no-interaction --prefer-dist
-
       - name: Copy .env.testing file
         run: cp .env.testing .env
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
 
       - name: Generate application key (if needed)
         run: php artisan key:generate --force || true
