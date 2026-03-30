@@ -68,7 +68,7 @@ class CriticalViewsTest extends TestCase
         // Create question options
         $this->questionOption = QuestionOption::create([
             'question_id' => $this->question->id,
-            'label' => 'Test Option'
+            'text' => 'Test Option'
         ]);
 
         $this->question->update(['correct_option_id' => $this->questionOption->id]);
@@ -213,7 +213,7 @@ class CriticalViewsTest extends TestCase
 
         $socialOption = QuestionOption::create([
             'question_id' => $socialQuestion->id,
-            'label' => 'Social Option'
+            'text' => 'Social Option'
         ]);
 
         $answer = Answer::factory()->create([
@@ -238,7 +238,7 @@ class CriticalViewsTest extends TestCase
 
         $updatedOption = QuestionOption::create([
             'question_id' => $this->question->id,
-            'label' => 'Updated Option'
+            'text' => 'Updated Option'
         ]);
 
         $answer->update(['points' => 15]);
@@ -279,7 +279,7 @@ class CriticalViewsTest extends TestCase
 
         $expiredOption = QuestionOption::create([
             'question_id' => $expiredQuestion->id,
-            'label' => 'Option'
+            'text' => 'Option'
         ]);
 
         $answer = Answer::factory()->create([
@@ -415,7 +415,7 @@ class CriticalViewsTest extends TestCase
 
         $opt2 = QuestionOption::create([
             'question_id' => $q2->id,
-            'label' => 'Option'
+            'text' => 'Option'
         ]);
 
         $a1 = Answer::factory()->create([
