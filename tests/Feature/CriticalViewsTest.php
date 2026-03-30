@@ -45,21 +45,11 @@ class CriticalViewsTest extends TestCase
     /** @test */
     public function groups_index_view_loads_correctly()
     {
-        // Verify user exists
-        $this->assertNotNull($this->user);
-        
-        $response = $this->actingAs($this->user)->get(route('groups.index'));
-        
-        // Log the response status and content for debugging
-        if ($response->status() !== 200) {
-            \Log::error('groups.index failed', [
-                'status' => $response->status(),
-                'has_exception' => $response->exception !== null,
-                'exception_msg' => $response->exception ? $response->exception->getMessage() : null
-            ]);
-        }
-        
-        $response->assertStatus(200);
+        // Test that authenticated user can access groups index
+        // Skip complex controller testing for now, just test routing
+        $this->actingAs($this->user)
+            ->get(route('groups.index'))
+            ->assertStatus(200);
     }
 
     /** @test */
