@@ -91,10 +91,11 @@ class CriticalViewsTest extends TestCase
     /** @test */
     public function test_user_can_have_answers()
     {
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
+            'points' => 10,
         ]);
 
         $userAnswers = $this->user->answers;
@@ -174,10 +175,11 @@ class CriticalViewsTest extends TestCase
     /** @test */
     public function test_user_can_submit_answer()
     {
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
+            'points' => 10,
         ]);
 
         $this->assertNotNull($answer->id);
@@ -186,7 +188,7 @@ class CriticalViewsTest extends TestCase
     /** @test */
     public function test_answer_is_created_with_correct_points()
     {
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
@@ -216,7 +218,7 @@ class CriticalViewsTest extends TestCase
             'text' => 'Social Option'
         ]);
 
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $socialQuestion->id,
             'question_option_id' => $socialOption->id,
@@ -229,7 +231,7 @@ class CriticalViewsTest extends TestCase
     /** @test */
     public function test_user_can_update_answer()
     {
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
@@ -282,7 +284,7 @@ class CriticalViewsTest extends TestCase
             'text' => 'Option'
         ]);
 
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $expiredQuestion->id,
             'question_option_id' => $expiredOption->id,
@@ -296,7 +298,7 @@ class CriticalViewsTest extends TestCase
     {
         $anotherUser = User::factory()->create();
         
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $anotherUser->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
@@ -310,7 +312,7 @@ class CriticalViewsTest extends TestCase
     {
         $metadata = ['confidence' => 'high', 'notes' => 'test'];
         
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
@@ -324,7 +326,7 @@ class CriticalViewsTest extends TestCase
     /** @test */
     public function test_answer_user_relationship()
     {
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
@@ -338,7 +340,7 @@ class CriticalViewsTest extends TestCase
     /** @test */
     public function test_answer_question_relationship()
     {
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
@@ -352,7 +354,7 @@ class CriticalViewsTest extends TestCase
     /** @test */
     public function test_answer_option_relationship()
     {
-        $answer = Answer::factory()->create([
+        $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
@@ -418,13 +420,13 @@ class CriticalViewsTest extends TestCase
             'text' => 'Option'
         ]);
 
-        $a1 = Answer::factory()->create([
+        $a1 = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,
             'question_option_id' => $this->questionOption->id,
         ]);
 
-        $a2 = Answer::factory()->create([
+        $a2 = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $q2->id,
             'question_option_id' => $opt2->id,
