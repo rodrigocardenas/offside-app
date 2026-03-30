@@ -19,7 +19,6 @@ Eres experto en **Laravel 11, PHP 8.3+, Capacitor 6+, TypeScript** y **Google Ge
 #### Backend
 - **Laravel 10+** (API REST)
 - **PHP 8.1+** (moderna: constructor promotion, readonly properties)
-- **Laravel Sanctum** (autenticación por tokens JWT)
 - **Google Gemini AI** (hosseinhezami/laravel-gemini)  
 - **Firebase PHP** (push notifications)
 - **Intervention Image** (manipulación de imágenes via CloudFlare Images)
