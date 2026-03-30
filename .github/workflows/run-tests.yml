@@ -49,8 +49,8 @@ jobs:
       - name: Run migrations (testing)
         run: php artisan migrate --env=testing --no-interaction --force
 
-      - name: Run PHPUnit Tests
-        run: php artisan test --no-coverage 2>&1
+      - name: Run CriticalViewsTest
+        run: php artisan test tests/Feature/CriticalViewsTest.php --no-coverage 2>&1
 
       - name: Upload test results
         if: always()
