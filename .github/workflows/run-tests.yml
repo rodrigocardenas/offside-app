@@ -34,6 +34,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
+      - name: Create bootstrap/cache directory
+        run: mkdir -p bootstrap/cache && chmod 755 bootstrap/cache
+
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist
 
