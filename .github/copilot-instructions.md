@@ -78,9 +78,6 @@ npx cap sync         # Terminal 3: Sync a Capacitor
 npm run prod         # Cache + optimize
 npx cap sync android # Sync a Android
 
-# Deploy
-bash scripts/deploy.sh  # Script de deploy (chequea rama, etc.)
-
 
 ## 📚 Documentación Relevante
 
@@ -117,6 +114,96 @@ bash scripts/deploy.sh  # Script de deploy (chequea rama, etc.)
    ```bash
    php artisan test
    ```
+
+---
+
+## 🚀 Deployment a Producción
+
+### Configuración Inicial (Una sola vez)
+
+**Nota sobre `.env.deploy`:**
+El script de deploy puede leer la configuración desde los siguientes archivos en orden de prioridad:
+1. Variables de entorno actuales (`$SSH_KEY_PATH`)
+2. Archivo local `~/.offside-deploy.env` (en tu home)
+3. Archivo en el proyecto (no committeado): `.env.deploy`
+
+1. **Obtener la clave SSH:**
+   - Solicita el archivo `offside-new.pem` al DevOps/Administrador
+   - Guárdalo en tu máquina local (ej: `~/.ssh/offside-new.pem`)
+
+2. **Configurar variables de entorno:**
+   ```bash
+   # Opción 1: Variable de entorno temporal (sesión actual)
+   export SSH_KEY_PATH=~/.ssh/offside-new.pem
+   
+   # Opción 2: Archivo de configuración permanente (~/.offside-deploy.env)
+   echo 'SSH_KEY_PATH=~/.ssh/offside-new.pem' >> ~/.offside-deploy.env
+   source ~/.offside-deploy.env
+   
+   # Opción 3: Archivo local en el proyecto (NO COMMITTEADO - agregar a .gitignore)
+   # Crear .env.deploy en la raíz del proyecto:
+   # SSH_KEY_PATH=/ruta/a/offside-new.pem
+   # DEPLOY_SERVER=ubuntu@ec2-100-30-41-157.compute-1.amazonaws.com
+   ```
+
+3. **Verificar permisos (Linux/macOS):**
+   ```bash
+   chmod 600 ~/.ssh/offside-new.pem
+   ```
+
+### Proceso de Deploy
+
+**Requisitos antes de ejecutar:**
+- ✅ Estar en rama `main`
+- ✅ Todos los cambios deben estar committed
+- ✅ Pasar todos los tests del grupo `@group deploy` (CriticalViewsTest)
+- ✅ No tener cambios locales sin guardar
+
+**Ejecutar deploy:**
+```bash
+# Con SSH configurado
+bash scripts/deploy.sh
+```
+
+**El script hará automáticamente:**
+1. ✅ Validar que estás en rama `main`
+2. ✅ Ejecutar `php artisan test --group=deploy` (CriticalViewsTest)
+3. ✅ Compilar assets con `npm run build`
+4. ✅ Crear archivo `build.tar.gz` con los cambios
+5. ✅ Transferir via SSH a servidor de producción
+6. ✅ Ejecutar migraciones en producción
+7. ✅ Hacer git pull de main
+8. ✅ Recargar servicios (queue, PHP-FPM, nginx)
+
+### Troubleshooting de Deploy
+
+**Error: "No se encontró SSH_KEY_PATH"**
+```bash
+export SSH_KEY_PATH=~/.ssh/offside-new.pem
+bash scripts/deploy.sh
+```
+
+**Error: "Estás en la rama X, se permite desde main"**
+- Cambiar a rama main: `git checkout main`
+- Asegurar que main está actualizado: `git pull origin main`
+
+**Error: "Tienes cambios locales sin guardar"**
+- Hacer commit: `git add . && git commit -m "tu mensaje"`
+- O descartar cambios: `git restore .`
+
+**Error: "Algunos tests críticos fallaron"**
+- Revisar qué tests fallaron
+- Corregir el código o los tests
+- Hacer commit de cambios: `git commit ...`
+- Intentar deploy nuevamente
+
+### Tests Críticos (Grupo @group deploy)
+
+El archivo `tests/Feature/CriticalViewsTest.php` contiene 24 tests que validan:
+- **17 tests** - Carga correcta de vistas (groups, profile, login, rankings)
+- **7 tests** - Envío y validación de respuestas a preguntas
+
+Todos deben pasar antes de deployar a producción.
 
 ---
 
