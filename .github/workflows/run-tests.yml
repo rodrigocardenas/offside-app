@@ -40,6 +40,9 @@ jobs:
       - name: Copy .env.testing file
         run: cp .env.testing .env
 
+      - name: Create SQLite database file
+        run: touch /tmp/database.sqlite && chmod 666 /tmp/database.sqlite
+
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist
 
