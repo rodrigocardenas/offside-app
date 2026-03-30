@@ -48,6 +48,10 @@ class CriticalViewsTest extends TestCase
     public function groups_index_view_loads_correctly()
     {
         $response = $this->actingAs($this->user)->get(route('groups.index'));
+        if ($response->status() === 500) {
+            dump($response->getContent());
+            dump($response->exception);
+        }
         $response->assertStatus(200);
     }
 
