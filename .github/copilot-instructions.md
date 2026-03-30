@@ -85,9 +85,8 @@ bash scripts/deploy.sh  # Script de deploy (chequea rama, etc.)
 ## 📚 Documentación Relevante
 
 - **[docs/START_HERE.md](../docs/START_HERE.md)** — Punto de partida
-- **[docs/TECHNICAL_DOCUMENTATION.md](../docs/TECHNICAL_DOCUMENTATION.md)** — Arquitectura
-- **[SECURITY_CHECKLIST.md](../SECURITY_CHECKLIST.md)** — Seguridad en producción
-- **[PRODUCTION_DEPLOYMENT_CHECKLIST.md](../PRODUCTION_DEPLOYMENT_CHECKLIST.md)** — Deploy
+- **[docs/SECURITY_CHECKLIST.md](../docs/security/SECURITY_CHECKLIST.md)** — Seguridad en producción
+- **[docs/PRODUCTION_DEPLOYMENT_CHECKLIST.md](../docs/deployments/PRODUCTION_DEPLOYMENT_CHECKLIST.md)** — Deploy
 
 ---
 
