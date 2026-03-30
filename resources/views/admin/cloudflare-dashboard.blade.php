@@ -162,7 +162,7 @@
                         <h4 style="font-size: 12px; color: {{ $textSecondary }}; margin: 0 0 8px 0; font-weight: 600;">Cloudflare Images</h4>
                         <ul style="margin: 0; padding: 0; list-style: none; font-size: 12px;">
                             <li style="color: {{ $textPrimary }}; margin-bottom: 4px;">
-                                <strong>Enabled:</strong> 
+                                <strong>Enabled:</strong>
                                 <span style="color: {{ config('cloudflare.images.enabled') ? '#10b981' : '#ef4444' }};">
                                     {{ config('cloudflare.images.enabled') ? '✓ Yes' : '✗ No' }}
                                 </span>

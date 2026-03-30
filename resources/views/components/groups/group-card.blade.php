@@ -31,7 +31,7 @@
                     $coverImageUrl = $group->getCoverImageUrl();
                     $hasImage = $coverImageUrl && !str_contains($coverImageUrl, 'group-default-cover');
                 @endphp
-                
+
                 @if($hasImage)
                     <img src="{{ $coverImageUrl }}" alt="{{ $group->name }}" style="width: 100%; height: 100%; object-fit: cover;">
                 @else

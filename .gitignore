@@ -11,6 +11,13 @@
 .env.production
 .env.local
 .env.deploy
+# Build directories
+/android/build
+/android/.gradle
+/ios/build
+/dist
+/build
+android-native-symbols-release
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml

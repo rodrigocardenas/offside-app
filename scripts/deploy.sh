@@ -36,7 +36,16 @@ fi
 if [ -n "$(git status --porcelain | grep -v 'build.tar.gz')" ]; then
     echo "⚠️ ADVERTENCIA: Tienes cambios locales sin guardar en Git. Haz commit antes de desplegar."
     exit 1
-fi
+fi@switch ($type)
+    @case(1)
+
+        @break
+    @case(2)
+
+        @break
+    @default
+
+@endswitch
 
 echo "🚀 Rama validada. Iniciando despliegue de '$REQUIRED_BRANCH'..."
 

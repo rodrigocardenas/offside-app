@@ -35,7 +35,7 @@
                     <!-- Group Name -->
                     <div>
                         <label for="name" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('Nombre del Grupo') }}</label>
-                        <input id="name" type="text" name="name" value="{{ old('name', $group->name) }}" 
+                        <input id="name" type="text" name="name" value="{{ old('name', $group->name) }}"
                             style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; box-sizing: border-box;"
                             onfocus="this.style.borderColor='{{ $accentColor }}'; this.style.boxShadow='0 0 0 3px rgba(0, 222, 176, 0.1)'"
                             onblur="this.style.borderColor='{{ $borderColor }}'; this.style.boxShadow='none'"
@@ -48,14 +48,14 @@
                     <!-- Cover Image Upload -->
                     <div>
                         <label style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 12px;">{{ __('Imagen de Portada') }}</label>
-                        
+
                         <!-- Current Cover Image Display -->
                         @if ($group->getCoverImageUrl())
                             <div style="margin-bottom: 12px;">
                                 <div style="position: relative; width: 100%; height: 200px; border-radius: 8px; overflow: hidden; border: 1px solid {{ $borderColor }};">
-                                    <img src="{{ $group->getCoverImageUrl('medium') }}" 
+                                    <img src="{{ $group->getCoverImageUrl('medium') }}"
                                          alt="{{ $group->name }}"
-                                         style="width: 100%; height: 100%; object-fit: cover;" 
+                                         style="width: 100%; height: 100%; object-fit: cover;"
                                          loading="lazy" />
                                     @if ($group->cover_provider === 'cloudflare')
                                         <div style="position: absolute; top: 8px; right: 8px; background: rgba(0, 0, 0, 0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">
@@ -80,26 +80,26 @@
                                 <p style="margin: 0; font-size: 12px; color: {{ $textSecondary }};">PNG, JPG, WebP (máx. 5MB)</p>
                             </div>
                         </div>
-                        
+
                         <!-- File input handler script -->
                         <script>
                             const coverDropZone = document.getElementById('coverDropZone');
                             const coverInput = document.getElementById('cover_image');
                             const coverDisplayContent = document.getElementById('coverDisplayContent');
-                            
+
                             coverDropZone.addEventListener('click', () => coverInput.click());
-                            
+
                             coverDropZone.addEventListener('dragover', (e) => {
                                 e.preventDefault();
                                 coverDropZone.style.borderColor = '{{ $accentColor }}';
                                 coverDropZone.style.background = '{{ $isDark ? '#1a524e' : '#f0f8f6' }}';
                             });
-                            
+
                             coverDropZone.addEventListener('dragleave', () => {
                                 coverDropZone.style.borderColor = '{{ $borderColor }}';
                                 coverDropZone.style.background = '{{ $bgSecondary }}';
                             });
-                            
+
                             coverDropZone.addEventListener('drop', (e) => {
                                 e.preventDefault();
                                 coverDropZone.style.borderColor = '{{ $borderColor }}';
@@ -107,9 +107,9 @@
                                 coverInput.files = e.dataTransfer.files;
                                 updateFileName();
                             });
-                            
+
                             coverInput.addEventListener('change', updateFileName);
-                            
+
                             function updateFileName() {
                                 if (coverInput.files.length > 0) {
                                     const file = coverInput.files[0];
@@ -122,7 +122,7 @@
                                 }
                             }
                         </script>
-                        
+
                         @error('cover_image')
                             <p style="margin-top: 6px; font-size: 13px; color: #ef4444;">{{ $message }}</p>
                         @enderror
@@ -130,13 +130,13 @@
 
                     <!-- Actions -->
                     <div style="display: flex; gap: 12px; margin-top: 20px;">
-                        <a href="{{ route('groups.show', $group) }}" 
+                        <a href="{{ route('groups.show', $group) }}"
                            style="flex: 1; padding: 12px 16px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $bgSecondary }}; color: {{ $textPrimary }}; text-align: center; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease; cursor: pointer;"
                            onmouseover="this.style.background='{{ $isDark ? '#0f3d3a' : '#e5e5e5' }}'"
                            onmouseout="this.style.background='{{ $bgSecondary }}'">
                             {{ __('Cancelar') }}
                         </a>
-                        <button type="submit" 
+                        <button type="submit"
                                 style="flex: 1; padding: 12px 16px; border: none; border-radius: 8px; background: {{ $accentColor }}; color: #000; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease;"
                                 onmouseover="this.style.background='{{ $accentDark }}'"
                                 onmouseout="this.style.background='{{ $accentColor }}'">
