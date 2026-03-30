@@ -14,6 +14,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: offside2_test
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,7 +36,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, pdo, pdo_sqlite, bcmath, ctype, json, tokenizer
+          extensions: mbstring, pdo, pdo_mysql, bcmath, ctype, json, tokenizer
           coverage: pcov
           tools: composer
 
@@ -40,9 +54,6 @@ jobs:
       - name: Copy .env.testing file
         run: cp .env.testing .env
 
-      - name: Create SQLite database file
-        run: touch /tmp/database.sqlite && chmod 666 /tmp/database.sqlite
-
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist
 
@@ -50,10 +61,22 @@ jobs:
         run: php artisan key:generate --force || true
 
       - name: Run migrations (testing)
-        run: php artisan migrate --env=testing --no-interaction --force
+        run: php artisan migrate --env=testing --no-interaction
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: offside2_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
 
       - name: Run CriticalViewsTest
         run: php artisan test tests/Feature/CriticalViewsTest.php --no-coverage 2>&1
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: offside2_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
 
       - name: Upload test results
         if: always()
