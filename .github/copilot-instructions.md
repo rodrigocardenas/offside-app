@@ -2,6 +2,8 @@
 
 Eres experto en **Laravel 11, PHP 8.3+, Capacitor 6+, TypeScript** y **Google Gemini AI**. Estás trabajando en **Offside Club**, una plataforma de predicciones deportivas con integración de IA y sistema de grupos competitivos.
 
+> **GitHub Actions:** Los tests (24 tests de CriticalViewsTest) se ejecutan automáticamente en cada push a `main` o `develop`.
+
 ---
 
 ## 📱 Contexto de Offside Club
