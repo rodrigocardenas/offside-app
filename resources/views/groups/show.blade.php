@@ -46,6 +46,21 @@
                     onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
                     {{ __('messages.more') }}
                 </a>
+                <!-- Create Pre Match Button -->
+                @if (auth()->user()->id === $group->created_by)
+                <div class="flex justify-end px-1 mb-4" style="margin-right: 8px;">
+                    <button type="button"
+                            title="Crear desafío Pre Match"
+                            onclick="openCreatePreMatchModal(@js($group->id))"
+                            style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ff8787); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 107, 107, 0.25); transition: transform 0.2s ease;"
+                            onmouseover="this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.transform='translateY(0)';">
+                        <i class="fas fa-fire"></i>
+                        Pre Match
+                    </button>
+                </div>
+                @endif
+                
                 <!-- Edit Group Button (Only for Creator) -->
                 @if (auth()->user()->id === $group->created_by)
                 <div class="flex justify-end px-1 mb-4" style="margin-right: 8px;">
@@ -58,6 +73,7 @@
                     </a>
                 </div>
                 @endif
+                
                 <!-- Share Group Button -->
                 <div class="flex justify-end px-1 mb-4" style="margin-top: 14px;">
                     <button type="button"
@@ -396,8 +412,18 @@
         })();
     </script>
 
-
-
+    <!-- Pre Match Modal -->
+    @include('components.modals.create-pre-match-modal', [
+        'isDark' => $isDark,
+        'bgPrimary' => $bgPrimary,
+        'bgSecondary' => $bgSecondary,
+        'bgTertiary' => $bgTertiary,
+        'textPrimary' => $textPrimary,
+        'textSecondary' => $textSecondary,
+        'borderColor' => $borderColor,
+        'accentColor' => $accentColor,
+        'accentDark' => $accentDark,
+    ])
 
 </x-app-layout>
 <style>
