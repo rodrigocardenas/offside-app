@@ -295,7 +295,7 @@ class CriticalViewsTest extends TestCase
     public function test_another_user_can_answer()
     {
         $anotherUser = User::factory()->create();
-        
+
         $answer = Answer::create([
             'user_id' => $anotherUser->id,
             'question_id' => $this->question->id,
@@ -309,7 +309,7 @@ class CriticalViewsTest extends TestCase
     public function test_answer_metadata_storage()
     {
         $metadata = ['confidence' => 'high', 'notes' => 'test'];
-        
+
         $answer = Answer::create([
             'user_id' => $this->user->id,
             'question_id' => $this->question->id,

@@ -225,6 +225,25 @@ Todos deben pasar antes de deployar a producción.
 - **Documenta APIs:** Comments en métodos públicos
 - No uses `dd()` en controladores; usa `Log::info()` para que el MCP de Laravel pueda leer los logs.
 
+## 📋 Flujo de Integración Continua
+
+**Después de CADA tarea completada exitosamente**, debes preguntar al usuario:
+
+```
+✅ Tarea completada. ¿Deseas:
+1️⃣  Solo commit local
+2️⃣  Commit + push a main (GitHub Actions ejecutará tests automáticamente)
+3️⃣  Commit + push + deploy a producción (ejecutará scripts/deploy.sh)
+4️⃣  Omitir cambios
+```
+
+**Flujo automático según opción:**
+- **Opción 1:** `git add . && git commit -m "mensaje"`
+- **Opción 2:** `git add . && git commit -m "mensaje" && git push origin main` + esperar 2-3 min para que GitHub Actions ejecute los 24 tests del CriticalViewsTest
+- **Opción 3:** Commit + Push + `bash scripts/deploy.sh` (validará tests en Actions primero, luego hace deploy a producción)
+
+> **IMPORTANTE:** No ejecutes nunca `deploy.sh` sin antes verificar que los tests hayan pasado en GitHub Actions.
+
 ## Herramientas MCP
 - Para tareas complejas, usa **Laravel Boost** para validar rutas y modelos antes de sugerir cambios en el Backend.
 - Usa **Chrome DevTools** para depurar la interfaz de usuario en el emulador de Android.
