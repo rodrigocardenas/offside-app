@@ -27,12 +27,21 @@ class UpdateFootballData extends Command
 
         try {
             $competitionMap = [
+                // Ligas Locales
                 'la-liga' => 'PD',
                 'premier-league' => 'PL',
                 'champions-league' => 'CL',
                 'serie-a' => 'SA',
                 'copa-del-rey' => 'CDR',
-                'league-cup' => 'LC'
+                'league-cup' => 'LC',
+                // Competencias Internacionales
+                'world-cup' => 'WC',
+                'copa-america' => 'CA',
+                'euro' => 'EURO',
+                'africa-cup' => 'AFCON',
+                'asian-cup' => 'AC',
+                'concacaf-gold-cup' => 'GC',
+                'olympic-tournament' => 'OLY',
             ];
 
             $competitionCode = $competitionMap[$league] ?? $league;
@@ -68,10 +77,19 @@ class UpdateFootballData extends Command
 
         // Mapear competitionCode a leagueId de api-sports.io
         $leagueMap = [
+            // Ligas Locales
             'PD' => 140,     // La Liga
             'PL' => 39,      // Premier League
             'CL' => 2,       // Champions League
             'SA' => 135,     // Serie A
+            // Competencias Internacionales
+            'WC' => 1,       // FIFA World Cup
+            'CA' => 131,     // Copa América
+            'EURO' => 4,     // UEFA Euro
+            'AFCON' => 33,   // Africa Cup of Nations
+            'AC' => 45,      // AFC Asian Cup
+            'GC' => 7,       // CONCACAF Gold Cup
+            'OLY' => 56,     // Olympic Tournament
         ];
 
         $leagueId = $leagueMap[$competitionCode] ?? 39;

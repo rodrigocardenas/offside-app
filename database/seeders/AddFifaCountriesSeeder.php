@@ -245,13 +245,13 @@ class AddFifaCountriesSeeder extends Seeder
         foreach ($countries as $country) {
             // Agregar external_id generado para evitar constraint
             $country['external_id'] = 'intl_' . strtolower($country['fifa_code']) . '_' . time();
-            
+
             Team::firstOrCreate(
                 ['fifa_code' => $country['fifa_code']], // Buscar por código único
                 $country // Crear con estos datos si no existe
             );
         }
-        
+
         $this->command->info('✅ ' . count($countries) . ' países FIFA agregados exitosamente');
     }
 }

@@ -10,21 +10,21 @@
 
     <!-- Filtros -->
     <div class="flex gap-2 mb-6 flex-wrap">
-        <button 
+        <button
             onclick="filterPenalties('ALL')"
             class="px-4 py-2 rounded font-bold text-sm bg-blue-600 text-white"
             id="filterAll"
         >
             📊 Todos
         </button>
-        <button 
+        <button
             onclick="filterPenalties('PENDING')"
             class="px-4 py-2 rounded font-bold text-sm bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white hover:bg-gray-400 transition"
             id="filterPending"
         >
             ⏳ Pendientes
         </button>
-        <button 
+        <button
             onclick="filterPenalties('FULFILLED')"
             class="px-4 py-2 rounded font-bold text-sm bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white hover:bg-gray-400 transition"
             id="filterFulfilled"
@@ -35,7 +35,7 @@
 
     <!-- Tabs de Tipo -->
     <div class="flex gap-2 mb-6 border-b border-gray-300 dark:border-gray-600">
-        <button 
+        <button
             onclick="filterByType('ALL')"
             class="font-bold px-4 py-3 border-b-2 border-transparent hover:border-blue-600 transition"
             id="typeAll"
@@ -43,21 +43,21 @@
         >
             📋 Todos los Tipos
         </button>
-        <button 
+        <button
             onclick="filterByType('POINTS')"
             class="font-bold px-4 py-3 border-b-2 border-transparent hover:border-blue-600 transition text-gray-600 dark:text-gray-400"
             id="typePoints"
         >
             💔 Puntos
         </button>
-        <button 
+        <button
             onclick="filterByType('SOCIAL')"
             class="font-bold px-4 py-3 border-b-2 border-transparent hover:border-blue-600 transition text-gray-600 dark:text-gray-400"
             id="typeSocial"
         >
             🍽️ Social
         </button>
-        <button 
+        <button
             onclick="filterByType('REVENGE')"
             class="font-bold px-4 py-3 border-b-2 border-transparent hover:border-blue-600 transition text-gray-600 dark:text-gray-400"
             id="typeRevenge"
@@ -92,14 +92,14 @@
         document.getElementById('filterAll').classList.remove('bg-blue-600', 'text-white');
         document.getElementById('filterPending').classList.remove('bg-blue-600', 'text-white');
         document.getElementById('filterFulfilled').classList.remove('bg-blue-600', 'text-white');
-        
+
         document.getElementById('filterAll').classList.add('bg-gray-300', 'dark:bg-gray-600', 'text-gray-900', 'dark:text-white');
         document.getElementById('filterPending').classList.add('bg-gray-300', 'dark:bg-gray-600', 'text-gray-900', 'dark:text-white');
         document.getElementById('filterFulfilled').classList.add('bg-gray-300', 'dark:bg-gray-600', 'text-gray-900', 'dark:text-white');
-        
+
         document.getElementById('filter' + status).classList.add('bg-blue-600', 'text-white');
         document.getElementById('filter' + status).classList.remove('bg-gray-300', 'dark:bg-gray-600', 'text-gray-900', 'dark:text-white');
-        
+
         renderPenalties();
     }
 
@@ -109,10 +109,10 @@
             btn.style.borderColor = 'transparent';
             btn.classList.add('text-gray-600', 'dark:text-gray-400');
         });
-        
+
         document.getElementById('type' + type).style.borderColor = 'rgb(37, 99, 235)';
         document.getElementById('type' + type).classList.remove('text-gray-600', 'dark:text-gray-400');
-        
+
         renderPenalties();
     }
 
@@ -142,10 +142,10 @@
         const html = filtered.map(penalty => `
             <div class="border-l-4 pl-4 py-4 rounded bg-gray-50 dark:bg-gray-700/50 transition"
                 style="border-color: ${getPenaltyColor(penalty.penalty_type)};">
-                
+
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-2">
-                        <img src="${penalty.user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(penalty.user.name)}" 
+                        <img src="${penalty.user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(penalty.user.name)}"
                             alt="${penalty.user.name}" class="w-8 h-8 rounded-full object-cover">
                         <div>
                             <p class="font-bold text-gray-900 dark:text-white">${penalty.user.name}</p>
@@ -154,7 +154,7 @@
                             </p>
                         </div>
                     </div>
-                    
+
                     <div class="text-right">
                         <span class="px-3 py-1 rounded text-xs font-bold ${getPenaltyBadgeClass(penalty.penalty_type)}">
                             ${getPenaltyLabel(penalty.penalty_type)}
@@ -172,11 +172,11 @@
                     <div class="p-2 bg-white dark:bg-gray-600 rounded">
                         <p class="text-xs text-gray-600 dark:text-gray-400">Pre Match</p>
                         <p class="font-bold text-gray-900 dark:text-white">
-                            ${penalty.pre_match?.home_team?.name || 'Match ?'} vs 
+                            ${penalty.pre_match?.home_team?.name || 'Match ?'} vs
                             ${penalty.pre_match?.away_team?.name || '?'}
                         </p>
                     </div>
-                    
+
                     ${penalty.penalty_type === 'POINTS' ? `
                         <div class="p-2 bg-red-50 dark:bg-red-900 rounded">
                             <p class="text-xs text-red-600 dark:text-red-300">Puntos Perdidos</p>

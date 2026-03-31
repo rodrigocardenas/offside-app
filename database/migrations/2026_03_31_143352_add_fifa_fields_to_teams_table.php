@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::table('teams', function (Blueprint $table) {
             // Agregar columna fifa_code única para países FIFA (3 letras: ARG, BRA, etc)
             $table->string('fifa_code', 3)->nullable()->unique()->after('tla');
-            
+
             // Confederación FIFA (CONMEBOL, UEFA, CONCACAF, AFC, CAF, OFC)
             $table->string('confederation')->nullable()->after('fifa_code');
-            
+
             // Región geográfica (South America, Europe, Africa, Asia, Oceania, etc)
             $table->string('region')->nullable()->after('confederation');
         });

@@ -1,0 +1,86 @@
+[    2109ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/login:41
+[    3231ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/login:100
+[    3232ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/login:100
+[    3234ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/login:100
+[    3234ms] [WARNING] ⚠️ No se encontraron elementos del dropdown @ http://offsideclub.test/login:100
+[    3368ms] [LOG] 🔔 initToasts ejecutándose en mobile-light-layout @ http://offsideclub.test/login:100
+[    3368ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/login:100
+[    9765ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/:41
+[    9799ms] [LOG] %c🌍 [TZ-SYNC] Script cargado correctamente color: #00deb0; font-weight: bold; font-size: 14px; @ http://offsideclub.test/:100
+[    9800ms] [LOG] %c⏳ Esperando a que el documento esté listo... color: #74b9ff; @ http://offsideclub.test/:100
+[    9800ms] [LOG] %c✅ ✅ TIMEZONE SYNC COMPLETAMENTE LISTO color: #51cf66; font-weight: bold; font-size: 14px; @ http://offsideclub.test/:100
+[    9800ms] [LOG] %c💡 Ejecuta: window.forceTimezoneSync() para forzar sincronización color: #74b9ff; font-style: italic; @ http://offsideclub.test/:100
+[    9800ms] [LOG] %c💡 Ejecuta: window.TZSync.debugInfo() para ver información de debug color: #74b9ff; font-style: italic; @ http://offsideclub.test/:100
+[   10364ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/:100
+[   10364ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/:100
+[   10366ms] [LOG] %c✅ DOMContentLoaded - Iniciando verificación color: #00deb0; font-weight: bold; @ http://offsideclub.test/:100
+[   10366ms] [LOG] %c--- Verificando timezone --- color: #00deb0; font-weight: bold; @ http://offsideclub.test/:100
+[   10382ms] [LOG] %c✅ Timezone detectado: Europe/Paris color: #00deb0; font-weight: bold; @ http://offsideclub.test/:100
+[   10382ms] [LOG] %c📍 Idioma/Locale: es-419 color: #74b9ff; @ http://offsideclub.test/:100
+[   10382ms] [LOG] %c🕐 Offset actual: 2 horas color: #74b9ff; @ http://offsideclub.test/:100
+[   10382ms] [LOG] %c📋 Estado: color: #00deb0; font-weight: bold; @ http://offsideclub.test/:100
+[   10382ms] [LOG]   Device TZ: Europe/Paris @ http://offsideclub.test/:100
+[   10382ms] [LOG]   Last synced TZ: NINGUNO @ http://offsideclub.test/:100
+[   10382ms] [LOG]   Last timestamp: NINGUNO @ http://offsideclub.test/:100
+[   10382ms] [LOG] %c🔄 Sincronizando timezone... color: #00deb0; font-weight: bold; @ http://offsideclub.test/:100
+[   10383ms] [LOG] %c🔄 Intento 1/3 - Sincronizando: Europe/Paris color: #00deb0; font-weight: bold; @ http://offsideclub.test/:100
+[   10383ms] [LOG] %c✅ CSRF token encontrado color: #00deb0; font-weight: bold; @ http://offsideclub.test/:100
+[   10383ms] [LOG] %c🔐 Usando autenticación por sesión de navegador color: #00deb0; font-weight: bold; @ http://offsideclub.test/:100
+[   10384ms] [LOG] ✅ Modal handler cargado @ http://offsideclub.test/:100
+[   10385ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/:100
+[   10385ms] [LOG] ✅ Elementos del dropdown encontrados @ http://offsideclub.test/:100
+[   10385ms] [LOG] ✅ Header dropdown handler inicializado correctamente @ http://offsideclub.test/:100
+[   10493ms] [LOG] 🔔 initToasts ejecutándose en mobile-light-layout @ http://offsideclub.test/:100
+[   10493ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/:100
+[   10494ms] [LOG] ✅ Session success detectada: "¡Bienvenido rodrigo! Tu ID completo es: rodrigo_41BA" @ http://offsideclub.test/:100
+[   10497ms] [WARNING] DEPRECATION NOTICE: "backgroundColor" is being deprecated. Please use the "style.background" property. @ http://offsideclub.test/:100
+[   10517ms] [LOG] ✅ Toast mostrado @ http://offsideclub.test/:100
+[   11220ms] [LOG] %c📡 Response status: 200 color: #00deb0; @ http://offsideclub.test/:100
+[   11221ms] [LOG] %c📝 Response body (primeros 500 chars): {"success":true,"message":"Zona horaria actualizada correctamente","timezone":"Europe\/Paris","previous_timezone":"UTC","synced_at":"2026-03-31T16:01:24+00:00"} color: #74b9ff; font-size: 10px; @ http://offsideclub.test/:100
+[   11221ms] [LOG] %c✅ ✅ ÉXITO: Timezone sincronizado color: #51cf66; font-weight: bold; font-size: 13px; {success: true, message: Zona horaria actualizada correctamente, timezone: Europe/Paris, previous_timezone: UTC, synced_at: 2026-03-31T16:01:24+00:00} @ http://offsideclub.test/:100
+[   92069ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/groups/create:41
+[   92638ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/groups/create:100
+[   92639ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/groups/create:100
+[   92644ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/groups/create:100
+[   92645ms] [WARNING] ⚠️ No se encontraron elementos del dropdown @ http://offsideclub.test/groups/create:100
+[   92745ms] [LOG] 🔔 initToasts ejecutándose en mobile-light-layout @ http://offsideclub.test/groups/create:100
+[   92746ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/groups/create:100
+[  100886ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/groups/8:311
+[  100954ms] [LOG] 🔔 Script de toast iniciando en app-layout... @ http://offsideclub.test/groups/8:370
+[  100954ms] [LOG] window.showSuccessToast: undefined @ http://offsideclub.test/groups/8:370
+[  101395ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/groups/8:370
+[  101395ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/groups/8:370
+[  101397ms] [LOG] DOMContentLoaded ejecutado en app-layout @ http://offsideclub.test/groups/8:370
+[  101399ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/groups/8:370
+[  101399ms] [LOG] ✅ Elementos del dropdown encontrados @ http://offsideclub.test/groups/8:370
+[  101400ms] [LOG] ✅ Header dropdown handler inicializado correctamente @ http://offsideclub.test/groups/8:370
+[  101401ms] [LOG] ✅ Modal handler cargado @ http://offsideclub.test/groups/8:370
+[  101426ms] [LOG] Document ready @ http://offsideclub.test/groups/8:370
+[  101509ms] [LOG] 🔔 initToasts ejecutándose en app-layout @ http://offsideclub.test/groups/8:370
+[  101509ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/groups/8:370
+[  101509ms] [LOG] ✅ Session success detectada: "Grupo creado exitosamente." @ http://offsideclub.test/groups/8:370
+[  101509ms] [WARNING] DEPRECATION NOTICE: "backgroundColor" is being deprecated. Please use the "style.background" property. @ http://offsideclub.test/groups/8:370
+[  101511ms] [LOG] ✅ Toast mostrado @ http://offsideclub.test/groups/8:370
+[  104910ms] [LOG] Penalty type changed to: POINTS @ http://offsideclub.test/groups/8:370
+[  106237ms] [LOG] Penalty type changed to: CUSTOM_PENALTY @ http://offsideclub.test/groups/8:370
+[  208637ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/groups/8:311
+[  208661ms] [LOG] 🔔 Script de toast iniciando en app-layout... @ http://offsideclub.test/groups/8:370
+[  208661ms] [LOG] window.showSuccessToast: undefined @ http://offsideclub.test/groups/8:370
+[  209411ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/groups/8:370
+[  209411ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/groups/8:370
+[  209413ms] [LOG] 🚀 DOMContentLoaded: Initializing modal @ http://offsideclub.test/groups/8:370
+[  209413ms] [LOG] ✅ Modal initialization complete @ http://offsideclub.test/groups/8:370
+[  209413ms] [LOG] DOMContentLoaded ejecutado en app-layout @ http://offsideclub.test/groups/8:370
+[  209415ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/groups/8:370
+[  209415ms] [LOG] ✅ Elementos del dropdown encontrados @ http://offsideclub.test/groups/8:370
+[  209416ms] [LOG] ✅ Header dropdown handler inicializado correctamente @ http://offsideclub.test/groups/8:370
+[  209417ms] [LOG] ✅ Modal handler cargado @ http://offsideclub.test/groups/8:370
+[  209442ms] [LOG] Document ready @ http://offsideclub.test/groups/8:370
+[  209521ms] [LOG] 🔔 initToasts ejecutándose en app-layout @ http://offsideclub.test/groups/8:370
+[  209521ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/groups/8:370
+[  210426ms] [LOG] 🎬 openCreatePreMatchModal called with groupId: 8 @ http://offsideclub.test/groups/8:370
+[  210426ms] [LOG] 🎯 updatePenaltyUI called @ http://offsideclub.test/groups/8:370
+[  210426ms] [LOG] ✅ Selected penalty type: POINTS @ http://offsideclub.test/groups/8:370
+[  212131ms] [LOG] 📻 Radio changed: CUSTOM_PENALTY @ http://offsideclub.test/groups/8:370
+[  212131ms] [LOG] 🎯 updatePenaltyUI called @ http://offsideclub.test/groups/8:370
+[  212131ms] [LOG] ✅ Selected penalty type: CUSTOM_PENALTY @ http://offsideclub.test/groups/8:370

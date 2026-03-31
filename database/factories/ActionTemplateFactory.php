@@ -17,7 +17,7 @@ class ActionTemplateFactory extends Factory
     public function definition(): array
     {
         $categories = ['GOALS', 'CARDS', 'DEFENSE', 'RARE', 'FUNNY'];
-        
+
         return [
             'action' => $this->faker->sentence(3),
             'description' => $this->faker->sentence(5),

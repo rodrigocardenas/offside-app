@@ -41,7 +41,7 @@
         <div class="ml-1 mr-1" style="background: {{ $bgTertiary }}; padding: 5px; border-radius: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 16px;">
             <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 2px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }}; padding: 8px;">
                 {{ __('views.rankings.title') }} <i class="fas fa-trophy" style="color: {{ $accentColor }};"></i>
-                
+
                 <!-- Action Buttons Container (Aligned to right) -->
                 <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
                     <!-- See More Button -->
@@ -50,7 +50,7 @@
                         onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
                         {{ __('messages.more') }}
                     </a>
-                    
+
                     <!-- Create Pre Match Button -->
                     @if (auth()->user()->id === $group->created_by)
                     <button type="button"
@@ -63,7 +63,7 @@
                         Pre Match
                     </button>
                     @endif
-                    
+
                     <!-- Edit Group Button (Only for Creator) -->
                     @if (auth()->user()->id === $group->created_by)
                     <a href="{{ route('groups.edit', $group) }}"
@@ -74,7 +74,7 @@
                         <i class="fas fa-edit"></i>
                     </a>
                     @endif
-                    
+
                     <!-- Share Group Button -->
                     <button type="button"
                             title="Invitar amigos al grupo"

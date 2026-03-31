@@ -1,0 +1,58 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img "Offside Club" [ref=e6]
+      - heading "Offside Club" [level=1] [ref=e7]
+      - paragraph [ref=e8]: Tu app de predicciones
+    - generic [ref=e9]:
+      - heading "Iniciar Sesión" [level=2] [ref=e10]
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - img [ref=e14]: 
+            - text: Tu nickname
+          - textbox "Tu nickname" [active] [ref=e16]:
+            - /placeholder: tu_nickname
+        - button "Jugar ahora" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]: 
+          - text: Jugar ahora
+    - paragraph [ref=e21]:
+      - img [ref=e22]: 
+      - strong [ref=e24]: ¿Nuevo en Offside Club?
+      - text: Crea tu cuenta para empezar a hacer predicciones y compite con otros usuarios.
+    - text: 
+  - generic [ref=e25]:
+    - generic [ref=e27]:
+      - generic [ref=e29]:
+        - generic [ref=e30] [cursor=pointer]:
+          - text: 
+          - generic: Request
+        - text: 
+        - generic [ref=e31] [cursor=pointer]:
+          - text: 
+          - generic: Timeline
+        - text: 
+        - generic [ref=e32] [cursor=pointer]:
+          - text: 
+          - generic: Views
+          - generic [ref=e33]: "3"
+        - text:    
+      - generic [ref=e34]:
+        - generic [ref=e37] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e39] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e40] [cursor=pointer]:
+          - generic: 
+          - generic: 478ms
+        - generic [ref=e41]:
+          - generic: 
+          - generic: 22MB
+        - generic [ref=e42]:
+          - generic: 
+          - generic: 10.x
+        - generic [ref=e43] [cursor=pointer]:
+          - generic: 
+          - generic: GET login
+    - text:                 
+  - text: 

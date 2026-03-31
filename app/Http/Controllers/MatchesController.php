@@ -312,19 +312,20 @@ class MatchesController extends Controller
     /**
      * GET /api/matches/upcoming
      *
-     * Obtiene partidos próximos (próximas 24 horas para Pre Match)
+     * Obtiene partidos próximos para Pre Match (próximos 7 días por defecto)
      *
      * @return JsonResponse
      */
     public function upcoming(): JsonResponse
     {
         try {
+            $days = request('days', 7); // Por defecto 7 días, configurable via ?days=3
             $now = now();
-            $tomorrow = $now->copy()->addHours(24);
+            $endDate = $now->copy()->addDays($days);
 
             $matches = $this->matchesService->getMatchesByDate(
                 $now->format('Y-m-d'),
-                $tomorrow->format('Y-m-d'),
+                $endDate->format('Y-m-d'),
                 null, // competition_id
                 null, // team_ids
                 false // include_finished - solo partidos pendientes
@@ -334,11 +335,13 @@ class MatchesController extends Controller
             $allMatches = [];
             foreach ($matches as $dateMatches) {
                 foreach ($dateMatches as $match) {
-                    // Filtrar solo partidos que comienzan en las próximas 24 horas
-                    if ($match['kickoff_time'] && $match['kickoff_time'] >= $now && $match['kickoff_time'] <= $tomorrow) {
+                    // Filtrar solo partidos que comienzan entre ahora y el rango de días
+                    $kickoffTimestamp = $match['kick_off_timestamp'] ?? null;
+                    if ($kickoffTimestamp && $kickoffTimestamp >= $now->timestamp && $kickoffTimestamp <= $endDate->timestamp) {
                         $allMatches[] = [
                             'id' => $match['id'] ?? null,
-                            'kickoff_time' => $match['kickoff_time'],
+                            'kick_off_time' => $match['kick_off_time'],
+                            'kick_off_timestamp' => $kickoffTimestamp,
                             'home_team' => $match['home_team'] ?? null,
                             'away_team' => $match['away_team'] ?? null,
                             'competition' => $match['competition'] ?? null,
@@ -347,8 +350,8 @@ class MatchesController extends Controller
                 }
             }
 
-            // Ordenar por hora de inicio
-            usort($allMatches, fn($a, $b) => $a['kickoff_time'] <=> $b['kickoff_time']);
+            // Ordenar por timestamp
+            usort($allMatches, fn($a, $b) => $a['kick_off_timestamp'] <=> $b['kick_off_timestamp']);
 
             return response()->json([
                 'success' => true,
@@ -356,7 +359,8 @@ class MatchesController extends Controller
                 'meta' => [
                     'count' => count($allMatches),
                     'current_time' => $now->toIso8601String(),
-                    'range_end' => $tomorrow->toIso8601String(),
+                    'range_end' => $endDate->toIso8601String(),
+                    'days' => $days,
                 ]
             ]);
 

@@ -95,36 +95,36 @@ Route::prefix('matches')->group(function () {
 // ============================================================================
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/matches/sync', [MatchesController::class, 'sync']);
-    
+
     // ========================================================================
     // RUTAS PRE MATCH - Desafíos anticipados en partidos
     // ========================================================================
     Route::prefix('pre-matches')->group(function () {
         // Listar Pre Matches (filtrar por grupo, estado)
         Route::get('/', [\App\Http\Controllers\Api\PreMatchController::class, 'index']);
-        
+
         // Crear nuevo Pre Match (Admin only)
         Route::post('/', [\App\Http\Controllers\Api\PreMatchController::class, 'store'])
             ->middleware('can:create-pre-match');
-        
+
         // Obtener detalles Pre Match
         Route::get('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'show']);
-        
+
         // Actualizar Pre Match (Admin)
         Route::patch('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'update'])
             ->middleware('can:update-pre-match');
-        
+
         // Agregar proposición de acción
         Route::post('/{preMatch}/propositions', [\App\Http\Controllers\Api\PreMatchController::class, 'addProposition']);
-        
+
         // Obtener penalizaciones asociadas
         Route::get('/{preMatch}/penalties', [\App\Http\Controllers\Api\PreMatchController::class, 'getPenalties']);
-        
+
         // Resolver Pre Match (Admin)
         Route::post('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch'])
             ->middleware('can:resolve-pre-match');
     });
-    
+
     // Pre Match Propositions - Votos en proposiciones
     Route::prefix('pre-match-propositions')->group(function () {
         Route::post('/{proposition}/vote', [\App\Http\Controllers\Api\PreMatchController::class, 'voteOnProposition']);

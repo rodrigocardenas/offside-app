@@ -12,7 +12,7 @@
             @endif
             <span class="font-bold text-sm text-gray-900 dark:text-white">{{ $proposition->user->name }}</span>
         </div>
-        
+
         <!-- Probability Badge -->
         @php
             $probabilityClass = match(true) {
@@ -21,7 +21,7 @@
                 default => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
             };
         @endphp
-        
+
         <span class="text-xs font-bold px-2 py-1 rounded {{ $probabilityClass }}">
             {{ number_format($proposition->probability * 100, 0) }}% probable
         </span>
@@ -31,7 +31,7 @@
     <p class="text-lg font-bold text-gray-900 dark:text-white mb-1">
         "{{ $proposition->action }}"
     </p>
-    
+
     @if($proposition->description)
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 italic">
             {{ $proposition->description }}
@@ -41,7 +41,7 @@
     <!-- Validation Progress -->
     <div class="flex items-center gap-2 mb-3">
         <div class="flex-1 bg-gray-300 dark:bg-gray-600 rounded-full h-2.5">
-            <div 
+            <div
                 class="h-2.5 rounded-full transition-all"
                 @switch($proposition->validation_status)
                     @case('ACCEPTED')
@@ -55,7 +55,7 @@
                 @endswitch
             ></div>
         </div>
-        <span 
+        <span
             class="text-xs font-bold px-2 py-1 rounded whitespace-nowrap"
             @switch($proposition->validation_status)
                 @case('ACCEPTED')
@@ -85,16 +85,16 @@
         @php
             $userVoted = $proposition->votes->where('user_id', Auth::id())->first();
         @endphp
-        
+
         @if(!$userVoted)
             <div class="flex gap-2">
-                <button 
+                <button
                     onclick="voteProposition({{ $proposition->id }}, true)"
                     class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded font-bold text-sm transition"
                 >
                     ✅ Es posible
                 </button>
-                <button 
+                <button
                     onclick="voteProposition({{ $proposition->id }}, false)"
                     class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded font-bold text-sm transition"
                 >

@@ -14,7 +14,7 @@ return new class extends Migration
         if (Schema::hasTable('pre_matches')) {
             return; // Tabla ya existe, skip
         }
-        
+
         Schema::create('pre_matches', function (Blueprint $table) {
             $table->id();
             $table->foreignId('football_match_id')->nullable()->constrained('football_matches')->onDelete('cascade');

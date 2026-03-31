@@ -1,15 +1,15 @@
-{{-- Modal para crear Pre Match --}}
-<div id="createPreMatchModal" 
+{{-- Create Pre Match Modal Component --}}
+<div id="createPreMatchModal"
      style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 1rem;">
-    
+
     <div style="background: {{ $isDark ? '#0f3d3a' : '#ffffff' }}; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-        
+
         <!-- Header -->
         <div style="padding: 24px; border-bottom: 1px solid {{ $borderColor }}; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: {{ $isDark ? '#0f3d3a' : '#ffffff' }}; z-index: 10;">
             <h2 style="font-size: 20px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">
                 🔥 Crear Pre Match Challenge
             </h2>
-            <button onclick="closeCreatePreMatchModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: {{ $textSecondary }}; padding: 0;">
+            <button type="button" onclick="closeCreatePreMatchModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: {{ $textSecondary }}; padding: 0;">
                 ✕
             </button>
         </div>
@@ -22,12 +22,12 @@
                 <label style="display: block; font-weight: 700; font-size: 14px; margin-bottom: 12px; color: {{ $textPrimary }};">
                     📅 Selecciona un Partido
                 </label>
-                <select id="preMatchMatchSelect" 
+                <select id="preMatchMatchSelect"
                         style="width: 100%; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-size: 14px; cursor: pointer;">
                     <option value="">-- Cargando partidos --</option>
                 </select>
                 <small style="display: block; margin-top: 8px; color: {{ $textSecondary }}; font-size: 12px;">
-                    Only matches starting in the next 24 hours
+                    Solo partidos en los próximos 7 días
                 </small>
             </div>
 
@@ -39,22 +39,24 @@
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <!-- POINTS Option -->
                     <div style="flex: 1; min-width: 120px;">
-                        <input type="radio" id="penaltyTypePoints" name="penaltyType" value="POINTS" checked 
+                        <input type="radio" id="penaltyTypePoints" name="penaltyType" value="POINTS" checked
                                style="display: none;">
-                        <label for="penaltyTypePoints" 
-                               style="display: block; text-align: center; padding: 12px 16px; border: 2px solid {{ $accentColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? 'rgba(0,222,176,0.15)' : '#e5f3f0' }}; color: {{ $accentColor }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;"
-                               onchange="updatePenaltyUI()">
+                        <label for="penaltyTypePoints"
+                               class="penalty-type-label"
+                               data-type="POINTS"
+                               style="display: block; text-align: center; padding: 12px 16px; border: 2px solid {{ $accentColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? 'rgba(0,222,176,0.15)' : '#e5f3f0' }}; color: {{ $accentColor }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;">
                             💰 Petar Puntos
                         </label>
                     </div>
 
                     <!-- CUSTOM PENALTY Option -->
                     <div style="flex: 1; min-width: 120px;">
-                        <input type="radio" id="penaltyTypeCustom" name="penaltyType" value="CUSTOM_PENALTY" 
+                        <input type="radio" id="penaltyTypeCustom" name="penaltyType" value="CUSTOM_PENALTY"
                                style="display: none;">
-                        <label for="penaltyTypeCustom" 
-                               style="display: block; text-align: center; padding: 12px 16px; border: 2px solid {{ $borderColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textSecondary }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;"
-                               onchange="updatePenaltyUI()">
+                        <label for="penaltyTypeCustom"
+                               class="penalty-type-label"
+                               data-type="CUSTOM_PENALTY"
+                               style="display: block; text-align: center; padding: 12px 16px; border: 2px solid {{ $borderColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textSecondary }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;">
                             📝 Castigo Personalizado
                         </label>
                     </div>
@@ -70,22 +72,19 @@
                     </label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
                         <button type="button" class="penalty-points-btn" data-points="500"
-                                onclick="selectPenaltyPoints(500)"
                                 style="padding: 12px; border: 2px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s;">
                             -500
                         </button>
                         <button type="button" class="penalty-points-btn" data-points="1000"
-                                onclick="selectPenaltyPoints(1000)"
-                                style="padding: 12px; border: 2px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s;">
+                                style="padding: 12px; border: 2px solid {{ $accentColor }}; border-radius: 8px; background: {{ $isDark ? 'rgba(0,222,176,0.15)' : '#e5f3f0' }}; color: {{ $textPrimary }}; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s;"
+                                data-selected="true">
                             -1000
                         </button>
                         <button type="button" class="penalty-points-btn" data-points="2000"
-                                onclick="selectPenaltyPoints(2000)"
                                 style="padding: 12px; border: 2px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s;">
                             -2000
                         </button>
                         <button type="button" class="penalty-points-btn" data-points="ALL"
-                                onclick="selectPenaltyPoints('ALL')"
                                 style="padding: 12px; border: 2px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s;">
                             🔥 TODOS
                         </button>
@@ -122,7 +121,7 @@
             </div>
 
             <!-- Error Message -->
-            <div id="preMatchError" 
+            <div id="preMatchError"
                  style="display: none; padding: 12px; background: #ffebee; border: 1px solid #ef5350; border-radius: 8px; color: #c62828; font-size: 13px; margin-bottom: 16px;">
             </div>
 
@@ -143,204 +142,6 @@
     </div>
 </div>
 
-<script>
-    let preMatchGroupId = null;
-    let selectedPenaltyPoints = 1000;
-
-    function openCreatePreMatchModal(groupId) {
-        preMatchGroupId = groupId;
-        const modal = document.getElementById('createPreMatchModal');
-        modal.style.display = 'flex';
-        // Reset form
-        document.getElementById('preMatchMatchSelect').value = '';
-        document.getElementById('penaltyTypePoints').checked = true;
-        document.getElementById('penaltyDescription').value = '';
-        document.getElementById('charCount').textContent = '0';
-        document.getElementById('preMatchError').style.display = 'none';
-        updatePenaltyUI();
-        selectPenaltyPoints(1000);
-        loadAvailableMatches(groupId);
-    }
-
-    function closeCreatePreMatchModal() {
-        document.getElementById('createPreMatchModal').style.display = 'none';
-        document.getElementById('preMatchError').style.display = 'none';
-    }
-
-    function loadAvailableMatches(groupId) {
-        const select = document.getElementById('preMatchMatchSelect');
-        select.innerHTML = `<option value="">-- Cargando partidos próximos --</option>`;
-        
-        // Fetch upcoming matches from API
-        fetch('/api/matches/upcoming', {
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to load matches');
-            return response.json();
-        })
-        .then(data => {
-            // Handle both direct array and { data: [...] } formats
-            const matches = Array.isArray(data) ? data : (data.data || []);
-            
-            if (!matches || matches.length === 0) {
-                select.innerHTML = `<option value="">No hay partidos próximos disponibles</option>`;
-                return;
-            }
-            
-            select.innerHTML = '<option value="">-- Selecciona un partido --</option>' + matches.map(match => {
-                const homeTeam = match.home_team?.name || match.home_team || 'Equipo A';
-                const awayTeam = match.away_team?.name || match.away_team || 'Equipo B';
-                const kickoffTime = match.kickoff_time ? new Date(match.kickoff_time).toLocaleString('es-AR', { 
-                    month: 'short', 
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }) : 'Hora TBD';
-                return `<option value="${match.id}">${homeTeam} vs ${awayTeam} (${kickoffTime})</option>`;
-            }).join('');
-        })
-        .catch(error => {
-            console.error('Error loading matches:', error);
-            select.innerHTML = `<option value="">Error al cargar partidos (${error.message})</option>`;
-        });
-    }
-                return `<option value="${match.id}">${homeTeam} vs ${awayTeam} (${kickoffTime})</option>`;
-            }).join('');
-        })
-        .catch(error => {
-            console.error('Error loading matches:', error);
-            select.innerHTML = `<option value="">Error al cargar partidos</option>`;
-        });
-    }
-
-    function updatePenaltyUI() {
-        const penaltyType = document.querySelector('input[name="penaltyType"]:checked').value;
-        const pointsDetails = document.getElementById('pointsDetails');
-        const customPenaltyDetails = document.getElementById('customPenaltyDetails');
-
-        if (penaltyType === 'POINTS') {
-            pointsDetails.style.display = 'block';
-            customPenaltyDetails.style.display = 'none';
-            // Update radio button styling
-            document.querySelector('label[for="penaltyTypePoints"]').style.borderColor = '{{ $accentColor }}';
-            document.querySelector('label[for="penaltyTypePoints"]').style.background = '{{ $isDark ? "rgba(0,222,176,0.15)" : "#e5f3f0" }}';
-            document.querySelector('label[for="penaltyTypePoints"]').style.color = '{{ $accentColor }}';
-            
-            document.querySelector('label[for="penaltyTypeCustom"]').style.borderColor = '{{ $borderColor }}';
-            document.querySelector('label[for="penaltyTypeCustom"]').style.background = '{{ $isDark ? "#1a524e" : "#f5f5f5" }}';
-            document.querySelector('label[for="penaltyTypeCustom"]').style.color = '{{ $textSecondary }}';
-        } else {
-            pointsDetails.style.display = 'none';
-            customPenaltyDetails.style.display = 'block';
-            // Update radio button styling
-            document.querySelector('label[for="penaltyTypePoints"]').style.borderColor = '{{ $borderColor }}';
-            document.querySelector('label[for="penaltyTypePoints"]').style.background = '{{ $isDark ? "#1a524e" : "#f5f5f5" }}';
-            document.querySelector('label[for="penaltyTypePoints"]').style.color = '{{ $textPrimary }}';
-            
-            document.querySelector('label[for="penaltyTypeCustom"]').style.borderColor = '{{ $accentColor }}';
-            document.querySelector('label[for="penaltyTypeCustom"]').style.background = '{{ $isDark ? "rgba(0,222,176,0.15)" : "#e5f3f0" }}';
-            document.querySelector('label[for="penaltyTypeCustom"]').style.color = '{{ $accentColor }}';
-        }
-    }
-
-    function selectPenaltyPoints(points) {
-        selectedPenaltyPoints = points;
-        document.getElementById('selectedPointsText').textContent = points === 'ALL' ? '🔥 TODOS LOS PUNTOS' : '-' + points;
-        
-        // Update button styling
-        document.querySelectorAll('.penalty-points-btn').forEach(btn => {
-            if (btn.dataset.points == points) {
-                btn.style.borderColor = '{{ $accentColor }}';
-                btn.style.background = '{{ $isDark ? "rgba(0, 222, 176, 0.2)" : "#e5f3f0" }}';
-                btn.style.color = '{{ $accentColor }}';
-            } else {
-                btn.style.borderColor = '{{ $borderColor }}';
-                btn.style.background = '{{ $isDark ? "#1a524e" : "#f5f5f5" }}';
-                btn.style.color = '{{ $textPrimary }}';
-            }
-        });
-    }
-
-    document.getElementById('penaltyDescription')?.addEventListener('input', function() {
-        document.getElementById('charCount').textContent = this.value.length;
-    });
-
-    function submitCreatePreMatch() {
-        const matchId = document.getElementById('preMatchMatchSelect').value;
-        const penaltyType = document.querySelector('input[name="penaltyType"]:checked').value;
-        const penaltyDescription = document.getElementById('penaltyDescription').value;
-        const errorDiv = document.getElementById('preMatchError');
-
-        // Validation
-        if (!matchId) {
-            showError('Por favor selecciona un partido');
-            return;
-        }
-
-        if (penaltyType === 'CUSTOM_PENALTY') {
-            if (!penaltyDescription.trim()) {
-                showError('Describe el castigo personalizado');
-                return;
-            }
-        }
-
-        const payload = {
-            match_id: parseInt(matchId),
-            group_id: preMatchGroupId,
-            penalty_type: penaltyType,
-            penalty_points: penaltyType === 'POINTS' ? (selectedPenaltyPoints === 'ALL' ? 9999 : parseInt(selectedPenaltyPoints)) : null,
-            penalty_description: penaltyType === 'CUSTOM_PENALTY' ? penaltyDescription : null,
-        };
-
-        // Submit via AJAX
-        fetch(`/api/pre-matches`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        })
-        .then(response => {
-            if (!response.ok) throw new Error(response.statusText);
-            return response.json();
-        })
-        .then(data => {
-            // Success - show notification and reload
-            showNotification('✅ Pre Match creado exitosamente', 'success');
-            closeCreatePreMatchModal();
-            setTimeout(() => location.reload(), 1500);
-        })
-        .catch(error => {
-            showError('Error: ' + error.message);
-        });
-    }
-
-    function showError(message) {
-        const errorDiv = document.getElementById('preMatchError');
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-    }
-
-    function showNotification(message, type = 'info') {
-        // Use existing notification system if available
-        if (window.showNotification) {
-            window.showNotification(message, type);
-        } else {
-            alert(message);
-        }
-    }
-
-    // Initialize on modal open
-    updatePenaltyUI();
-    selectPenaltyPoints(1000);
-</script>
-
 <style>
     #createPreMatchModal {
         animation: slideUp 0.3s ease;
@@ -357,3 +158,242 @@
         }
     }
 </style>
+
+<!-- JavaScript Module for Modal Management -->
+<script>
+(function() {
+    // Theme configuration from Blade
+    const THEME = {
+        isDark: {{ json_encode($isDark) }},
+        accentColor: '{{ $accentColor }}',
+        borderColor: '{{ $borderColor }}',
+        textPrimary: '{{ $textPrimary }}',
+        textSecondary: '{{ $textSecondary }}',
+        bgPrimary: '{{ $bgPrimary }}',
+        bgSecondary: '{{ $bgSecondary }}',
+        bgTertiary: '{{ $bgTertiary }}'
+    };
+
+    // Global state
+    let preMatchGroupId = null;
+    let selectedPenaltyPoints = 1000;
+
+    // Export functions to window
+    window.openCreatePreMatchModal = function(groupId) {
+        console.log('🎬 openCreatePreMatchModal called with groupId:', groupId);
+        preMatchGroupId = groupId;
+        const modal = document.getElementById('createPreMatchModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.getElementById('preMatchMatchSelect').value = '';
+            document.getElementById('penaltyTypePoints').checked = true;
+            document.getElementById('preMatchError').style.display = 'none';
+            selectedPenaltyPoints = 1000;
+            updatePenaltyUI();
+            loadUpcomingMatches();
+        } else {
+            console.error('❌ Modal element not found');
+        }
+    };
+
+    window.closeCreatePreMatchModal = function() {
+        const modal = document.getElementById('createPreMatchModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    function loadUpcomingMatches() {
+        const select = document.getElementById('preMatchMatchSelect');
+        if (!select) {
+            console.warn('⚠️ Match select element not found');
+            return;
+        }
+
+        select.innerHTML = '<option value="">Cargando partidos...</option>';
+
+        fetch('/api/matches/upcoming')
+            .then(r => r.json())
+            .then(response => {
+                select.innerHTML = '<option value="">-- Selecciona un partido --</option>';
+                // Handle both direct array (legacy) and API response format
+                const matches = Array.isArray(response) ? response : (response.data || []);
+                if (Array.isArray(matches) && matches.length > 0) {
+                    matches.forEach(match => {
+                        // Convert Unix timestamp (seconds) to milliseconds for JavaScript Date
+                        const kickoffMs = (match.kick_off_timestamp || 0) * 1000;
+                        const date = new Date(kickoffMs).toLocaleDateString('es-ES');
+                        // Use the pre-formatted time from API
+                        const time = match.kick_off_time || new Date(kickoffMs).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
+                        const homeTeam = match.home_team?.name || 'Equipo A';
+                        const awayTeam = match.away_team?.name || 'Equipo B';
+                        const competition = match.competition?.name ? ` [${match.competition.name}]` : '';
+                        const option = document.createElement('option');
+                        option.value = match.id;
+                        option.textContent = `${homeTeam} vs ${awayTeam} - ${time}${competition}`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">No hay partidos disponibles</option>';
+                }
+            })
+            .catch(err => {
+                console.error('❌ Error loading matches:', err);
+                select.innerHTML = '<option value="">Error al cargar partidos</option>';
+            });
+    }
+
+    function updatePenaltyUI() {
+        console.log('🎯 updatePenaltyUI called');
+        const penaltyType = document.querySelector('input[name="penaltyType"]:checked');
+
+        if (!penaltyType) {
+            console.warn('⚠️ No checked radio button found');
+            return;
+        }
+
+        const selectedValue = penaltyType.value;
+        console.log('✅ Selected penalty type:', selectedValue);
+
+        const pointsDetails = document.getElementById('pointsDetails');
+        const customDetails = document.getElementById('customPenaltyDetails');
+        const labels = document.querySelectorAll('.penalty-type-label');
+
+        // Hide/show details sections
+        if (selectedValue === 'POINTS') {
+            if (pointsDetails) pointsDetails.style.display = 'block';
+            if (customDetails) customDetails.style.display = 'none';
+        } else if (selectedValue === 'CUSTOM_PENALTY') {
+            if (pointsDetails) pointsDetails.style.display = 'none';
+            if (customDetails) customDetails.style.display = 'block';
+        }
+
+        // Update label styles
+        labels.forEach(label => {
+            const labelType = label.getAttribute('data-type');
+            if (labelType === selectedValue) {
+                // Highlight selected
+                label.style.borderColor = THEME.accentColor;
+                label.style.background = THEME.isDark ? 'rgba(0,222,176,0.3)' : '#d4f0ed';
+                label.style.color = THEME.accentColor;
+                label.style.borderWidth = '2px';
+            } else {
+                // Reset unselected
+                label.style.borderColor = THEME.borderColor;
+                label.style.background = THEME.isDark ? '#1a524e' : '#f5f5f5';
+                label.style.color = THEME.textSecondary;
+                label.style.borderWidth = '2px';
+            }
+        });
+    }
+
+    window.updatePenaltyUI = updatePenaltyUI;
+
+    window.selectPenaltyPoints = function(points) {
+        selectedPenaltyPoints = points;
+        const txt = document.getElementById('selectedPointsText');
+        if (txt) {
+            txt.textContent = points === 'ALL' ? '🔥 TODOS' : '-' + points;
+        }
+
+        // Update button styles
+        document.querySelectorAll('.penalty-points-btn').forEach(btn => {
+            const btnPoints = btn.getAttribute('data-points');
+            btn.style.borderColor = (btnPoints == points) ? THEME.accentColor : THEME.borderColor;
+            btn.style.background = (btnPoints == points)
+                ? (THEME.isDark ? 'rgba(0,222,176,0.15)' : '#e5f3f0')
+                : (THEME.isDark ? '#1a524e' : '#f5f5f5');
+        });
+    };
+
+    window.submitCreatePreMatch = function() {
+        const matchSelect = document.getElementById('preMatchMatchSelect');
+        const penaltyType = document.querySelector('input[name="penaltyType"]:checked');
+        const customPenalty = document.getElementById('penaltyDescription');
+
+        if (!matchSelect || !penaltyType) {
+            alert('Error: Elementos del formulario no encontrados');
+            return;
+        }
+
+        const matchId = matchSelect.value;
+        if (!matchId) {
+            alert('Por favor selecciona un partido');
+            return;
+        }
+
+        if (penaltyType.value === 'CUSTOM_PENALTY' && !customPenalty?.value?.trim()) {
+            alert('Por favor describe el castigo personalizado');
+            return;
+        }
+
+        const penaltyValue = penaltyType.value === 'POINTS'
+            ? `-${selectedPenaltyPoints} puntos`
+            : customPenalty.value;
+
+        const payload = {
+            football_match_id: parseInt(matchId),
+            penalty_type: penaltyType.value,
+            penalty: penaltyValue,
+            penalty_points: penaltyType.value === 'POINTS' ? selectedPenaltyPoints : null
+        };
+
+        fetch(`/api/pre-matches?group_id=${preMatchGroupId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                alert('❌ Error: ' + data.error);
+            } else {
+                alert('✅ Pre Match creado exitosamente!');
+                window.closeCreatePreMatchModal();
+                setTimeout(() => location.reload(), 1000);
+            }
+        })
+        .catch(err => {
+            console.error('❌ Error:', err);
+            alert('Error al crear Pre Match');
+        });
+    };
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 DOMContentLoaded: Initializing modal');
+
+        // Character counter
+        const textarea = document.getElementById('penaltyDescription');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                const count = document.getElementById('charCount');
+                if (count) count.textContent = this.value.length;
+            });
+        }
+
+        // Radio button change handlers
+        const radioButtons = document.querySelectorAll('input[name="penaltyType"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', function() {
+                console.log('📻 Radio changed:', this.value);
+                updatePenaltyUI();
+            });
+        });
+
+        // Penalty points button handlers
+        document.querySelectorAll('.penalty-points-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const points = this.getAttribute('data-points');
+                console.log('💰 Points selected:', points);
+                window.selectPenaltyPoints(points);
+            });
+        });
+
+        console.log('✅ Modal initialization complete');
+    });
+})();
+</script>

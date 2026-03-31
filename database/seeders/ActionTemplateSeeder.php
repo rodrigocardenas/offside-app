@@ -24,26 +24,26 @@ class ActionTemplateSeeder extends Seeder
             ['action' => 'Gol en los primeros 5 minutos', 'category' => 'GOALS', 'probability' => 0.18, 'description' => 'Primer gol antes del minuto 5'],
             ['action' => 'Gol en últimos 5 minutos', 'category' => 'GOALS', 'probability' => 0.20, 'description' => 'Gol en minuto 85 o posterior'],
             ['action' => '5+ goles en el partido', 'category' => 'GOALS', 'probability' => 0.35, 'description' => 'Total de goles >= 5'],
-            
+
             // 🟨 CARDS (Tarjetas) - HIGH probability
             ['action' => '3+ tarjetas rojas', 'category' => 'CARDS', 'probability' => 0.12, 'description' => 'Tres o más tarjetas rojas en total'],
             ['action' => 'Expulsión en primer tiempo', 'category' => 'CARDS', 'probability' => 0.15, 'description' => 'Tarjeta roja antes del minuto 45'],
             ['action' => '8+ tarjetas amarillas', 'category' => 'CARDS', 'probability' => 0.25, 'description' => 'Ocho o más tarjetas amarillas totales'],
             ['action' => 'Gol anulado por VAR', 'category' => 'SCORING', 'probability' => 0.05, 'description' => 'VAR anula un gol válido (fuera de juego, falta)'],
-            
+
             // ⚽ SCORING (Anotación) - MEDIUM probability
             ['action' => 'Penalti atajado', 'category' => 'SCORING', 'probability' => 0.10, 'description' => 'Arquero detiene penalti'],
             ['action' => 'Penalti errado (poste/afuera)', 'category' => 'SCORING', 'probability' => 0.08, 'description' => 'Falla penalti contra poste o afuera'],
             ['action' => 'Doble penalti en el partido', 'category' => 'RARE', 'probability' => 0.04, 'description' => 'Dos penaltis diferentes anotados/atajados'],
             ['action' => 'Autogol de defensor clave', 'category' => 'RARE', 'probability' => 0.02, 'description' => 'Jugador defensivo importante marca en contra'],
             ['action' => 'Gol sin rematador claro', 'category' => 'FUNNY', 'probability' => 0.05, 'description' => 'Gol por toque casualidad/rebote'],
-            
+
             // 🛡️ DEFENSE (Defensa) - MEDIUM probability
             ['action' => 'Cero goles concedidos', 'category' => 'DEFENSE', 'probability' => 0.20, 'description' => 'Equipo no concede goles (0-x resultado)'],
             ['action' => 'Arquero con 8+ atajadas', 'category' => 'DEFENSE', 'probability' => 0.30, 'description' => 'Arquero hace 8 o más atajadas'],
             ['action' => 'Empate sin goles (0-0)', 'category' => 'DEFENSE', 'probability' => 0.08, 'description' => 'Partido termina 0-0'],
             ['action' => 'Clean sheet + gol anotado', 'category' => 'DEFENSE', 'probability' => 0.18, 'description' => 'Equipo no concede y anota al menos 1'],
-            
+
             // 🎭 RARE (Raras) - LOW probability
             ['action' => 'Lluvia extrema detiene partido', 'category' => 'RARE', 'probability' => 0.01, 'description' => 'Condiciones climáticas interrumpen juego'],
             ['action' => 'Lesión grave de estrella', 'category' => 'RARE', 'probability' => 0.03, 'description' => 'Jugador clave se lesiona seriamente'],
@@ -53,7 +53,7 @@ class ActionTemplateSeeder extends Seeder
             ['action' => 'Cambio en minuto 35', 'category' => 'RARE', 'probability' => 0.04, 'description' => 'Cambio táctico tempranero por lesión/roja'],
             ['action' => 'Gol de penalti de rebote', 'category' => 'FUNNY', 'probability' => 0.02, 'description' => 'Penalti atajado, rebote y gol'],
             ['action' => 'Cortina de humo en celebración', 'category' => 'FUNNY', 'probability' => 0.03, 'description' => 'Pirotecnia/humo en celebración de gol'],
-            
+
             // 😂 FUNNY (Divertidas) - LOWMEDIUM probability
             ['action' => 'Celebración de entrenador en cancha', 'category' => 'FUNNY', 'probability' => 0.05, 'description' => 'DT entra a celebrar gol'],
             ['action' => 'Gol anulado ridículamente', 'category' => 'FUNNY', 'probability' => 0.02, 'description' => 'VAR anula gol claro por error visual'],
@@ -62,7 +62,7 @@ class ActionTemplateSeeder extends Seeder
             ['action' => 'Saque de meta fallido (gol)', 'category' => 'FUNNY', 'probability' => 0.05, 'description' => 'Saque de meta va directo a gol'],
             ['action' => 'Caída cómica en el área', 'category' => 'FUNNY', 'probability' => 0.04, 'description' => 'Contacto mínimo, caída dramática'],
             ['action' => 'Tiro lejano inesperado (gol)', 'category' => 'RARE', 'probability' => 0.06, 'description' => 'Tiro de larga distancia entra por sorpresa'],
-            
+
             // Adicionales MEDIUM probability
             ['action' => 'Cambio de jugador en minuto 1', 'category' => 'RARE', 'probability' => 0.01, 'description' => 'Cambio preventivo antes de minuto 1'],
             ['action' => 'Gol sin tiro previo', 'category' => 'FUNNY', 'probability' => 0.02, 'description' => 'Gol de rebote sin tiro definido'],

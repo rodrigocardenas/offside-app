@@ -23,7 +23,7 @@
                     Loading...
                 </p>
                 <p id="resolutionDescription" class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    
+
                 </p>
             </div>
 
@@ -67,7 +67,7 @@
                                 <p class="text-xs text-gray-600 dark:text-gray-400">La acción ocurrió en el partido</p>
                             </div>
                         </label>
-                        
+
                         <label class="flex items-center gap-2 flex-1 p-3 border-2 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                             id="fulfilledNo" style="border-color: #e5e7eb;">
                             <input type="radio" name="was_fulfilled" value="0" class="w-5 h-5">
@@ -84,7 +84,7 @@
                     <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">
                         Notas (evidencia, links, etc.) *
                     </label>
-                    <textarea 
+                    <textarea
                         name="admin_notes"
                         id="adminNotes"
                         placeholder="Ej: Video en 2:34 (gol de cabeza), Link: https://..."
@@ -99,7 +99,7 @@
                     <label class="block text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">
                         ¿Quién pierde? (Propuesta Rechazada)
                     </label>
-                    <select 
+                    <select
                         name="loser_user_id"
                         id="loserSelect"
                         class="w-full p-3 border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded"
@@ -111,13 +111,13 @@
 
                 <!-- Botones -->
                 <div class="flex gap-2 pt-4">
-                    <button 
+                    <button
                         type="submit"
                         class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded font-bold transition"
                     >
                         ✅ Validar Acción
                     </button>
-                    <button 
+                    <button
                         type="button"
                         onclick="closeResolutionModal()"
                         class="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-3 rounded font-bold transition"

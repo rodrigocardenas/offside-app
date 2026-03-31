@@ -44,7 +44,7 @@
 
         <!-- Filter Tabs -->
         <div class="flex gap-2 mb-8 border-b border-gray-300 dark:border-gray-600 overflow-x-auto">
-            <button 
+            <button
                 onclick="filterMatches('ALL')"
                 class="font-bold px-6 py-3 whitespace-nowrap border-b-2"
                 id="filterAll"
@@ -52,21 +52,21 @@
             >
                 📊 Todos
             </button>
-            <button 
+            <button
                 onclick="filterMatches('OPEN')"
                 class="font-bold px-6 py-3 whitespace-nowrap border-b-2 border-transparent text-gray-600 dark:text-gray-400"
                 id="filterOpen"
             >
                 🔵 Abiertos
             </button>
-            <button 
+            <button
                 onclick="filterMatches('LOCKED')"
                 class="font-bold px-6 py-3 whitespace-nowrap border-b-2 border-transparent text-gray-600 dark:text-gray-400"
                 id="filterLocked"
             >
                 🔒 Cerrados
             </button>
-            <button 
+            <button
                 onclick="filterMatches('RESOLVED')"
                 class="font-bold px-6 py-3 whitespace-nowrap border-b-2 border-transparent text-gray-600 dark:text-gray-400"
                 id="filterResolved"
@@ -78,7 +78,7 @@
         <!-- Pre Matches List -->
         <div id="preMatchesContainer" class="space-y-6 mb-12">
             @forelse($preMatches as $preMatch)
-                <x-pre-match.card 
+                <x-pre-match.card
                     :preMatch="$preMatch"
                     :match="$preMatch->match"
                 />
@@ -86,7 +86,7 @@
                 <div class="text-center py-12 text-gray-500 dark:text-gray-400">
                     <p class="text-xl">📭 No hay desafíos creados aún</p>
                     @can('create', App\Models\PreMatch::class)
-                        <button 
+                        <button
                             onclick="openCreatePreMatchModal()"
                             class="mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 transition"
                         >
@@ -118,13 +118,13 @@
 
     function filterMatches(status) {
         currentFilter = status;
-        
+
         // Update button styles
         document.querySelectorAll('[id^="filter"]').forEach(btn => {
             btn.style.borderColor = 'transparent';
             btn.classList.add('text-gray-600', 'dark:text-gray-400');
         });
-        
+
         document.getElementById('filter' + status).style.borderColor = 'rgb(37, 99, 235)';
         document.getElementById('filter' + status).classList.remove('text-gray-600', 'dark:text-gray-400');
 

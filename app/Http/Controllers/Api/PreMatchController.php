@@ -22,11 +22,11 @@ class PreMatchController extends Controller
         $status = $request->query('status'); // pending, active, completed
 
         $query = PreMatch::query();
-        
+
         if ($groupId) {
             $query->where('group_id', $groupId);
         }
-        
+
         if ($status) {
             $query->where('status', $status);
         }
@@ -131,7 +131,7 @@ class PreMatchController extends Controller
         // Actualizar conteos
         $totalVotes = $proposition->votes()->count();
         $approvedCount = $proposition->votes()->where('approved', true)->count();
-        
+
         $proposition->update([
             'votes_count' => $totalVotes,
             'approved_votes' => $approvedCount,

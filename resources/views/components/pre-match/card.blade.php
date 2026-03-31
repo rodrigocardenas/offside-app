@@ -10,7 +10,7 @@
                 <h3 class="text-xl font-bold text-white mt-2">
                     {{ $match->home_team->name ?? 'Home' }} vs {{ $match->away_team->name ?? 'Away' }}
                 </h3>
-              
+
                 <p class="text-purple-200 text-sm mt-1">
                     ⏰ {{ $match->scheduled_date?->format('d/m/Y H:i') ?? 'TBD' }}
                 </p>
@@ -24,16 +24,16 @@
     <!-- Content -->
     <div class="px-6 py-4 space-y-4">
         <!-- Penalty Badge -->
-        <div class="p-4 rounded-lg" 
+        <div class="p-4 rounded-lg"
             @switch($preMatch->penalty_type)
                 @case('POINTS')
-                    style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid rgb(239, 68, 68);" 
+                    style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid rgb(239, 68, 68);"
                 @break
                 @case('SOCIAL')
-                    style="background-color: rgba(249, 115, 22, 0.1); border-left: 4px solid rgb(249, 115, 22);" 
+                    style="background-color: rgba(249, 115, 22, 0.1); border-left: 4px solid rgb(249, 115, 22);"
                 @break
                 @case('REVENGE')
-                    style="background-color: rgba(168, 85, 247, 0.1); border-left: 4px solid rgb(168, 85, 247);" 
+                    style="background-color: rgba(168, 85, 247, 0.1); border-left: 4px solid rgb(168, 85, 247);"
                 @endswitch
         >
             @switch($preMatch->penalty_type)
@@ -65,7 +65,7 @@
                 </span>
             </div>
             <div class="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-2.5">
-                <div 
+                <div
                     class="bg-green-500 h-2.5 rounded-full transition-all duration-300"
                     style="width: {{ $preMatch->propositions->count() > 0 ? ($preMatch->propositions->where('validation_status', 'ACCEPTED')->count() / $preMatch->propositions->count() * 100) : 0 }}%"
                 ></div>
@@ -76,7 +76,7 @@
         @if($preMatch->status === 'OPEN' || $preMatch->status === 'DRAFT')
             <div class="flex gap-2 pt-2">
                 @if($preMatch->status === 'OPEN')
-                    <button 
+                    <button
                         onclick="openProposalModal({{ $preMatch->id }})"
                         class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-bold text-sm transition"
                     >
@@ -85,7 +85,7 @@
                 @endif
             </div>
         @elseif($preMatch->status === 'RESOLVED')
-            <button 
+            <button
                 onclick="viewPenalties({{ $preMatch->id }})"
                 class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-bold transition"
             >

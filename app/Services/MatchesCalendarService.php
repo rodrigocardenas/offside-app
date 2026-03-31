@@ -166,7 +166,7 @@ class MatchesCalendarService
 
         // Filtrar por estado si no incluye finalizados
         if (!$includeFinished) {
-            $query->whereIn('status', ['SCHEDULED', 'LIVE']);
+            $query->whereIn('status', ['SCHEDULED', 'LIVE', 'Not Started']);
         }
 
         return $query->get();
