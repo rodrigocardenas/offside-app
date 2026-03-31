@@ -2082,40 +2082,48 @@ describe('Pre Match Feature', function () {
 - [ ] Seeder: 50+ acciones (LOW/MEDIUM/HIGH/RARE)
 - [ ] Endpoints GET `/api/action-templates/random` + `/api/action-templates/random?probability=X`
 
-### Sprint 2 (Semanas 3-4): Pre Match MVP (Admin Only Validation)
-- [ ] Modelos Eloquent (PreMatch, Proposition, Vote, Resolution)
-- [ ] Migraciones (pre_matches, pre_match_propositions, pre_match_votes, pre_match_resolutions, group_penalties)
-- [ ] Controllers & APIs:
-  - [ ] POST `/api/groups/{id}/pre-matches` (Admin)
-  - [ ] POST `/api/pre-matches/{id}/propositions` (Member)
-  - [ ] POST `/api/propositions/{id}/votes` (Member)
-  - [ ] POST `/api/pre-matches/{id}/resolutions` (Admin only - manual validation)
-- [ ] Validación votación (>50% + 3+ votos)
-- [ ] System: Restar puntos automáticamente si penalty_type = POINTS
+### Sprint 2 (Semanas 3-4): Pre Match MVP (Admin Only Validation) ✅ COMPLETADO
+- [x] Modelos Eloquent (PreMatch, Proposition, Vote, Resolution, GroupPenalty, ActionTemplate)
+- [x] Migraciones (pre_matches, pre_match_propositions, pre_match_votes, pre_match_resolutions, group_penalties, action_templates)
+- [x] Controllers & APIs:
+  - [x] GET `/api/pre-matches` (Listar)
+  - [x] POST `/api/pre-matches` (Crear - Admin)
+  - [x] GET/PATCH `/api/pre-matches/{id}` (Detalles/Actualizar)
+  - [x] POST `/api/pre-matches/{id}/propositions` (Crear propuesta)
+  - [x] POST `/api/pre-match-propositions/{id}/vote` (Votar)
+  - [x] POST `/api/pre-matches/{id}/resolve` (Admin validation)
+  - [x] GET `/api/pre-matches/{id}/penalties` (Listar penalizaciones)
+  - [x] GET `/api/action-templates/random` (Sugerencia aleatoria)
+- [x] Validación votación (approval_percentage tracking)
+- [x] System: Crear GroupPenalty cuando se resuelve (manual por admin)
+- [x] 213 países FIFA seeded con flagcdn.com URLs
+- [x] 46 acciones categorizadas (GOALS, CARDS, DEFENSE, RARE, FUNNY)
 
-### Sprint 3 (Semana 5): UI & Frontend Components
-- [ ] Componente Pre Match Card (status, badges, contadores)
-- [ ] Componente Crear Propuesta + Botón Sugerir
-- [ ] Componente Lista Proposiciones (voting, approval%)
-- [ ] WebSocket real-time (votes, new propositions)
-- [ ] UX: Notificación "2 horas para votar"
+### Sprint 3 (Semana 5): UI & Frontend Components ✅ COMPLETADO
+- [x] Componente Pre Match Card (status, badges, contadores) - `card.blade.php`
+- [x] Componente Crear Propuesta + Botón Sugerir - `create-proposal-modal.blade.php`
+- [x] Componente Proposition Item (votación dinámica) - `proposition-item.blade.php`
+- [x] TypeScript Client - `pre-match-client.ts`
+- [x] Componente Penalty History Leaderboard - `penalty-history.blade.php`
+- [x] Componente Admin Resolution Modal - `resolution-modal.blade.php`
+- [x] Vista de integración grupo - `pre-match/group.blade.php`
+- [x] ActionTemplateController con endpoints
+- [x] Documentación PRE_MATCH_COMPONENTS.md
 
-### Sprint 4 (Semana 6): Admin Resolution Modal
-- [ ] Modal: ¿Se cumplió? (SÍ/NO) + Notas evidencia
-- [ ] Tab selector: 💰 Puntos | 🍽️ Social | ⚔️ Revancha
-- [ ] POINTS: Grid selector [-500 | -1000 | -2000 | TODOS]
-- [ ] SOCIAL: Textarea libre
-- [ ] REVANCHA: Textarea con sugerencia de reto inverso
-- [ ] Save → Aplica penalidad + Notificación push
+### Sprint 4 (Semana 6): Admin Resolution Modal ⏳ PENDIENTE
+- [ ] Testing completo (Pest): 15+ test cases
+- [ ] WebSocket real-time (votes, new propositions, penalties)
+- [ ] Integration: Conectar modales con backend
+- [ ] UX refinement: Notificación "X horas para votar"
+- [ ] Dark mode refinamiento y QA
 
-### Sprint 5 (Semana 7): Testing + Leaderboard + Optimización
-- [ ] Tests (Pest): 12+ test cases (sugerencias, penalidades, puntos)
+### Sprint 5 (Semana 7): Performance & Leaderboard 🔲 NO INICIADO
+- [ ] Cache: Action templates, pre-matches by status
 - [ ] Leaderboard histórico: "Carlos debe: 1000 pts, 1 cena, 1 reto"
-- [ ] Dark mode refinamiento
-- [ ] Performance optimization (cache action templates, lazy load)
-- [ ] Documentación API + Postman collection
+- [ ] Performance optimization (lazy loading componentes)
+- [ ] Documentación API completa + Postman collection
 
-### Sprint 6 (Semana 8): Visuales mundialistas (Opcional)
+### Sprint 6 (Semana 8): Visuales mundialistas (Opcional) 🔲 NO INICIADO
 - [ ] Logo/mascota Mundial (SVN animado)
 - [ ] Paleta de colores oficial (Azul, Naranja, Plata)
 - [ ] Hero section en dashboard

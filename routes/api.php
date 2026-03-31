@@ -126,4 +126,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('pre-match-propositions')->group(function () {
         Route::post('/{proposition}/vote', [\App\Http\Controllers\Api\PreMatchController::class, 'voteOnProposition']);
     });
+
+    // Action Templates - Sugerencias de acciones
+    Route::prefix('action-templates')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ActionTemplateController::class, 'index']);
+        Route::get('/random', [\App\Http\Controllers\ActionTemplateController::class, 'random']);
+        Route::get('/category/{category}', [\App\Http\Controllers\ActionTemplateController::class, 'byCategory']);
+    });
+
+    // Penalties - Historial de castigos (Admin)
+    Route::prefix('penalties')->group(function () {
+        Route::patch('/{penalty}/fulfill', [\App\Http\Controllers\Api\PreMatchController::class, 'markPenaltyFulfilled']);
+    });
 });
