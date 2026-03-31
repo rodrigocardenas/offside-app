@@ -310,6 +310,71 @@ class MatchesController extends Controller
     }
 
     /**
+     * GET /api/matches/upcoming
+     *
+     * Obtiene partidos próximos (próximas 24 horas para Pre Match)
+     *
+     * @return JsonResponse
+     */
+    public function upcoming(): JsonResponse
+    {
+        try {
+            $now = now();
+            $tomorrow = $now->copy()->addHours(24);
+
+            $matches = $this->matchesService->getMatchesByDate(
+                $now->format('Y-m-d'),
+                $tomorrow->format('Y-m-d'),
+                null, // competition_id
+                null, // team_ids
+                false // include_finished - solo partidos pendientes
+            );
+
+            // Aplanar el array de partidos
+            $allMatches = [];
+            foreach ($matches as $dateMatches) {
+                foreach ($dateMatches as $match) {
+                    // Filtrar solo partidos que comienzan en las próximas 24 horas
+                    if ($match['kickoff_time'] && $match['kickoff_time'] >= $now && $match['kickoff_time'] <= $tomorrow) {
+                        $allMatches[] = [
+                            'id' => $match['id'] ?? null,
+                            'kickoff_time' => $match['kickoff_time'],
+                            'home_team' => $match['home_team'] ?? null,
+                            'away_team' => $match['away_team'] ?? null,
+                            'competition' => $match['competition'] ?? null,
+                        ];
+                    }
+                }
+            }
+
+            // Ordenar por hora de inicio
+            usort($allMatches, fn($a, $b) => $a['kickoff_time'] <=> $b['kickoff_time']);
+
+            return response()->json([
+                'success' => true,
+                'data' => $allMatches,
+                'meta' => [
+                    'count' => count($allMatches),
+                    'current_time' => $now->toIso8601String(),
+                    'range_end' => $tomorrow->toIso8601String(),
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error al obtener partidos próximos', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'data' => [],
+                'message' => 'Error al obtener partidos próximos',
+            ], 500);
+        }
+    }
+
+    /**
      * POST /api/matches/sync
      *
      * Sincroniza partidos desde API externa (requiere autenticación)

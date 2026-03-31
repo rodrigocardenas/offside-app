@@ -41,29 +41,31 @@
         <div class="ml-1 mr-1" style="background: {{ $bgTertiary }}; padding: 5px; border-radius: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 16px;">
             <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 2px; font-size: 16px; font-weight: 600; color: {{ $textPrimary }}; padding: 8px;">
                 {{ __('views.rankings.title') }} <i class="fas fa-trophy" style="color: {{ $accentColor }};"></i>
-                <a href="{{ url('/groups', $group->id) }}/ranking" style="margin-left: auto; font-size: 12px; color: {{ $textSecondary }}; cursor: pointer; padding: 4px 8px; border-radius: 12px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease;"
-                    onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#f0f0f0' }}'; this.style.color='{{ $textPrimary }}';"
-                    onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
-                    {{ __('messages.more') }}
-                </a>
-                <!-- Create Pre Match Button -->
-                @if (auth()->user()->id === $group->created_by)
-                <div class="flex justify-end px-1 mb-4" style="margin-right: 8px;">
+                
+                <!-- Action Buttons Container (Aligned to right) -->
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+                    <!-- See More Button -->
+                    <a href="{{ url('/groups', $group->id) }}/ranking" style="font-size: 12px; color: {{ $textSecondary }}; cursor: pointer; padding: 6px 8px; border-radius: 12px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease; text-decoration: none;"
+                        onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#f0f0f0' }}'; this.style.color='{{ $textPrimary }}';"
+                        onmouseout="this.style.background='{{ $bgSecondary }}'; this.style.color='{{ $textSecondary }}';">
+                        {{ __('messages.more') }}
+                    </a>
+                    
+                    <!-- Create Pre Match Button -->
+                    @if (auth()->user()->id === $group->created_by)
                     <button type="button"
                             title="Crear desafío Pre Match"
                             onclick="openCreatePreMatchModal(@js($group->id))"
-                            style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ff8787); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 107, 107, 0.25); transition: transform 0.2s ease;"
+                            style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ff8787); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 107, 107, 0.25); transition: transform 0.2s ease; text-decoration: none;"
                             onmouseover="this.style.transform='translateY(-2px)'"
                             onmouseout="this.style.transform='translateY(0)';">
                         <i class="fas fa-fire"></i>
                         Pre Match
                     </button>
-                </div>
-                @endif
-                
-                <!-- Edit Group Button (Only for Creator) -->
-                @if (auth()->user()->id === $group->created_by)
-                <div class="flex justify-end px-1 mb-4" style="margin-right: 8px;">
+                    @endif
+                    
+                    <!-- Edit Group Button (Only for Creator) -->
+                    @if (auth()->user()->id === $group->created_by)
                     <a href="{{ route('groups.edit', $group) }}"
                        title="Editar grupo"
                        style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: {{ $isDark ? '#1a524e' : '#e5f3f0' }}; color: {{ $accentColor }}; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid {{ $accentColor }}; transition: all 0.2s ease; text-decoration: none;"
@@ -71,19 +73,16 @@
                        onmouseout="this.style.background='{{ $isDark ? '#1a524e' : '#e5f3f0' }}'; this.style.color='{{ $accentColor }}';">
                         <i class="fas fa-edit"></i>
                     </a>
-                </div>
-                @endif
-                
-                <!-- Share Group Button -->
-                <div class="flex justify-end px-1 mb-4" style="margin-top: 14px;">
+                    @endif
+                    
+                    <!-- Share Group Button -->
                     <button type="button"
                             title="Invitar amigos al grupo"
                             onclick="showInviteModal(@js($group->name), @js(route('groups.invite', $group->code)))"
-                            style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: linear-gradient(135deg, #17b796, #00deb0); color: #003b2f; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(0, 222, 176, 0.25); transition: transform 0.2s ease;"
+                            style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: linear-gradient(135deg, #17b796, #00deb0); color: #003b2f; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(0, 222, 176, 0.25); transition: transform 0.2s ease; text-decoration: none;"
                             onmouseover="this.style.transform='translateY(-2px)'"
                             onmouseout="this.style.transform='translateY(0)';">
                         <i class="fas fa-share-alt"></i>
-
                     </button>
                 </div>
             </div>

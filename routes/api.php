@@ -71,6 +71,9 @@ Route::prefix('matches')->group(function () {
     // Obtener partidos agrupados por día
     Route::get('/calendar', [MatchesController::class, 'calendar']);
 
+    // Obtener partidos próximos (para Pre Match)
+    Route::get('/upcoming', [MatchesController::class, 'upcoming']);
+
     // Obtener partidos de una competencia
     Route::get('/by-competition/{competitionId}', [MatchesController::class, 'byCompetition']);
 

@@ -1,6 +1,6 @@
 {{-- Modal para crear Pre Match --}}
 <div id="createPreMatchModal" 
-     style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+     style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 1rem;">
     
     <div style="background: {{ $isDark ? '#0f3d3a' : '#ffffff' }}; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
         
@@ -38,35 +38,24 @@
                 </label>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <!-- POINTS Option -->
-                    <div>
+                    <div style="flex: 1; min-width: 120px;">
                         <input type="radio" id="penaltyTypePoints" name="penaltyType" value="POINTS" checked 
                                style="display: none;">
                         <label for="penaltyTypePoints" 
-                               style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid {{ $accentColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? '#1a524e' : '#e5f3f0' }}; color: {{ $accentColor }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;"
+                               style="display: block; text-align: center; padding: 12px 16px; border: 2px solid {{ $accentColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? 'rgba(0,222,176,0.15)' : '#e5f3f0' }}; color: {{ $accentColor }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;"
                                onchange="updatePenaltyUI()">
-                            💰 Puntos
+                            💰 Petar Puntos
                         </label>
                     </div>
 
-                    <!-- SOCIAL Option -->
-                    <div>
-                        <input type="radio" id="penaltyTypeSocial" name="penaltyType" value="SOCIAL" 
+                    <!-- CUSTOM PENALTY Option -->
+                    <div style="flex: 1; min-width: 120px;">
+                        <input type="radio" id="penaltyTypeCustom" name="penaltyType" value="CUSTOM_PENALTY" 
                                style="display: none;">
-                        <label for="penaltyTypeSocial" 
-                               style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid {{ $borderColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textSecondary }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;"
+                        <label for="penaltyTypeCustom" 
+                               style="display: block; text-align: center; padding: 12px 16px; border: 2px solid {{ $borderColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textSecondary }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;"
                                onchange="updatePenaltyUI()">
-                            🍽️ Social
-                        </label>
-                    </div>
-
-                    <!-- REVENGE Option -->
-                    <div>
-                        <input type="radio" id="penaltyTypeRevenge" name="penaltyType" value="REVENGE" 
-                               style="display: none;">
-                        <label for="penaltyTypeRevenge" 
-                               style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid {{ $borderColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textSecondary }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;"
-                               onchange="updatePenaltyUI()">
-                            ⚔️ Revancha
+                            📝 Castigo Personalizado
                         </label>
                     </div>
                 </div>
@@ -106,17 +95,17 @@
                     </small>
                 </div>
 
-                <!-- SOCIAL/REVENGE Details -->
-                <div id="socialDetails" style="display: none;">
+                <!-- CUSTOM PENALTY Details -->
+                <div id="customPenaltyDetails" style="display: none;">
                     <label style="display: block; font-weight: 700; font-size: 14px; margin-bottom: 12px; color: {{ $textPrimary }};">
-                        Describe el Castigo
+                        📝 Describe el Castigo
                     </label>
                     <textarea id="penaltyDescription"
-                              placeholder="Ej: Paga cena para 6, video vergüenza, reto futuro, etc."
-                              style="width: 100%; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-size: 14px; font-family: inherit; resize: vertical; min-height: 80px;"
-                              maxlength="255"></textarea>
+                              placeholder="Ej: Pagar cena para todos, video vergüenza, reto futuro, lavar camisetas, etc."
+                              style="width: 100%; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px;"
+                              maxlength="500"></textarea>
                     <small style="display: block; margin-top: 8px; color: {{ $textSecondary }}; font-size: 12px;">
-                        <span id="charCount">0</span>/255 caracteres
+                        <span id="charCount">0</span>/500 caracteres
                     </small>
                 </div>
             </div>
@@ -160,7 +149,16 @@
 
     function openCreatePreMatchModal(groupId) {
         preMatchGroupId = groupId;
-        document.getElementById('createPreMatchModal').style.display = 'flex';
+        const modal = document.getElementById('createPreMatchModal');
+        modal.style.display = 'flex';
+        // Reset form
+        document.getElementById('preMatchMatchSelect').value = '';
+        document.getElementById('penaltyTypePoints').checked = true;
+        document.getElementById('penaltyDescription').value = '';
+        document.getElementById('charCount').textContent = '0';
+        document.getElementById('preMatchError').style.display = 'none';
+        updatePenaltyUI();
+        selectPenaltyPoints(1000);
         loadAvailableMatches(groupId);
     }
 
@@ -171,12 +169,13 @@
 
     function loadAvailableMatches(groupId) {
         const select = document.getElementById('preMatchMatchSelect');
-        select.innerHTML = `<option value="">-- Cargando partidos --</option>`;
+        select.innerHTML = `<option value="">-- Cargando partidos próximos --</option>`;
         
         // Fetch upcoming matches from API
-        fetch('/api/football-matches?status=upcoming&limit=10', {
+        fetch('/api/matches/upcoming', {
             headers: {
                 'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
             }
         })
         .then(response => {
@@ -184,20 +183,31 @@
             return response.json();
         })
         .then(data => {
-            if (!data.data || data.data.length === 0) {
-                select.innerHTML = `<option value="">No hay partidos disponibles</option>`;
+            // Handle both direct array and { data: [...] } formats
+            const matches = Array.isArray(data) ? data : (data.data || []);
+            
+            if (!matches || matches.length === 0) {
+                select.innerHTML = `<option value="">No hay partidos próximos disponibles</option>`;
                 return;
             }
             
-            select.innerHTML = data.data.map(match => {
-                const homeTeam = match.home_team?.name || 'Equipo A';
-                const awayTeam = match.away_team?.name || 'Equipo B';
-                const kickoffTime = new Date(match.kickoff_time).toLocaleString('es-AR', { 
+            select.innerHTML = '<option value="">-- Selecciona un partido --</option>' + matches.map(match => {
+                const homeTeam = match.home_team?.name || match.home_team || 'Equipo A';
+                const awayTeam = match.away_team?.name || match.away_team || 'Equipo B';
+                const kickoffTime = match.kickoff_time ? new Date(match.kickoff_time).toLocaleString('es-AR', { 
                     month: 'short', 
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
-                });
+                }) : 'Hora TBD';
+                return `<option value="${match.id}">${homeTeam} vs ${awayTeam} (${kickoffTime})</option>`;
+            }).join('');
+        })
+        .catch(error => {
+            console.error('Error loading matches:', error);
+            select.innerHTML = `<option value="">Error al cargar partidos (${error.message})</option>`;
+        });
+    }
                 return `<option value="${match.id}">${homeTeam} vs ${awayTeam} (${kickoffTime})</option>`;
             }).join('');
         })
@@ -210,22 +220,30 @@
     function updatePenaltyUI() {
         const penaltyType = document.querySelector('input[name="penaltyType"]:checked').value;
         const pointsDetails = document.getElementById('pointsDetails');
-        const socialDetails = document.getElementById('socialDetails');
+        const customPenaltyDetails = document.getElementById('customPenaltyDetails');
 
         if (penaltyType === 'POINTS') {
             pointsDetails.style.display = 'block';
-            socialDetails.style.display = 'none';
+            customPenaltyDetails.style.display = 'none';
             // Update radio button styling
-            document.getElementById('penaltyTypePoints').parentElement.parentElement.style.borderColor = '{{ $accentColor }}';
-            document.getElementById('penaltyTypeSocial').parentElement.parentElement.style.borderColor = '{{ $borderColor }}';
-            document.getElementById('penaltyTypeRevenge').parentElement.parentElement.style.borderColor = '{{ $borderColor }}';
+            document.querySelector('label[for="penaltyTypePoints"]').style.borderColor = '{{ $accentColor }}';
+            document.querySelector('label[for="penaltyTypePoints"]').style.background = '{{ $isDark ? "rgba(0,222,176,0.15)" : "#e5f3f0" }}';
+            document.querySelector('label[for="penaltyTypePoints"]').style.color = '{{ $accentColor }}';
+            
+            document.querySelector('label[for="penaltyTypeCustom"]').style.borderColor = '{{ $borderColor }}';
+            document.querySelector('label[for="penaltyTypeCustom"]').style.background = '{{ $isDark ? "#1a524e" : "#f5f5f5" }}';
+            document.querySelector('label[for="penaltyTypeCustom"]').style.color = '{{ $textSecondary }}';
         } else {
             pointsDetails.style.display = 'none';
-            socialDetails.style.display = 'block';
+            customPenaltyDetails.style.display = 'block';
             // Update radio button styling
-            document.getElementById('penaltyTypePoints').parentElement.parentElement.style.borderColor = '{{ $borderColor }}';
-            document.getElementById('penaltyTypeSocial').parentElement.parentElement.style.borderColor = '{{ $accentColor }}';
-            document.getElementById('penaltyTypeRevenge').parentElement.parentElement.style.borderColor = '{{ $accentColor }}';
+            document.querySelector('label[for="penaltyTypePoints"]').style.borderColor = '{{ $borderColor }}';
+            document.querySelector('label[for="penaltyTypePoints"]').style.background = '{{ $isDark ? "#1a524e" : "#f5f5f5" }}';
+            document.querySelector('label[for="penaltyTypePoints"]').style.color = '{{ $textPrimary }}';
+            
+            document.querySelector('label[for="penaltyTypeCustom"]').style.borderColor = '{{ $accentColor }}';
+            document.querySelector('label[for="penaltyTypeCustom"]').style.background = '{{ $isDark ? "rgba(0,222,176,0.15)" : "#e5f3f0" }}';
+            document.querySelector('label[for="penaltyTypeCustom"]').style.color = '{{ $accentColor }}';
         }
     }
 
@@ -263,9 +281,9 @@
             return;
         }
 
-        if (penaltyType === 'SOCIAL' || penaltyType === 'REVENGE') {
+        if (penaltyType === 'CUSTOM_PENALTY') {
             if (!penaltyDescription.trim()) {
-                showError('Describe el tipo de castigo');
+                showError('Describe el castigo personalizado');
                 return;
             }
         }
@@ -273,9 +291,9 @@
         const payload = {
             match_id: parseInt(matchId),
             group_id: preMatchGroupId,
-            penalty_type: penaltyType === 'REVENGE' ? 'REVANCHA' : penaltyType,
+            penalty_type: penaltyType,
             penalty_points: penaltyType === 'POINTS' ? (selectedPenaltyPoints === 'ALL' ? 9999 : parseInt(selectedPenaltyPoints)) : null,
-            penalty_description: (penaltyType === 'SOCIAL' || penaltyType === 'REVENGE') ? penaltyDescription : null,
+            penalty_description: penaltyType === 'CUSTOM_PENALTY' ? penaltyDescription : null,
         };
 
         // Submit via AJAX
