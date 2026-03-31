@@ -11,12 +11,12 @@ class PreMatch extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['match_id', 'group_id', 'created_by', 'penalty_type', 'penalty_points', 'penalty_description', 'status', 'admin_notes'];
+    protected $fillable = ['football_match_id', 'group_id', 'created_by', 'penalty_type', 'penalty_points', 'penalty_description', 'status', 'admin_notes'];
     protected $casts = ['created_at' => 'datetime', 'updated_at' => 'datetime'];
 
     public function match(): BelongsTo
     {
-        return $this->belongsTo(FootballMatch::class);
+        return $this->belongsTo(FootballMatch::class, 'football_match_id');
     }
 
     public function group(): BelongsTo

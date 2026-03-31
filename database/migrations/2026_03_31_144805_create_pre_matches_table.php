@@ -17,7 +17,7 @@ return new class extends Migration
         
         Schema::create('pre_matches', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('match_id')->constrained('matches')->onDelete('cascade');
+            $table->foreignId('football_match_id')->nullable()->constrained('football_matches')->onDelete('cascade');
             $table->foreignId('group_id')->constrained('groups')->onDelete('cascade');
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade'); // Admin que crea el desafío
             $table->enum('penalty_type', ['POINTS', 'SOCIAL', 'REVANCHA'])->default('POINTS');
