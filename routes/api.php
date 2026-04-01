@@ -104,15 +104,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\PreMatchController::class, 'index']);
 
         // Crear nuevo Pre Match (Admin only)
-        Route::post('/', [\App\Http\Controllers\Api\PreMatchController::class, 'store'])
-            ->middleware('can:create-pre-match');
+        Route::post('/', [\App\Http\Controllers\Api\PreMatchController::class, 'store']);
 
         // Obtener detalles Pre Match
         Route::get('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'show']);
 
         // Actualizar Pre Match (Admin)
-        Route::patch('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'update'])
-            ->middleware('can:update-pre-match');
+        Route::patch('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'update']);
 
         // Agregar proposición de acción
         Route::post('/{preMatch}/propositions', [\App\Http\Controllers\Api\PreMatchController::class, 'addProposition']);
@@ -121,8 +119,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{preMatch}/penalties', [\App\Http\Controllers\Api\PreMatchController::class, 'getPenalties']);
 
         // Resolver Pre Match (Admin)
-        Route::post('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch'])
-            ->middleware('can:resolve-pre-match');
+        Route::post('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch']);
     });
 
     // Pre Match Propositions - Votos en proposiciones
