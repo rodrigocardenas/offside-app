@@ -211,8 +211,10 @@
             document.getElementById('preMatchError').style.display = 'none';
             selectedPenaltyPoints = 1000;
             updatePenaltyUI();
-            loadUpcomingMatches();
-            initializeMatchSearch();
+            // Load matches FIRST, then initialize search after matches are loaded
+            loadUpcomingMatches().then(() => {
+                initializeMatchSearch();
+            });
         } else {
             console.error('❌ Modal element not found');
         }
@@ -229,14 +231,15 @@
         const searchInput = document.getElementById('preMatchSearchInput');
         if (!searchInput) {
             console.warn('⚠️ Search input element not found');
-            return;
+            return Promise.reject('Search input not found');
         }
 
         console.log('📥 Loading upcoming matches...');
         searchInput.placeholder = 'Cargando partidos...';
         searchInput.disabled = true;
 
-        fetch('/api/matches/upcoming')
+        // Return the promise so caller can wait for completion
+        return fetch('/api/matches/upcoming')
             .then(r => {
                 console.log('✅ Matches API response status:', r.status);
                 if (!r.ok) throw new Error(`API Error ${r.status}`);
@@ -253,6 +256,7 @@
 
                 // Store matches in window for search
                 window.preMatchesData = matches;
+                console.log('✅ Stored matches in window.preMatchesData:', window.preMatchesData.length);
                 searchInput.placeholder = '🔍 Busca un partido (equipo, competencia, fecha)...';
                 searchInput.disabled = false;
                 searchInput.focus();
@@ -263,6 +267,7 @@
                 console.error('❌ Error loading matches:', err);
                 searchInput.placeholder = 'Error al cargar partidos';
                 searchInput.disabled = true;
+                throw err;
             });
     }
 
