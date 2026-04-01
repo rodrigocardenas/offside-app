@@ -1,0 +1,123 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2] [cursor=pointer]:
+    - text: "¡Bienvenido rodri! Tu ID completo es: rodri_9901"
+    - button "Close" [ref=e3]: ✖
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - link "Offside Club" [ref=e7] [cursor=pointer]:
+        - /url: http://offsideclub.test/groups
+        - img "Offside Club" [ref=e8]
+      - generic [ref=e9]: Offside Club
+      - generic [ref=e10]:
+        - button "r" [ref=e11] [cursor=pointer]:
+          - generic [ref=e13]: r
+        - text:  
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - img [ref=e16]: 
+        - text: "Racha:"
+        - generic [ref=e18]: 0 días
+      - generic [ref=e19]:
+        - img [ref=e20]: 
+        - text: "Exactitud:"
+        - generic [ref=e22]: 0%
+      - generic [ref=e23]:
+        - img [ref=e24]: 
+        - text: "Grupos:"
+        - generic [ref=e26]: "0"
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e30] [cursor=pointer]:
+          - generic [ref=e32]:
+            - img [ref=e33]: 
+            - text: Quiz
+          - heading "Mobile World Congress Quiz 2026" [level=3] [ref=e35]
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - img [ref=e38]: 
+              - generic [ref=e40]:
+                - strong [ref=e41]: "0"
+                - text: Miembros
+            - paragraph [ref=e43]: Solo puedes responder una vez, desde que respondes la 1era pregunta comienza el contador de tiempo
+        - button [ref=e45] [cursor=pointer]
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - img [ref=e48]: 
+          - text: Mis Grupos
+        - generic [ref=e50]:
+          - img [ref=e51]: 
+          - paragraph [ref=e53]: No tienes grupos
+          - paragraph [ref=e54]: Buscar o crea uno nuevo
+      - generic [ref=e55]:
+        - link "Crear Grupo" [ref=e56] [cursor=pointer]:
+          - /url: http://offsideclub.test/groups/create
+          - img [ref=e57]: +
+          - text: Crear Grupo
+        - generic [ref=e61]: O
+        - button "Unirse a Grupo" [ref=e63] [cursor=pointer]:
+          - img [ref=e64]: 
+          - text: Unirse a Grupo
+      - generic [ref=e66]:
+        - link "Mis Grupos" [ref=e67] [cursor=pointer]:
+          - /url: http://offsideclub.test/groups
+          - img [ref=e69]: 
+          - generic [ref=e71]: Mis Grupos
+        - link "Partidos" [ref=e72] [cursor=pointer]:
+          - /url: http://offsideclub.test/matches/calendar
+          - img [ref=e74]: 
+          - generic [ref=e76]: Partidos
+        - link "Tienda" [ref=e77] [cursor=pointer]:
+          - /url: http://offsideclub.test/market
+          - img [ref=e79]: 
+          - generic [ref=e81]: Tienda
+        - button "Tu opinión" [ref=e82] [cursor=pointer]:
+          - img [ref=e84]: 
+          - generic [ref=e86]: Tu opinión
+    - text:     +      
+  - generic [ref=e87]:
+    - generic [ref=e89]:
+      - generic [ref=e91]:
+        - generic [ref=e92] [cursor=pointer]:
+          - text: 
+          - generic: Request
+        - text: 
+        - generic [ref=e93] [cursor=pointer]:
+          - text: 
+          - generic: Timeline
+        - text: 
+        - generic [ref=e94] [cursor=pointer]:
+          - text: 
+          - generic: Views
+          - generic [ref=e95]: "11"
+        - generic [ref=e96] [cursor=pointer]:
+          - text: 
+          - generic: Queries
+          - generic [ref=e97]: "10"
+        - generic [ref=e98] [cursor=pointer]:
+          - text: 
+          - generic: Models
+          - generic [ref=e99]: "3"
+        - text:  
+      - generic [ref=e100]:
+        - generic [ref=e103] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e105] [cursor=pointer]:
+          - generic: 
+          - generic [ref=e106]: "2"
+        - combobox [ref=e107] [cursor=pointer]:
+          - option "#1 login (stacked) (14:27:45)"
+          - option "#2 / (14:27:47)" [selected]
+        - generic [ref=e108] [cursor=pointer]:
+          - generic: 
+          - generic: 592ms
+        - generic [ref=e109]:
+          - generic: 
+          - generic: 25MB
+        - generic [ref=e110]:
+          - generic: 
+          - generic: 10.x
+        - generic [ref=e111] [cursor=pointer]:
+          - generic: 
+          - generic: GET /
+    - text:                                                                                                             
+  - text: 

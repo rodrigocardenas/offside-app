@@ -1,9 +1,5 @@
 {{-- Create Pre Match Modal Component --}}
-<!-- jQuery & Select2 Dependencies -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+{{-- jQuery & Select2 are now loaded globally in app.blade.php --}}
 
 <div id="createPreMatchModal"
      style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 1rem;">
@@ -255,56 +251,16 @@
                     select.innerHTML = '<option value="">No hay partidos disponibles</option>';
                 }
 
-                // Initialize or update Select2
-                initializeSelect2();
+                console.log('✅ Matches loaded into select dropdown (vanilla JS)');
             })
             .catch(err => {
                 console.error('❌ Error loading matches:', err);
                 select.innerHTML = '<option value="">Error al cargar partidos</option>';
-                initializeSelect2();
             });
     }
 
     function initializeSelect2() {
-        const select = document.getElementById('preMatchMatchSelect');
-        if (!select) {
-            console.warn('Select element not found');
-            return;
-        }
-
-        // Wait for jQuery to be available
-        if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
-            console.warn('jQuery or Select2 not yet loaded, retrying...');
-            setTimeout(initializeSelect2, 200);
-            return;
-        }
-
-        try {
-            // Destroy existing Select2 instance if it exists
-            if (select.classList.contains('select2-hidden-accessible')) {
-                $(select).select2('destroy');
-            }
-
-            // Initialize Select2
-            $(select).select2({
-                allowClear: true,
-                placeholder: '🔍 Busca un partido (equipo, competencia, fecha)...',
-                width: '100%',
-                language: {
-                    noResults: function () {
-                        return 'No se encontraron partidos';
-                    },
-                    searching: function () {
-                        return 'Buscando...';
-                    }
-                }
-            });
-
-            console.log('✅ Select2 initialized');
-        } catch (e) {
-            console.error('Error initializing Select2:', e);
-            console.log('Select2 not available, using native select');
-        }
+        window.initializeSelect2 = function() {}; // No-op (using vanilla JS instead)
     }
 
     function updatePenaltyUI() {
@@ -413,12 +369,25 @@
         })
         .then(r => {
             console.log('Response status:', r.status);
-            if (!r.ok) {
-                return r.text().then(text => {
-                    throw new Error(`API Error ${r.status}: ${text}`);
-                });
-            }
-            return r.json();
+            console.log('Response headers:', {
+                'content-type': r.headers.get('content-type')
+            });
+            
+            // Try to get response as text first to debug
+            return r.text().then(text => {
+                console.log('Raw response text (first 200 chars):', text.substring(0, 200));
+                
+                if (!r.ok) {
+                    throw new Error(`API Error ${r.status}: ${text.substring(0, 500)}`);
+                }
+                
+                // Try to parse as JSON
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    throw new Error(`Invalid JSON response: ${e.message}\nResponse: ${text.substring(0, 500)}`);
+                }
+            });
         })
         .then(data => {
             console.log('✅ Success response:', data);

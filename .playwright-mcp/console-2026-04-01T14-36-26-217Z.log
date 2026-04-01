@@ -1,0 +1,33 @@
+[     505ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/groups/12:311
+[     543ms] [LOG] 🔔 Script de toast iniciando en app-layout... @ http://offsideclub.test/groups/12:370
+[     543ms] [LOG] window.showSuccessToast: undefined @ http://offsideclub.test/groups/12:370
+[    1041ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/groups/12:370
+[    1043ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/groups/12:370
+[    1046ms] [LOG] 🚀 DOMContentLoaded: Initializing modal @ http://offsideclub.test/groups/12:370
+[    1046ms] [LOG] ✅ Modal initialization complete @ http://offsideclub.test/groups/12:370
+[    1046ms] [LOG] DOMContentLoaded ejecutado en app-layout @ http://offsideclub.test/groups/12:370
+[    1049ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/groups/12:370
+[    1049ms] [LOG] ✅ Elementos del dropdown encontrados @ http://offsideclub.test/groups/12:370
+[    1049ms] [LOG] ✅ Header dropdown handler inicializado correctamente @ http://offsideclub.test/groups/12:370
+[    1050ms] [LOG] ✅ Modal handler cargado @ http://offsideclub.test/groups/12:370
+[    1095ms] [LOG] Document ready @ http://offsideclub.test/groups/12:370
+[    1239ms] [LOG] 🔔 initToasts ejecutándose en app-layout @ http://offsideclub.test/groups/12:370
+[    1239ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/groups/12:370
+[    5277ms] [LOG] 🎬 openCreatePreMatchModal called with groupId: 12 @ http://offsideclub.test/groups/12:370
+[    5278ms] [LOG] 🎯 updatePenaltyUI called @ http://offsideclub.test/groups/12:370
+[    5278ms] [LOG] ✅ Selected penalty type: POINTS @ http://offsideclub.test/groups/12:370
+[    5279ms] [LOG] 📥 Loading upcoming matches... @ http://offsideclub.test/groups/12:370
+[    6193ms] [LOG] Matches API response status: 200 @ http://offsideclub.test/groups/12:370
+[    6194ms] [LOG] ✅ Matches loaded: {success: true, data: Array(22), meta: Object} @ http://offsideclub.test/groups/12:370
+[    6195ms] [LOG] 📊 Parsed matches count: 22 @ http://offsideclub.test/groups/12:370
+[    6195ms] [LOG] ✅ Matches loaded into select dropdown (vanilla JS) @ http://offsideclub.test/groups/12:370
+[   19698ms] [LOG] 🎬 openCreatePreMatchModal called with groupId: 12 @ http://offsideclub.test/groups/12:370
+[   19698ms] [LOG] 🎯 updatePenaltyUI called @ http://offsideclub.test/groups/12:370
+[   19698ms] [LOG] ✅ Selected penalty type: POINTS @ http://offsideclub.test/groups/12:370
+[   19699ms] [LOG] 📥 Loading upcoming matches... @ http://offsideclub.test/groups/12:370
+[   20509ms] [LOG] Match selected:  @ http://offsideclub.test/groups/12:370
+[   20544ms] [LOG] Matches API response status: 200 @ http://offsideclub.test/groups/12:370
+[   20545ms] [LOG] ✅ Matches loaded: {success: true, data: Array(22), meta: Object} @ http://offsideclub.test/groups/12:370
+[   20545ms] [LOG] 📊 Parsed matches count: 22 @ http://offsideclub.test/groups/12:370
+[   20546ms] [LOG] ✅ Matches loaded into select dropdown (vanilla JS) @ http://offsideclub.test/groups/12:370
+[   25215ms] [LOG] Submit clicked @ http://offsideclub.test/groups/12:370

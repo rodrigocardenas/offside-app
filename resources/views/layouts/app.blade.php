@@ -129,37 +129,37 @@
     <!-- Firebase Cloud Messaging Scripts (PASO 10) -->
     <!-- Test Script Simplísimo (para debug) -->
     <script src="{{ asset('js/firebase-test-simple.js') }}"></script>
-    
+
     <!-- Scripts se cargan siempre, pero solo se inicializan si está autenticado -->
     <script>
         console.log('🔍 PRE-LOAD: Verificando estado de funciones antes de cargar scripts');
         console.log('   window.getPushNotificationState antes:', typeof window.getPushNotificationState);
         console.log('   document.readyState:', document.readyState);
     </script>
-    
+
     <script src="{{ asset('js/firebase-messaging-native.js') }}"></script>
-    
+
     <script>
         console.log('✅ POST-LOAD firebase-messaging-native.js');
         console.log('   window.getPushNotificationState:', typeof window.getPushNotificationState);
         console.log('   window.initializePushNotifications:', typeof window.initializePushNotifications);
         console.log('   window.NativeFirebaseMessaging:', typeof window.NativeFirebaseMessaging);
     </script>
-    
+
     <script src="{{ asset('js/permission-service.js') }}"></script>
-    
+
     <script>
         console.log('✅ POST-LOAD permission-service.js - funciones siguen disponibles');
         console.log('   window.getPushNotificationState:', typeof window.getPushNotificationState);
     </script>
-    
+
     <script src="{{ asset('js/token-service.js') }}"></script>
-    
+
     <script>
         console.log('✅ POST-LOAD token-service.js - funciones siguen disponibles');
         console.log('   window.getPushNotificationState:', typeof window.getPushNotificationState);
     </script>
-    
+
     @auth
     <script>
         // Inicializar servicios Firebase para usuarios autenticados

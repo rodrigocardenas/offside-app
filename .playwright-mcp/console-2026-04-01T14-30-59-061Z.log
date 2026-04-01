@@ -1,0 +1,756 @@
+[       0ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[     210ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[     414ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[     622ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[     828ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    1044ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    1247ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    1453ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    1654ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    1859ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    2062ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    2269ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    2452ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2453ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2454ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2454ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2454ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2454ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2454ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2454ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2454ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2455ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2455ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2455ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2455ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2456ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2456ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2457ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2458ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2458ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2458ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2459ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2459ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2459ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2460ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2460ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2460ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2460ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2460ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2461ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2461ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2461ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2461ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2461ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2461ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2462ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2462ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2462ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2462ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2462ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2462ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2463ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2463ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2463ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2463ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2463ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2464ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2464ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2464ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2464ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2464ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2465ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2465ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2465ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2465ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2465ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2466ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2466ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2466ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2466ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2466ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2466ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2467ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2467ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2467ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2467ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2467ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2467ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2467ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2468ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2468ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2468ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2468ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2468ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2468ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    2523ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/groups/12:311
+[    2572ms] [LOG] 🔔 Script de toast iniciando en app-layout... @ http://offsideclub.test/groups/12:370
+[    2572ms] [LOG] window.showSuccessToast: undefined @ http://offsideclub.test/groups/12:370
+[    3025ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/groups/12:370
+[    3026ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/groups/12:370
+[    3029ms] [LOG] 🚀 DOMContentLoaded: Initializing modal @ http://offsideclub.test/groups/12:370
+[    3030ms] [LOG] ✅ Modal initialization complete @ http://offsideclub.test/groups/12:370
+[    3030ms] [LOG] DOMContentLoaded ejecutado en app-layout @ http://offsideclub.test/groups/12:370
+[    3033ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/groups/12:370
+[    3034ms] [LOG] ✅ Elementos del dropdown encontrados @ http://offsideclub.test/groups/12:370
+[    3034ms] [LOG] ✅ Header dropdown handler inicializado correctamente @ http://offsideclub.test/groups/12:370
+[    3037ms] [LOG] ✅ Modal handler cargado @ http://offsideclub.test/groups/12:370
+[    3078ms] [LOG] Document ready @ http://offsideclub.test/groups/12:370
+[    3278ms] [LOG] 🔔 initToasts ejecutándose en app-layout @ http://offsideclub.test/groups/12:370
+[    3279ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/groups/12:370
+[   12633ms] [LOG] 🎬 openCreatePreMatchModal called with groupId: 12 @ http://offsideclub.test/groups/12:370
+[   12633ms] [LOG] 🎯 updatePenaltyUI called @ http://offsideclub.test/groups/12:370
+[   12634ms] [LOG] ✅ Selected penalty type: POINTS @ http://offsideclub.test/groups/12:370
+[   12634ms] [LOG] 📥 Loading upcoming matches... @ http://offsideclub.test/groups/12:370
+[   13554ms] [LOG] Matches API response status: 200 @ http://offsideclub.test/groups/12:370
+[   13557ms] [LOG] ✅ Matches loaded: {success: true, data: Array(22), meta: Object} @ http://offsideclub.test/groups/12:370
+[   13559ms] [LOG] 📊 Parsed matches count: 22 @ http://offsideclub.test/groups/12:370
+[   13562ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   13766ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   13970ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   14175ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   14379ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   14583ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   14789ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   14995ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   15198ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   15404ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   15606ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   15809ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   16014ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   16222ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   16441ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   16643ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   16848ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   17053ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   17256ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   17463ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   17665ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   17868ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   18070ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   18277ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   18499ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   18702ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   18907ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   19111ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   19334ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   19557ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   19772ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   19976ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   20180ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   20384ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   20591ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   20794ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   20998ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   21227ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   21438ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   21641ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   21848ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   22051ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   22266ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   22477ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   22680ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   22884ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   23085ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   23286ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   23487ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   23693ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   23899ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   24104ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   24308ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   24512ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   24718ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   24923ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   25149ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   25361ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   25566ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   25772ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   25999ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   26232ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   26444ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   26650ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   26853ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   27055ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   27257ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   27463ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   27667ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   27872ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   28074ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   28278ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   28493ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   28697ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   28901ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   29106ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   29309ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   29513ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   29716ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   29921ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   30127ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   30332ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   30535ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   30742ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   30948ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   31149ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   31353ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   31555ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   31757ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   31962ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   32166ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   32369ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   32575ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   32778ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   32983ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   33199ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   33415ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   33620ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   33824ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   34026ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   34234ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   34440ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   34642ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   34846ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   35051ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   35254ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   35455ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   35660ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   35862ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   36076ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   36286ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   36490ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   36692ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   36898ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   37102ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   37306ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   37509ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   37714ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   37917ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   38119ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   38324ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   38528ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   38754ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   38970ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   39174ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   39397ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   39601ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   39805ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   40007ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   40219ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   40433ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   40636ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   40840ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   41048ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   41250ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   41454ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   41658ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   41862ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   42066ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   42271ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   42474ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   42681ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   42885ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   43088ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   43294ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   43498ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   43708ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   43934ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   44138ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   44342ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   44544ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   44745ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   44949ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   45163ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   45372ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   45577ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   45782ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   45988ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   46193ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   46398ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   46626ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   46840ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   47047ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   47252ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   47454ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   47659ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   47862ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   48068ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   48272ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   48474ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   48678ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   48880ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   49083ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   49309ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   49511ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   49712ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   49917ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   50121ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   50355ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   50564ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   50770ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   50973ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   51182ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   51384ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   51591ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   51797ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   52030ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   52235ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   52442ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   52647ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   52850ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   53067ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   53277ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   53483ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   53687ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   53970ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   54183ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   54390ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   54597ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   54798ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   55004ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   55209ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   55414ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   55646ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   55856ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   56061ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   56266ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   56484ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   56690ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   56892ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   57096ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   57307ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   57519ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   57726ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   57931ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   58167ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   58369ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   58573ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   58779ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   58999ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   59204ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   59407ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   59612ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   59825ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   60039ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   60247ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   60450ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   60655ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   60912ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   61126ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   61332ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   61536ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   61772ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   61973ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   62179ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   62384ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   62618ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   62833ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   63038ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   63253ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   63551ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   63753ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   63955ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   64161ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   64481ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   64694ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   64899ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   65104ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   65372ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   65572ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   65777ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   65981ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   66282ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   66496ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   66700ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   66908ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   67158ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   67362ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   67567ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   67771ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   67986ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   68188ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   68393ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   68597ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   68804ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   69009ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   69213ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   69420ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   69699ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   69903ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   70104ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   70308ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   70527ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   70729ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   70932ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   71147ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   71352ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   71558ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   71762ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   71967ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   72254ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   72455ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   72660ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   72863ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   73073ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   73275ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   73480ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   73684ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   73942ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   74158ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   74366ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   74570ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   74772ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   74981ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   75185ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   75386ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   75647ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   75857ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   76060ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   76276ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   76518ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   76734ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   76940ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   77145ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   77370ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   77572ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   77777ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   77982ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   78185ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   78390ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   78597ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   78800ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   79049ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   79258ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   79465ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   79668ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   79928ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   80142ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   80349ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   80554ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   80818ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   81025ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   81231ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   81437ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   81641ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   81847ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   82052ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   82255ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   82495ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   82696ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   82901ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   83106ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   83355ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   83560ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   83762ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   83966ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   84183ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   84392ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   84597ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   84800ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   85126ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   85338ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   85543ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   85748ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   85954ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   86159ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   86365ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   86568ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   86811ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   87016ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   87222ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   87428ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   87663ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   87869ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   88074ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   88276ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   88479ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   88682ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   88890ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   89095ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   89306ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   89519ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   89725ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   89929ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   90249ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   90450ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   90654ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   90858ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   91063ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   91266ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   91470ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   91675ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   91876ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   92083ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   92286ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   92489ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   92695ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   92899ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   93103ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   93307ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   93510ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   93715ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   93918ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   94122ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   94324ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   94527ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   94729ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   94931ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   95132ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   95337ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   95557ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   95762ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   95975ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   96207ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   96415ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   96620ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   96822ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   97042ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   97252ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   97458ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   97661ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   97907ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   98117ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   98323ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   98528ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   98755ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   98970ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   99178ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   99382ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   99589ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   99792ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[   99999ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  100206ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  100411ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  100662ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  100869ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  101076ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  101281ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  101529ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  101740ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  101945ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  102150ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  102378ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  102591ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  102797ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  103005ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  103264ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  103476ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  103681ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  103885ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  104090ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  104291ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  104494ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  104697ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  104906ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  105122ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  105324ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  105527ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  105784ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  105992ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  106197ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  106402ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  106607ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  106860ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  107072ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  107275ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  107479ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  107682ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  107888ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  108092ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  108297ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  108658ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  108872ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  109076ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  109282ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  109529ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  109736ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  109950ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  110154ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  110361ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  110566ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  110772ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  110976ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  111181ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  111398ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  111603ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  111807ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  112010ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  112215ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  112419ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  112623ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  112830ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  113068ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  113281ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  113484ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  113687ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  113913ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  114128ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  114334ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  114539ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  114770ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  114978ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  115182ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  115384ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  115589ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  115793ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  115995ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  116201ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  116405ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  116622ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  116829ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  117034ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  117239ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  117455ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  117665ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  117866ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  118073ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  118277ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  118479ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  118686ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  118890ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  119097ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[  119298ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370

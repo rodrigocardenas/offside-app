@@ -1,0 +1,326 @@
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - link "Offside Club" [ref=e7] [cursor=pointer]:
+        - /url: http://offsideclub.test/groups
+        - img "Offside Club" [ref=e8]
+      - generic [ref=e9]: Test Pre Match
+      - button "r" [ref=e11] [cursor=pointer]:
+        - generic [ref=e13]: r
+    - main [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - text: Ranking
+            - img [ref=e18]
+            - generic [ref=e20]:
+              - link "Ver Más" [ref=e21] [cursor=pointer]:
+                - /url: http://offsideclub.test/groups/12/ranking
+              - button "Pre Match" [active] [ref=e22] [cursor=pointer]:
+                - img [ref=e23]
+                - text: Pre Match
+              - link "Editar grupo" [ref=e25] [cursor=pointer]:
+                - /url: http://offsideclub.test/groups/12/edit
+                - img [ref=e26]
+              - button "Invitar amigos al grupo" [ref=e28] [cursor=pointer]:
+                - img [ref=e29]
+          - generic [ref=e33]:
+            - img "rodri" [ref=e35]
+            - generic [ref=e36]: 0 pts.
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]:
+                - generic [ref=e44]:
+                  - generic [ref=e45]: Predicción del Día
+                  - generic [ref=e46]:
+                    - img [ref=e47]
+                    - text: La Liga • Jornada 30 • 300 pts
+                - generic [ref=e49]:
+                  - generic [ref=e50]:
+                    - img "Rayo Vallecano" [ref=e51]
+                    - generic [ref=e52]: Rayo Vallecano
+                  - generic [ref=e53]: 21:00
+                  - generic [ref=e55]: Elche
+                - generic [ref=e56]: ¿Cuál será el resultado del partido?
+                - generic [ref=e58]:
+                  - generic [ref=e59] [cursor=pointer]:
+                    - generic: Empate
+                  - generic [ref=e60] [cursor=pointer]:
+                    - generic: Victoria Elche
+                  - generic [ref=e61] [cursor=pointer]:
+                    - generic: Victoria Rayo Vallecano
+                - generic [ref=e62]:
+                  - img [ref=e63]
+                  - text: 2d 8h 30m
+                - generic [ref=e65]:
+                  - button [ref=e66] [cursor=pointer]:
+                    - img [ref=e67]
+                  - button [ref=e69] [cursor=pointer]:
+                    - img [ref=e70]
+              - generic [ref=e72]:
+                - generic [ref=e73]:
+                  - generic [ref=e74]: Predicción del Día
+                  - generic [ref=e75]:
+                    - img [ref=e76]
+                    - text: La Liga • Jornada 30 • 300 pts
+                - generic [ref=e78]:
+                  - generic [ref=e79]:
+                    - img "Real Sociedad" [ref=e80]
+                    - generic [ref=e81]: Real Sociedad
+                  - generic [ref=e82]: 14:00
+                  - generic [ref=e83]:
+                    - img "Levante" [ref=e84]
+                    - generic [ref=e85]: Levante
+                - generic [ref=e86]: ¿Cuál equipo tendrá más posesión en el partido?
+                - generic [ref=e88]:
+                  - generic [ref=e89] [cursor=pointer]:
+                    - generic: Levante
+                  - generic [ref=e90] [cursor=pointer]:
+                    - generic: Real Sociedad
+                - generic [ref=e91]:
+                  - img [ref=e92]
+                  - text: 3d 1h 30m
+                - generic [ref=e94]:
+                  - button [ref=e95] [cursor=pointer]:
+                    - img [ref=e96]
+                  - button [ref=e98] [cursor=pointer]:
+                    - img [ref=e99]
+              - generic [ref=e101]:
+                - generic [ref=e102]:
+                  - generic [ref=e103]: Predicción del Día
+                  - generic [ref=e104]:
+                    - img [ref=e105]
+                    - text: Serie A • Jornada 31 • 300 pts
+                - generic [ref=e107]:
+                  - generic [ref=e108]:
+                    - img "Sassuolo" [ref=e109]
+                    - generic [ref=e110]: Sassuolo
+                  - generic [ref=e111]: 15:00
+                  - generic [ref=e112]:
+                    - img "Cagliari" [ref=e113]
+                    - generic [ref=e114]: Cagliari
+                - generic [ref=e115]: ¿Cuál equipo anotará el primer gol en el partido?
+                - generic [ref=e117]:
+                  - generic [ref=e118] [cursor=pointer]:
+                    - generic: Cagliari
+                  - generic [ref=e119] [cursor=pointer]:
+                    - generic: Ninguno
+                  - generic [ref=e120] [cursor=pointer]:
+                    - generic: Sassuolo
+                - generic [ref=e121]:
+                  - img [ref=e122]
+                  - text: 3d 2h 30m
+                - generic [ref=e124]:
+                  - button [ref=e125] [cursor=pointer]:
+                    - img [ref=e126]
+                  - button [ref=e128] [cursor=pointer]:
+                    - img [ref=e129]
+              - generic [ref=e131]:
+                - generic [ref=e132]:
+                  - generic [ref=e133]: Predicción del Día
+                  - generic [ref=e134]:
+                    - img [ref=e135]
+                    - text: La Liga • Jornada 30 • 300 pts
+                - generic [ref=e137]:
+                  - generic [ref=e138]:
+                    - img "Mallorca" [ref=e139]
+                    - generic [ref=e140]: Mallorca
+                  - generic [ref=e141]: 16:15
+                  - generic [ref=e142]:
+                    - img "Real Madrid" [ref=e143]
+                    - generic [ref=e144]: Real Madrid
+                - generic [ref=e145]: ¿Cuál equipo recibirá más faltas en el partido?
+                - generic [ref=e147]:
+                  - generic [ref=e148] [cursor=pointer]:
+                    - generic: Mallorca
+                  - generic [ref=e149] [cursor=pointer]:
+                    - generic: Ninguno
+                  - generic [ref=e150] [cursor=pointer]:
+                    - generic: Real Madrid
+                - generic [ref=e151]:
+                  - img [ref=e152]
+                  - text: 3d 3h 45m
+                - generic [ref=e154]:
+                  - button [ref=e155] [cursor=pointer]:
+                    - img [ref=e156]
+                  - button [ref=e158] [cursor=pointer]:
+                    - img [ref=e159]
+              - generic [ref=e161]:
+                - generic [ref=e162]:
+                  - generic [ref=e163]: Predicción del Día
+                  - generic [ref=e164]:
+                    - img [ref=e165]
+                    - text: Serie A • Jornada 31 • 300 pts
+                - generic [ref=e167]:
+                  - generic [ref=e168]:
+                    - img "Hellas Verona" [ref=e169]
+                    - generic [ref=e170]: Hellas Verona
+                  - generic [ref=e171]: 18:00
+                  - generic [ref=e172]:
+                    - img "Fiorentina" [ref=e173]
+                    - generic [ref=e174]: Fiorentina
+                - generic [ref=e175]: ¿Cuál equipo recibirá más tarjetas amarillas en el partido?
+                - generic [ref=e177]:
+                  - generic [ref=e178] [cursor=pointer]:
+                    - generic: Fiorentina
+                  - generic [ref=e179] [cursor=pointer]:
+                    - generic: Hellas Verona
+                  - generic [ref=e180] [cursor=pointer]:
+                    - generic: Ninguno
+                - generic [ref=e181]:
+                  - img [ref=e182]
+                  - text: 3d 5h 30m
+                - generic [ref=e184]:
+                  - button [ref=e185] [cursor=pointer]:
+                    - img [ref=e186]
+                  - button [ref=e188] [cursor=pointer]:
+                    - img [ref=e189]
+              - generic [ref=e191]:
+                - generic [ref=e192]:
+                  - generic [ref=e193]: Preguntas Sociales
+                  - generic [ref=e194]:
+                    - img [ref=e195]
+                    - text: Próximamente
+                - generic [ref=e197]:
+                  - img [ref=e199]
+                  - generic [ref=e201]:
+                    - heading "Agrupa a más miembros" [level=3] [ref=e202]
+                    - paragraph [ref=e203]: Necesitas al menos 2 miembros en el grupo para desbloquear las preguntas sociales y competir con tus amigos.
+                - generic [ref=e204]: "Miembros actuales: 1/2"
+            - button [ref=e205] [cursor=pointer]:
+              - img [ref=e206]
+            - button [ref=e208] [cursor=pointer]:
+              - img [ref=e209]
+          - generic [ref=e211]:
+            - button [ref=e212] [cursor=pointer]
+            - button [ref=e213] [cursor=pointer]
+            - button [ref=e214] [cursor=pointer]
+            - button [ref=e215] [cursor=pointer]
+            - button [ref=e216] [cursor=pointer]
+            - button [ref=e217] [cursor=pointer]
+        - generic [ref=e219]:
+          - generic [ref=e220]:
+            - img [ref=e221]
+            - text: Chat
+          - paragraph [ref=e225]: No hay mensajes aún. ¡Sé el primero en escribir!
+          - generic [ref=e227]:
+            - textbox "Escribe un mensaje..." [ref=e228]
+            - button "Enviar" [ref=e229] [cursor=pointer]
+        - button "Agregar recompensa/penitencia" [ref=e231] [cursor=pointer]:
+          - img [ref=e232]
+          - text: Agregar recompensa/penitencia
+  - generic [ref=e234]:
+    - link "Mis Grupos" [ref=e235] [cursor=pointer]:
+      - /url: http://offsideclub.test/groups
+      - img [ref=e237]
+      - generic [ref=e239]: Mis Grupos
+    - link "Partidos" [ref=e240] [cursor=pointer]:
+      - /url: http://offsideclub.test/matches/calendar
+      - img [ref=e242]
+      - generic [ref=e244]: Partidos
+    - link "Tienda" [ref=e245] [cursor=pointer]:
+      - /url: http://offsideclub.test/market
+      - img [ref=e247]
+      - generic [ref=e249]: Tienda
+    - button "Tu opinión" [ref=e250] [cursor=pointer]:
+      - img [ref=e252]
+      - generic [ref=e254]: Tu opinión
+  - button [ref=e286] [cursor=pointer]:
+    - img [ref=e256]
+  - generic [ref=e288]:
+    - generic [ref=e289]:
+      - heading "🔥 Crear Pre Match Challenge" [level=2] [ref=e290]
+      - button "✕" [ref=e291] [cursor=pointer]
+    - generic [ref=e292]:
+      - generic [ref=e293]:
+        - generic [ref=e294]: 📅 Selecciona un Partido
+        - combobox [ref=e295] [cursor=pointer]:
+          - option "-- Selecciona un partido --" [selected]
+          - option "Rayo Vallecano vs Elche - 19:00 [La Liga]"
+          - option "Real Sociedad vs Levante - 12:00 [La Liga]"
+          - option "Sassuolo vs Cagliari - 13:00 [Serie A]"
+          - option "Mallorca vs Real Madrid - 14:15 [La Liga]"
+          - option "Hellas Verona vs Fiorentina - 16:00 [Serie A]"
+          - option "Real Betis vs España - 16:30 [La Liga]"
+          - option "Laos vs Perú - 18:45 [Serie A]"
+          - option "Atletico Madrid vs Barcelona - 19:00 [La Liga]"
+          - option "Getafe vs Grays Athletic - 12:00 [La Liga]"
+          - option "Cremonese vs Bolivia - 13:00 [Serie A]"
+          - option "Valencia vs Celta Vigo - 14:15 [La Liga]"
+          - option "Pisa vs Togo - 16:00 [Serie A]"
+          - option "Oviedo vs Sevilla - 16:30 [La Liga]"
+          - option "India vs Irán - 18:45 [Serie A]"
+          - option "Alaves vs Osasuna - 19:00 [La Liga]"
+          - option "Udinese vs Cuba - 10:30 [Serie A]"
+          - option "Lecce vs Atalanta - 13:00 [Serie A]"
+          - option "Juventus vs Grecia - 16:00 [Serie A]"
+          - option "Japón vs Malta - 18:45 [Serie A]"
+          - option "Girona vs Villarreal - 19:00 [La Liga]"
+          - option "Sporting CP vs Armenia - 19:00 [Champions League]"
+          - option "Real Madrid vs Bayern München - 19:00 [Champions League]"
+        - generic [ref=e296]: Solo partidos en los próximos 7 días
+      - generic [ref=e297]:
+        - generic [ref=e298]: 🔥 Tipo de Castigo
+        - generic [ref=e299]:
+          - generic [ref=e301] [cursor=pointer]: 💰 Petar Puntos
+          - generic [ref=e303] [cursor=pointer]: 📝 Castigo Personalizado
+      - generic [ref=e305]:
+        - generic [ref=e306]: Puntos a Restar
+        - generic [ref=e307]:
+          - button "-500" [ref=e308] [cursor=pointer]
+          - button "-1000" [ref=e309] [cursor=pointer]
+          - button "-2000" [ref=e310] [cursor=pointer]
+          - button "🔥 TODOS" [ref=e311] [cursor=pointer]
+        - generic [ref=e312]:
+          - text: "Seleccionado:"
+          - strong [ref=e313]: "-1000"
+      - paragraph [ref=e315]:
+        - strong [ref=e316]: "📋 Cómo funciona:"
+        - text: 1. Todos los miembros pueden proponer acciones improbables
+        - text: 2. El grupo vota cada propuesta (✅ Es posible / ❌ Muy extremo)
+        - text: 3. Después del partido, el admin valida si ocurrió
+        - text: 4. Si ocurrió → se aplica automáticamente el castigo
+      - generic [ref=e317]:
+        - button "Cancelar" [ref=e318] [cursor=pointer]
+        - button "🚀 Crear Pre Match" [ref=e319] [cursor=pointer]
+  - generic [ref=e259]:
+    - generic [ref=e261]:
+      - generic [ref=e263]:
+        - generic [ref=e264] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e265] [cursor=pointer]:
+          - generic: 
+          - generic [ref=e266]: "1"
+        - generic [ref=e267] [cursor=pointer]:
+          - generic: 
+        - text:      
+      - generic [ref=e274]:
+        - generic [ref=e277] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e279] [cursor=pointer]:
+          - generic: 
+          - generic [ref=e280]: "8"
+        - combobox [ref=e281] [cursor=pointer]:
+          - option "#1 groups (stacked) (14:29:41)"
+          - option "#2 groups/12 (14:29:43)"
+          - option "#3 unread-count (ajax) (14:29:45)"
+          - option "#4 browser-logs (ajax) (14:29:45)"
+          - option "#5 browser-logs (ajax) (14:29:52)"
+          - option "#6 upcoming (ajax) (14:29:52)"
+          - option "#7 browser-logs (ajax) (14:29:53)"
+          - option "#8 browser-logs (ajax) (14:29:53)" [selected]
+        - generic [ref=e282] [cursor=pointer]:
+          - generic: 
+          - generic: 272ms
+        - generic [ref=e283]:
+          - generic: 
+          - generic: 21MB
+        - generic [ref=e284]:
+          - generic: 
+          - generic: 10.x
+        - generic [ref=e285] [cursor=pointer]:
+          - generic: 
+          - generic: POST _boost/browser-logs
+    - text:                    
+  - text: 

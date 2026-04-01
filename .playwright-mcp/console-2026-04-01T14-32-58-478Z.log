@@ -1,0 +1,352 @@
+[      86ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[     290ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[     522ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[     730ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[     935ms] [WARNING] jQuery or Select2 not yet loaded, retrying... @ http://offsideclub.test/groups/12:370
+[    1091ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1093ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1093ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1093ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1094ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1094ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1095ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1095ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1095ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1095ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1096ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1096ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1096ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1096ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1096ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1097ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1097ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1097ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1097ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1097ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1097ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1097ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1098ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1098ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1098ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1098ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1098ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1099ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1099ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1099ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1099ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1099ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1099ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1100ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1100ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1100ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1100ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1100ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1100ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1101ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1101ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1101ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1101ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1101ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1101ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1101ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1102ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1102ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1102ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1102ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1102ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1102ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1102ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1103ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1103ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1103ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1103ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1103ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1104ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1104ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1104ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1104ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1104ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1104ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1104ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1105ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1105ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1105ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1105ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1105ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1105ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1105ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1106ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1106ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1106ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1106ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1106ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1106ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1107ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1107ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1107ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1107ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1107ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1107ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1107ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1108ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1108ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1108ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1108ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1108ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1108ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1109ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1109ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1109ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1109ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1109ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1109ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1110ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1110ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1111ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1111ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1111ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1111ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1111ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1111ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1111ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1111ms] [ERROR] Failed to send logs: TypeError: Failed to fetch
+    at window.fetch (http://offsideclub.test/_debugbar/assets/javascript?v=1769180602:2038:39)
+    at flushLogs (http://offsideclub.test/groups/12:348:9) @ http://offsideclub.test/groups/12:356
+[    1158ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/groups/12:311
+[    1202ms] [LOG] 🔔 Script de toast iniciando en app-layout... @ http://offsideclub.test/groups/12:370
+[    1203ms] [LOG] window.showSuccessToast: undefined @ http://offsideclub.test/groups/12:370
+[    1634ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/groups/12:370
+[    1636ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/groups/12:370
+[    1639ms] [LOG] 🚀 DOMContentLoaded: Initializing modal @ http://offsideclub.test/groups/12:370
+[    1639ms] [LOG] ✅ Modal initialization complete @ http://offsideclub.test/groups/12:370
+[    1640ms] [LOG] DOMContentLoaded ejecutado en app-layout @ http://offsideclub.test/groups/12:370
+[    1642ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/groups/12:370
+[    1642ms] [LOG] ✅ Elementos del dropdown encontrados @ http://offsideclub.test/groups/12:370
+[    1643ms] [LOG] ✅ Header dropdown handler inicializado correctamente @ http://offsideclub.test/groups/12:370
+[    1644ms] [LOG] ✅ Modal handler cargado @ http://offsideclub.test/groups/12:370
+[    1683ms] [LOG] Document ready @ http://offsideclub.test/groups/12:370
+[    1907ms] [LOG] 🔔 initToasts ejecutándose en app-layout @ http://offsideclub.test/groups/12:370
+[    1908ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/groups/12:370
+[   12766ms] [LOG] 🎬 openCreatePreMatchModal called with groupId: 12 @ http://offsideclub.test/groups/12:370
+[   12767ms] [LOG] 🎯 updatePenaltyUI called @ http://offsideclub.test/groups/12:370
+[   12768ms] [LOG] ✅ Selected penalty type: POINTS @ http://offsideclub.test/groups/12:370
+[   12770ms] [LOG] 📥 Loading upcoming matches... @ http://offsideclub.test/groups/12:370
+[   13747ms] [LOG] Matches API response status: 200 @ http://offsideclub.test/groups/12:370
+[   13752ms] [LOG] ✅ Matches loaded: {success: true, data: Array(22), meta: Object} @ http://offsideclub.test/groups/12:370
+[   13754ms] [LOG] 📊 Parsed matches count: 22 @ http://offsideclub.test/groups/12:370
+[   13755ms] [LOG] ✅ Matches loaded into select dropdown (vanilla JS) @ http://offsideclub.test/groups/12:370
+[   70089ms] [LOG] Response status: 200 @ http://offsideclub.test/groups/12:370
+[   70605ms] [ERROR] ❌ Error: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON @ http://offsideclub.test/groups/12:370
+[   70606ms] [ERROR] Error message: Unexpected token '<', "<!DOCTYPE "... is not valid JSON @ http://offsideclub.test/groups/12:370

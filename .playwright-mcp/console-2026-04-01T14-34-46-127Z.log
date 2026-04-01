@@ -1,0 +1,70 @@
+[     942ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/groups/12:311
+[     992ms] [LOG] 🔔 Script de toast iniciando en app-layout... @ http://offsideclub.test/groups/12:370
+[     992ms] [LOG] window.showSuccessToast: undefined @ http://offsideclub.test/groups/12:370
+[    1673ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/groups/12:370
+[    1675ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/groups/12:370
+[    1681ms] [LOG] 🚀 DOMContentLoaded: Initializing modal @ http://offsideclub.test/groups/12:370
+[    1682ms] [LOG] ✅ Modal initialization complete @ http://offsideclub.test/groups/12:370
+[    1682ms] [LOG] DOMContentLoaded ejecutado en app-layout @ http://offsideclub.test/groups/12:370
+[    1686ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/groups/12:370
+[    1686ms] [LOG] ✅ Elementos del dropdown encontrados @ http://offsideclub.test/groups/12:370
+[    1687ms] [LOG] ✅ Header dropdown handler inicializado correctamente @ http://offsideclub.test/groups/12:370
+[    1688ms] [LOG] ✅ Modal handler cargado @ http://offsideclub.test/groups/12:370
+[    1732ms] [LOG] Document ready @ http://offsideclub.test/groups/12:370
+[    1970ms] [LOG] 🔔 initToasts ejecutándose en app-layout @ http://offsideclub.test/groups/12:370
+[    1971ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/groups/12:370
+[    5450ms] [LOG] 🎬 openCreatePreMatchModal called with groupId: 12 @ http://offsideclub.test/groups/12:370
+[    5451ms] [LOG] 🎯 updatePenaltyUI called @ http://offsideclub.test/groups/12:370
+[    5451ms] [LOG] ✅ Selected penalty type: POINTS @ http://offsideclub.test/groups/12:370
+[    5451ms] [LOG] 📥 Loading upcoming matches... @ http://offsideclub.test/groups/12:370
+[    6330ms] [LOG] Matches API response status: 200 @ http://offsideclub.test/groups/12:370
+[    6334ms] [LOG] ✅ Matches loaded: {success: true, data: Array(22), meta: Object} @ http://offsideclub.test/groups/12:370
+[    6335ms] [LOG] 📊 Parsed matches count: 22 @ http://offsideclub.test/groups/12:370
+[    6338ms] [LOG] ✅ Matches loaded into select dropdown (vanilla JS) @ http://offsideclub.test/groups/12:370
+[   17577ms] [LOG] Response status: 200 @ http://offsideclub.test/groups/12:370
+[   17577ms] [LOG] Response headers: {content-type: text/html; charset=UTF-8} @ http://offsideclub.test/groups/12:370
+[   18082ms] [LOG] Raw response text (first 200 chars): <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="Ixzg1hTTrFxzLiDiiBmpmT2 @ http://offsideclub.test/groups/12:370
+[   18082ms] [ERROR] ❌ Error: Error: Invalid JSON response: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Response: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="Ixzg1hTTrFxzLiDiiBmpmT2jHyK8z0Sqfmy5JDVh">
+
+    <title>Offside</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://
+    at http://offsideclub.test/groups/12:2206:27 @ http://offsideclub.test/groups/12:370
+[   18082ms] [ERROR] Error message: Invalid JSON response: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Response: <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="Ixzg1hTTrFxzLiDiiBmpmT2jHyK8z0Sqfmy5JDVh">
+
+    <title>Offside</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https:// @ http://offsideclub.test/groups/12:370
+[   43003ms] [LOG] CSRF Token: Ixzg1hTTrFxzLiDiiBmpmT2jHyK8z0Sqfmy5JDVh @ http://offsideclub.test/groups/12:370
+[   43003ms] [LOG] Payload: {football_match_id: 671, group_id: 12, penalty_type: POINTS, penalty_points: 1000, penalty_description: null} @ http://offsideclub.test/groups/12:370
+[   43819ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://offsideclub.test/api/pre-matches:0
+[   43821ms] [LOG] Response status: 401 @ http://offsideclub.test/groups/12:370
+[   43821ms] [LOG] Response content-type: application/json @ http://offsideclub.test/groups/12:370
+[   43823ms] [LOG] Response text (first 500 chars): {"error":"Unauthenticated","message":"No autenticado"} @ http://offsideclub.test/groups/12:370

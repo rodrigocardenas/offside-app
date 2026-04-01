@@ -1,0 +1,75 @@
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - heading "Crear nuevo grupo" [level=2] [ref=e6]
+      - img [ref=e7]: 
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Nombre del grupo
+        - textbox "Nombre del grupo" [active] [ref=e12]:
+          - /placeholder: "Ej: Grupo de amigos"
+      - generic [ref=e13]:
+        - generic [ref=e14]: Categoría
+        - combobox "Categoría" [ref=e15] [cursor=pointer]:
+          - option "Oficial" [selected]
+          - option "Mis partidos"
+      - generic [ref=e16]:
+        - generic [ref=e17]: Competición
+        - combobox "Competición" [ref=e18] [cursor=pointer]:
+          - option "Selecciona una competición" [selected]
+          - option "La Liga (laliga)"
+          - option "Premier League (premier)"
+          - option "Champions League (champions)"
+      - generic [ref=e19]:
+        - generic [ref=e20]: Recompensa o penalización
+        - textbox "Recompensa o penalización" [ref=e21]:
+          - /placeholder: Escribe el premio para el ganador o la penitencia para el perdedor
+      - generic [ref=e22]:
+        - link "Cancelar" [ref=e23] [cursor=pointer]:
+          - /url: http://offsideclub.test/groups
+        - button "Crear grupo" [ref=e24] [cursor=pointer]:
+          - generic [ref=e25]: Crear grupo
+          - text: 
+  - generic [ref=e26]:
+    - generic [ref=e28]:
+      - generic [ref=e30]:
+        - generic [ref=e31] [cursor=pointer]:
+          - text: 
+          - generic: Request
+        - text: 
+        - generic [ref=e32] [cursor=pointer]:
+          - text: 
+          - generic: Timeline
+        - text: 
+        - generic [ref=e33] [cursor=pointer]:
+          - text: 
+          - generic: Views
+          - generic [ref=e34]: "3"
+        - generic [ref=e35] [cursor=pointer]:
+          - text: 
+          - generic: Queries
+          - generic [ref=e36]: "3"
+        - generic [ref=e37] [cursor=pointer]:
+          - text: 
+          - generic: Models
+          - generic [ref=e38]: "4"
+        - text:  
+      - generic [ref=e39]:
+        - generic [ref=e42] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e44] [cursor=pointer]:
+          - generic: 
+        - generic [ref=e45] [cursor=pointer]:
+          - generic: 
+          - generic: 476ms
+        - generic [ref=e46]:
+          - generic: 
+          - generic: 25MB
+        - generic [ref=e47]:
+          - generic: 
+          - generic: 10.x
+        - generic [ref=e48] [cursor=pointer]:
+          - generic: 
+          - generic: GET groups/create
+    - text:                                          
+  - text: 
