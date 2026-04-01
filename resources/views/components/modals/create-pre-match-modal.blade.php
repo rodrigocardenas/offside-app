@@ -24,12 +24,26 @@
                 <label style="display: block; font-weight: 700; font-size: 14px; margin-bottom: 12px; color: {{ $textPrimary }};">
                     📅 Selecciona un Partido
                 </label>
-                <select id="preMatchMatchSelect"
-                        class="w-full select2-match-selector"
-                        data-placeholder="🔍 Busca un partido (equipo, competencia, fecha)..."
-                        style="width: 100%; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-size: 14px; cursor: pointer;">
-                    <option value="">-- Cargando partidos --</option>
+                
+                <!-- Search Input -->
+                <input type="text" 
+                       id="preMatchSearchInput"
+                       placeholder="🔍 Busca un partido (equipo, competencia, fecha)..."
+                       style="width: 100%; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-size: 14px; margin-bottom: 8px;">
+                
+                <!-- Results Dropdown -->
+                <div id="preMatchSearchResults" 
+                     style="display: none; position: absolute; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 100; width: 460px; margin-top: -8px; padding: 4px 0;">
+                </div>
+                
+                <!-- Hidden Select for form submission -->
+                <select id="preMatchMatchSelect" style="display: none;">
+                    <option value="">-- Selecciona un partido --</option>
                 </select>
+                
+                <!-- Selected Match Display -->
+                <div id="selectedMatchDisplay" style="display: none; padding: 12px; border: 1px solid {{ $accentColor }}; border-radius: 8px; background: {{ $isDark ? 'rgba(0,222,176,0.1)' : '#e5f3f0' }}; color: {{ $textPrimary }}; font-size: 13px; font-weight: 600; margin-top: 8px;"></div>
+                
                 <small style="display: block; margin-top: 8px; color: {{ $textSecondary }}; font-size: 12px;">
                     Solo partidos en los próximos 7 días
                 </small>
@@ -189,12 +203,16 @@
         const modal = document.getElementById('createPreMatchModal');
         if (modal) {
             modal.style.display = 'flex';
+            document.getElementById('preMatchSearchInput').value = '';
             document.getElementById('preMatchMatchSelect').value = '';
+            document.getElementById('selectedMatchDisplay').style.display = 'none';
+            document.getElementById('preMatchSearchResults').style.display = 'none';
             document.getElementById('penaltyTypePoints').checked = true;
             document.getElementById('preMatchError').style.display = 'none';
             selectedPenaltyPoints = 1000;
             updatePenaltyUI();
             loadUpcomingMatches();
+            initializeMatchSearch();
         } else {
             console.error('❌ Modal element not found');
         }
@@ -208,99 +226,119 @@
     };
 
     function loadUpcomingMatches() {
-        const select = document.getElementById('preMatchMatchSelect');
-        if (!select) {
-            console.warn('⚠️ Match select element not found');
+        const searchInput = document.getElementById('preMatchSearchInput');
+        if (!searchInput) {
+            console.warn('⚠️ Search input element not found');
             return;
         }
 
         console.log('📥 Loading upcoming matches...');
-        select.innerHTML = '<option value="">Cargando partidos...</option>';
+        searchInput.placeholder = 'Cargando partidos...';
+        searchInput.disabled = true;
 
         fetch('/api/matches/upcoming')
             .then(r => {
-                console.log('Matches API response status:', r.status);
-                if (!r.ok) {
-                    throw new Error(`API Error ${r.status}`);
-                }
+                console.log('✅ Matches API response status:', r.status);
+                if (!r.ok) throw new Error(`API Error ${r.status}`);
                 return r.json();
             })
             .then(response => {
-                console.log('✅ Matches loaded:', response);
-                select.innerHTML = '<option value="">-- Selecciona un partido --</option>';
-                // Handle both direct array (legacy) and API response format
                 const matches = Array.isArray(response) ? response : (response.data || []);
                 console.log('📊 Parsed matches count:', matches.length);
                 
-                if (Array.isArray(matches) && matches.length > 0) {
-                    matches.forEach(match => {
-                        // Convert Unix timestamp (seconds) to milliseconds for JavaScript Date
-                        const kickoffMs = (match.kick_off_timestamp || 0) * 1000;
-                        const date = new Date(kickoffMs).toLocaleDateString('es-ES');
-                        // Use the pre-formatted time from API
-                        const time = match.kick_off_time || new Date(kickoffMs).toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
-                        const homeTeam = match.home_team?.name || 'Equipo A';
-                        const awayTeam = match.away_team?.name || 'Equipo B';
-                        const competition = match.competition?.name ? ` [${match.competition.name}]` : '';
-                        const option = document.createElement('option');
-                        option.value = match.id;
-                        option.textContent = `${homeTeam} vs ${awayTeam} - ${time}${competition}`;
-                        select.appendChild(option);
-                    });
-                } else {
-                    select.innerHTML = '<option value="">No hay partidos disponibles</option>';
+                if (matches.length === 0) {
+                    searchInput.placeholder = 'No hay partidos disponibles';
+                    return;
                 }
 
-                // Initialize Select2 after loading matches
-                initializeSelect2();
-                console.log('✅ Matches loaded into select dropdown');
+                // Store matches in window for search
+                window.preMatchesData = matches;
+                searchInput.placeholder = '🔍 Busca un partido (equipo, competencia, fecha)...';
+                searchInput.disabled = false;
+                searchInput.focus();
+
+                console.log('✅ Matches loaded successfully');
             })
             .catch(err => {
                 console.error('❌ Error loading matches:', err);
-                select.innerHTML = '<option value="">Error al cargar partidos</option>';
-                initializeSelect2();
+                searchInput.placeholder = 'Error al cargar partidos';
+                searchInput.disabled = true;
             });
     }
 
-    function initializeSelect2() {
-        const select = document.getElementById('preMatchMatchSelect');
-        if (!select) {
-            console.warn('⚠️ Select element not found');
+    function initializeMatchSearch() {
+        const searchInput = document.getElementById('preMatchSearchInput');
+        const resultsDiv = document.getElementById('preMatchSearchResults');
+        const selectedDisplay = document.getElementById('selectedMatchDisplay');
+        const hiddenSelect = document.getElementById('preMatchMatchSelect');
+
+        if (!searchInput || !resultsDiv) {
+            console.warn('⚠️ Search elements not found');
             return;
         }
 
-        // Check if jQuery and Select2 are available
-        if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
-            console.warn('⚠️ jQuery or Select2 not yet loaded, retrying...');
-            setTimeout(initializeSelect2, 200);
-            return;
-        }
-
-        try {
-            // Destroy existing Select2 instance if it exists
-            if (select.classList.contains('select2-hidden-accessible')) {
-                $(select).select2('destroy');
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            
+            if (!query) {
+                resultsDiv.style.display = 'none';
+                return;
             }
 
-            // Initialize Select2
-            $(select).select2({
-                allowClear: true,
-                placeholder: '🔍 Busca un partido (equipo, competencia, fecha)...',
-                width: '100%',
-                language: {
-                    noResults: function () {
-                        return 'No se encontraron partidos';
-                    },
-                    searching: function () {
-                        return 'Buscando...';
-                    }
-                }
+            const matches = window.preMatchesData || [];
+            const filtered = matches.filter(m => {
+                const home = m.home_team?.name || '';
+                const away = m.away_team?.name || '';
+                const comp = m.competition?.name || '';
+                const searchText = `${home} ${away} ${comp} ${m.kick_off_time || ''}`.toLowerCase();
+                return searchText.includes(query);
             });
 
-            console.log('✅ Select2 initialized successfully');
-        } catch (e) {
-            console.error('❌ Error initializing Select2:', e);
-        }
+            console.log('🔍 Filtered matches:', filtered.length);
+
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = '<div style="padding: 12px; color: #999;">No se encontraron partidos</div>';
+                resultsDiv.style.display = 'block';
+                return;
+            }
+
+            resultsDiv.innerHTML = filtered.map(match => `
+                <div class="match-option" 
+                     data-value="${match.id}"
+                     style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; font-size: 13px; transition: background 0.2s ease;"
+                     onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#e5f3f0' }}'"
+                     onmouseout="this.style.background='transparent'">
+                    <strong>${match.home_team?.name || 'Equipo A'} vs ${match.away_team?.name || 'Equipo B'}</strong><br>
+                    ${match.kick_off_time || 'Hora TBD'} · ${match.competition?.name || 'Competencia'}
+                </div>
+            `).join('');
+
+            resultsDiv.style.display = 'block';
+
+            // Add click handlers to options
+            document.querySelectorAll('.match-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const matchId = this.getAttribute('data-value');
+                    const match = window.preMatchesData.find(m => m.id == matchId);
+                    
+                    if (match) {
+                        searchInput.value = `${match.home_team?.name} vs ${match.away_team?.name}`;
+                        hiddenSelect.value = matchId;
+                        selectedDisplay.textContent = `✅ ${match.home_team?.name} vs ${match.away_team?.name} (${match.kick_off_time})`;
+                        selectedDisplay.style.display = 'block';
+                        resultsDiv.style.display = 'none';
+                        console.log('✅ Match selected:', matchId);
+                    }
+                });
+            });
+        });
+
+        // Close results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target !== searchInput && !e.target.closest('.match-option')) {
+                resultsDiv.style.display = 'none';
+            }
+        });
     }
 
     function updatePenaltyUI() {
