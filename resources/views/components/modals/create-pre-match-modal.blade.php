@@ -218,14 +218,24 @@
             return;
         }
 
+        console.log('📥 Loading upcoming matches...');
         select.innerHTML = '<option value="">Cargando partidos...</option>';
 
         fetch('/api/matches/upcoming')
-            .then(r => r.json())
+            .then(r => {
+                console.log('Matches API response status:', r.status);
+                if (!r.ok) {
+                    throw new Error(`API Error ${r.status}`);
+                }
+                return r.json();
+            })
             .then(response => {
+                console.log('✅ Matches loaded:', response);
                 select.innerHTML = '<option value="">-- Selecciona un partido --</option>';
                 // Handle both direct array (legacy) and API response format
                 const matches = Array.isArray(response) ? response : (response.data || []);
+                console.log('📊 Parsed matches count:', matches.length);
+                
                 if (Array.isArray(matches) && matches.length > 0) {
                     matches.forEach(match => {
                         // Convert Unix timestamp (seconds) to milliseconds for JavaScript Date
@@ -257,16 +267,26 @@
 
     function initializeSelect2() {
         const select = document.getElementById('preMatchMatchSelect');
-        if (!select) return;
-
-        // Destroy existing Select2 instance if it exists
-        if ($.fn.select2 && select.classList.contains('select2-hidden-accessible')) {
-            $('#preMatchMatchSelect').select2('destroy');
+        if (!select) {
+            console.warn('Select element not found');
+            return;
         }
 
-        // Initialize Select2 with custom styling
-        if ($ && $.fn.select2) {
-            $('#preMatchMatchSelect').select2({
+        // Wait for jQuery to be available
+        if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
+            console.warn('jQuery or Select2 not yet loaded, retrying...');
+            setTimeout(initializeSelect2, 200);
+            return;
+        }
+
+        try {
+            // Destroy existing Select2 instance if it exists
+            if (select.classList.contains('select2-hidden-accessible')) {
+                $(select).select2('destroy');
+            }
+
+            // Initialize Select2
+            $(select).select2({
                 allowClear: true,
                 placeholder: '🔍 Busca un partido (equipo, competencia, fecha)...',
                 width: '100%',
@@ -277,26 +297,13 @@
                     searching: function () {
                         return 'Buscando...';
                     }
-                },
-                templateResult: function(data) {
-                    if (!data.id) return data.text;
-                    return $('<span>' + data.text + '</span>');
-                },
-                templateSelection: function(data) {
-                    if (!data.id) return data.text;
-                    return $('<span>' + data.text + '</span>');
                 }
             });
 
-            // Custom styling for dark mode
-            const modal = document.getElementById('createPreMatchModal');
-            if (THEME.isDark) {
-                const select2Container = $('#preMatchMatchSelect').parent().find('.select2-container');
-                select2Container.addClass('dark-mode-select2');
-            }
-        } else {
-            console.warn('⚠️ jQuery or Select2 not yet loaded');
-            setTimeout(initializeSelect2, 100);
+            console.log('✅ Select2 initialized');
+        } catch (e) {
+            console.error('Error initializing Select2:', e);
+            console.log('Select2 not available, using native select');
         }
     }
 
@@ -404,19 +411,25 @@
             },
             body: JSON.stringify(payload)
         })
-        .then(r => r.json())
-        .then(data => {
-            if (data.error) {
-                alert('❌ Error: ' + data.error);
-            } else {
-                alert('✅ Pre Match creado exitosamente!');
-                window.closeCreatePreMatchModal();
-                setTimeout(() => location.reload(), 1000);
+        .then(r => {
+            console.log('Response status:', r.status);
+            if (!r.ok) {
+                return r.text().then(text => {
+                    throw new Error(`API Error ${r.status}: ${text}`);
+                });
             }
+            return r.json();
+        })
+        .then(data => {
+            console.log('✅ Success response:', data);
+            alert('✅ Pre Match creado exitosamente!');
+            window.closeCreatePreMatchModal();
+            setTimeout(() => location.reload(), 1000);
         })
         .catch(err => {
             console.error('❌ Error:', err);
-            alert('Error al crear Pre Match');
+            console.error('Error message:', err.message);
+            alert('❌ Error: ' + err.message);
         });
     };
 
