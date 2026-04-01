@@ -28,20 +28,15 @@ class UpdateFootballData extends Command
         try {
             $competitionMap = [
                 // Ligas Locales
-                'la-liga' => 'PD',
-                'premier-league' => 'PL',
-                'champions-league' => 'CL',
-                'serie-a' => 'SA',
-                'copa-del-rey' => 'CDR',
-                'league-cup' => 'LC',
+                // 'la-liga' => 'PD',
+                // 'premier-league' => 'PL',
+                // 'champions-league' => 'CL',
+                // 'serie-a' => 'SA',
+                // 'copa-del-rey' => 'CDR',
+                // 'league-cup' => 'LC',
                 // Competencias Internacionales
                 'world-cup' => 'WC',
-                'copa-america' => 'CA',
-                'euro' => 'EURO',
-                'africa-cup' => 'AFCON',
-                'asian-cup' => 'AC',
-                'concacaf-gold-cup' => 'GC',
-                'olympic-tournament' => 'OLY',
+                'friendlies' => 'FR'
             ];
 
             $competitionCode = $competitionMap[$league] ?? $league;

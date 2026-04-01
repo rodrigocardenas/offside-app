@@ -21,25 +21,15 @@ class UpdateFixturesNightly extends Command
         Log::info('Iniciando actualización nocturna de fixtures');
 
         $leagues = [
-            // 🌍 Competencias Internacionales (Prioridad Alta) - IDs verificados de api-sports.io
-            2 => 21,           // UEFA Champions League - próximas 3 semanas
-            3 => 21,           // UEFA Europa League - próximas 3 semanas
-            6 => 21,           // Africa Cup of Nations - próximas 3 semanas
-            12 => 14,          // CAF Champions League - próximas 2 semanas
-            15 => 30,          // FIFA Club World Cup - próximas 4 semanas
-            16 => 21,          // CONCACAF Champions League - próximas 3 semanas
-            17 => 21,          // AFC Champions League - próximas 3 semanas
-            22 => 21,          // CONCACAF Gold Cup - próximas 3 semanas
-            27 => 21,          // OFC Champions League - próximas 3 semanas
-            36 => 21,          // Africa Cup of Nations - Qualification - próximas 3 semanas
+            // 🌍 Competencias Internacionales (Prioridad Alta)
+            'world-cup' => 1,           // Mundial - próximas 4 semanas
+            'friendlies' => 10,        // Copa América - próximas 3 semanas
             
             // ⚽ Ligas Locales
-            39 => 14,          // Premier League - próximas 2 semanas
-            61 => 14,          // Ligue 1 - próximas 2 semanas
-            71 => 14,          // Serie A (Brazil) - próximas 2 semanas
-            78 => 14,          // Bundesliga - próximas 2 semanas
-            135 => 14,         // Serie A (Italy) - próximas 2 semanas
-            140 => 14,         // La Liga - próximas 2 semanas
+            // 'la-liga' => 14,             // La Liga - próximas 2 semanas
+            // 'premier-league' => 14,      // Premier League - próximas 2 semanas
+            // 'champions-league' => 21,    // Champions League - próximas 3 semanas
+            // 'serie-a' => 14,             // Serie A - próximas 2 semanas
         ];
 
         $totalMatches = 0;

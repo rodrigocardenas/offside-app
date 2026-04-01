@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\PreMatch;
 use App\Models\PreMatchProposition;
 use App\Models\PreMatchVote;
@@ -45,15 +46,16 @@ class PreMatchController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'match_id' => 'required|exists:matches,id',
+            'football_match_id' => 'required|exists:football_matches,id',
             'group_id' => 'required|exists:groups,id',
-            'penalty_type' => 'required|in:POINTS,SOCIAL,REVANCHA',
+            'penalty_type' => 'required|in:POINTS,CUSTOM_PENALTY',
             'penalty_points' => 'nullable|integer|min:100|max:5000',
             'penalty_description' => 'nullable|string|max:500',
             'admin_notes' => 'nullable|string|max:1000',
         ]);
 
         $validated['created_by'] = auth()->id();
+        $validated['status'] = 'pending';
 
         $preMatch = PreMatch::create($validated);
 

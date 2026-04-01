@@ -1,4 +1,10 @@
 {{-- Create Pre Match Modal Component --}}
+<!-- jQuery & Select2 Dependencies -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
 <div id="createPreMatchModal"
      style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 1rem;">
 
@@ -23,6 +29,8 @@
                     📅 Selecciona un Partido
                 </label>
                 <select id="preMatchMatchSelect"
+                        class="w-full select2-match-selector"
+                        data-placeholder="🔍 Busca un partido (equipo, competencia, fecha)..."
                         style="width: 100%; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textPrimary }}; font-size: 14px; cursor: pointer;">
                     <option value="">-- Cargando partidos --</option>
                 </select>
@@ -236,11 +244,60 @@
                 } else {
                     select.innerHTML = '<option value="">No hay partidos disponibles</option>';
                 }
+
+                // Initialize or update Select2
+                initializeSelect2();
             })
             .catch(err => {
                 console.error('❌ Error loading matches:', err);
                 select.innerHTML = '<option value="">Error al cargar partidos</option>';
+                initializeSelect2();
             });
+    }
+
+    function initializeSelect2() {
+        const select = document.getElementById('preMatchMatchSelect');
+        if (!select) return;
+
+        // Destroy existing Select2 instance if it exists
+        if ($.fn.select2 && select.classList.contains('select2-hidden-accessible')) {
+            $('#preMatchMatchSelect').select2('destroy');
+        }
+
+        // Initialize Select2 with custom styling
+        if ($ && $.fn.select2) {
+            $('#preMatchMatchSelect').select2({
+                allowClear: true,
+                placeholder: '🔍 Busca un partido (equipo, competencia, fecha)...',
+                width: '100%',
+                language: {
+                    noResults: function () {
+                        return 'No se encontraron partidos';
+                    },
+                    searching: function () {
+                        return 'Buscando...';
+                    }
+                },
+                templateResult: function(data) {
+                    if (!data.id) return data.text;
+                    return $('<span>' + data.text + '</span>');
+                },
+                templateSelection: function(data) {
+                    if (!data.id) return data.text;
+                    return $('<span>' + data.text + '</span>');
+                }
+            });
+
+            // Custom styling for dark mode
+            const modal = document.getElementById('createPreMatchModal');
+            if (THEME.isDark) {
+                const select2Container = $('#preMatchMatchSelect').parent().find('.select2-container');
+                select2Container.addClass('dark-mode-select2');
+            }
+        } else {
+            console.warn('⚠️ jQuery or Select2 not yet loaded');
+            setTimeout(initializeSelect2, 100);
+        }
     }
 
     function updatePenaltyUI() {
@@ -333,12 +390,13 @@
 
         const payload = {
             football_match_id: parseInt(matchId),
+            group_id: parseInt(preMatchGroupId),
             penalty_type: penaltyType.value,
-            penalty: penaltyValue,
-            penalty_points: penaltyType.value === 'POINTS' ? selectedPenaltyPoints : null
+            penalty_points: penaltyType.value === 'POINTS' ? (selectedPenaltyPoints === 'ALL' ? 5000 : parseInt(selectedPenaltyPoints)) : null,
+            penalty_description: penaltyType.value === 'CUSTOM_PENALTY' ? customPenalty.value : null
         };
 
-        fetch(`/api/pre-matches?group_id=${preMatchGroupId}`, {
+        fetch(`/api/pre-matches`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
