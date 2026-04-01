@@ -304,33 +304,16 @@
 
             resultsDiv.innerHTML = filtered.map(match => `
                 <div class="match-option" 
-                     data-value="${match.id}"
                      style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; font-size: 13px; transition: background 0.2s ease;"
                      onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#e5f3f0' }}'"
-                     onmouseout="this.style.background='transparent'">
+                     onmouseout="this.style.background='transparent'"
+                     onclick="selectMatchFromDropdown(${match.id}, '${match.home_team?.name || 'Equipo A'}', '${match.away_team?.name || 'Equipo B'}', '${match.kick_off_time || 'TBD'}')">
                     <strong>${match.home_team?.name || 'Equipo A'} vs ${match.away_team?.name || 'Equipo B'}</strong><br>
                     ${match.kick_off_time || 'Hora TBD'} · ${match.competition?.name || 'Competencia'}
                 </div>
             `).join('');
 
             resultsDiv.style.display = 'block';
-
-            // Add click handlers to options
-            document.querySelectorAll('.match-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    const matchId = this.getAttribute('data-value');
-                    const match = window.preMatchesData.find(m => m.id == matchId);
-                    
-                    if (match) {
-                        searchInput.value = `${match.home_team?.name} vs ${match.away_team?.name}`;
-                        hiddenSelect.value = matchId;
-                        selectedDisplay.textContent = `✅ ${match.home_team?.name} vs ${match.away_team?.name} (${match.kick_off_time})`;
-                        selectedDisplay.style.display = 'block';
-                        resultsDiv.style.display = 'none';
-                        console.log('✅ Match selected:', matchId);
-                    }
-                });
-            });
         });
 
         // Close results when clicking outside
@@ -402,6 +385,24 @@
                 ? (THEME.isDark ? 'rgba(0,222,176,0.15)' : '#e5f3f0')
                 : (THEME.isDark ? '#1a524e' : '#f5f5f5');
         });
+    };
+
+    window.selectMatchFromDropdown = function(matchId, homeTeam, awayTeam, kickOff) {
+        console.log('✅ selectMatchFromDropdown called with matchId:', matchId);
+        
+        const searchInput = document.getElementById('preMatchSearchInput');
+        const resultsDiv = document.getElementById('preMatchSearchResults');
+        const selectedDisplay = document.getElementById('selectedMatchDisplay');
+        const hiddenSelect = document.getElementById('preMatchMatchSelect');
+        
+        if (hiddenSelect && searchInput && selectedDisplay && resultsDiv) {
+            hiddenSelect.value = matchId;
+            searchInput.value = `${homeTeam} vs ${awayTeam}`;
+            selectedDisplay.textContent = `✅ ${homeTeam} vs ${awayTeam} (${kickOff})`;
+            selectedDisplay.style.display = 'block';
+            resultsDiv.style.display = 'none';
+            console.log('✅ Match stored - matchId:', hiddenSelect.value, 'element value:', matchId);
+        }
     };
 
     window.submitCreatePreMatch = function() {
