@@ -57,13 +57,13 @@
                         </label>
                     </div>
 
-                    <!-- CUSTOM PENALTY Option -->
+                    <!-- SOCIAL PENALTY Option -->
                     <div style="flex: 1; min-width: 120px;">
-                        <input type="radio" id="penaltyTypeCustom" name="penaltyType" value="CUSTOM_PENALTY"
+                        <input type="radio" id="penaltyTypeCustom" name="penaltyType" value="SOCIAL"
                                style="display: none;">
                         <label for="penaltyTypeCustom"
                                class="penalty-type-label"
-                               data-type="CUSTOM_PENALTY"
+                               data-type="SOCIAL"
                                style="display: block; text-align: center; padding: 12px 16px; border: 2px solid {{ $borderColor }}; border-radius: 8px; cursor: pointer; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; color: {{ $textSecondary }}; font-weight: 600; font-size: 13px; transition: all 0.2s ease;">
                             📝 Castigo Personalizado
                         </label>
@@ -102,7 +102,7 @@
                     </small>
                 </div>
 
-                <!-- CUSTOM PENALTY Details -->
+                <!-- SOCIAL PENALTY Details -->
                 <div id="customPenaltyDetails" style="display: none;">
                     <label style="display: block; font-weight: 700; font-size: 14px; margin-bottom: 12px; color: {{ $textPrimary }};">
                         📝 Describe el Castigo
@@ -320,7 +320,7 @@
         if (selectedValue === 'POINTS') {
             if (pointsDetails) pointsDetails.style.display = 'block';
             if (customDetails) customDetails.style.display = 'none';
-        } else if (selectedValue === 'CUSTOM_PENALTY') {
+        } else if (selectedValue === 'SOCIAL') {
             if (pointsDetails) pointsDetails.style.display = 'none';
             if (customDetails) customDetails.style.display = 'block';
         }
@@ -379,7 +379,7 @@
             return;
         }
 
-        if (penaltyType.value === 'CUSTOM_PENALTY' && !customPenalty?.value?.trim()) {
+        if (penaltyType.value === 'SOCIAL' && !customPenalty?.value?.trim()) {
             alert('Por favor describe el castigo personalizado');
             return;
         }
@@ -393,7 +393,7 @@
             group_id: parseInt(preMatchGroupId),
             penalty_type: penaltyType.value,
             penalty_points: penaltyType.value === 'POINTS' ? (selectedPenaltyPoints === 'ALL' ? 5000 : parseInt(selectedPenaltyPoints)) : null,
-            penalty_description: penaltyType.value === 'CUSTOM_PENALTY' ? customPenalty.value : null
+            penalty_description: penaltyType.value === 'SOCIAL' ? customPenalty.value : null
         };
 
         fetch(`/api/pre-matches`, {

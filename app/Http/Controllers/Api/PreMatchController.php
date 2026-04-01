@@ -48,11 +48,15 @@ class PreMatchController extends Controller
         $validated = $request->validate([
             'football_match_id' => 'required|exists:football_matches,id',
             'group_id' => 'required|exists:groups,id',
-            'penalty_type' => 'required|in:POINTS,CUSTOM_PENALTY',
+            'penalty_type' => 'required|in:POINTS,SOCIAL',
             'penalty_points' => 'nullable|integer|min:100|max:5000',
             'penalty_description' => 'nullable|string|max:500',
             'admin_notes' => 'nullable|string|max:1000',
         ]);
+
+        // Map frontend field to database column name
+        $validated['match_id'] = $validated['football_match_id'];
+        unset($validated['football_match_id']);
 
         $validated['created_by'] = auth()->id();
         $validated['status'] = 'pending';
