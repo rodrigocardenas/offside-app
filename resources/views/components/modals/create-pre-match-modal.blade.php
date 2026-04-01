@@ -36,10 +36,8 @@
                      style="display: none; position: absolute; background: {{ $isDark ? '#1a524e' : '#f5f5f5' }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; max-height: 200px; overflow-y: auto; z-index: 100; width: 460px; margin-top: -8px; padding: 4px 0;">
                 </div>
                 
-                <!-- Hidden Select for form submission -->
-                <select id="preMatchMatchSelect" style="display: none;">
-                    <option value="">-- Selecciona un partido --</option>
-                </select>
+                <!-- Hidden input for storing match_id -->
+                <input type="hidden" id="preMatchMatchSelect" value="" />
                 
                 <!-- Selected Match Display -->
                 <div id="selectedMatchDisplay" style="display: none; padding: 12px; border: 1px solid {{ $accentColor }}; border-radius: 8px; background: {{ $isDark ? 'rgba(0,222,176,0.1)' : '#e5f3f0' }}; color: {{ $textPrimary }}; font-size: 13px; font-weight: 600; margin-top: 8px;"></div>

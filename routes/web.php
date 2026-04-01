@@ -289,3 +289,183 @@ Route::get('/debug/test-prematch', function () {
     }
 });
 
+Route::get('/debug/modal', function () {
+    return view('components.modals.debug-prematch-modal');
+});
+
+Route::get('/debug/modal-test', function () {
+    return <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Pre Match Modal</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; background: #f5f5f5; }
+        button { padding: 10px 20px; margin: 10px 0; cursor: pointer; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 4px; }
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: slideUp 0.3s ease;
+        }
+        .modal-content {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            padding: 24px;
+        }
+        input[type="text"], .results {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 8px 0;
+        }
+        .results { max-height: 150px; overflow-y: auto; background: #f9f9f9; }
+        .match-item { padding: 8px; border-bottom: 1px solid #ddd; cursor: pointer; }
+        .match-item:hover { background: #e9f5ff; }
+        .display { padding: 12px; border: 1px solid #00deb0; border-radius: 4px; margin: 12px 0; background: #e5f3f0; display: none; }
+        .status-box { padding: 12px; background: #f0f0f0; border-radius: 4px; margin: 12px 0; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <h1>🧪 Debug Pre Match Modal Test</h1>
+    <p>Click "Open Modal" below, then:</p>
+    <ol>
+        <li>Type "Real" or "Liverpool" in search box</li>
+        <li>Click a match</li>
+        <li>Click Submit button</li>
+        <li>Check browser console (F12) for logs</li>
+    </ol>
+    <button onclick="openModal()">Open Modal</button>
+    <button onclick="alert('Check browser console (press F12) for detailed logs and values')">📋 Check Console (F12)</button>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <h2>🧪 DEBUG Modal</h2>
+            <input type="text" id="searchInput" placeholder="Type to search...">
+            <div id="results" class="results"></div>
+            <div id="display" class="display"></div>
+            <div class="status-box">
+                Hidden Input Value: <strong id="statusValue">(empty)</strong>
+            </div>
+            <div>
+                <input type="hidden" id="matchInput" value="">
+                <button onclick="submitForm()">Submit</button>
+                <button onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const matches = [
+            { id: 1, home: 'Real Madrid', away: 'Barcelona', time: '19:00', comp: 'La Liga' },
+            { id: 2, home: 'Liverpool', away: 'Manchester', time: '16:00', comp: 'Premier League' },
+            { id: 3, home: 'PSG', away: 'Monaco', time: '20:00', comp: 'Ligue 1' }
+        ];
+
+        function openModal() {
+            console.log('%c🎬 OPENING MODAL', 'color: blue; font-weight: bold; font-size: 14px');
+            document.getElementById('myModal').style.display = 'flex';
+            initSearch();
+        }
+
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+
+        function initSearch() {
+            console.log('%c🔍 INITIALIZING SEARCH', 'color: green; font-weight: bold; font-size: 14px');
+            const input = document.getElementById('searchInput');
+            input.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                const resultsDiv = document.getElementById('results');
+                
+                if (!query) {
+                    resultsDiv.style.display = 'none';
+                    return;
+                }
+
+                const filtered = matches.filter(m => {
+                    const text = `${m.home} ${m.away} ${m.comp}`.toLowerCase();
+                    return text.includes(query);
+                });
+
+                console.log(`%cFiltered: ${filtered.length} matches`, 'color: gray');
+                
+                if (filtered.length === 0) {
+                    resultsDiv.innerHTML = '<div style="padding: 8px;">No matches</div>';
+                    resultsDiv.style.display = 'block';
+                    return;
+                }
+
+                resultsDiv.innerHTML = filtered.map(m => `
+                    <div class="match-item" onclick="selectMatch(${m.id}, '${m.home}', '${m.away}', '${m.time}')">
+                        <strong>${m.home} vs ${m.away}</strong><br>
+                        <small>${m.time} · ${m.comp}</small>
+                    </div>
+                `).join('');
+                
+                resultsDiv.style.display = 'block';
+            });
+        }
+
+        window.selectMatch = function(matchId, home, away, time) {
+            console.log('%c✅ MATCH SELECTED', 'color: orange; font-weight: bold; font-size: 14px');
+            console.log('matchId:', matchId, '| type:', typeof matchId);
+            
+            const input = document.getElementById('matchInput');
+            const display = document.getElementById('display');
+            const status = document.getElementById('statusValue');
+            
+            input.value = matchId;
+            console.log('Set input.value to:', input.value);
+            console.log('Confirmed .value is:', input.value);
+            
+            display.textContent = `✅ ${home} vs ${away} (${time})`;
+            display.style.display = 'block';
+            status.textContent = input.value;
+            
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('searchInput').value = `${home} vs ${away}`;
+        };
+
+        window.submitForm = function() {
+            console.log('%c🚀 SUBMITTING FORM', 'color: red; font-weight: bold; font-size: 14px');
+            const input = document.getElementById('matchInput');
+            const value = input.value;
+            
+            console.log('Getting value from input...');
+            console.log('input.value:', value);
+            console.log('typeof:', typeof value);
+            console.log('length:', value ? value.length : 0);
+            console.log('Boolean(!value):', !value);
+            console.log('Boolean(!!value):', !!value);
+            
+            if (!value) {
+                console.error('%c❌ SUBMISSION FAILED - Empty value!', 'color: red; font-weight: bold');
+                alert('❌ ERROR: matchId is empty!\\nValue: "' + value + '"');
+                return;
+            }
+            
+            console.log('%c✅ SUCCESS - Value:', 'color: green; font-weight: bold', value);
+            alert('✅ SUCCESS! Submitted value: ' + value);
+        };
+    </script>
+</body>
+</html>
+HTML;
+});
+
