@@ -304,10 +304,14 @@
 
             resultsDiv.innerHTML = filtered.map(match => `
                 <div class="match-option" 
+                     data-match-id="${match.id}"
+                     data-home-team="${(match.home_team?.name || 'Equipo A').replace(/"/g, '&quot;')}"
+                     data-away-team="${(match.away_team?.name || 'Equipo B').replace(/"/g, '&quot;')}"
+                     data-kick-off="${match.kick_off_time || 'TBD'}"
                      style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid {{ $borderColor }}; color: {{ $textPrimary }}; font-size: 13px; transition: background 0.2s ease;"
                      onmouseover="this.style.background='{{ $isDark ? '#2a4a47' : '#e5f3f0' }}'"
                      onmouseout="this.style.background='transparent'"
-                     onclick="selectMatchFromDropdown(${match.id}, '${match.home_team?.name || 'Equipo A'}', '${match.away_team?.name || 'Equipo B'}', '${match.kick_off_time || 'TBD'}')">
+                     onclick="selectMatchFromDropdown(this)">
                     <strong>${match.home_team?.name || 'Equipo A'} vs ${match.away_team?.name || 'Equipo B'}</strong><br>
                     ${match.kick_off_time || 'Hora TBD'} · ${match.competition?.name || 'Competencia'}
                 </div>
@@ -387,7 +391,17 @@
         });
     };
 
-    window.selectMatchFromDropdown = function(matchId, homeTeam, awayTeam, kickOff) {
+    window.selectMatchFromDropdown = function(element) {
+        console.log('=== selectMatchFromDropdown called ===');
+        console.log('Element:', element);
+        console.log('Element type:', typeof element);
+        
+        const matchId = element.getAttribute('data-match-id');
+        const homeTeam = element.getAttribute('data-home-team');
+        const awayTeam = element.getAttribute('data-away-team');
+        const kickOff = element.getAttribute('data-kick-off');
+        
+        console.log('Extracted values:', {matchId, homeTeam, awayTeam, kickOff});
         console.log('✅ selectMatchFromDropdown called with matchId:', matchId);
         
         const searchInput = document.getElementById('preMatchSearchInput');
@@ -395,20 +409,42 @@
         const selectedDisplay = document.getElementById('selectedMatchDisplay');
         const hiddenSelect = document.getElementById('preMatchMatchSelect');
         
+        console.log('Elements found:', {
+            searchInput: !!searchInput,
+            resultsDiv: !!resultsDiv,
+            selectedDisplay: !!selectedDisplay,
+            hiddenSelect: !!hiddenSelect
+        });
+        
         if (hiddenSelect && searchInput && selectedDisplay && resultsDiv) {
             hiddenSelect.value = matchId;
             searchInput.value = `${homeTeam} vs ${awayTeam}`;
             selectedDisplay.textContent = `✅ ${homeTeam} vs ${awayTeam} (${kickOff})`;
             selectedDisplay.style.display = 'block';
             resultsDiv.style.display = 'none';
-            console.log('✅ Match stored - matchId:', hiddenSelect.value, 'element value:', matchId);
+            console.log('✅ Match stored - hiddenSelect.value is now:', hiddenSelect.value);
+            console.log('Element value attr:', hiddenSelect.getAttribute('value'));
+            console.log('All options in select:', hiddenSelect.innerHTML);
+        } else {
+            console.error('❌ One or more elements not found!');
         }
     };
 
     window.submitCreatePreMatch = function() {
+        console.log('=== submitCreatePreMatch called ===');
         const matchSelect = document.getElementById('preMatchMatchSelect');
         const penaltyType = document.querySelector('input[name="penaltyType"]:checked');
         const customPenalty = document.getElementById('penaltyDescription');
+
+        console.log('Form elements check:', {
+            matchSelect: !!matchSelect,
+            matchSelectId: matchSelect?.id,
+            matchSelectValue: matchSelect?.value,
+            matchSelectValueType: typeof matchSelect?.value,
+            matchSelectValueLength: matchSelect?.value?.length,
+            penaltyType: !!penaltyType,
+            customPenalty: !!customPenalty
+        });
 
         if (!matchSelect || !penaltyType) {
             alert('Error: Elementos del formulario no encontrados');
@@ -416,8 +452,15 @@
         }
 
         const matchId = matchSelect.value;
+        console.log('matchId extracted:', matchId);
+        console.log('matchId is truthy:', !!matchId);
+        console.log('matchId length:', matchId?.length);
+        console.log('matchId === "":', matchId === "");
+        console.log('!matchId:', !matchId);
+        
         if (!matchId) {
             alert('Por favor selecciona un partido');
+            console.error('❌ Empty matchId, showing alert');
             return;
         }
 
