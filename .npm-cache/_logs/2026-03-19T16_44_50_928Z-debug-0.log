@@ -1,0 +1,749 @@
+0 verbose cli /opt/homebrew/Cellar/node/25.6.0/bin/node /opt/homebrew/bin/npm
+1 info using npm@11.8.0
+2 info using node@v25.6.0
+3 silly config load:file:/opt/homebrew/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/pablo/offside-app/.npmrc
+5 silly config load:file:/Users/pablo/.npmrc
+6 silly config load:file:/opt/homebrew/etc/npmrc
+7 verbose title npm install
+8 verbose argv "install"
+9 verbose logfile logs-max:10 dir:/Users/pablo/offside-app/.npm-cache/_logs/2026-03-19T16_44_50_928Z-
+10 verbose logfile /Users/pablo/offside-app/.npm-cache/_logs/2026-03-19T16_44_50_928Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 silly idealTree buildDeps
+14 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/axios' ]
+15 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/brace-expansion' ]
+16 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/esbuild' ]
+17 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/follow-redirects' ]
+18 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/form-data' ]
+19 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/fs-extra' ]
+20 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/glob' ]
+21 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/laravel-vite-plugin' ]
+22 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/postcss' ]
+23 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/rimraf' ]
+24 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/rollup' ]
+25 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/tar-fs' ]
+26 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/tinyglobby' ]
+27 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/toastify-js' ]
+28 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/vite' ]
+29 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/xml2js' ]
+30 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@capacitor/cli' ]
+31 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@esbuild/darwin-arm64' ]
+32 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@ionic/utils-array' ]
+33 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@ionic/utils-object' ]
+34 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@ionic/utils-process' ]
+35 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@ionic/utils-stream' ]
+36 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@ionic/utils-subprocess' ]
+37 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@isaacs/balanced-match' ]
+38 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@isaacs/brace-expansion' ]
+39 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@rollup/rollup-darwin-arm64' ]
+40 silly reify mark retired [ '/Users/pablo/offside-app/node_modules/@types/estree' ]
+41 silly reify mark retired [
+41 silly reify   '/Users/pablo/offside-app/node_modules/autoprefixer',
+41 silly reify   '/Users/pablo/offside-app/node_modules/.bin/autoprefixer'
+41 silly reify ]
+42 silly reify mark retired [
+42 silly reify   '/Users/pablo/offside-app/node_modules/browserslist',
+42 silly reify   '/Users/pablo/offside-app/node_modules/.bin/browserslist'
+42 silly reify ]
+43 silly reify mark retired [
+43 silly reify   '/Users/pablo/offside-app/node_modules/cssesc',
+43 silly reify   '/Users/pablo/offside-app/node_modules/.bin/cssesc'
+43 silly reify ]
+44 silly reify mark retired [
+44 silly reify   '/Users/pablo/offside-app/node_modules/is-docker',
+44 silly reify   '/Users/pablo/offside-app/node_modules/.bin/is-docker'
+44 silly reify ]
+45 silly reify mark retired [
+45 silly reify   '/Users/pablo/offside-app/node_modules/jiti',
+45 silly reify   '/Users/pablo/offside-app/node_modules/.bin/jiti'
+45 silly reify ]
+46 silly reify mark retired [
+46 silly reify   '/Users/pablo/offside-app/node_modules/mkdirp',
+46 silly reify   '/Users/pablo/offside-app/node_modules/.bin/mkdirp'
+46 silly reify ]
+47 silly reify mark retired [
+47 silly reify   '/Users/pablo/offside-app/node_modules/native-run',
+47 silly reify   '/Users/pablo/offside-app/node_modules/.bin/native-run'
+47 silly reify ]
+48 silly reify mark retired [
+48 silly reify   '/Users/pablo/offside-app/node_modules/nanoid',
+48 silly reify   '/Users/pablo/offside-app/node_modules/.bin/nanoid'
+48 silly reify ]
+49 silly reify mark retired [
+49 silly reify   '/Users/pablo/offside-app/node_modules/prebuild-install',
+49 silly reify   '/Users/pablo/offside-app/node_modules/.bin/prebuild-install'
+49 silly reify ]
+50 silly reify mark retired [
+50 silly reify   '/Users/pablo/offside-app/node_modules/rc',
+50 silly reify   '/Users/pablo/offside-app/node_modules/.bin/rc'
+50 silly reify ]
+51 silly reify mark retired [
+51 silly reify   '/Users/pablo/offside-app/node_modules/resolve',
+51 silly reify   '/Users/pablo/offside-app/node_modules/.bin/resolve'
+51 silly reify ]
+52 silly reify mark retired [
+52 silly reify   '/Users/pablo/offside-app/node_modules/semver',
+52 silly reify   '/Users/pablo/offside-app/node_modules/.bin/semver'
+52 silly reify ]
+53 silly reify mark retired [
+53 silly reify   '/Users/pablo/offside-app/node_modules/sucrase',
+53 silly reify   '/Users/pablo/offside-app/node_modules/.bin/sucrase',
+53 silly reify   '/Users/pablo/offside-app/node_modules/.bin/sucrase-node'
+53 silly reify ]
+54 silly reify mark retired [
+54 silly reify   '/Users/pablo/offside-app/node_modules/tailwindcss',
+54 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tailwind',
+54 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tailwindcss'
+54 silly reify ]
+55 silly reify mark retired [
+55 silly reify   '/Users/pablo/offside-app/node_modules/tree-kill',
+55 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tree-kill'
+55 silly reify ]
+56 silly reify mark retired [
+56 silly reify   '/Users/pablo/offside-app/node_modules/typescript',
+56 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tsc',
+56 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tsserver'
+56 silly reify ]
+57 silly reify mark retired [
+57 silly reify   '/Users/pablo/offside-app/node_modules/update-browserslist-db',
+57 silly reify   '/Users/pablo/offside-app/node_modules/.bin/update-browserslist-db'
+57 silly reify ]
+58 silly reify mark retired [
+58 silly reify   '/Users/pablo/offside-app/node_modules/which',
+58 silly reify   '/Users/pablo/offside-app/node_modules/.bin/node-which'
+58 silly reify ]
+59 silly reify mark retired [
+59 silly reify   '/Users/pablo/offside-app/node_modules/yaml',
+59 silly reify   '/Users/pablo/offside-app/node_modules/.bin/yaml'
+59 silly reify ]
+60 silly reify mark retired [
+60 silly reify   '/Users/pablo/offside-app/node_modules/@grpc/proto-loader',
+60 silly reify   '/Users/pablo/offside-app/node_modules/.bin/proto-loader-gen-types'
+60 silly reify ]
+61 silly reify moves {
+61 silly reify   '/Users/pablo/offside-app/node_modules/axios': '/Users/pablo/offside-app/node_modules/.axios-InVAmxXw',
+61 silly reify   '/Users/pablo/offside-app/node_modules/brace-expansion': '/Users/pablo/offside-app/node_modules/.brace-expansion-KLgHlAat',
+61 silly reify   '/Users/pablo/offside-app/node_modules/esbuild': '/Users/pablo/offside-app/node_modules/.esbuild-OvPvG0GM',
+61 silly reify   '/Users/pablo/offside-app/node_modules/follow-redirects': '/Users/pablo/offside-app/node_modules/.follow-redirects-t2yuqZrc',
+61 silly reify   '/Users/pablo/offside-app/node_modules/form-data': '/Users/pablo/offside-app/node_modules/.form-data-FHsMJZxd',
+61 silly reify   '/Users/pablo/offside-app/node_modules/fs-extra': '/Users/pablo/offside-app/node_modules/.fs-extra-fLG0MbE2',
+61 silly reify   '/Users/pablo/offside-app/node_modules/glob': '/Users/pablo/offside-app/node_modules/.glob-C79xfDas',
+61 silly reify   '/Users/pablo/offside-app/node_modules/laravel-vite-plugin': '/Users/pablo/offside-app/node_modules/.laravel-vite-plugin-7A1ZYJU9',
+61 silly reify   '/Users/pablo/offside-app/node_modules/postcss': '/Users/pablo/offside-app/node_modules/.postcss-yLLOOU3X',
+61 silly reify   '/Users/pablo/offside-app/node_modules/rimraf': '/Users/pablo/offside-app/node_modules/.rimraf-jkL3QrkR',
+61 silly reify   '/Users/pablo/offside-app/node_modules/rollup': '/Users/pablo/offside-app/node_modules/.rollup-fmsKDKd4',
+61 silly reify   '/Users/pablo/offside-app/node_modules/tar-fs': '/Users/pablo/offside-app/node_modules/.tar-fs-hPivkxm8',
+61 silly reify   '/Users/pablo/offside-app/node_modules/tinyglobby': '/Users/pablo/offside-app/node_modules/.tinyglobby-GONmgZEn',
+61 silly reify   '/Users/pablo/offside-app/node_modules/toastify-js': '/Users/pablo/offside-app/node_modules/.toastify-js-Uer551p8',
+61 silly reify   '/Users/pablo/offside-app/node_modules/vite': '/Users/pablo/offside-app/node_modules/.vite-vSuPR5DR',
+61 silly reify   '/Users/pablo/offside-app/node_modules/xml2js': '/Users/pablo/offside-app/node_modules/.xml2js-ZgJkYV6f',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@capacitor/cli': '/Users/pablo/offside-app/node_modules/@capacitor/.cli-kVKq5y7s',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@esbuild/darwin-arm64': '/Users/pablo/offside-app/node_modules/@esbuild/.darwin-arm64-Qy3ynEEW',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@ionic/utils-array': '/Users/pablo/offside-app/node_modules/@ionic/.utils-array-SOaO8BHZ',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@ionic/utils-object': '/Users/pablo/offside-app/node_modules/@ionic/.utils-object-ZLy2XKlX',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@ionic/utils-process': '/Users/pablo/offside-app/node_modules/@ionic/.utils-process-gn41jjOY',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@ionic/utils-stream': '/Users/pablo/offside-app/node_modules/@ionic/.utils-stream-yltwtTir',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@ionic/utils-subprocess': '/Users/pablo/offside-app/node_modules/@ionic/.utils-subprocess-TW9zuH7Y',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@isaacs/balanced-match': '/Users/pablo/offside-app/node_modules/@isaacs/.balanced-match-2X4DqSr6',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@isaacs/brace-expansion': '/Users/pablo/offside-app/node_modules/@isaacs/.brace-expansion-xwv5KV6P',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@rollup/rollup-darwin-arm64': '/Users/pablo/offside-app/node_modules/@rollup/.rollup-darwin-arm64-um9ozStV',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@types/estree': '/Users/pablo/offside-app/node_modules/@types/.estree-dgJvxXzZ',
+61 silly reify   '/Users/pablo/offside-app/node_modules/autoprefixer': '/Users/pablo/offside-app/node_modules/.autoprefixer-DrsvV0Vu',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/autoprefixer': '/Users/pablo/offside-app/node_modules/.bin/.autoprefixer-7rEiiZhE',
+61 silly reify   '/Users/pablo/offside-app/node_modules/browserslist': '/Users/pablo/offside-app/node_modules/.browserslist-85jMA474',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/browserslist': '/Users/pablo/offside-app/node_modules/.bin/.browserslist-WQdBWbzH',
+61 silly reify   '/Users/pablo/offside-app/node_modules/cssesc': '/Users/pablo/offside-app/node_modules/.cssesc-H5dQwPRU',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/cssesc': '/Users/pablo/offside-app/node_modules/.bin/.cssesc-e5tygHG1',
+61 silly reify   '/Users/pablo/offside-app/node_modules/is-docker': '/Users/pablo/offside-app/node_modules/.is-docker-zdrPjxoC',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/is-docker': '/Users/pablo/offside-app/node_modules/.bin/.is-docker-1SM3OJJg',
+61 silly reify   '/Users/pablo/offside-app/node_modules/jiti': '/Users/pablo/offside-app/node_modules/.jiti-iQOLASgT',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/jiti': '/Users/pablo/offside-app/node_modules/.bin/.jiti-RO3tCjcL',
+61 silly reify   '/Users/pablo/offside-app/node_modules/mkdirp': '/Users/pablo/offside-app/node_modules/.mkdirp-7yOIW3vL',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/mkdirp': '/Users/pablo/offside-app/node_modules/.bin/.mkdirp-myyrWgvQ',
+61 silly reify   '/Users/pablo/offside-app/node_modules/native-run': '/Users/pablo/offside-app/node_modules/.native-run-Cri96U2h',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/native-run': '/Users/pablo/offside-app/node_modules/.bin/.native-run-c2Gj9507',
+61 silly reify   '/Users/pablo/offside-app/node_modules/nanoid': '/Users/pablo/offside-app/node_modules/.nanoid-8rDhYpTY',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/nanoid': '/Users/pablo/offside-app/node_modules/.bin/.nanoid-f1QW232N',
+61 silly reify   '/Users/pablo/offside-app/node_modules/prebuild-install': '/Users/pablo/offside-app/node_modules/.prebuild-install-cnfGI2Nh',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/prebuild-install': '/Users/pablo/offside-app/node_modules/.bin/.prebuild-install-N6963EFR',
+61 silly reify   '/Users/pablo/offside-app/node_modules/rc': '/Users/pablo/offside-app/node_modules/.rc-2nORadKf',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/rc': '/Users/pablo/offside-app/node_modules/.bin/.rc-uZaathDl',
+61 silly reify   '/Users/pablo/offside-app/node_modules/resolve': '/Users/pablo/offside-app/node_modules/.resolve-6vN44b4Y',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/resolve': '/Users/pablo/offside-app/node_modules/.bin/.resolve-SLPxJhhE',
+61 silly reify   '/Users/pablo/offside-app/node_modules/semver': '/Users/pablo/offside-app/node_modules/.semver-2dwVXcDC',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/semver': '/Users/pablo/offside-app/node_modules/.bin/.semver-zAeNhSi6',
+61 silly reify   '/Users/pablo/offside-app/node_modules/sucrase': '/Users/pablo/offside-app/node_modules/.sucrase-R780i5WT',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/sucrase': '/Users/pablo/offside-app/node_modules/.bin/.sucrase-Is9sSVXP',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/sucrase-node': '/Users/pablo/offside-app/node_modules/.bin/.sucrase-node-FEYBaJag',
+61 silly reify   '/Users/pablo/offside-app/node_modules/tailwindcss': '/Users/pablo/offside-app/node_modules/.tailwindcss-kuUCLBVI',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tailwind': '/Users/pablo/offside-app/node_modules/.bin/.tailwind-GSH8deL9',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tailwindcss': '/Users/pablo/offside-app/node_modules/.bin/.tailwindcss-uDPj7ai0',
+61 silly reify   '/Users/pablo/offside-app/node_modules/tree-kill': '/Users/pablo/offside-app/node_modules/.tree-kill-iVP0fl0c',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tree-kill': '/Users/pablo/offside-app/node_modules/.bin/.tree-kill-lxGQ5Wmi',
+61 silly reify   '/Users/pablo/offside-app/node_modules/typescript': '/Users/pablo/offside-app/node_modules/.typescript-CrhNWIpi',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tsc': '/Users/pablo/offside-app/node_modules/.bin/.tsc-rYu1nR2K',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/tsserver': '/Users/pablo/offside-app/node_modules/.bin/.tsserver-osKgiykJ',
+61 silly reify   '/Users/pablo/offside-app/node_modules/update-browserslist-db': '/Users/pablo/offside-app/node_modules/.update-browserslist-db-ARdkGg9N',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/update-browserslist-db': '/Users/pablo/offside-app/node_modules/.bin/.update-browserslist-db-4UVRqAEg',
+61 silly reify   '/Users/pablo/offside-app/node_modules/which': '/Users/pablo/offside-app/node_modules/.which-HOuBNWA4',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/node-which': '/Users/pablo/offside-app/node_modules/.bin/.node-which-9ZLBH8UK',
+61 silly reify   '/Users/pablo/offside-app/node_modules/yaml': '/Users/pablo/offside-app/node_modules/.yaml-si11p1DX',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/yaml': '/Users/pablo/offside-app/node_modules/.bin/.yaml-toVcD3Wy',
+61 silly reify   '/Users/pablo/offside-app/node_modules/@grpc/proto-loader': '/Users/pablo/offside-app/node_modules/@grpc/.proto-loader-HV0PHF9S',
+61 silly reify   '/Users/pablo/offside-app/node_modules/.bin/proto-loader-gen-types': '/Users/pablo/offside-app/node_modules/.bin/.proto-loader-gen-types-qTU77WsS'
+61 silly reify }
+62 silly audit bulk request {
+62 silly audit   '@alloc/quick-lru': [ '5.2.0' ],
+62 silly audit   '@capacitor-firebase/messaging': [ '6.3.1' ],
+62 silly audit   '@capacitor/android': [ '6.2.1' ],
+62 silly audit   '@capacitor/app': [ '6.0.3' ],
+62 silly audit   '@capacitor/app-launcher': [ '6.0.4' ],
+62 silly audit   '@capacitor/cli': [ '7.4.5' ],
+62 silly audit   commander: [ '12.1.0', '4.1.1' ],
+62 silly audit   '@capacitor/core': [ '6.2.1' ],
+62 silly audit   '@capacitor/device': [ '6.0.3' ],
+62 silly audit   '@capacitor/ios': [ '6.2.1' ],
+62 silly audit   '@esbuild/aix-ppc64': [ '0.27.3' ],
+62 silly audit   '@esbuild/android-arm': [ '0.27.3' ],
+62 silly audit   '@esbuild/android-arm64': [ '0.27.3' ],
+62 silly audit   '@esbuild/android-x64': [ '0.27.3' ],
+62 silly audit   '@esbuild/darwin-arm64': [ '0.27.3' ],
+62 silly audit   '@esbuild/darwin-x64': [ '0.27.3' ],
+62 silly audit   '@esbuild/freebsd-arm64': [ '0.27.3' ],
+62 silly audit   '@esbuild/freebsd-x64': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-arm': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-arm64': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-ia32': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-loong64': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-mips64el': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-ppc64': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-riscv64': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-s390x': [ '0.27.3' ],
+62 silly audit   '@esbuild/linux-x64': [ '0.27.3' ],
+62 silly audit   '@esbuild/netbsd-arm64': [ '0.27.3' ],
+62 silly audit   '@esbuild/netbsd-x64': [ '0.27.3' ],
+62 silly audit   '@esbuild/openbsd-arm64': [ '0.27.3' ],
+62 silly audit   '@esbuild/openbsd-x64': [ '0.27.3' ],
+62 silly audit   '@esbuild/openharmony-arm64': [ '0.27.3' ],
+62 silly audit   '@esbuild/sunos-x64': [ '0.27.3' ],
+62 silly audit   '@esbuild/win32-arm64': [ '0.27.3' ],
+62 silly audit   '@esbuild/win32-ia32': [ '0.27.3' ],
+62 silly audit   '@esbuild/win32-x64': [ '0.27.3' ],
+62 silly audit   '@firebase/ai': [ '1.4.0' ],
+62 silly audit   '@firebase/analytics': [ '0.10.16' ],
+62 silly audit   '@firebase/analytics-compat': [ '0.2.22' ],
+62 silly audit   '@firebase/analytics-types': [ '0.8.3' ],
+62 silly audit   '@firebase/app': [ '0.13.1' ],
+62 silly audit   '@firebase/app-check': [ '0.10.0' ],
+62 silly audit   '@firebase/app-check-compat': [ '0.3.25' ],
+62 silly audit   '@firebase/app-check-interop-types': [ '0.3.3' ],
+62 silly audit   '@firebase/app-check-types': [ '0.5.3' ],
+62 silly audit   '@firebase/app-compat': [ '0.4.1' ],
+62 silly audit   '@firebase/app-types': [ '0.9.3' ],
+62 silly audit   '@firebase/auth': [ '1.10.6' ],
+62 silly audit   '@firebase/auth-compat': [ '0.5.26' ],
+62 silly audit   '@firebase/auth-interop-types': [ '0.2.4' ],
+62 silly audit   '@firebase/auth-types': [ '0.13.0' ],
+62 silly audit   '@firebase/component': [ '0.6.17' ],
+62 silly audit   '@firebase/data-connect': [ '0.3.9' ],
+62 silly audit   '@firebase/database': [ '1.0.19' ],
+62 silly audit   '@firebase/database-compat': [ '2.0.10' ],
+62 silly audit   '@firebase/database-types': [ '1.0.14' ],
+62 silly audit   '@firebase/firestore': [ '4.7.17' ],
+62 silly audit   '@firebase/firestore-compat': [ '0.3.52' ],
+62 silly audit   '@firebase/firestore-types': [ '3.0.3' ],
+62 silly audit   '@firebase/functions': [ '0.12.8' ],
+62 silly audit   '@firebase/functions-compat': [ '0.3.25' ],
+62 silly audit   '@firebase/functions-types': [ '0.6.3' ],
+62 silly audit   '@firebase/installations': [ '0.6.17' ],
+62 silly audit   '@firebase/installations-compat': [ '0.2.17' ],
+62 silly audit   '@firebase/installations-types': [ '0.5.3' ],
+62 silly audit   '@firebase/logger': [ '0.4.4' ],
+62 silly audit   '@firebase/messaging': [ '0.12.21' ],
+62 silly audit   '@firebase/messaging-compat': [ '0.2.21' ],
+62 silly audit   '@firebase/messaging-interop-types': [ '0.2.3' ],
+62 silly audit   '@firebase/performance': [ '0.7.6' ],
+62 silly audit   '@firebase/performance-compat': [ '0.2.19' ],
+62 silly audit   '@firebase/performance-types': [ '0.2.3' ],
+62 silly audit   '@firebase/remote-config': [ '0.6.4' ],
+62 silly audit   '@firebase/remote-config-compat': [ '0.2.17' ],
+62 silly audit   '@firebase/remote-config-types': [ '0.4.0' ],
+62 silly audit   '@firebase/storage': [ '0.13.12' ],
+62 silly audit   '@firebase/storage-compat': [ '0.3.22' ],
+62 silly audit   '@firebase/storage-types': [ '0.8.3' ],
+62 silly audit   '@firebase/util': [ '1.12.0' ],
+62 silly audit   '@firebase/webchannel-wrapper': [ '1.0.3' ],
+62 silly audit   '@fortawesome/fontawesome-free': [ '6.7.2' ],
+62 silly audit   '@grpc/grpc-js': [ '1.9.15' ],
+62 silly audit   '@grpc/proto-loader': [ '0.7.15' ],
+62 silly audit   '@ionic/cli-framework-output': [ '2.2.8' ],
+62 silly audit   '@ionic/utils-array': [ '2.1.6' ],
+62 silly audit   '@ionic/utils-fs': [ '3.1.7' ],
+62 silly audit   'fs-extra': [ '9.1.0', '11.3.3' ],
+62 silly audit   '@ionic/utils-object': [ '2.1.6' ],
+62 silly audit   '@ionic/utils-process': [ '2.1.12' ],
+62 silly audit   'signal-exit': [ '3.0.7', '4.1.0' ],
+62 silly audit   '@ionic/utils-stream': [ '3.1.7' ],
+62 silly audit   '@ionic/utils-subprocess': [ '3.0.1' ],
+62 silly audit   '@ionic/utils-terminal': [ '2.3.5' ],
+62 silly audit   'ansi-regex': [ '5.0.1', '6.1.0' ],
+62 silly audit   'ansi-styles': [ '4.3.0', '6.2.1' ],
+62 silly audit   'emoji-regex': [ '8.0.0', '9.2.2' ],
+62 silly audit   'string-width': [ '4.2.3', '5.1.2' ],
+62 silly audit   'strip-ansi': [ '6.0.1', '7.1.0' ],
+62 silly audit   'wrap-ansi': [ '7.0.0', '8.1.0' ],
+62 silly audit   '@isaacs/balanced-match': [ '4.0.1' ],
+62 silly audit   '@isaacs/brace-expansion': [ '5.0.1' ],
+62 silly audit   '@isaacs/cliui': [ '8.0.2' ],
+62 silly audit   '@jridgewell/gen-mapping': [ '0.3.8' ],
+62 silly audit   '@jridgewell/resolve-uri': [ '3.1.2' ],
+62 silly audit   '@jridgewell/set-array': [ '1.2.1' ],
+62 silly audit   '@jridgewell/sourcemap-codec': [ '1.5.0' ],
+62 silly audit   '@jridgewell/trace-mapping': [ '0.3.25' ],
+62 silly audit   '@nodelib/fs.scandir': [ '2.1.5' ],
+62 silly audit   '@nodelib/fs.stat': [ '2.0.5' ],
+62 silly audit   '@nodelib/fs.walk': [ '1.2.8' ],
+62 silly audit   '@pkgjs/parseargs': [ '0.11.0' ],
+62 silly audit   '@protobufjs/aspromise': [ '1.1.2' ],
+62 silly audit   '@protobufjs/base64': [ '1.1.2' ],
+62 silly audit   '@protobufjs/codegen': [ '2.0.4' ],
+62 silly audit   '@protobufjs/eventemitter': [ '1.1.0' ],
+62 silly audit   '@protobufjs/fetch': [ '1.1.0' ],
+62 silly audit   '@protobufjs/float': [ '1.0.2' ],
+62 silly audit   '@protobufjs/inquire': [ '1.1.0' ],
+62 silly audit   '@protobufjs/path': [ '1.1.2' ],
+62 silly audit   '@protobufjs/pool': [ '1.1.0' ],
+62 silly audit   '@protobufjs/utf8': [ '1.1.0' ],
+62 silly audit   '@rollup/rollup-android-arm-eabi': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-android-arm64': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-darwin-arm64': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-darwin-x64': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-freebsd-arm64': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-freebsd-x64': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-arm-gnueabihf': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-arm-musleabihf': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-arm64-gnu': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-arm64-musl': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-loong64-gnu': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-loong64-musl': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-ppc64-gnu': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-ppc64-musl': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-riscv64-gnu': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-riscv64-musl': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-s390x-gnu': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-x64-gnu': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-linux-x64-musl': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-openbsd-x64': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-openharmony-arm64': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-win32-arm64-msvc': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-win32-ia32-msvc': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-win32-x64-gnu': [ '4.57.1' ],
+62 silly audit   '@rollup/rollup-win32-x64-msvc': [ '4.57.1' ],
+62 silly audit   '@types/estree': [ '1.0.8' ],
+62 silly audit   '@types/fs-extra': [ '8.1.5' ],
+62 silly audit   '@types/node': [ '22.15.30' ],
+62 silly audit   '@types/slice-ansi': [ '4.0.0' ],
+62 silly audit   '@vue/reactivity': [ '3.1.5' ],
+62 silly audit   '@vue/shared': [ '3.1.5' ],
+62 silly audit   '@xmldom/xmldom': [ '0.8.11' ],
+62 silly audit   alpinejs: [ '3.14.9' ],
+62 silly audit   'any-promise': [ '1.3.0' ],
+62 silly audit   anymatch: [ '3.1.3' ],
+62 silly audit   arg: [ '5.0.2' ],
+62 silly audit   'astral-regex': [ '2.0.0' ],
+62 silly audit   asynckit: [ '0.4.0' ],
+62 silly audit   'at-least-node': [ '1.0.0' ],
+62 silly audit   autoprefixer: [ '10.4.21' ],
+62 silly audit   axios: [ '1.13.5' ],
+62 silly audit   'balanced-match': [ '1.0.2' ],
+62 silly audit   'base64-js': [ '1.5.1' ],
+62 silly audit   'big-integer': [ '1.6.52' ],
+62 silly audit   'binary-extensions': [ '2.3.0' ],
+62 silly audit   bl: [ '4.1.0' ],
+62 silly audit   'bplist-parser': [ '0.3.2' ],
+62 silly audit   'brace-expansion': [ '2.0.2' ],
+62 silly audit   braces: [ '3.0.3' ],
+62 silly audit   browserslist: [ '4.24.4' ],
+62 silly audit   buffer: [ '5.7.1' ],
+62 silly audit   'buffer-crc32': [ '0.2.13' ],
+62 silly audit   'call-bind-apply-helpers': [ '1.0.2' ],
+62 silly audit   'camelcase-css': [ '2.0.1' ],
+62 silly audit   'caniuse-lite': [ '1.0.30001715' ],
+62 silly audit   canvas: [ '3.1.0' ],
+62 silly audit   chokidar: [ '3.6.0' ],
+62 silly audit   'glob-parent': [ '5.1.2', '6.0.2' ],
+62 silly audit   chownr: [ '1.1.4', '2.0.0' ],
+62 silly audit   cliui: [ '8.0.1' ],
+62 silly audit   'color-convert': [ '2.0.1' ],
+62 silly audit   'color-name': [ '1.1.4' ],
+62 silly audit   'combined-stream': [ '1.0.8' ],
+62 silly audit   'cross-spawn': [ '7.0.6' ],
+62 silly audit   cssesc: [ '3.0.0' ],
+62 silly audit   debug: [ '4.4.3' ],
+62 silly audit   'decompress-response': [ '6.0.0' ],
+62 silly audit   'deep-extend': [ '0.6.0' ],
+62 silly audit   'define-lazy-prop': [ '2.0.0' ],
+62 silly audit   'delayed-stream': [ '1.0.0' ],
+62 silly audit   'detect-libc': [ '2.0.4' ],
+62 silly audit   didyoumean: [ '1.2.2' ],
+62 silly audit   dlv: [ '1.1.3' ],
+62 silly audit   dotenv: [ '16.6.1' ],
+62 silly audit   'dunder-proto': [ '1.0.1' ],
+62 silly audit   eastasianwidth: [ '0.2.0' ],
+62 silly audit   'electron-to-chromium': [ '1.5.140' ],
+62 silly audit   elementtree: [ '0.1.7' ],
+62 silly audit   'end-of-stream': [ '1.4.4' ],
+62 silly audit   'env-paths': [ '2.2.1' ],
+62 silly audit   'es-define-property': [ '1.0.1' ],
+62 silly audit   'es-errors': [ '1.3.0' ],
+62 silly audit   'es-object-atoms': [ '1.1.1' ],
+62 silly audit   'es-set-tostringtag': [ '2.1.0' ],
+62 silly audit   esbuild: [ '0.27.3' ],
+62 silly audit   escalade: [ '3.2.0' ],
+62 silly audit   'expand-template': [ '2.0.3' ],
+62 silly audit   'fast-glob': [ '3.3.3' ],
+62 silly audit   fastq: [ '1.19.1' ],
+62 silly audit   'faye-websocket': [ '0.11.4' ],
+62 silly audit   'fd-slicer': [ '1.1.0' ],
+62 silly audit   'fill-range': [ '7.1.1' ],
+62 silly audit   firebase: [ '11.9.0' ],
+62 silly audit   'follow-redirects': [ '1.15.11' ],
+62 silly audit   'foreground-child': [ '3.3.1' ],
+62 silly audit   'form-data': [ '4.0.5' ],
+62 silly audit   'fraction.js': [ '4.3.7' ],
+62 silly audit   'fs-constants': [ '1.0.0' ],
+62 silly audit   'fs-minipass': [ '2.1.0' ],
+62 silly audit   minipass: [ '3.3.6', '7.1.2', '5.0.0' ],
+62 silly audit   fsevents: [ '2.3.3' ],
+62 silly audit   'function-bind': [ '1.1.2' ],
+62 silly audit   'get-caller-file': [ '2.0.5' ],
+62 silly audit   'get-intrinsic': [ '1.3.0' ],
+62 silly audit   'get-proto': [ '1.0.1' ],
+62 silly audit   'github-from-package': [ '0.0.0' ],
+62 silly audit   glob: [ '10.5.0', '13.0.1' ],
+62 silly audit   gopd: [ '1.2.0' ],
+62 silly audit   'graceful-fs': [ '4.2.11' ],
+62 silly audit   'has-symbols': [ '1.1.0' ],
+62 silly audit   'has-tostringtag': [ '1.0.2' ],
+62 silly audit   hasown: [ '2.0.2' ],
+62 silly audit   'http-parser-js': [ '0.5.10' ],
+62 silly audit   idb: [ '7.1.1' ],
+62 silly audit   ieee754: [ '1.2.1' ],
+62 silly audit   inherits: [ '2.0.4' ],
+62 silly audit   ini: [ '1.3.8', '4.1.3' ],
+62 silly audit   'is-binary-path': [ '2.1.0' ],
+62 silly audit   'is-core-module': [ '2.16.1' ],
+62 silly audit   'is-docker': [ '2.2.1' ],
+62 silly audit   'is-extglob': [ '2.1.1' ],
+62 silly audit   'is-fullwidth-code-point': [ '3.0.0' ],
+62 silly audit   'is-glob': [ '4.0.3' ],
+62 silly audit   'is-number': [ '7.0.0' ],
+62 silly audit   'is-wsl': [ '2.2.0' ],
+62 silly audit   isexe: [ '2.0.0' ],
+62 silly audit   jackspeak: [ '3.4.3' ],
+62 silly audit   jiti: [ '1.21.7' ],
+62 silly audit   jsonfile: [ '6.2.0' ],
+62 silly audit   kleur: [ '4.1.5', '3.0.3' ],
+62 silly audit   'laravel-vite-plugin': [ '2.1.0' ],
+62 silly audit   lilconfig: [ '3.1.3' ],
+62 silly audit   'lines-and-columns': [ '1.2.4' ],
+62 silly audit   'lodash.camelcase': [ '4.3.0' ],
+62 silly audit   long: [ '5.3.2' ],
+62 silly audit   'lru-cache': [ '10.4.3', '11.2.5' ],
+62 silly audit   'math-intrinsics': [ '1.1.0' ],
+62 silly audit   merge2: [ '1.4.1' ],
+62 silly audit   micromatch: [ '4.0.8' ],
+62 silly audit   'mime-db': [ '1.52.0' ],
+62 silly audit   'mime-types': [ '2.1.35' ],
+62 silly audit   'mimic-response': [ '3.1.0' ],
+62 silly audit   minimatch: [ '9.0.5', '10.1.2' ],
+62 silly audit   minimist: [ '1.2.8' ],
+62 silly audit   minizlib: [ '2.1.2' ],
+62 silly audit   mkdirp: [ '1.0.4' ],
+62 silly audit   'mkdirp-classic': [ '0.5.3' ],
+62 silly audit   ms: [ '2.1.3' ],
+62 silly audit   mz: [ '2.7.0' ],
+62 silly audit   nanoid: [ '3.3.11' ],
+62 silly audit   'napi-build-utils': [ '2.0.0' ],
+62 silly audit   'native-run': [ '2.0.3' ],
+62 silly audit   'node-abi': [ '3.75.0' ],
+62 silly audit   'node-addon-api': [ '7.1.1' ],
+62 silly audit   'node-releases': [ '2.0.19' ],
+62 silly audit   'normalize-path': [ '3.0.0' ],
+62 silly audit   'normalize-range': [ '0.1.2' ],
+62 silly audit   'object-assign': [ '4.1.1' ],
+62 silly audit   'object-hash': [ '3.0.0' ],
+62 silly audit   once: [ '1.4.0' ],
+62 silly audit   open: [ '8.4.2' ],
+62 silly audit   'package-json-from-dist': [ '1.0.1' ],
+62 silly audit   'path-key': [ '3.1.1' ],
+62 silly audit   'path-parse': [ '1.0.7' ],
+62 silly audit   'path-scurry': [ '1.11.1', '2.0.1' ],
+62 silly audit   pend: [ '1.2.0' ],
+62 silly audit   picocolors: [ '1.1.1' ],
+62 silly audit   picomatch: [ '2.3.1', '4.0.3' ],
+62 silly audit   pify: [ '2.3.0' ],
+62 silly audit   pirates: [ '4.0.7' ],
+62 silly audit   plist: [ '3.1.0' ],
+62 silly audit   postcss: [ '8.5.6' ],
+62 silly audit   'postcss-import': [ '15.1.0' ],
+62 silly audit   'postcss-js': [ '4.0.1' ],
+62 silly audit   'postcss-load-config': [ '4.0.2' ],
+62 silly audit   'postcss-nested': [ '6.2.0' ],
+62 silly audit   'postcss-selector-parser': [ '6.1.2' ],
+62 silly audit   'postcss-value-parser': [ '4.2.0' ],
+62 silly audit   'prebuild-install': [ '7.1.3' ],
+62 silly audit   prompts: [ '2.4.2' ],
+62 silly audit   protobufjs: [ '7.5.3' ],
+62 silly audit   'proxy-from-env': [ '1.1.0' ],
+62 silly audit   pump: [ '3.0.2' ],
+62 silly audit   'queue-microtask': [ '1.2.3' ],
+62 silly audit   rc: [ '1.2.8' ],
+62 silly audit   'read-cache': [ '1.0.0' ],
+62 silly audit   'readable-stream': [ '3.6.2' ],
+62 silly audit   readdirp: [ '3.6.0' ],
+62 silly audit   'require-directory': [ '2.1.1' ],
+62 silly audit   resolve: [ '1.22.10' ],
+62 silly audit   reusify: [ '1.1.0' ],
+62 silly audit   rimraf: [ '6.1.2' ],
+62 silly audit   rollup: [ '4.57.1' ],
+62 silly audit   'run-parallel': [ '1.2.0' ],
+62 silly audit   'safe-buffer': [ '5.2.1' ],
+62 silly audit   sax: [ '1.1.4' ],
+62 silly audit   semver: [ '7.7.1' ],
+62 silly audit   'shebang-command': [ '2.0.0' ],
+62 silly audit   'shebang-regex': [ '3.0.0' ],
+62 silly audit   'simple-concat': [ '1.0.1' ],
+62 silly audit   'simple-get': [ '4.0.1' ],
+62 silly audit   sisteransi: [ '1.0.5' ],
+62 silly audit   'slice-ansi': [ '4.0.0' ],
+62 silly audit   'source-map-js': [ '1.2.1' ],
+62 silly audit   split2: [ '4.2.0' ],
+62 silly audit   string_decoder: [ '1.3.0' ],
+62 silly audit   'strip-json-comments': [ '2.0.1' ],
+62 silly audit   sucrase: [ '3.35.0' ],
+62 silly audit   'supports-preserve-symlinks-flag': [ '1.0.0' ],
+62 silly audit   tailwindcss: [ '3.4.17' ],
+62 silly audit   tar: [ '6.2.1' ],
+62 silly audit   'tar-fs': [ '2.1.4' ],
+62 silly audit   'tar-stream': [ '2.2.0' ],
+62 silly audit   thenify: [ '3.3.1' ],
+62 silly audit   'thenify-all': [ '1.6.0' ],
+62 silly audit   through2: [ '4.0.2' ],
+62 silly audit   tinyglobby: [ '0.2.15' ],
+62 silly audit   fdir: [ '6.5.0' ],
+62 silly audit   'to-regex-range': [ '5.0.1' ],
+62 silly audit   'toastify-js': [ '1.12.0' ],
+62 silly audit   'tree-kill': [ '1.2.2' ],
+62 silly audit   'ts-interface-checker': [ '0.1.13' ],
+62 silly audit   tslib: [ '2.8.1' ],
+62 silly audit   'tunnel-agent': [ '0.6.0' ],
+62 silly audit   typescript: [ '5.9.3' ],
+62 silly audit   'undici-types': [ '6.21.0' ],
+62 silly audit   universalify: [ '2.0.1' ],
+62 silly audit   untildify: [ '4.0.0' ],
+62 silly audit   'update-browserslist-db': [ '1.1.3' ],
+62 silly audit   'util-deprecate': [ '1.0.2' ],
+62 silly audit   vite: [ '7.3.1' ],
+62 silly audit   'vite-plugin-full-reload': [ '1.2.0' ],
+62 silly audit   'web-vitals': [ '4.2.4' ],
+62 silly audit   'websocket-driver': [ '0.7.4' ],
+62 silly audit   'websocket-extensions': [ '0.1.4' ],
+62 silly audit   which: [ '2.0.2' ],
+62 silly audit   wrappy: [ '1.0.2' ],
+62 silly audit   xml2js: [ '0.6.2' ],
+62 silly audit   xmlbuilder: [ '11.0.1', '15.1.1' ],
+62 silly audit   y18n: [ '5.0.8' ],
+62 silly audit   yallist: [ '4.0.0' ],
+62 silly audit   yaml: [ '2.7.1' ],
+62 silly audit   yargs: [ '17.7.2' ],
+62 silly audit   'yargs-parser': [ '21.1.1' ],
+62 silly audit   yauzl: [ '2.10.0' ]
+62 silly audit }
+63 verbose audit error FetchError: request to https://registry.npmjs.org/-/npm/v1/security/advisories/bulk failed, reason: getaddrinfo ENOTFOUND registry.npmjs.org
+63 verbose audit error     at ClientRequest.<anonymous> (/opt/homebrew/lib/node_modules/npm/node_modules/minipass-fetch/lib/index.js:130:14)
+63 verbose audit error     at ClientRequest.emit (node:events:508:20)
+63 verbose audit error     at emitErrorEvent (node:_http_client:108:11)
+63 verbose audit error     at _destroy (node:_http_client:963:9)
+63 verbose audit error     at onSocketNT (node:_http_client:983:5)
+63 verbose audit error     at process.processTicksAndRejections (node:internal/process/task_queues:91:21) {
+63 verbose audit error   code: 'ENOTFOUND',
+63 verbose audit error   errno: 'ENOTFOUND',
+63 verbose audit error   syscall: 'getaddrinfo',
+63 verbose audit error   hostname: 'registry.npmjs.org',
+63 verbose audit error   type: 'system'
+63 verbose audit error }
+64 silly audit error undefined
+65 silly audit report null
+66 http cache which@https://registry.npmjs.org/which/-/which-2.0.2.tgz 1ms (cache hit)
+67 http cache yaml@https://registry.npmjs.org/yaml/-/yaml-2.7.1.tgz 0ms (cache hit)
+68 http cache @grpc/proto-loader@https://registry.npmjs.org/@grpc/proto-loader/-/proto-loader-0.7.15.tgz 0ms (cache hit)
+69 http cache typescript@https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz 0ms (cache hit)
+70 http cache update-browserslist-db@https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.1.3.tgz 0ms (cache hit)
+71 http cache sucrase@https://registry.npmjs.org/sucrase/-/sucrase-3.35.0.tgz 0ms (cache hit)
+72 http cache tree-kill@https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz 0ms (cache hit)
+73 http cache tailwindcss@https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.17.tgz 0ms (cache hit)
+74 http cache semver@https://registry.npmjs.org/semver/-/semver-7.7.1.tgz 0ms (cache hit)
+75 http cache resolve@https://registry.npmjs.org/resolve/-/resolve-1.22.10.tgz 0ms (cache hit)
+76 http cache rc@https://registry.npmjs.org/rc/-/rc-1.2.8.tgz 0ms (cache hit)
+77 http cache prebuild-install@https://registry.npmjs.org/prebuild-install/-/prebuild-install-7.1.3.tgz 0ms (cache hit)
+78 http cache nanoid@https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz 0ms (cache hit)
+79 http cache mkdirp@https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz 0ms (cache hit)
+80 http cache native-run@https://registry.npmjs.org/native-run/-/native-run-2.0.3.tgz 0ms (cache hit)
+81 http cache browserslist@https://registry.npmjs.org/browserslist/-/browserslist-4.24.4.tgz 0ms (cache hit)
+82 http cache is-docker@https://registry.npmjs.org/is-docker/-/is-docker-2.2.1.tgz 0ms (cache hit)
+83 http cache cssesc@https://registry.npmjs.org/cssesc/-/cssesc-3.0.0.tgz 0ms (cache hit)
+84 http cache @types/estree@https://registry.npmjs.org/@types/estree/-/estree-1.0.8.tgz 0ms (cache hit)
+85 http cache autoprefixer@https://registry.npmjs.org/autoprefixer/-/autoprefixer-10.4.21.tgz 0ms (cache hit)
+86 http cache jiti@https://registry.npmjs.org/jiti/-/jiti-1.21.7.tgz 0ms (cache hit)
+87 http cache @isaacs/balanced-match@https://registry.npmjs.org/@isaacs/balanced-match/-/balanced-match-4.0.1.tgz 0ms (cache hit)
+88 http cache @rollup/rollup-darwin-arm64@https://registry.npmjs.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.57.1.tgz 0ms (cache hit)
+89 http cache @isaacs/brace-expansion@https://registry.npmjs.org/@isaacs/brace-expansion/-/brace-expansion-5.0.1.tgz 0ms (cache hit)
+90 http cache @ionic/utils-subprocess@https://registry.npmjs.org/@ionic/utils-subprocess/-/utils-subprocess-3.0.1.tgz 0ms (cache hit)
+91 http cache @ionic/utils-stream@https://registry.npmjs.org/@ionic/utils-stream/-/utils-stream-3.1.7.tgz 0ms (cache hit)
+92 http cache @esbuild/darwin-arm64@https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.27.3.tgz 0ms (cache hit)
+93 http cache @ionic/utils-array@https://registry.npmjs.org/@ionic/utils-array/-/utils-array-2.1.6.tgz 0ms (cache hit)
+94 http cache @ionic/utils-object@https://registry.npmjs.org/@ionic/utils-object/-/utils-object-2.1.6.tgz 0ms (cache hit)
+95 http cache @ionic/utils-process@https://registry.npmjs.org/@ionic/utils-process/-/utils-process-2.1.12.tgz 0ms (cache hit)
+96 http cache @capacitor/cli@https://registry.npmjs.org/@capacitor/cli/-/cli-7.4.5.tgz 0ms (cache hit)
+97 http cache xml2js@https://registry.npmjs.org/xml2js/-/xml2js-0.6.2.tgz 0ms (cache hit)
+98 http cache vite@https://registry.npmjs.org/vite/-/vite-7.3.1.tgz 0ms (cache hit)
+99 http cache rollup@https://registry.npmjs.org/rollup/-/rollup-4.57.1.tgz 0ms (cache hit)
+100 http cache tar-fs@https://registry.npmjs.org/tar-fs/-/tar-fs-2.1.4.tgz 0ms (cache hit)
+101 http cache tinyglobby@https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.15.tgz 0ms (cache hit)
+102 http cache rimraf@https://registry.npmjs.org/rimraf/-/rimraf-6.1.2.tgz 0ms (cache hit)
+103 http cache toastify-js@https://registry.npmjs.org/toastify-js/-/toastify-js-1.12.0.tgz 0ms (cache hit)
+104 http cache postcss@https://registry.npmjs.org/postcss/-/postcss-8.5.6.tgz 0ms (cache hit)
+105 http cache glob@https://registry.npmjs.org/glob/-/glob-10.5.0.tgz 0ms (cache hit)
+106 http cache laravel-vite-plugin@https://registry.npmjs.org/laravel-vite-plugin/-/laravel-vite-plugin-2.1.0.tgz 0ms (cache hit)
+107 http cache follow-redirects@https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.11.tgz 0ms (cache hit)
+108 http cache fs-extra@https://registry.npmjs.org/fs-extra/-/fs-extra-11.3.3.tgz 0ms (cache hit)
+109 http cache axios@https://registry.npmjs.org/axios/-/axios-1.13.5.tgz 0ms (cache hit)
+110 http cache brace-expansion@https://registry.npmjs.org/brace-expansion/-/brace-expansion-2.0.2.tgz 0ms (cache hit)
+111 http cache picomatch@https://registry.npmjs.org/picomatch/-/picomatch-4.0.3.tgz 0ms (cache hit)
+112 http cache fdir@https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz 0ms (cache hit)
+113 http cache picomatch@https://registry.npmjs.org/picomatch/-/picomatch-4.0.3.tgz 0ms (cache hit)
+114 http cache commander@https://registry.npmjs.org/commander/-/commander-12.1.0.tgz 0ms (cache hit)
+115 http cache fdir@https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz 0ms (cache hit)
+116 http cache esbuild@https://registry.npmjs.org/esbuild/-/esbuild-0.27.3.tgz 0ms (cache hit)
+117 http cache path-scurry@https://registry.npmjs.org/path-scurry/-/path-scurry-2.0.1.tgz 0ms (cache hit)
+118 http cache form-data@https://registry.npmjs.org/form-data/-/form-data-4.0.5.tgz 0ms (cache hit)
+119 http cache minimatch@https://registry.npmjs.org/minimatch/-/minimatch-10.1.2.tgz 0ms (cache hit)
+120 http cache lru-cache@https://registry.npmjs.org/lru-cache/-/lru-cache-11.2.5.tgz 0ms (cache hit)
+121 silly tarball no local data for which@https://registry.npmjs.org/which/-/which-2.0.2.tgz. Extracting by manifest.
+122 silly tarball no local data for yaml@https://registry.npmjs.org/yaml/-/yaml-2.7.1.tgz. Extracting by manifest.
+123 silly tarball no local data for @grpc/proto-loader@https://registry.npmjs.org/@grpc/proto-loader/-/proto-loader-0.7.15.tgz. Extracting by manifest.
+124 silly tarball no local data for typescript@https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz. Extracting by manifest.
+125 http cache glob@https://registry.npmjs.org/glob/-/glob-13.0.1.tgz 0ms (cache hit)
+126 silly tarball no local data for update-browserslist-db@https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.1.3.tgz. Extracting by manifest.
+127 silly tarball no local data for sucrase@https://registry.npmjs.org/sucrase/-/sucrase-3.35.0.tgz. Extracting by manifest.
+128 silly tarball no local data for tree-kill@https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz. Extracting by manifest.
+129 silly tarball no local data for tailwindcss@https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.17.tgz. Extracting by manifest.
+130 silly tarball no local data for semver@https://registry.npmjs.org/semver/-/semver-7.7.1.tgz. Extracting by manifest.
+131 silly tarball no local data for resolve@https://registry.npmjs.org/resolve/-/resolve-1.22.10.tgz. Extracting by manifest.
+132 silly tarball no local data for rc@https://registry.npmjs.org/rc/-/rc-1.2.8.tgz. Extracting by manifest.
+133 silly tarball no local data for prebuild-install@https://registry.npmjs.org/prebuild-install/-/prebuild-install-7.1.3.tgz. Extracting by manifest.
+134 silly tarball no local data for nanoid@https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz. Extracting by manifest.
+135 silly tarball no local data for mkdirp@https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz. Extracting by manifest.
+136 silly tarball no local data for native-run@https://registry.npmjs.org/native-run/-/native-run-2.0.3.tgz. Extracting by manifest.
+137 silly tarball no local data for browserslist@https://registry.npmjs.org/browserslist/-/browserslist-4.24.4.tgz. Extracting by manifest.
+138 silly tarball no local data for is-docker@https://registry.npmjs.org/is-docker/-/is-docker-2.2.1.tgz. Extracting by manifest.
+139 silly tarball no local data for cssesc@https://registry.npmjs.org/cssesc/-/cssesc-3.0.0.tgz. Extracting by manifest.
+140 silly tarball no local data for @types/estree@https://registry.npmjs.org/@types/estree/-/estree-1.0.8.tgz. Extracting by manifest.
+141 silly tarball no local data for autoprefixer@https://registry.npmjs.org/autoprefixer/-/autoprefixer-10.4.21.tgz. Extracting by manifest.
+142 silly tarball no local data for jiti@https://registry.npmjs.org/jiti/-/jiti-1.21.7.tgz. Extracting by manifest.
+143 silly tarball no local data for @isaacs/balanced-match@https://registry.npmjs.org/@isaacs/balanced-match/-/balanced-match-4.0.1.tgz. Extracting by manifest.
+144 silly tarball no local data for @rollup/rollup-darwin-arm64@https://registry.npmjs.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.57.1.tgz. Extracting by manifest.
+145 silly tarball no local data for @isaacs/brace-expansion@https://registry.npmjs.org/@isaacs/brace-expansion/-/brace-expansion-5.0.1.tgz. Extracting by manifest.
+146 silly tarball no local data for @ionic/utils-subprocess@https://registry.npmjs.org/@ionic/utils-subprocess/-/utils-subprocess-3.0.1.tgz. Extracting by manifest.
+147 silly tarball no local data for @ionic/utils-stream@https://registry.npmjs.org/@ionic/utils-stream/-/utils-stream-3.1.7.tgz. Extracting by manifest.
+148 silly tarball no local data for @esbuild/darwin-arm64@https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.27.3.tgz. Extracting by manifest.
+149 silly tarball no local data for @ionic/utils-array@https://registry.npmjs.org/@ionic/utils-array/-/utils-array-2.1.6.tgz. Extracting by manifest.
+150 silly tarball no local data for @ionic/utils-object@https://registry.npmjs.org/@ionic/utils-object/-/utils-object-2.1.6.tgz. Extracting by manifest.
+151 silly tarball no local data for @ionic/utils-process@https://registry.npmjs.org/@ionic/utils-process/-/utils-process-2.1.12.tgz. Extracting by manifest.
+152 silly tarball no local data for @capacitor/cli@https://registry.npmjs.org/@capacitor/cli/-/cli-7.4.5.tgz. Extracting by manifest.
+153 silly tarball no local data for xml2js@https://registry.npmjs.org/xml2js/-/xml2js-0.6.2.tgz. Extracting by manifest.
+154 silly tarball no local data for vite@https://registry.npmjs.org/vite/-/vite-7.3.1.tgz. Extracting by manifest.
+155 silly tarball no local data for rollup@https://registry.npmjs.org/rollup/-/rollup-4.57.1.tgz. Extracting by manifest.
+156 silly tarball no local data for tar-fs@https://registry.npmjs.org/tar-fs/-/tar-fs-2.1.4.tgz. Extracting by manifest.
+157 silly tarball no local data for tinyglobby@https://registry.npmjs.org/tinyglobby/-/tinyglobby-0.2.15.tgz. Extracting by manifest.
+158 silly tarball no local data for rimraf@https://registry.npmjs.org/rimraf/-/rimraf-6.1.2.tgz. Extracting by manifest.
+159 silly tarball no local data for toastify-js@https://registry.npmjs.org/toastify-js/-/toastify-js-1.12.0.tgz. Extracting by manifest.
+160 silly tarball no local data for postcss@https://registry.npmjs.org/postcss/-/postcss-8.5.6.tgz. Extracting by manifest.
+161 silly tarball no local data for glob@https://registry.npmjs.org/glob/-/glob-10.5.0.tgz. Extracting by manifest.
+162 silly tarball no local data for laravel-vite-plugin@https://registry.npmjs.org/laravel-vite-plugin/-/laravel-vite-plugin-2.1.0.tgz. Extracting by manifest.
+163 silly tarball no local data for follow-redirects@https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.11.tgz. Extracting by manifest.
+164 silly tarball no local data for fs-extra@https://registry.npmjs.org/fs-extra/-/fs-extra-11.3.3.tgz. Extracting by manifest.
+165 silly tarball no local data for axios@https://registry.npmjs.org/axios/-/axios-1.13.5.tgz. Extracting by manifest.
+166 silly tarball no local data for brace-expansion@https://registry.npmjs.org/brace-expansion/-/brace-expansion-2.0.2.tgz. Extracting by manifest.
+167 silly tarball no local data for picomatch@https://registry.npmjs.org/picomatch/-/picomatch-4.0.3.tgz. Extracting by manifest.
+168 silly tarball no local data for fdir@https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz. Extracting by manifest.
+169 silly tarball no local data for picomatch@https://registry.npmjs.org/picomatch/-/picomatch-4.0.3.tgz. Extracting by manifest.
+170 silly tarball no local data for commander@https://registry.npmjs.org/commander/-/commander-12.1.0.tgz. Extracting by manifest.
+171 silly tarball no local data for fdir@https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz. Extracting by manifest.
+172 silly tarball no local data for esbuild@https://registry.npmjs.org/esbuild/-/esbuild-0.27.3.tgz. Extracting by manifest.
+173 silly tarball no local data for path-scurry@https://registry.npmjs.org/path-scurry/-/path-scurry-2.0.1.tgz. Extracting by manifest.
+174 silly tarball no local data for form-data@https://registry.npmjs.org/form-data/-/form-data-4.0.5.tgz. Extracting by manifest.
+175 silly tarball no local data for minimatch@https://registry.npmjs.org/minimatch/-/minimatch-10.1.2.tgz. Extracting by manifest.
+176 silly tarball no local data for lru-cache@https://registry.npmjs.org/lru-cache/-/lru-cache-11.2.5.tgz. Extracting by manifest.
+177 silly tarball no local data for glob@https://registry.npmjs.org/glob/-/glob-13.0.1.tgz. Extracting by manifest.
+178 http fetch GET https://registry.npmjs.org/which/-/which-2.0.2.tgz attempt 1 failed with ENOTFOUND
+179 http fetch GET https://registry.npmjs.org/yaml/-/yaml-2.7.1.tgz attempt 1 failed with ENOTFOUND
+180 http fetch GET https://registry.npmjs.org/@grpc/proto-loader/-/proto-loader-0.7.15.tgz attempt 1 failed with ENOTFOUND
+181 http fetch GET https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz attempt 1 failed with ENOTFOUND
+182 http fetch GET https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.1.3.tgz attempt 1 failed with ENOTFOUND
+183 http fetch GET https://registry.npmjs.org/sucrase/-/sucrase-3.35.0.tgz attempt 1 failed with ENOTFOUND
+184 http fetch GET https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz attempt 1 failed with ENOTFOUND
+185 http fetch GET https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.17.tgz attempt 1 failed with ENOTFOUND
+186 http fetch GET https://registry.npmjs.org/semver/-/semver-7.7.1.tgz attempt 1 failed with ENOTFOUND
+187 http fetch GET https://registry.npmjs.org/resolve/-/resolve-1.22.10.tgz attempt 1 failed with ENOTFOUND
+188 http fetch GET https://registry.npmjs.org/rc/-/rc-1.2.8.tgz attempt 1 failed with ENOTFOUND
+189 http fetch GET https://registry.npmjs.org/prebuild-install/-/prebuild-install-7.1.3.tgz attempt 1 failed with ENOTFOUND
+190 http fetch GET https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz attempt 1 failed with ENOTFOUND
+191 http fetch GET https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz attempt 1 failed with ENOTFOUND
+192 http fetch GET https://registry.npmjs.org/native-run/-/native-run-2.0.3.tgz attempt 1 failed with ENOTFOUND
+193 http fetch GET https://registry.npmjs.org/glob/-/glob-13.0.1.tgz attempt 1 failed with ENOTFOUND
+194 http fetch GET https://registry.npmjs.org/which/-/which-2.0.2.tgz attempt 2 failed with ENOTFOUND
+195 http fetch GET https://registry.npmjs.org/yaml/-/yaml-2.7.1.tgz attempt 2 failed with ENOTFOUND
+196 http fetch GET https://registry.npmjs.org/@grpc/proto-loader/-/proto-loader-0.7.15.tgz attempt 2 failed with ENOTFOUND
+197 http fetch GET https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz attempt 2 failed with ENOTFOUND
+198 http fetch GET https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.1.3.tgz attempt 2 failed with ENOTFOUND
+199 http fetch GET https://registry.npmjs.org/sucrase/-/sucrase-3.35.0.tgz attempt 2 failed with ENOTFOUND
+200 http fetch GET https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz attempt 2 failed with ENOTFOUND
+201 http fetch GET https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.17.tgz attempt 2 failed with ENOTFOUND
+202 http fetch GET https://registry.npmjs.org/semver/-/semver-7.7.1.tgz attempt 2 failed with ENOTFOUND
+203 http fetch GET https://registry.npmjs.org/resolve/-/resolve-1.22.10.tgz attempt 2 failed with ENOTFOUND
+204 http fetch GET https://registry.npmjs.org/rc/-/rc-1.2.8.tgz attempt 2 failed with ENOTFOUND
+205 http fetch GET https://registry.npmjs.org/prebuild-install/-/prebuild-install-7.1.3.tgz attempt 2 failed with ENOTFOUND
+206 http fetch GET https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz attempt 2 failed with ENOTFOUND
+207 http fetch GET https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz attempt 2 failed with ENOTFOUND
+208 http fetch GET https://registry.npmjs.org/native-run/-/native-run-2.0.3.tgz attempt 2 failed with ENOTFOUND
+209 http fetch GET https://registry.npmjs.org/glob/-/glob-13.0.1.tgz attempt 2 failed with ENOTFOUND
+210 http fetch GET https://registry.npmjs.org/which/-/which-2.0.2.tgz attempt 3 failed with ENOTFOUND
+211 http fetch GET https://registry.npmjs.org/yaml/-/yaml-2.7.1.tgz attempt 3 failed with ENOTFOUND
+212 http fetch GET https://registry.npmjs.org/@grpc/proto-loader/-/proto-loader-0.7.15.tgz attempt 3 failed with ENOTFOUND
+213 http fetch GET https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz attempt 3 failed with ENOTFOUND
+214 http fetch GET https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.1.3.tgz attempt 3 failed with ENOTFOUND
+215 http fetch GET https://registry.npmjs.org/sucrase/-/sucrase-3.35.0.tgz attempt 3 failed with ENOTFOUND
+216 http fetch GET https://registry.npmjs.org/tree-kill/-/tree-kill-1.2.2.tgz attempt 3 failed with ENOTFOUND
+217 http fetch GET https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.17.tgz attempt 3 failed with ENOTFOUND
+218 http fetch GET https://registry.npmjs.org/semver/-/semver-7.7.1.tgz attempt 3 failed with ENOTFOUND
+219 http fetch GET https://registry.npmjs.org/resolve/-/resolve-1.22.10.tgz attempt 3 failed with ENOTFOUND
+220 http fetch GET https://registry.npmjs.org/rc/-/rc-1.2.8.tgz attempt 3 failed with ENOTFOUND
+221 http fetch GET https://registry.npmjs.org/prebuild-install/-/prebuild-install-7.1.3.tgz attempt 3 failed with ENOTFOUND
+222 http fetch GET https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz attempt 3 failed with ENOTFOUND
+223 http fetch GET https://registry.npmjs.org/mkdirp/-/mkdirp-1.0.4.tgz attempt 3 failed with ENOTFOUND
+224 http fetch GET https://registry.npmjs.org/native-run/-/native-run-2.0.3.tgz attempt 3 failed with ENOTFOUND
+225 http fetch GET https://registry.npmjs.org/glob/-/glob-13.0.1.tgz attempt 3 failed with ENOTFOUND
+226 verbose cwd /Users/pablo/offside-app
+227 verbose os Darwin 25.3.0
+228 verbose node v25.6.0
+229 verbose npm  v11.8.0
+230 error Exit handler never called!
+231 error This is an error with npm itself. Please report this error at:
+232 error   <https://github.com/npm/cli/issues>
+233 verbose exit 1
+234 verbose code 1
+235 error A complete log of this run can be found in: /Users/pablo/offside-app/.npm-cache/_logs/2026-03-19T16_44_50_928Z-debug-0.log
