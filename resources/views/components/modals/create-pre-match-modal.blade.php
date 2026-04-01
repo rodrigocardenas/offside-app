@@ -251,16 +251,56 @@
                     select.innerHTML = '<option value="">No hay partidos disponibles</option>';
                 }
 
-                console.log('✅ Matches loaded into select dropdown (vanilla JS)');
+                // Initialize Select2 after loading matches
+                initializeSelect2();
+                console.log('✅ Matches loaded into select dropdown');
             })
             .catch(err => {
                 console.error('❌ Error loading matches:', err);
                 select.innerHTML = '<option value="">Error al cargar partidos</option>';
+                initializeSelect2();
             });
     }
 
     function initializeSelect2() {
-        window.initializeSelect2 = function() {}; // No-op (using vanilla JS instead)
+        const select = document.getElementById('preMatchMatchSelect');
+        if (!select) {
+            console.warn('⚠️ Select element not found');
+            return;
+        }
+
+        // Check if jQuery and Select2 are available
+        if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
+            console.warn('⚠️ jQuery or Select2 not yet loaded, retrying...');
+            setTimeout(initializeSelect2, 200);
+            return;
+        }
+
+        try {
+            // Destroy existing Select2 instance if it exists
+            if (select.classList.contains('select2-hidden-accessible')) {
+                $(select).select2('destroy');
+            }
+
+            // Initialize Select2
+            $(select).select2({
+                allowClear: true,
+                placeholder: '🔍 Busca un partido (equipo, competencia, fecha)...',
+                width: '100%',
+                language: {
+                    noResults: function () {
+                        return 'No se encontraron partidos';
+                    },
+                    searching: function () {
+                        return 'Buscando...';
+                    }
+                }
+            });
+
+            console.log('✅ Select2 initialized successfully');
+        } catch (e) {
+            console.error('❌ Error initializing Select2:', e);
+        }
     }
 
     function updatePenaltyUI() {
