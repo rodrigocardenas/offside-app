@@ -331,6 +331,8 @@ window.submitCreatePreMatch = function() {
     const customPenalty = document.getElementById('penaltyDescription');
 
     console.log('Form check:', {matchInput: !!matchInput, penaltyType: !!penaltyType});
+    console.log('matchInput element:', matchInput);
+    console.log('matchInput.value:', matchInput?.value);
 
     if (!matchInput || !penaltyType) {
         alert('Error: Elementos del formulario no encontrados');
@@ -339,10 +341,11 @@ window.submitCreatePreMatch = function() {
 
     const matchId = matchInput.value;
     console.log('matchId value:', matchId, 'type:', typeof matchId, 'is truthy:', !!matchId);
+    console.log('matchId trim:', matchId?.trim?.(), 'length:', matchId?.length);
 
-    if (!matchId) {
-        alert('Por favor selecciona un partido');
-        console.error('❌ Empty matchId, showing alert');
+    if (!matchId || matchId === 'UNKNOWN') {
+        alert('❌ Por favor selecciona un partido válido');
+        console.error('❌ Empty or invalid matchId:', matchId);
         return;
     }
 
@@ -431,8 +434,13 @@ function loadUpcomingMatches() {
         })
         .then(response => {
             const matches = Array.isArray(response) ? response : (response.data || []);
+            console.log('📊 Raw response:', response);
             console.log('📊 Parsed matches count:', matches.length);
-            console.log('📊 First match structure:', matches[0] ? JSON.stringify(matches[0]) : 'No matches');
+            if (matches.length > 0) {
+                console.log('📊 First match full object:', matches[0]);
+                console.log('📊 First match id value:', matches[0].id, 'type:', typeof matches[0].id);
+                console.log('📊 First match keys:', Object.keys(matches[0]));
+            }
 
             if (matches.length === 0) {
                 searchInput.placeholder = 'No hay partidos disponibles';
@@ -495,8 +503,8 @@ function initializeMatchSearch() {
         }
 
         resultsDiv.innerHTML = filtered.map(match => {
-            const idValue = match.id || 'NULL_ID';
-            console.log('Rendering match:', {id: idValue, home: match.home_team?.name, away: match.away_team?.name});
+            const idValue = match.id || match.match?.id || 'UNKNOWN';
+            console.log(`Rendering match: id=${idValue}, home=${match.home_team?.name}, away=${match.away_team?.name}, full_match:`, match);
             return `
             <div class="match-option"
                  data-match-id="${idValue}"
