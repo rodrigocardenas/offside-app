@@ -77,13 +77,13 @@
 
         <!-- Content Grid -->
         <div id="contentGrid" style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; padding: 0 1rem;">
-            
+
             <!-- Main Content (Propositions) -->
             <div>
                 <!-- Challenge Details -->
                 <div style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }}; margin-bottom: 16px;">
                     <h2 style="font-size: 16px; font-weight: 700; color: {{ $textPrimary }}; margin: 0 0 12px 0;">
-                        💣 Castigo por Fallar
+                        💣 Consecuencias sí se cumple la acción:
                     </h2>
 
                     <div style="padding: 12px; border-radius: 8px;
@@ -138,14 +138,23 @@
                             @foreach($preMatch->propositions as $proposition)
                             <div style="background: {{ $bgSecondary }}; padding: 16px; border-radius: 8px; border: 1px solid {{ $borderColor }};">
                                 <!-- Proposition Header -->
-                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
-                                    <div style="flex: 1;">
-                                        <p style="font-weight: 700; color: {{ $textPrimary }}; margin: 0 0 4px 0;">
-                                            {{ $proposition->user->name }}: {{ $proposition->action }}
-                                        </p>
-                                        <p style="font-size: 12px; color: {{ $textSecondary }}; margin: 0;">
-                                            {{ $proposition->created_at->diffForHumans() }}
-                                        </p>
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
+                                    <!-- Avatar + Info -->
+                                    <div style="display: flex; gap: 10px; align-items: flex-start; flex: 1; min-width: 0;">
+                                        <!-- Avatar Circle -->
+                                        <img src="{{ $proposition->user->getAvatarUrl('small') }}"
+                                             alt="{{ $proposition->user->name }}"
+                                             style="width: 36px; height: 36px; min-width: 36px; border-radius: 50%; object-fit: cover; border: 2px solid {{ $accentColor }}; flex-shrink: 0;">
+                                        
+                                        <!-- User Info -->
+                                        <div style="flex: 1; min-width: 0;">
+                                            <p style="font-weight: 700; color: {{ $textPrimary }}; margin: 0 0 4px 0; word-break: break-word;">
+                                                {{ $proposition->user->name }}: {{ $proposition->action }}
+                                            </p>
+                                            <p style="font-size: 12px; color: {{ $textSecondary }}; margin: 0;">
+                                                {{ $proposition->created_at->diffForHumans() }}
+                                            </p>
+                                        </div>
                                     </div>
                                     @if($proposition->validation_status === 'approved')
                                         <span style="padding: 4px 12px; background: #4CAF50; color: #fff; border-radius: 20px; font-size: 11px; font-weight: 700;">
@@ -300,7 +309,7 @@
                 font-size: 20px !important;
             }
 
-            #resolveModal .checkboxes-container {
+            .checkboxes-container {
                 max-height: 60vh !important;
             }
         }
