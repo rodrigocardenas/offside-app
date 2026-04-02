@@ -98,7 +98,7 @@ try {
     echo "\n   - penalty_type: {$preMarch->penalty_type}";
     echo "\n   - penalty_points: {$preMarch->penalty_points}";
     echo "\n   - status: {$preMarch->status}";
-    
+
 } catch (\Exception $e) {
     echo "\n❌ FAILED to create Pre Match";
     echo "\n   Error: " . $e->getMessage();

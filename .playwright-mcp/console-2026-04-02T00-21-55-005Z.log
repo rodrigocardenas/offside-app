@@ -1,0 +1,7 @@
+[    1891ms] [LOG] 🔍 Browser logger active (MCP server detected). Posting to: http://offsideclub.test/_boost/browser-logs @ http://offsideclub.test/login:41
+[    2116ms] [LOG] [AndroidBackButton] No estamos en Capacitor, no inicializando @ http://offsideclub.test/login:100
+[    2118ms] [LOG] [DeepLinks] Handler inicializado correctamente @ http://offsideclub.test/login:100
+[    2120ms] [LOG] 🔧 Inicializando header dropdown handler @ http://offsideclub.test/login:100
+[    2120ms] [WARNING] ⚠️ No se encontraron elementos del dropdown @ http://offsideclub.test/login:100
+[    2224ms] [LOG] 🔔 initToasts ejecutándose en mobile-light-layout @ http://offsideclub.test/login:100
+[    2224ms] [LOG] showSuccessToast disponible: function @ http://offsideclub.test/login:100

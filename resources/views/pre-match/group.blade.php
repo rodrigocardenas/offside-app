@@ -1,163 +1,225 @@
-<!-- Pre Match Group Challenges Page -->
-@extends('layouts.app')
+<x-app-layout
+    :logo-url="asset('images/logo_alone.png')"
+    alt-text="Offside Club"
+>
+    @section('navigation-title', $group->name . ' - Pre Matches')
 
-@section('content')
-<div class="py-12">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    @php
+        $themeMode = auth()->user()->theme_mode ?? 'light';
+        $isDark = $themeMode === 'dark';
+
+        // Colores dinámicos
+        $bgPrimary = $isDark ? '#0a2e2c' : '#f5f5f5';
+        $bgSecondary = $isDark ? '#0f3d3a' : '#f5f5f5';
+        $bgTertiary = $isDark ? '#1a524e' : '#ffffff';
+        $textPrimary = $isDark ? '#ffffff' : '#333333';
+        $textSecondary = $isDark ? '#b0b0b0' : '#999999';
+        $borderColor = $isDark ? '#2a4a47' : '#e0e0e0';
+        $accentColor = '#00deb0';
+        $accentDark = '#17b796';
+        $accentLight = 'rgba(0, 222, 176, 0.1)';
+        $buttonBgHover = $isDark ? 'rgba(0, 222, 176, 0.12)' : 'rgba(0, 222, 176, 0.08)';
+        $redAccent = '#ff6b6b';
+        $redLight = 'rgba(255, 107, 107, 0.1)';
+        $orangeAccent = '#ff9500';
+    @endphp
+
+    <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
+
         <!-- Page Header -->
-        <div class="mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <span class="text-5xl">🔥</span> {{ $group->name }} - Pre Match Challenges
-            </h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-2">
-                Crea desafíos improbables y compite con tu grupo. ¡Adivina qué pasará en el partido!
-            </p>
+        <div class="ml-1 mr-1" style="background: {{ $bgTertiary }}; padding: 20px; border-radius: 16px; border: 1px solid {{ $borderColor }}; margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <div>
+                    <h1 style="font-size: 28px; font-weight: 700; color: {{ $textPrimary }}; margin: 0; display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 36px;">🔥</span>
+                        {{ $group->name }} - Pre Match Challenges
+                    </h1>
+                    <p style="color: {{ $textSecondary }}; margin: 8px 0 0 0; font-size: 14px;">
+                        Crea desafíos y compite con tu grupo
+                    </p>
+                </div>
+                <a href="{{ route('groups.show', $group) }}"
+                   style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: none; border-radius: 8px; background: {{ $isDark ? '#2a4a47' : '#e5f3f0' }}; color: {{ $accentColor }}; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease; text-decoration: none;"
+                   onmouseover="this.style.background='{{ $accentLight }}'"
+                   onmouseout="this.style.background='{{ $isDark ? '#2a4a47' : '#e5f3f0' }}';">
+                    ← Volver al Grupo
+                </a>
+            </div>
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-blue-100 dark:bg-blue-900 p-6 rounded-lg">
-                <p class="text-sm font-bold text-blue-600 dark:text-blue-300">TOTAL DESAFÍOS</p>
-                <p class="text-3xl font-bold text-blue-800 dark:text-blue-200 mt-2">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px;">
+            <!-- Total Desafíos -->
+            <div style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }};">
+                <p style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; margin: 0; text-transform: uppercase;">
+                    📊 Total
+                </p>
+                <p style="font-size: 28px; font-weight: 700; color: {{ $accentColor }}; margin: 12px 0 0 0;">
                     {{ $preMatches->count() }}
                 </p>
             </div>
-            <div class="bg-green-100 dark:bg-green-900 p-6 rounded-lg">
-                <p class="text-sm font-bold text-green-600 dark:text-green-300">ABIERTOS AHORA</p>
-                <p class="text-3xl font-bold text-green-800 dark:text-green-200 mt-2">
-                    {{ $preMatches->where('status', 'OPEN')->count() }}
+
+            <!-- Pendientes -->
+            <div style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }};">
+                <p style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; margin: 0; text-transform: uppercase;">
+                    ⏳ Pendientes
+                </p>
+                <p style="font-size: 28px; font-weight: 700; color: #ff6b6b; margin: 12px 0 0 0;">
+                    {{ $preMatches->where('status', 'pending')->count() }}
                 </p>
             </div>
-            <div class="bg-purple-100 dark:bg-purple-900 p-6 rounded-lg">
-                <p class="text-sm font-bold text-purple-600 dark:text-purple-300">RESUELTOS</p>
-                <p class="text-3xl font-bold text-purple-800 dark:text-purple-200 mt-2">
-                    {{ $preMatches->where('status', 'RESOLVED')->count() }}
+
+            <!-- Activos -->
+            <div style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }};">
+                <p style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; margin: 0; text-transform: uppercase;">
+                    🔴 Activos
+                </p>
+                <p style="font-size: 28px; font-weight: 700; color: #ffa726; margin: 12px 0 0 0;">
+                    {{ $preMatches->where('status', 'active')->count() }}
                 </p>
             </div>
-            <div class="bg-orange-100 dark:bg-orange-900 p-6 rounded-lg">
-                <p class="text-sm font-bold text-orange-600 dark:text-orange-300">CASTIGOS PENDIENTES</p>
-                <p class="text-3xl font-bold text-orange-800 dark:text-orange-200 mt-2">
-                    {{ count($groupPenalties->where('fulfilled_at', null) ?? []) }}
+
+            <!-- Completados -->
+            <div style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }};">
+                <p style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; margin: 0; text-transform: uppercase;">
+                    ✅ Completados
+                </p>
+                <p style="font-size: 28px; font-weight: 700; color: #66bb6a; margin: 12px 0 0 0;">
+                    {{ $preMatches->where('status', 'completed')->count() }}
                 </p>
             </div>
         </div>
 
         <!-- Filter Tabs -->
-        <div class="flex gap-2 mb-8 border-b border-gray-300 dark:border-gray-600 overflow-x-auto">
-            <button
-                onclick="filterMatches('ALL')"
-                class="font-bold px-6 py-3 whitespace-nowrap border-b-2"
-                id="filterAll"
-                style="border-color: rgb(37, 99, 235);"
-            >
+        <div style="display: flex; gap: 8px; overflow-x: auto; margin-bottom: 24px; border-bottom: 2px solid {{ $borderColor }}; padding-bottom: 0;">
+            <button onclick="filterMatches('ALL')"
+                    id="filterAll"
+                    style="padding: 12px 16px; border: none; background: transparent; color: {{ $accentColor }}; font-weight: 700; font-size: 13px; cursor: pointer; border-bottom: 3px solid {{ $accentColor }}; transition: all 0.2s ease; white-space: nowrap;">
                 📊 Todos
             </button>
-            <button
-                onclick="filterMatches('OPEN')"
-                class="font-bold px-6 py-3 whitespace-nowrap border-b-2 border-transparent text-gray-600 dark:text-gray-400"
-                id="filterOpen"
-            >
-                🔵 Abiertos
+            <button onclick="filterMatches('pending')"
+                    id="filterPending"
+                    style="padding: 12px 16px; border: none; background: transparent; color: {{ $textSecondary }}; font-weight: 700; font-size: 13px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s ease; white-space: nowrap;">
+                ⏳ Pendientes
             </button>
-            <button
-                onclick="filterMatches('LOCKED')"
-                class="font-bold px-6 py-3 whitespace-nowrap border-b-2 border-transparent text-gray-600 dark:text-gray-400"
-                id="filterLocked"
-            >
-                🔒 Cerrados
+            <button onclick="filterMatches('active')"
+                    id="filterActive"
+                    style="padding: 12px 16px; border: none; background: transparent; color: {{ $textSecondary }}; font-weight: 700; font-size: 13px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s ease; white-space: nowrap;">
+                🔴 Activos
             </button>
-            <button
-                onclick="filterMatches('RESOLVED')"
-                class="font-bold px-6 py-3 whitespace-nowrap border-b-2 border-transparent text-gray-600 dark:text-gray-400"
-                id="filterResolved"
-            >
-                ✅ Resueltos
+            <button onclick="filterMatches('completed')"
+                    id="filterCompleted"
+                    style="padding: 12px 16px; border: none; background: transparent; color: {{ $textSecondary }}; font-weight: 700; font-size: 13px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s ease; white-space: nowrap;">
+                ✅ Completados
             </button>
         </div>
 
         <!-- Pre Matches List -->
-        <div id="preMatchesContainer" class="space-y-6 mb-12">
+        <div id="preMatchesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 32px;">
             @forelse($preMatches as $preMatch)
                 <x-pre-match.card
                     :preMatch="$preMatch"
                     :match="$preMatch->match"
+                    :isDark="$isDark"
+                    :bgTertiary="$bgTertiary"
+                    :textPrimary="$textPrimary"
+                    :textSecondary="$textSecondary"
+                    :borderColor="$borderColor"
+                    :accentColor="$accentColor"
+                    :redAccent="$redAccent"
+                    :redLight="$redLight"
+                    :orangeAccent="$orangeAccent"
                 />
             @empty
-                <div class="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <p class="text-xl">📭 No hay desafíos creados aún</p>
-                    @can('create', App\Models\PreMatch::class)
-                        <button
-                            onclick="openCreatePreMatchModal()"
-                            class="mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 transition"
-                        >
-                            ➕ Crear Primer Desafío
-                        </button>
-                    @endcan
+                <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; color: {{ $textSecondary }};">
+                    <p style="font-size: 18px; margin: 0 0 16px 0;">📭 No hay desafíos creados aún</p>
+                    <button onclick="openCreatePreMatchModal({{ $group->id }})"
+                            style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 8px; background: linear-gradient(135deg, {{ $redAccent }}, #ff8787); color: #fff; font-weight: 700; cursor: pointer; transition: transform 0.2s ease; text-decoration: none;"
+                            onmouseover="this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.transform='translateY(0)';">
+                        <i class="fas fa-fire"></i>
+                        ➕ Crear Primer Desafío
+                    </button>
                 </div>
             @endforelse
         </div>
 
-        <!-- Penalty History -->
-        <div class="mt-12 pt-8 border-t border-gray-300 dark:border-gray-600">
-            <x-pre-match.penalty-history />
+        <!-- Penalty History Section -->
+        @if($groupPenalties->count() > 0)
+        <div style="background: {{ $bgTertiary }}; padding: 24px; border-radius: 16px; border: 1px solid {{ $borderColor }}; margin-top: 32px;">
+            <h2 style="font-size: 18px; font-weight: 700; color: {{ $textPrimary }}; margin: 0 0 20px 0;">
+                ⚖️ Castigos Recientes
+            </h2>
+
+            <div style="display: grid; gap: 12px;">
+                @foreach($groupPenalties->take(10) as $penalty)
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: {{ $bgSecondary }}; border-radius: 8px; border: 1px solid {{ $borderColor }};">
+                    <div>
+                        <p style="font-weight: 600; color: {{ $textPrimary }}; margin: 0 0 4px 0;">
+                            {{ $penalty->user->name }}
+                        </p>
+                        <p style="font-size: 12px; color: {{ $textSecondary }}; margin: 0;">
+                            @if($penalty->penalty_type === 'POINTS')
+                                💔 -{{ $penalty->penalty_points }} puntos
+                            @else
+                                📝 {{ $penalty->penalty_description }}
+                            @endif
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        @if($penalty->fulfilled_at)
+                            <span style="display: inline-block; padding: 4px 12px; background: #4CAF50; color: #fff; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                ✓ Cumplido
+                            </span>
+                        @else
+                            <span style="display: inline-block; padding: 4px 12px; background: {{ $redLight }}; color: {{ $redAccent }}; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                ⏳ Pendiente
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
         </div>
+        @endif
+
     </div>
-</div>
 
-<!-- Create Proposal Modal -->
-<x-pre-match.create-proposal-modal />
+    <!-- Create Pre Match Modal -->
+    <x-modals.create-pre-match-modal :isDark="$isDark" />
 
-<!-- Resolution Modal (Admin Only) -->
-@if(Auth::user()?->isadmin())
-    <x-pre-match.resolution-modal />
-@endif
+    <script>
+        let allPreMatches = @json($preMatches);
+        let currentFilter = 'ALL';
 
-<script>
-    let allPreMatches = @json($preMatches);
-    let currentFilter = 'ALL';
+        function filterMatches(status) {
+            currentFilter = status;
 
-    function filterMatches(status) {
-        currentFilter = status;
+            // Update button styles
+            const buttons = {
+                'ALL': document.getElementById('filterAll'),
+                'pending': document.getElementById('filterPending'),
+                'active': document.getElementById('filterActive'),
+                'completed': document.getElementById('filterCompleted')
+            };
 
-        // Update button styles
-        document.querySelectorAll('[id^="filter"]').forEach(btn => {
-            btn.style.borderColor = 'transparent';
-            btn.classList.add('text-gray-600', 'dark:text-gray-400');
-        });
+            Object.values(buttons).forEach(btn => {
+                if (btn) {
+                    btn.style.borderBottomColor = 'transparent';
+                    btn.style.color = '{{ $textSecondary }}';
+                }
+            });
 
-        document.getElementById('filter' + status).style.borderColor = 'rgb(37, 99, 235)';
-        document.getElementById('filter' + status).classList.remove('text-gray-600', 'dark:text-gray-400');
-
-        // Re-render
-        renderPreMatches();
-    }
-
-    function renderPreMatches() {
-        let filtered = allPreMatches;
-
-        if (currentFilter !== 'ALL') {
-            filtered = filtered.filter(pm => pm.status === currentFilter);
-        }
-
-        console.log('Rendering', filtered.length, 'pre-matches');
-        // Aquí irían los componentes renderizados dinámicamente
-        // Por ahora, simplemente muestrar/ocultar con CSS
-    }
-
-    // Cargar castigos cuando la página carga
-    document.addEventListener('DOMContentLoaded', function() {
-        const groupId = document.body.dataset.groupId || {{ $group->id }};
-        preMatchClient.loadPenalties(groupId).then(data => {
-            if (data && data.penalties) {
-                console.log('Castigos cargados:', data.penalties);
+            if (buttons[status]) {
+                buttons[status].style.borderBottomColor = '{{ $accentColor }}';
+                buttons[status].style.color = '{{ $accentColor }}';
             }
-        });
-    });
 
-    // Escuchar eventos de actualización en tiempo real
-    window.addEventListener('pre-match:vote-update', function(e) {
-        console.log('Vote update:', e.detail);
-        // Aquí podrías auto-actualizar la UI
-    });
-</script>
-@endsection
+            // Filter cards (placeholder - actual filtering can be done with JS or server-side)
+        }
+    </script>
+
+    <x-layout.bottom-navigation active-item="pre-matches" />
+
+</x-app-layout>
+

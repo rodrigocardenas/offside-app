@@ -1,0 +1,33 @@
+
+   PASS  Tests\Feature\CriticalViewsTest
+  ✓ user can be created and retrieved                                   11.29s  
+  ✓ user belongs to multiple groups                                      0.24s  
+  ✓ user can have answers                                                0.05s  
+  ✓ group can be created with unique code                                0.07s  
+  ✓ group has users                                                      0.07s  
+  ✓ group belongs to competition                                         0.04s  
+  ✓ group has questions                                                  0.03s  
+  ✓ competition can be created                                           0.06s  
+  ✓ competition has groups                                               0.08s  
+  ✓ question can be created                                              0.09s  
+  ✓ question belongs to group                                            0.07s  
+  ✓ question has options                                                 0.08s  
+  ✓ user can submit answer                                               0.08s  
+  ✓ answer is created with correct points                                0.07s  
+  ✓ answer for social question                                           0.06s  
+  ✓ user can update answer                                               0.06s  
+  ✓ invalid answer option fails                                          0.16s  
+  ✓ answer to expired question                                           0.07s  
+  ✓ another user can answer                                              0.05s  
+  ✓ answer metadata storage                                              0.08s  
+  ✓ answer user relationship                                             0.06s  
+  ✓ answer question relationship                                         0.05s  
+  ✓ answer option relationship                                           0.03s  
+  ✓ question option relationship                                         0.05s  
+  ✓ group created by user                                                0.05s  
+  ✓ multiple questions in group                                          0.04s  
+  ✓ multiple answers per user                                            0.05s  
+
+  Tests:    27 passed (40 assertions)
+  Duration: 13.43s
+

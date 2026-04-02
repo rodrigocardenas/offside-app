@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
 
         if (app()->environment(['local', 'testing'])) {
             $this->call([
-                UserLoginSeeder::class,
+                // UserLoginSeeder::class, // ❌ Deshabilitado: Error con timestamp/timezone
             ]);
         }
     }

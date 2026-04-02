@@ -251,4 +251,12 @@ class Group extends Model
     {
         return $query->where('category', 'public');
     }
+
+    /**
+     * Get pre-matches for this group
+     */
+    public function preMatches()
+    {
+        return $this->hasMany(\App\Models\PreMatch::class);
+    }
 }

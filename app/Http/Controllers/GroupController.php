@@ -1613,4 +1613,81 @@ class GroupController extends Controller
             'competitionName' => $match->competition->name ?? 'Competition'
         ]);
     }
+
+    /**
+     * Show Pre Matches for a group
+     */
+    public function showPreMatches(Group $group)
+    {
+        // Verify user is member of the group
+        if (!$group->users->contains('id', auth()->id())) {
+            throw new GroupAccessException(
+                "No tienes acceso a este grupo",
+                $group->id,
+                auth()->id()
+            );
+        }
+
+        // Get all pre-matches for this group with related data
+        $preMatches = $group->preMatches()
+            ->with([
+                'match',
+                'creator:id,name,avatar',
+                'propositions.user:id,name,avatar',
+                'propositions.votes'
+            ])
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Get penalties for this group
+        $groupPenalties = \App\Models\GroupPenalty::where('group_id', $group->id)
+            ->with(['user:id,name,avatar', 'preMatch'])
+            ->get();
+
+        return view('pre-match.group', [
+            'group' => $group,
+            'preMatches' => $preMatches,
+            'groupPenalties' => $groupPenalties
+        ]);
+    }
+
+    /**
+     * Show detailed view of a Pre Match
+     */
+    public function showPreMatchDetail(Group $group, \App\Models\PreMatch $preMatch)
+    {
+        // Verify user is member of the group
+        if (!$group->users->contains('id', auth()->id())) {
+            throw new GroupAccessException(
+                "No tienes acceso a este grupo",
+                $group->id,
+                auth()->id()
+            );
+        }
+
+        // Verify the pre-match belongs to this group
+        if ($preMatch->group_id !== $group->id) {
+            abort(404);
+        }
+
+        // Load all related data
+        $preMatch->load([
+            'match:id,date,home_team,away_team,status',
+            'creator:id,name,avatar',
+            'group:id,name',
+            'propositions' => function ($query) {
+                $query->with([
+                    'user:id,name,avatar',
+                    'votes' => function ($q) {
+                        $q->where('user_id', auth()->id());
+                    }
+                ])->orderByDesc('created_at');
+            }
+        ]);
+
+        return view('pre-match.show', [
+            'group' => $group,
+            'preMatch' => $preMatch
+        ]);
+    }
 }

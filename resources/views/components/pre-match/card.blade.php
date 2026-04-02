@@ -1,96 +1,110 @@
 <!-- Pre Match Card Component -->
-<div class="pre-match-card border-l-4 border-l-purple-600 dark:border-l-purple-400 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow mb-4">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-purple-600 to-purple-700 dark:from-purple-900 dark:to-purple-800 px-6 py-4">
-        <div class="flex justify-between items-center">
-            <div>
-                <span class="text-white font-bold text-sm flex items-center gap-2">
-                    <span class="text-lg">🔥</span> PRE MATCH CHALLENGE
-                </span>
-                <h3 class="text-xl font-bold text-white mt-2">
-                    {{ $match->home_team->name ?? 'Home' }} vs {{ $match->away_team->name ?? 'Away' }}
-                </h3>
+@php
+    // Determinar gradient según estado
+    $headerGradient = 'linear-gradient(135deg, #ff6b6b, #ff8787)'; // pending - rojo
+    $statusIcon = '⏳';
+    $statusLabel = 'Pendiente';
 
-                <p class="text-purple-200 text-sm mt-1">
-                    ⏰ {{ $match->scheduled_date?->format('d/m/Y H:i') ?? 'TBD' }}
+    if ($preMatch->status === 'active') {
+        $headerGradient = 'linear-gradient(135deg, #ffa726, #ffb74d)'; // active - naranja
+        $statusIcon = '🔴';
+        $statusLabel = 'Activo';
+    } elseif ($preMatch->status === 'completed') {
+        $headerGradient = 'linear-gradient(135deg, #66bb6a, #81c784)'; // completed - verde
+        $statusIcon = '✅';
+        $statusLabel = 'Completado';
+    } elseif ($preMatch->status === 'cancelled') {
+        $headerGradient = 'linear-gradient(135deg, #bdbdbd, #9e9e9e)'; // cancelled - gris
+        $statusIcon = '✕';
+        $statusLabel = 'Cancelado';
+    }
+@endphp
+
+<div style="background: {{ $bgTertiary }}; border-radius: 12px; border: 1px solid {{ $borderColor }}; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; cursor: pointer;"
+     onclick="window.location.href = '/groups/{{ $preMatch->group_id }}/pre-matches/{{ $preMatch->id }}'"
+     onmouseover="this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'; this.style.transform='translateY(-2px)'"
+     onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'; this.style.transform='translateY(0)'">
+
+    <!-- Header with Gradient -->
+    <div style="background: {{ $headerGradient }}; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+            <div style="flex: 1; min-width: 0;">
+                <span style="color: #fff; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 16px;">🔥</span> PRE MATCH
+                </span>
+                <h3 style="color: #fff; font-weight: 700; font-size: 16px; margin: 8px 0; word-break: break-word;">
+                    {{ $match->home_team ?? 'Home' }} vs {{ $match->away_team ?? 'Away' }}
+                </h3>
+                <p style="color: rgba(255,255,255,0.9); font-size: 12px; margin: 4px 0 0 0;">
+                    ⏰ {{ $match->date?->format('d/m H:i') ?? 'TBD' }}
                 </p>
             </div>
-            <span class="px-4 py-2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full font-bold whitespace-nowrap">
-                {{ $preMatch->status }}
+            <span style="display: inline-block; padding: 6px 10px; background: rgba(255,255,255,0.2); color: #fff; font-size: 11px; border-radius: 20px; font-weight: 700; white-space: nowrap; flex-shrink: 0;">
+                {{ $statusIcon }} {{ $statusLabel }}
             </span>
         </div>
     </div>
 
     <!-- Content -->
-    <div class="px-6 py-4 space-y-4">
+    <div style="padding: 20px;">
+
         <!-- Penalty Badge -->
-        <div class="p-4 rounded-lg"
-            @switch($preMatch->penalty_type)
-                @case('POINTS')
-                    style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid rgb(239, 68, 68);"
-                @break
-                @case('SOCIAL')
-                    style="background-color: rgba(249, 115, 22, 0.1); border-left: 4px solid rgb(249, 115, 22);"
-                @break
-                @case('REVENGE')
-                    style="background-color: rgba(168, 85, 247, 0.1); border-left: 4px solid rgb(168, 85, 247);"
-                @endswitch
-        >
-            @switch($preMatch->penalty_type)
-                @case('POINTS')
-                    <p class="font-bold text-red-800 dark:text-red-200">
-                        💔 CASTIGO: Restar {{ $preMatch->penalty_points }} puntos
-                    </p>
-                @break
-                @case('SOCIAL')
-                    <p class="font-bold text-orange-800 dark:text-orange-200">
-                        🍽️ CASTIGO: {{ $preMatch->penalty }}
-                    </p>
-                @break
-                @case('REVENGE')
-                    <p class="font-bold text-purple-800 dark:text-purple-200">
-                        ⚔️ CASTIGO: {{ $preMatch->penalty }}
-                    </p>
-                @endswitch
+        <div style="padding: 12px; border-radius: 8px; margin-bottom: 16px;
+            @if($preMatch->penalty_type === 'POINTS')
+                background: {{ $redLight }}; border-left: 4px solid {{ $redAccent }};
+            @else
+                background: rgba(255, 149, 0, 0.1); border-left: 4px solid {{ $orangeAccent }};
+            @endif
+        ">
+            @if($preMatch->penalty_type === 'POINTS')
+                <p style="color: {{ $redAccent }}; font-weight: 700; margin: 0;">
+                    💔 CASTIGO: Restar {{ $preMatch->penalty_points }} puntos
+                </p>
+            @else
+                <p style="color: {{ $orangeAccent }}; font-weight: 700; margin: 0;">
+                    📝 CASTIGO: {{ $preMatch->penalty_description }}
+                </p>
+            @endif
         </div>
 
-        <!-- Propositions Progress -->
-        <div>
-            <div class="flex justify-between items-center mb-2">
-                <p class="text-sm font-bold text-gray-700 dark:text-gray-300">
+        <!-- Propositions Progress (si las hay) -->
+        @if($preMatch->propositions->count() > 0)
+        <div style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <p style="font-size: 12px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">
                     {{ $preMatch->propositions->count() }} propuestas
                 </p>
-                <span class="text-xs font-bold text-green-600 dark:text-green-400">
-                    ✅ {{ $preMatch->propositions->where('validation_status', 'ACCEPTED')->count() }} aceptadas
+                <span style="font-size: 11px; font-weight: 700; color: #4CAF50;">
+                    ✅ {{ $preMatch->propositions->where('validation_status', 'approved')->count() }} aceptadas
                 </span>
             </div>
-            <div class="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-2.5">
-                <div
-                    class="bg-green-500 h-2.5 rounded-full transition-all duration-300"
-                    style="width: {{ $preMatch->propositions->count() > 0 ? ($preMatch->propositions->where('validation_status', 'ACCEPTED')->count() / $preMatch->propositions->count() * 100) : 0 }}%"
-                ></div>
+            <div style="width: 100%; height: 6px; background: {{ $borderColor }}; border-radius: 3px; overflow: hidden;">
+                <div style="height: 100%; background: #4CAF50; transition: all 0.3s ease;
+                    width: {{ $preMatch->propositions->count() > 0 ? ($preMatch->propositions->where('validation_status', 'approved')->count() / $preMatch->propositions->count() * 100) : 0 }}%;">
+                </div>
             </div>
         </div>
+        @endif
 
         <!-- Action Buttons -->
-        @if($preMatch->status === 'OPEN' || $preMatch->status === 'DRAFT')
-            <div class="flex gap-2 pt-2">
-                @if($preMatch->status === 'OPEN')
-                    <button
-                        onclick="openProposalModal({{ $preMatch->id }})"
-                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded font-bold text-sm transition"
-                    >
-                        ➕ Nueva Acción
-                    </button>
-                @endif
-            </div>
-        @elseif($preMatch->status === 'RESOLVED')
-            <button
-                onclick="viewPenalties({{ $preMatch->id }})"
-                class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded font-bold transition"
-            >
-                🏆 Ver Castigos
-            </button>
-        @endif
+        <div style="display: flex; gap: 8px; margin-top: 16px;">
+            @if($preMatch->status === 'active' || $preMatch->status === 'pending')
+                <button onclick="event.stopPropagation(); window.location.href = '/groups/{{ $preMatch->group_id }}/pre-matches/{{ $preMatch->id }}'"
+                        style="flex: 1; padding: 10px; border: none; border-radius: 6px; background: {{ $accentColor }}; color: #003b2f; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s ease;"
+                        onmouseover="this.style.backgroundColor='{{ $accentDark }}'"
+                        onmouseout="this.style.backgroundColor='{{ $accentColor }}';">
+                    👁️ Ver Detalles
+                </button>
+            @elseif($preMatch->status === 'completed')
+                <button onclick="event.stopPropagation(); window.location.href = '/groups/{{ $preMatch->group_id }}/pre-matches/{{ $preMatch->id }}'"
+                        style="width: 100%; padding: 10px; border: none; border-radius: 6px; background: #4CAF50; color: #fff; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s ease;"
+                        onmouseover="this.style.opacity='0.8'"
+                        onmouseout="this.style.opacity='1';">
+                    ✅ Ver Resultados
+                </button>
+            @endif
+        </div>
+
     </div>
+
 </div>

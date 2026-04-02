@@ -1,0 +1,10 @@
+- generic [ref=e3]:
+  - generic "Laragon" [ref=e4]
+  - generic [ref=e5]:
+    - text: Apache/2.4.47 (Win64) OpenSSL/1.1.1k mod_fcgid/2.3.10-dev
+    - text: "PHP version: 8.3.22"
+    - link "info" [ref=e7] [cursor=pointer]:
+      - /url: /?q=info
+    - text: "Document Root: C:/laragon/www"
+  - link "Getting Started" [ref=e10] [cursor=pointer]:
+    - /url: https://laragon.org/docs

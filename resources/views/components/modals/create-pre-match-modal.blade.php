@@ -335,6 +335,7 @@ window.submitCreatePreMatch = function() {
 
     const payload = {
         match_id: parseInt(matchId),
+        group_id: parseInt(preMatchGroupId),
         penalty_type: penaltyType.value,
         penalty_points: penaltyType.value === 'POINTS' ? (selectedPenaltyPoints === 'ALL' ? 5000 : parseInt(selectedPenaltyPoints)) : null,
         penalty_description: penaltyType.value === 'SOCIAL' ? customPenalty.value : null
@@ -342,7 +343,7 @@ window.submitCreatePreMatch = function() {
 
     console.log('Payload:', payload);
 
-    fetch(`/api/groups/${preMatchGroupId}/pre-matches`, {
+    fetch(`/api/pre-matches`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -383,7 +384,6 @@ window.submitCreatePreMatch = function() {
                 console.error('❌ No pre-match ID in response:', data);
                 window.location.href = `/groups/${preMatchGroupId}/pre-matches`;
             }
-        }, 500);
         }, 500);
     })
     .catch(err => {

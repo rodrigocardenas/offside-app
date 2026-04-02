@@ -16,7 +16,7 @@ class PreMatch extends Model
 
     public function match(): BelongsTo
     {
-        return $this->belongsTo(FootballMatch::class, 'match_id');
+        return $this->belongsTo(FootballMatch::class, 'football_match_id', 'id');
     }
 
     public function group(): BelongsTo

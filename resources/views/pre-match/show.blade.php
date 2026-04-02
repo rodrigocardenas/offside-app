@@ -2,7 +2,7 @@
     :logo-url="asset('images/logo_alone.png')"
     alt-text="Offside Club"
 >
-    @section('navigation-title', 'Pre Match - ' . $preMatch->match->home_team_name . ' vs ' . $preMatch->match->away_team_name)
+    @section('navigation-title', 'Pre Match - ' . $preMatch->match->home_team . ' vs ' . $preMatch->match->away_team)
 
     @php
         $themeMode = auth()->user()->theme_mode ?? 'light';
@@ -83,7 +83,7 @@
                 <!-- Challenge Details -->
                 <div style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }}; margin-bottom: 16px;">
                     <h2 style="font-size: 16px; font-weight: 700; color: {{ $textPrimary }}; margin: 0 0 12px 0;">
-                        💣 Consecuencias sí se cumple la acción:
+                        💣 Consecuencias sí se cumple tu propuesta:
                     </h2>
 
                     <div style="padding: 12px; border-radius: 8px;
@@ -145,7 +145,7 @@
                                         <img src="{{ $proposition->user->getAvatarUrl('small') }}"
                                              alt="{{ $proposition->user->name }}"
                                              style="width: 36px; height: 36px; min-width: 36px; border-radius: 50%; object-fit: cover; border: 2px solid {{ $accentColor }}; flex-shrink: 0;">
-                                        
+
                                         <!-- User Info -->
                                         <div style="flex: 1; min-width: 0;">
                                             <p style="font-weight: 700; color: {{ $textPrimary }}; margin: 0 0 4px 0; word-break: break-word;">
@@ -156,19 +156,23 @@
                                             </p>
                                         </div>
                                     </div>
-                                    @if($proposition->validation_status === 'approved')
-                                        <span style="padding: 4px 12px; background: #4CAF50; color: #fff; border-radius: 20px; font-size: 11px; font-weight: 700;">
-                                            ✓ Aprobado
-                                        </span>
-                                    @elseif($proposition->validation_status === 'rejected')
-                                        <span style="padding: 4px 12px; background: {{ $redAccent }}; color: #fff; border-radius: 20px; font-size: 11px; font-weight: 700;">
-                                            ✕ Rechazado
-                                        </span>
-                                    @else
-                                        <span style="padding: 4px 12px; background: #ff9500; color: #fff; border-radius: 20px; font-size: 11px; font-weight: 700;">
-                                            ⏳ Pendiente
-                                        </span>
-                                    @endif
+                                    
+                                    <!-- Status Badge -->
+                                    <div style="flex-shrink: 0;">
+                                        @if($proposition->validation_status === 'approved')
+                                            <span style="padding: 4px 12px; background: #4CAF50; color: #fff; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block;">
+                                                ✓ Aprobado
+                                            </span>
+                                        @elseif($proposition->validation_status === 'rejected')
+                                            <span style="padding: 4px 12px; background: {{ $redAccent }}; color: #fff; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block;">
+                                                ✕ Rechazado
+                                            </span>
+                                        @else
+                                            <span style="padding: 4px 12px; background: #ff9500; color: #fff; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block;">
+                                                ⏳ Pendiente
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <!-- Proposition Description -->

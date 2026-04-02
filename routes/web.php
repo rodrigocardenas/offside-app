@@ -78,6 +78,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('groups/by-match/{matchId}', [GroupController::class, 'getGroupsByMatch']);
     Route::get('groups/{group}/ranking-quiz', [GroupController::class, 'showQuizRanking'])->name('groups.ranking-quiz');  // 🎮 Quiz Ranking View
     Route::get('groups/{group}/quiz-ranking', [GroupController::class, 'getQuizRanking'])->name('groups.quiz-ranking');  // 🎮 Quiz Ranking API
+    Route::get('groups/{group}/pre-matches', [GroupController::class, 'showPreMatches'])->name('groups.pre-matches');  // 🔥 Pre Matches
+    Route::get('groups/{group}/pre-matches/{preMatch}', [GroupController::class, 'showPreMatchDetail'])->name('groups.pre-matches.show');  // 🔥 Ver detalle
 
     // Preguntas
     Route::resource('questions', QuestionController::class);
@@ -250,16 +252,16 @@ Route::middleware('auth')->post('/timezone/sync', function (\Illuminate\Http\Req
 Route::get('/debug/test-prematch', function () {
     try {
         echo "<h2>🧪 Pre Match Modal Test</h2>";
-        
+
         // Get a match
         $match = \App\Models\Match::orderBy('id', 'desc')->first();
-            
+
         if (!$match) {
             return "❌ No matches found";
         }
-        
+
         echo "<p>✅ Match found: {$match->id} ({$match->home_team->name} vs {$match->away_team->name})</p>";
-        
+
         // Create Pre Match
         $pm = \App\Models\PreMatch::create([
             'match_id' => $match->id,
@@ -269,10 +271,10 @@ Route::get('/debug/test-prematch', function () {
             'penalty_points' => 1000,
             'status' => 'pending'
         ]);
-        
+
         echo "<p>✅ Pre Match created with ID: {$pm->id}</p>";
         echo "<p>   - match_id in DB: {$pm->match_id}</p>";
-        
+
         // Verify
         $verify = \App\Models\PreMatch::find($pm->id);
         if ($verify && $verify->match_id == $match->id) {
@@ -281,9 +283,9 @@ Route::get('/debug/test-prematch', function () {
         } else {
             echo "<p><strong style='color:red'>❌ VERIFICATION FAILED</strong></p>";
         }
-        
+
         echo "<pre>" . json_encode($pm->toArray(), JSON_PRETTY_PRINT) . "</pre>";
-        
+
     } catch (\Exception $e) {
         return "❌ Error: " . $e->getMessage() . "\n" . $e->getTraceAsString();
     }
@@ -392,7 +394,7 @@ Route::get('/debug/modal-test', function () {
             input.addEventListener('input', function() {
                 const query = this.value.toLowerCase();
                 const resultsDiv = document.getElementById('results');
-                
+
                 if (!query) {
                     resultsDiv.style.display = 'none';
                     return;
@@ -404,7 +406,7 @@ Route::get('/debug/modal-test', function () {
                 });
 
                 console.log(`%cFiltered: ${filtered.length} matches`, 'color: gray');
-                
+
                 if (filtered.length === 0) {
                     resultsDiv.innerHTML = '<div style="padding: 8px;">No matches</div>';
                     resultsDiv.style.display = 'block';
@@ -417,7 +419,7 @@ Route::get('/debug/modal-test', function () {
                         <small>${m.time} · ${m.comp}</small>
                     </div>
                 `).join('');
-                
+
                 resultsDiv.style.display = 'block';
             });
         }
@@ -425,19 +427,19 @@ Route::get('/debug/modal-test', function () {
         window.selectMatch = function(matchId, home, away, time) {
             console.log('%c✅ MATCH SELECTED', 'color: orange; font-weight: bold; font-size: 14px');
             console.log('matchId:', matchId, '| type:', typeof matchId);
-            
+
             const input = document.getElementById('matchInput');
             const display = document.getElementById('display');
             const status = document.getElementById('statusValue');
-            
+
             input.value = matchId;
             console.log('Set input.value to:', input.value);
             console.log('Confirmed .value is:', input.value);
-            
+
             display.textContent = `✅ ${home} vs ${away} (${time})`;
             display.style.display = 'block';
             status.textContent = input.value;
-            
+
             document.getElementById('results').style.display = 'none';
             document.getElementById('searchInput').value = `${home} vs ${away}`;
         };
@@ -446,20 +448,20 @@ Route::get('/debug/modal-test', function () {
             console.log('%c🚀 SUBMITTING FORM', 'color: red; font-weight: bold; font-size: 14px');
             const input = document.getElementById('matchInput');
             const value = input.value;
-            
+
             console.log('Getting value from input...');
             console.log('input.value:', value);
             console.log('typeof:', typeof value);
             console.log('length:', value ? value.length : 0);
             console.log('Boolean(!value):', !value);
             console.log('Boolean(!!value):', !!value);
-            
+
             if (!value) {
                 console.error('%c❌ SUBMISSION FAILED - Empty value!', 'color: red; font-weight: bold');
                 alert('❌ ERROR: matchId is empty!\\nValue: "' + value + '"');
                 return;
             }
-            
+
             console.log('%c✅ SUCCESS - Value:', 'color: green; font-weight: bold', value);
             alert('✅ SUCCESS! Submitted value: ' + value);
         };
@@ -467,5 +469,39 @@ Route::get('/debug/modal-test', function () {
 </body>
 </html>
 HTML;
+});
+
+// Debug: Check matches in database
+Route::get('/debug/matches-check', function () {
+    $now = now();
+    $endDate = $now->copy()->addDays(7);
+
+    $matches = \App\Models\FootballMatch::whereBetween('date', [
+        $now->format('Y-m-d'),
+        $endDate->format('Y-m-d')
+    ])
+        ->orderBy('date')
+        ->limit(10)
+        ->with(['homeTeam', 'awayTeam', 'competition'])
+        ->get();
+
+    $allMatches = \App\Models\FootballMatch::orderByDesc('date')->limit(5)->get(['id', 'date', 'status']);
+    $statuses = \App\Models\FootballMatch::distinct()->pluck('status')->toArray();
+
+    return response()->json([
+        'current_time' => $now->toIso8601String(),
+        'total_matches_in_db' => \App\Models\FootballMatch::count(),
+        'unique_statuses' => $statuses,
+        'newest_matches' => $allMatches->map(fn($m) => ['id' => $m->id, 'date' => $m->date, 'status' => $m->status]),
+        'matches_in_range' => $matches->count(),
+        'matches' => $matches->map(fn($m) => [
+            'id' => $m->id,
+            'date' => $m->date,
+            'status' => $m->status,
+            'home' => $m->homeTeam?->name,
+            'away' => $m->awayTeam?->name,
+            'competition' => $m->competition?->name,
+        ])
+    ]);
 });
 

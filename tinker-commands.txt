@@ -1,0 +1,19 @@
+$group = App\Models\Group::first();
+if (!$group) {
+    $comp = App\Models\Competition::firstOrCreate(
+        ['name' => 'Test Comp'],
+        ['year' => 2024]
+    );
+    $user = App\Models\User::firstOrCreate(
+        ['email' => 'test@offsideclub.test'],
+        ['name' => 'Test User', 'password' => bcrypt('pass')]
+    );
+    $group = App\Models\Group::create([
+        'competition_id' => $comp->id,
+        'created_by' => $user->id,
+        'code' => 'TEST' . strtoupper(substr(uniqid(), -4))
+    ]);
+    $group->users()->attach($user->id);
+}
+echo "Group: " . $group->code . " (ID:" . $group->id . ")\n";
+echo "URL: http://offsideclub.test/groups/" . $group->code . "\n";

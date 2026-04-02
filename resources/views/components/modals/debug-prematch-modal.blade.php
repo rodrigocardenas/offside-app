@@ -17,20 +17,20 @@
 
         <!-- Body -->
         <div style="padding: 24px;">
-            
+
             <!-- Test 1: Search Input -->
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-weight: 700; margin-bottom: 8px;">
                     🔍 Search Input
                 </label>
-                <input type="text" 
+                <input type="text"
                        id="debugSearchInput"
                        placeholder="Type to search..."
                        style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
             </div>
 
             <!-- Test 2: Results Dropdown -->
-            <div id="debugResults" 
+            <div id="debugResults"
                  style="padding: 8px; max-height: 150px; overflow-y: auto; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; background: #f9f9f9; display: none;">
             </div>
 
@@ -100,11 +100,11 @@ function debugInitSearch() {
         console.error('❌ Search input not found');
         return;
     }
-    
+
     input.addEventListener('input', function() {
         const query = this.value.toLowerCase();
         const resultsDiv = document.getElementById('debugResults');
-        
+
         if (!query) {
             resultsDiv.style.display = 'none';
             return;
@@ -116,7 +116,7 @@ function debugInitSearch() {
         });
 
         console.log('Filtered matches:', filtered);
-        
+
         if (filtered.length === 0) {
             resultsDiv.innerHTML = '<div style="padding: 8px;">No matches found</div>';
             resultsDiv.style.display = 'block';
@@ -130,7 +130,7 @@ function debugInitSearch() {
                 <small>${m.time} · ${m.comp}</small>
             </div>
         `).join('');
-        
+
         resultsDiv.style.display = 'block';
     });
 }
@@ -138,21 +138,21 @@ function debugInitSearch() {
 window.debugSelectMatch = function(matchId, home, away, time) {
     console.log('=== debugSelectMatch called ===');
     console.log('matchId:', matchId, 'type:', typeof matchId);
-    
+
     const hiddenInput = document.getElementById('debugMatchInput');
     const display = document.getElementById('debugDisplay');
     const valueSpan = document.getElementById('debugValue');
-    
+
     hiddenInput.value = matchId;
-    
+
     console.log('Set .value to:', hiddenInput.value);
     console.log('Via getAttribute:', hiddenInput.getAttribute('value'));
-    
+
     display.textContent = `✅ ${home} vs ${away} (${time})`;
     display.style.display = 'block';
-    
+
     valueSpan.textContent = hiddenInput.value || '(empty)';
-    
+
     // Hide results
     document.getElementById('debugResults').style.display = 'none';
     document.getElementById('debugSearchInput').value = `${home} vs ${away}`;
@@ -162,18 +162,18 @@ window.debugSubmit = function() {
     console.log('=== debugSubmit called ===');
     const hiddenInput = document.getElementById('debugMatchInput');
     const value = hiddenInput.value;
-    
+
     console.log('Hidden input .value:', value);
     console.log('Type:', typeof value);
     console.log('Length:', value.length);
     console.log('Is truthy:', !!value);
     console.log('Is falsy:', !value);
-    
+
     if (!value) {
         alert('❌ Value is empty or falsy! Value: "' + value + '"');
         return;
     }
-    
+
     alert('✅ SUCCESS! Value: ' + value);
 };
 </script>

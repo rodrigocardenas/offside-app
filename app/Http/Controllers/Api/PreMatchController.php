@@ -46,17 +46,13 @@ class PreMatchController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'football_match_id' => 'required|exists:football_matches,id',
+            'match_id' => 'required|exists:football_matches,id',
             'group_id' => 'required|exists:groups,id',
             'penalty_type' => 'required|in:POINTS,SOCIAL',
             'penalty_points' => 'nullable|integer|min:100|max:5000',
             'penalty_description' => 'nullable|string|max:500',
             'admin_notes' => 'nullable|string|max:1000',
         ]);
-
-        // Map frontend field to database column name
-        $validated['match_id'] = $validated['football_match_id'];
-        unset($validated['football_match_id']);
 
         $validated['created_by'] = auth()->id();
         $validated['status'] = 'pending';
@@ -101,16 +97,28 @@ class PreMatchController extends Controller
     {
         $validated = $request->validate([
             'action' => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
         ]);
 
         $proposition = $preMatch->propositions()->create([
             ...$validated,
             'user_id' => auth()->id(),
             'validation_status' => 'pending',
-            'votes_count' => 0,
-            'approved_votes' => 0,
+            'votes_count' => 1, // Ya tiene mi voto
+            'approved_votes' => 1, // Yo lo aprobé automáticamente
         ]);
+
+        // Crear automáticamente mi voto de aceptación
+        PreMatchVote::create([
+            'pre_match_proposition_id' => $proposition->id,
+            'user_id' => auth()->id(),
+            'approved' => true,
+        ]);
+
+        // Calcular porcentaje
+        $groupMembersCount = $preMatch->group->users->count();
+        $approvalPercentage = (1 / $groupMembersCount) * 100;
+        $proposition->update(['approval_percentage' => $approvalPercentage]);
 
         return response()->json($proposition, 201);
     }
@@ -138,61 +146,115 @@ class PreMatchController extends Controller
         $totalVotes = $proposition->votes()->count();
         $approvedCount = $proposition->votes()->where('approved', true)->count();
 
+        // Contar miembros del grupo
+        $groupMembersCount = $proposition->preMatch->group->users->count();
+
+        // Determinar estado: si tiene todas las aprobaciones, cambiar a approved
+        $validationStatus = $approvedCount >= $groupMembersCount ? 'approved' : 'pending';
+
         $proposition->update([
             'votes_count' => $totalVotes,
             'approved_votes' => $approvedCount,
             'approval_percentage' => $totalVotes > 0 ? ($approvedCount / $totalVotes) * 100 : 0,
+            'validation_status' => $validationStatus,
         ]);
+
+        // Verificar si TODAS las propuestas del pre-match están aprobadas
+        $preMatch = $proposition->preMatch;
+        $totalPropositions = $preMatch->propositions()->count();
+        $approvedPropositions = $preMatch->propositions()->where('validation_status', 'approved')->count();
+
+        // Si todas las propuestas están aprobadas, cambiar estado del pre-match a 'active'
+        if ($totalPropositions > 0 && $approvedPropositions === $totalPropositions) {
+            $preMatch->update(['status' => 'active']);
+        }
 
         return response()->json($proposition);
     }
 
     /**
-     * POST /api/pre-matches/{id}/resolve
-     * Resolver desafío (Admin): especificar si se cumplió y qué proposición ganó
+     * DELETE /api/pre-match-propositions/{id}
+     * Eliminar propuesta (solo el creador, si no está completamente aprobada)
      */
-    public function resolvePreMatch(Request $request, PreMatch $preMatch): JsonResponse
+    public function deleteProposition(PreMatchProposition $proposition): JsonResponse
     {
-        $validated = $request->validate([
-            'winning_proposition_id' => 'nullable|exists:pre_match_propositions,id',
-            'was_fulfilled' => 'required|boolean',
-            'admin_evidence' => 'nullable|string|max:1000',
-            'admin_notes' => 'nullable|string|max:1000',
-        ]);
-
-        // Crear resolución
-        $resolution = $preMatch->resolutions()->create([
-            ...$validated,
-            'admin_verified' => true,
-            'resolved_at' => now(),
-        ]);
-
-        // Si fue rechazado, crear penalizaciones para proponentes
-        if (!$validated['was_fulfilled']) {
-            $this->applyPenalties($preMatch);
+        // Solo el creador puede eliminar
+        if ($proposition->user_id !== auth()->id()) {
+            return response()->json(['error' => 'No tienes permiso para eliminar esta propuesta'], 403);
         }
 
-        $preMatch->update(['status' => 'completed']);
+        // Contar miembros del grupo
+        $groupMembersCount = $proposition->preMatch->group->users->count();
 
-        return response()->json($resolution);
+        // Si está aprobada por todos, no se puede eliminar
+        if ($proposition->approved_votes >= $groupMembersCount) {
+            return response()->json(['error' => 'No puedes eliminar una propuesta aprobada por todos'], 422);
+        }
+
+        $proposition->delete();
+
+        return response()->json(['message' => 'Propuesta eliminada']);
     }
 
     /**
-     * Aplicar penalizaciones a usuarios que propusieron acciones no cumplidas
+     * PUT /api/pre-matches/{id}/resolve
+     * Resolver desafío (Admin): especificar perdedores y aplicar penalizaciones
      */
-    private function applyPenalties(PreMatch $preMatch): void
+    public function resolvePreMatch(Request $request, PreMatch $preMatch): JsonResponse
     {
-        foreach ($preMatch->propositions as $proposition) {
+        // Authorize - only creator or admin
+        if ($preMatch->created_by !== auth()->id()) {
+            return response()->json(['error' => 'No tienes permiso para resolver este desafío'], 403);
+        }
+
+        $validated = $request->validate([
+            'loser_ids' => 'required|array',
+            'loser_ids.*' => 'exists:users,id',
+            'penalty_points' => 'required|numeric|min:0',
+        ]);
+
+        $loserIds = $validated['loser_ids'];
+        $penaltyPoints = $validated['penalty_points'];
+
+        // Apply penalties to each loser
+        foreach ($loserIds as $loserId) {
+            // Apply penalty to loser - deduct from group_user pivot table
+            if ($preMatch->penalty_type === 'POINTS') {
+                $groupUser = $preMatch->group->users()
+                    ->wherePivot('user_id', $loserId)
+                    ->first();
+
+                if ($groupUser) {
+                    $currentPoints = $groupUser->pivot->points ?? 0;
+                    $newPoints = max(0, $currentPoints - $penaltyPoints);
+
+                    $preMatch->group->users()->updateExistingPivot($loserId, [
+                        'points' => $newPoints
+                    ]);
+                }
+            }
+
+            // Create penalty record
             GroupPenalty::create([
                 'group_id' => $preMatch->group_id,
-                'user_id' => $proposition->user_id,
+                'user_id' => $loserId,
                 'pre_match_id' => $preMatch->id,
                 'penalty_type' => $preMatch->penalty_type,
-                'penalty_points' => $preMatch->penalty_points,
-                'penalty_description' => $preMatch->penalty_description,
-                'is_resolved' => false,
+                'penalty_data' => [
+                    'points' => $penaltyPoints ?? 0,
+                ],
+                'penalty_description' => $preMatch->penalty_description ?? 'Castigo por perder el desafío',
+                'is_resolved' => true,
             ]);
         }
+
+        // Update pre-match status to completed
+        $preMatch->update(['status' => 'completed']);
+
+        return response()->json([
+            'message' => 'Desafío resuelto exitosamente',
+            'pre_match' => $preMatch,
+        ]);
     }
 
     /**

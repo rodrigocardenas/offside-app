@@ -93,39 +93,40 @@ Route::prefix('matches')->group(function () {
 // ============================================================================
 // RUTAS DE SINCRONIZACIÓN (Requiere autenticación y permisos de admin)
 // ============================================================================
-Route::middleware('auth:sanctum')->group(function () {
+// RUTAS PRE MATCH - Protegidas con autenticación de sesión
+// ============================================================================
+Route::middleware('auth:web')->prefix('pre-matches')->group(function () {
+    // Listar Pre Matches (filtrar por grupo, estado)
+    Route::get('/', [\App\Http\Controllers\Api\PreMatchController::class, 'index']);
+
+    // Crear nuevo Pre Match
+    Route::post('/', [\App\Http\Controllers\Api\PreMatchController::class, 'store']);
+
+    // Obtener detalles Pre Match
+    Route::get('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'show']);
+
+    // Actualizar Pre Match (Admin)
+    Route::patch('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'update']);
+
+    // Agregar proposición de acción
+    Route::post('/{preMatch}/propositions', [\App\Http\Controllers\Api\PreMatchController::class, 'addProposition']);
+
+    // Obtener penalizaciones asociadas
+    Route::get('/{preMatch}/penalties', [\App\Http\Controllers\Api\PreMatchController::class, 'getPenalties']);
+
+    // Resolver Pre Match (Admin)
+    Route::put('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch']);
+});
+
+// Pre Match Propositions - Votos en proposiciones
+Route::middleware('auth:web')->prefix('pre-match-propositions')->group(function () {
+    Route::post('/{proposition}/vote', [\App\Http\Controllers\Api\PreMatchController::class, 'voteOnProposition']);
+    Route::delete('/{proposition}', [\App\Http\Controllers\Api\PreMatchController::class, 'deleteProposition']);
+});
+
+// ============================================================================
+Route::middleware('auth:web')->group(function () {
     Route::post('/matches/sync', [MatchesController::class, 'sync']);
-
-    // ========================================================================
-    // RUTAS PRE MATCH - Desafíos anticipados en partidos
-    // ========================================================================
-    Route::prefix('pre-matches')->group(function () {
-        // Listar Pre Matches (filtrar por grupo, estado)
-        Route::get('/', [\App\Http\Controllers\Api\PreMatchController::class, 'index']);
-
-        // Crear nuevo Pre Match (Admin only)
-        Route::post('/', [\App\Http\Controllers\Api\PreMatchController::class, 'store']);
-
-        // Obtener detalles Pre Match
-        Route::get('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'show']);
-
-        // Actualizar Pre Match (Admin)
-        Route::patch('/{preMatch}', [\App\Http\Controllers\Api\PreMatchController::class, 'update']);
-
-        // Agregar proposición de acción
-        Route::post('/{preMatch}/propositions', [\App\Http\Controllers\Api\PreMatchController::class, 'addProposition']);
-
-        // Obtener penalizaciones asociadas
-        Route::get('/{preMatch}/penalties', [\App\Http\Controllers\Api\PreMatchController::class, 'getPenalties']);
-
-        // Resolver Pre Match (Admin)
-        Route::post('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch']);
-    });
-
-    // Pre Match Propositions - Votos en proposiciones
-    Route::prefix('pre-match-propositions')->group(function () {
-        Route::post('/{proposition}/vote', [\App\Http\Controllers\Api\PreMatchController::class, 'voteOnProposition']);
-    });
 
     // Action Templates - Sugerencias de acciones
     Route::prefix('action-templates')->group(function () {
@@ -138,4 +139,53 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('penalties')->group(function () {
         Route::patch('/{penalty}/fulfill', [\App\Http\Controllers\Api\PreMatchController::class, 'markPenaltyFulfilled']);
     });
+
+    // ====================================================================
+    // DEBUG ROUTES (Temporal - para diagnóstico de autenticación)
+    // ====================================================================
+    Route::get('/debug/auth-check', function (Request $request) {
+        return response()->json([
+            'authenticated' => auth()->check(),
+            'user_id' => auth()->id(),
+            'user_email' => auth()->user()?->email,
+            'request_expects_json' => $request->expectsJson(),
+            'headers' => [
+                'content-type' => $request->header('content-type'),
+                'accept' => $request->header('accept'),
+                'authorization' => $request->header('authorization') ? 'SET' : 'EMPTY'
+            ]
+        ]);
+    });
+
+    Route::post('/debug/pre-match-test', function (Request $request) {
+        \Log::info('DEBUG: pre-match-test POST received', [
+            'body' => $request->all(),
+            'authenticated' => auth()->check(),
+            'user_id' => auth()->id(),
+            'expect_json' => $request->expectsJson(),
+        ]);
+
+        return response()->json([
+            'status' => 'test_success',
+            'authenticated' => auth()->check(),
+            'user_id' => auth()->id(),
+            'payload_received' => $request->all(),
+        ], 201);
+    });
+});
+
+// Endpoint público para verificación
+Route::get('/debug/public-check', function () {
+    return response()->json(['status' => 'public_access_ok']);
+});
+
+// Endpoint protegido de debug con auth:web
+Route::middleware('auth:web')->get('/debug/protected-check', function (Request $request) {
+    return response()->json([
+        'authenticated' => true,
+        'user_id' => auth()->id(),
+        'user_email' => auth()->user()?->email,
+        'message' => '✅ Session authentication is working!',
+        'guard_check' => auth('web')->check(),
+    ]);
 });
