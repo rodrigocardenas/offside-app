@@ -229,6 +229,12 @@ window.closeCreatePreMatchModal = function() {
 window.selectMatchFromDropdown = function(element) {
     console.log('=== selectMatchFromDropdown called ===');
     console.log('Element:', element);
+    console.log('Element attributes:', {
+        'data-match-id': element.getAttribute('data-match-id'),
+        'data-home-team': element.getAttribute('data-home-team'),
+        'data-away-team': element.getAttribute('data-away-team'),
+        'data-kick-off': element.getAttribute('data-kick-off')
+    });
 
     const matchId = element.getAttribute('data-match-id');
     const homeTeam = element.getAttribute('data-home-team');
@@ -242,15 +248,27 @@ window.selectMatchFromDropdown = function(element) {
     const selectedDisplay = document.getElementById('selectedMatchDisplay');
     const hiddenInput = document.getElementById('preMatchMatchSelect');
 
-    if (hiddenInput && searchInput && selectedDisplay && resultsDiv) {
+    if (!hiddenInput) {
+        console.error('❌ Hidden input element not found!');
+        alert('Error interno: No se encuentra campo oculto');
+        return;
+    }
+
+    if (!matchId) {
+        console.error('❌ matchId is empty or null!', {matchId});
+        alert('Error: No se pudo obtener el ID del partido');
+        return;
+    }
+
+    if (searchInput && resultsDiv && selectedDisplay) {
         hiddenInput.value = matchId;
         searchInput.value = `${homeTeam} vs ${awayTeam}`;
         selectedDisplay.textContent = `✅ ${homeTeam} vs ${awayTeam} (${kickOff})`;
         selectedDisplay.style.display = 'block';
         resultsDiv.style.display = 'none';
-        console.log('✅ Match stored - hiddenInput.value is now:', hiddenInput.value);
+        console.log('✅ Match stored successfully - hiddenInput.value:', hiddenInput.value);
     } else {
-        console.error('❌ One or more elements not found!');
+        console.error('❌ One or more elements not found!', {searchInput: !!searchInput, resultsDiv: !!resultsDiv, selectedDisplay: !!selectedDisplay});
     }
 };
 
@@ -414,10 +432,17 @@ function loadUpcomingMatches() {
         .then(response => {
             const matches = Array.isArray(response) ? response : (response.data || []);
             console.log('📊 Parsed matches count:', matches.length);
+            console.log('📊 First match structure:', matches[0] ? JSON.stringify(matches[0]) : 'No matches');
 
             if (matches.length === 0) {
                 searchInput.placeholder = 'No hay partidos disponibles';
                 return;
+            }
+
+            // Validar que todos los matches tienen ID
+            const matchesWithoutId = matches.filter(m => !m.id);
+            if (matchesWithoutId.length > 0) {
+                console.warn(`⚠️ ${matchesWithoutId.length} matches sin ID:`, matchesWithoutId);
             }
 
             window_preMatchesData = matches;
@@ -425,7 +450,7 @@ function loadUpcomingMatches() {
             searchInput.disabled = false;
             searchInput.focus();
 
-            console.log('✅ Matches loaded successfully');
+            console.log('✅ Matches loaded successfully - Total:', matches.length, 'With ID:', matches.filter(m => m.id).length);
         })
         .catch(err => {
             console.error('❌ Error loading matches:', err);
@@ -469,9 +494,12 @@ function initializeMatchSearch() {
             return;
         }
 
-        resultsDiv.innerHTML = filtered.map(match => `
+        resultsDiv.innerHTML = filtered.map(match => {
+            const idValue = match.id || 'NULL_ID';
+            console.log('Rendering match:', {id: idValue, home: match.home_team?.name, away: match.away_team?.name});
+            return `
             <div class="match-option"
-                 data-match-id="${match.id}"
+                 data-match-id="${idValue}"
                  data-home-team="${(match.home_team?.name || 'Equipo A').replace(/"/g, '&quot;')}"
                  data-away-team="${(match.away_team?.name || 'Equipo B').replace(/"/g, '&quot;')}"
                  data-kick-off="${match.kick_off_time || 'TBD'}"
@@ -482,7 +510,8 @@ function initializeMatchSearch() {
                 <strong>${match.home_team?.name || 'Equipo A'} vs ${match.away_team?.name || 'Equipo B'}</strong><br>
                 ${match.kick_off_time || 'Hora TBD'} · ${match.competition?.name || 'Competencia'}
             </div>
-        `).join('');
+            `;
+        }).join('');
 
         resultsDiv.style.display = 'block';
     });
