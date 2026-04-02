@@ -46,7 +46,7 @@ class PreMatchController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'match_id' => 'required|exists:football_matches,id',
+            'football_match_id' => 'required|exists:football_matches,id',
             'group_id' => 'required|exists:groups,id',
             'penalty_type' => 'required|in:POINTS,SOCIAL',
             'penalty_points' => 'nullable|integer|min:100|max:5000',

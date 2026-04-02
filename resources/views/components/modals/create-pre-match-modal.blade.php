@@ -352,7 +352,7 @@ window.submitCreatePreMatch = function() {
     }
 
     const payload = {
-        match_id: parseInt(matchId),
+        football_match_id: parseInt(matchId),
         group_id: parseInt(preMatchGroupId),
         penalty_type: penaltyType.value,
         penalty_points: penaltyType.value === 'POINTS' ? (selectedPenaltyPoints === 'ALL' ? 5000 : parseInt(selectedPenaltyPoints)) : null,
