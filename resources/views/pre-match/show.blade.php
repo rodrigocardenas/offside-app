@@ -443,7 +443,240 @@
     </div>
 
 
+    <!-- Toast Container -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
+
     <script>
+        // ============================================================
+        // SSE (Server-Sent Events) - Real-time updates
+        // ============================================================
+        const preMatchId = {{ $preMatch->id }};
+        let eventSource = null;
+
+        function initializeSSE() {
+            console.log('🔌 Inicializando conexión SSE para pre-match:', preMatchId);
+
+            eventSource = new EventSource(`/api/pre-matches/${preMatchId}/events`);
+
+            // Conexión abierta
+            eventSource.addEventListener('open', function() {
+                console.log('✅ Conectado a eventos en tiempo real');
+                showToast('Conectado a actualizaciones en vivo', 'success', 3000);
+            });
+
+            // Recibir eventos
+            eventSource.addEventListener('message', function(e) {
+                try {
+                    const event = JSON.parse(e.data);
+                    console.log('📡 Evento recibido:', event.event, event.data);
+                    handlePreMatchEvent(event);
+                } catch (err) {
+                    console.error('❌ Error al parsear evento:', err);
+                }
+            });
+
+            // Errores
+            eventSource.addEventListener('error', function() {
+                console.error('❌ Error en conexión SSE');
+                showToast('Desconectado de actualizaciones', 'error', 5000);
+                eventSource.close();
+
+                // Intentar reconectar después de 5 segundos
+                setTimeout(() => {
+                    console.log('🔄 Reintentando conexión...');
+                    initializeSSE();
+                }, 5000);
+            });
+        }
+
+        // ============================================================
+        // Manejador principal de eventos
+        // ============================================================
+        function handlePreMatchEvent(event) {
+            const { event: eventType, data: payload } = event;
+
+            switch(eventType) {
+                case 'proposition.created':
+                    handlePropositionCreated(payload);
+                    break;
+                case 'proposition.deleted':
+                    handlePropositionDeleted(payload);
+                    break;
+                case 'proposition.auto_approved':
+                    handlePropositionAutoApproved(payload);
+                    break;
+                case 'vote.created':
+                    handleVoteCreated(payload);
+                    break;
+                case 'status.changed':
+                    handleStatusChanged(payload);
+                    break;
+                case 'status.pending_to_active':
+                    handleStatusPendingToActive(payload);
+                    break;
+                case 'status.resolved':
+                    handleStatusResolved(payload);
+                    break;
+            }
+        }
+
+        // ============================================================
+        // Handlers específicos por evento
+        // ============================================================
+
+        function handlePropositionCreated(payload) {
+            showToast(`✅ ${payload.user_name} propuso: "${payload.action}"`, 'info', 5000);
+            // Nota: La actualización del DOM se hace con un pequeño delay para que se complete el evento del servidor
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+
+        function handlePropositionDeleted(payload) {
+            showToast(`🗑️ ${payload.user_name} eliminó su propuesta`, 'warning', 4000);
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        }
+
+        function handlePropositionAutoApproved(payload) {
+            showToast(`✨ ¡"${payload.action}" fue aprobado unánimemente!`, 'success', 5000);
+        }
+
+        function handleVoteCreated(payload) {
+            // Solo notificar si es el creador de la propuesta
+            if (payload.proposition_creator_id === {{ auth()->id() }}) {
+                showToast(`🗳️ Tu propuesta recibió un voto`, 'info', 3000);
+            }
+            // Actualizar barra de progreso en tiempo real
+            updatePropositionProgress(payload.proposition_id, payload.approved_votes, payload.votes_count, payload.approval_percentage);
+        }
+
+        function handleStatusPendingToActive(payload) {
+            showToast(`🔴 ¡El pre-match está ACTIVO! Todas las propuestas fueron aprobadas.`, 'warning', 7000);
+            // Actualizar header
+            updatePreMatchStatus('active');
+        }
+
+        function handleStatusChanged(payload) {
+            console.log('Estado cambió de', payload.old_status, 'a', payload.new_status);
+        }
+
+        function handleStatusResolved(payload) {
+            showToast(`✅ Pre-match resuelto. Penalidades aplicadas.`, 'success', 7000);
+            updatePreMatchStatus('resolved');
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+
+        // ============================================================
+        // Funciones auxiliares
+        // ============================================================
+
+        function updatePropositionProgress(propositionId, approvedVotes, totalVotes, percentage) {
+            // Aquí iría lógica para actualizar el UI sin reload
+            // Por ahora, solo log
+            console.log(`📊 Propuesta ${propositionId}: ${approvedVotes}/${totalVotes} (${percentage}%)`);
+        }
+
+        function updatePreMatchStatus(newStatus) {
+            // Actualizar el header del pre-match
+            const header = document.querySelector('[style*="background"]');
+            if (header && newStatus === 'active') {
+                header.style.background = 'linear-gradient(135deg, #ffa726, #ffb74d)';
+            }
+        }
+
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toast-container');
+
+            // Colores según el tipo
+            const colors = {
+                'success': { bg: '#4CAF50', text: '#fff' },
+                'error': { bg: '#ff6b6b', text: '#fff' },
+                'warning': { bg: '#ff9500', text: '#fff' },
+                'info': { bg: '#2196F3', text: '#fff' }
+            };
+
+            const color = colors[type] || colors['info'];
+
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                background: ${color.bg};
+                color: ${color.text};
+                padding: 16px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                font-size: 14px;
+                font-weight: 600;
+                animation: slideInRight 0.3s ease-out;
+                min-width: 280px;
+                max-width: 400px;
+                pointer-events: auto;
+            `;
+            toast.textContent = message;
+
+            container.appendChild(toast);
+
+            // Auto-remove después de duration
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // Agregar keyframes para animaciones
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+
+            .proposition-updating {
+                animation: pulse 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Inicializar SSE cuando se carga la página
+        document.addEventListener('DOMContentLoaded', initializeSSE);
+
+        // Cerrar conexión SSE antes de descargar la página
+        window.addEventListener('beforeunload', () => {
+            if (eventSource) {
+                eventSource.close();
+                console.log('🔌 SSE desconectado');
+            }
+        });
+
+        // ============================================================
+        // Functions originales (modificadas)
+        // ============================================================
+
         function openPropositionModal() {
             document.getElementById('propositionModal').style.display = 'flex';
         }
@@ -457,7 +690,6 @@
             e.preventDefault();
 
             const text = document.getElementById('propositionText').value;
-            const preMatchId = {{ $preMatch->id }};
 
             try {
                 const response = await fetch(`/api/pre-matches/${preMatchId}/propositions`, {
@@ -475,11 +707,11 @@
 
                 if (!response.ok) throw new Error('Error al enviar propuesta');
 
-                alert('✅ Propuesta enviada exitosamente!');
+                showToast('✅ Propuesta enviada exitosamente!', 'success', 3000);
                 closePropositionModal();
-                location.reload();
+                // El evento SSE disparará el reload automáticamente
             } catch (err) {
-                alert('❌ Error: ' + err.message);
+                showToast('❌ Error: ' + err.message, 'error', 5000);
             }
         });
 
@@ -500,9 +732,10 @@
 
                 if (!response.ok) throw new Error('Error al votar');
 
-                location.reload();
+                showToast('🗳️ Voto registrado', 'success', 2000);
+                // El evento SSE disparará actualizaciones automáticas
             } catch (err) {
-                alert('❌ Error: ' + err.message);
+                showToast('❌ Error: ' + err.message, 'error', 5000);
             }
         }
 
@@ -524,10 +757,10 @@
 
                 if (!response.ok) throw new Error('Error al eliminar propuesta');
 
-                alert('✅ Propuesta eliminada exitosamente');
-                location.reload();
+                showToast('✅ Propuesta eliminada exitosamente', 'success', 3000);
+                // El evento SSE disparará el reload automáticamente
             } catch (err) {
-                alert('❌ Error: ' + err.message);
+                showToast('❌ Error: ' + err.message, 'error', 5000);
             }
         }
 
@@ -553,7 +786,7 @@
             };
 
             try {
-                const response = await fetch(`/api/pre-matches/{{ $preMatch->id }}/resolve`, {
+                const response = await fetch(`/api/pre-matches/${preMatchId}/resolve`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -565,19 +798,17 @@
 
                 if (!response.ok) {
                     const error = await response.json();
-                    alert('Error: ' + (error.message || 'No se pudo resolver el desafío'));
+                    showToast('Error: ' + (error.message || 'No se pudo resolver el desafío'), 'error', 5000);
                     return;
                 }
 
-                const result = await response.json();
-
-                // Show success message and reload
-                alert('✅ Desafío resuelto exitosamente');
-                window.location.reload();
+                showToast('✅ Desafío resuelto exitosamente', 'success', 3000);
+                closeResolveModal();
+                // El evento SSE disparará el reload automáticamente
 
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al resolver el desafío: ' + error.message);
+                showToast('Error al resolver el desafío: ' + error.message, 'error', 5000);
             }
         });
     </script>
