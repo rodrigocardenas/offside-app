@@ -209,6 +209,34 @@ Todos deben pasar antes de deployar a producción.
 
 ---
 
+## ⛔ PROHIBICIÓN CRÍTICA: migrate:fresh & Database Dumps
+
+**NUNCA EJECUTAR SIN PERMISO EXPLÍCITO:**
+
+- ❌ `php artisan migrate:fresh`
+- ❌ `php artisan migrate --fresh`
+- ❌ `php artisan migrate:refresh`
+- ❌ Cualquier comando que elimine o resetee tablas
+- ❌ Operaciones de dump de bases de datos
+- ❌ Cambios en conexiones de base de datos
+
+**Por qué es crítico:**
+- El servidor tiene datos de producción/testing que no se pueden perder
+- Los seeders pueden no recrear exactamente el mismo estado
+- Usuarios pueden estar usando la app en tiempo real
+
+**Si accidentalmente ejecutas estos comandos:**
+1. ⚠️ INMEDIATAMENTE restaura con: `php artisan db:seed`
+2. 📢 AVISA al usuario inmediatamente
+3. 📝 Documenta lo que pasó
+
+**Alternativa correcta:**
+- Para crear una nueva migración: `php artisan make:migration migration_name`
+- Luego ejecuta: `php artisan migrate` (SIN --fresh)
+- Nunca resetees todo sin permiso explícito
+
+---
+
 ## 🛠️ Reglas de Terminal y Comandos
 
 - Usa exclusivamente sintaxis de **Bash** para todos los comandos de terminal. No uses PowerShell ni CMD.
