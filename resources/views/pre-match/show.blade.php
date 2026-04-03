@@ -448,6 +448,81 @@
 
     <script>
         // ============================================================
+        // Push Notifications Configuration
+        // ============================================================
+        let notificationPermission = 'default';
+
+        /**
+         * Solicitar permiso para notificaciones push
+         */
+        function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                console.log('⚠️ Este navegador no soporta notificaciones');
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                notificationPermission = 'granted';
+                console.log('✅ Notificaciones ya tienen permiso');
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(function(permission) {
+                    notificationPermission = permission;
+                    if (permission === 'granted') {
+                        console.log('✅ Permiso de notificaciones otorgado');
+                        // Test notification
+                        new Notification('Offside Club', {
+                            body: 'Recibirás notificaciones de eventos importantes',
+                            icon: '/images/logo_alone.png',
+                            badge: '/images/favicon.ico'
+                        });
+                    }
+                });
+            } else {
+                console.log('⚠️ Notificaciones bloqueadas por el usuario');
+            }
+        }
+
+        /**
+         * Enviar notificación push
+         * @param {string} title - Título de la notificación
+         * @param {string} body - Cuerpo de la notificación
+         * @param {string} icon - URL del icono (default logo)
+         * @param {string} badge - URL del badge (default logo)
+         * @param {Object} options - Opciones adicionales
+         */
+        function sendPushNotification(title, body, icon = null, badge = null, options = {}) {
+            if (notificationPermission !== 'granted' || !('Notification' in window)) {
+                console.log('⏸️ Notificación no enviada (sin permiso)');
+                return;
+            }
+
+            const notifOptions = {
+                body: body,
+                icon: icon || '/images/logo_alone.png',
+                badge: badge || '/images/favicon.ico',
+                tag: 'prematch-' + preMatchId, // Agrupar notificaciones por pre-match
+                requireInteraction: false, // Auto-close después de cierto tiempo
+                ...options
+            };
+
+            try {
+                const notification = new Notification(title, notifOptions);
+                console.log('📢 Push notification enviada:', title);
+
+                // Click en notificación → volver a la pestaña
+                notification.addEventListener('click', function() {
+                    window.focus();
+                    notification.close();
+                });
+
+                // Auto-cerrar después de 7 segundos
+                setTimeout(() => notification.close(), 7000);
+            } catch (err) {
+                console.error('❌ Error enviando notificación:', err);
+            }
+        }
+
+        // ============================================================
         // SSE (Server-Sent Events) - Real-time updates
         // ============================================================
         const preMatchId = {{ $preMatch->id }};
@@ -526,6 +601,11 @@
 
         function handlePropositionCreated(payload) {
             showToast(`✅ ${payload.user_name} propuso: "${payload.action}"`, 'info', 5000);
+            sendPushNotification(
+                '💡 Nueva Propuesta',
+                `${payload.user_name}: ${payload.action}`,
+                payload.user_avatar
+            );
             // Nota: La actualización del DOM se hace con un pequeño delay para que se complete el evento del servidor
             setTimeout(() => {
                 location.reload();
@@ -547,6 +627,10 @@
             // Solo notificar si es el creador de la propuesta
             if (payload.proposition_creator_id === {{ auth()->id() }}) {
                 showToast(`🗳️ Tu propuesta recibió un voto`, 'info', 3000);
+                sendPushNotification(
+                    '🗳️ Tu Propuesta Fue Votada',
+                    `"${payload.approved_votes}/${payload.votes_count}" han votado por tu propuesta`
+                );
             }
             // Actualizar barra de progreso en tiempo real
             updatePropositionProgress(payload.proposition_id, payload.approved_votes, payload.votes_count, payload.approval_percentage);
@@ -554,6 +638,13 @@
 
         function handleStatusPendingToActive(payload) {
             showToast(`🔴 ¡El pre-match está ACTIVO! Todas las propuestas fueron aprobadas.`, 'warning', 7000);
+            sendPushNotification(
+                '🔴 Pre-Match ACTIVO',
+                'El desafío está activo. Las propuestas serán validadas después del partido.',
+                null,
+                null,
+                { requireInteraction: true }
+            );
             // Actualizar header
             updatePreMatchStatus('active');
         }
@@ -564,6 +655,13 @@
 
         function handleStatusResolved(payload) {
             showToast(`✅ Pre-match resuelto. Penalidades aplicadas.`, 'success', 7000);
+            sendPushNotification(
+                '✅ Desafío Resuelto',
+                'Las penalidades han sido aplicadas. La página se actualizará en breves.',
+                null,
+                null,
+                { requireInteraction: false }
+            );
             updatePreMatchStatus('resolved');
             setTimeout(() => {
                 location.reload();
@@ -662,8 +760,11 @@
         `;
         document.head.appendChild(style);
 
-        // Inicializar SSE cuando se carga la página
-        document.addEventListener('DOMContentLoaded', initializeSSE);
+        // Inicializar SSE y solicitar permisos de notificaciones cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            requestNotificationPermission();
+            initializeSSE();
+        });
 
         // Cerrar conexión SSE antes de descargar la página
         window.addEventListener('beforeunload', () => {

@@ -16,7 +16,7 @@ class PreMatchSSEStreamTest extends TestCase
     {
         // This test validates the basic infrastructure
         // Full integration tests would require a running SSE stream
-        
+
         $this->assertTrue(true);
     }
 }
