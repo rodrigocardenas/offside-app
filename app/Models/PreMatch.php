@@ -48,4 +48,54 @@ class PreMatch extends Model
     {
         return $this->hasMany(GroupPenalty::class);
     }
+
+    /**
+     * Boot model - Disparar eventos cuando cambia el estado
+     */
+    protected static function booted(): void
+    {
+        /**
+         * Evento: Cambio de Estado del Pre-Match
+         */
+        static::updating(function (self $preMatch) {
+            if ($preMatch->isDirty('status')) {
+                $oldStatus = $preMatch->getOriginal('status');
+                $newStatus = $preMatch->status;
+
+                PreMatchEvent::create([
+                    'pre_match_id' => $preMatch->id,
+                    'event_type' => 'status.changed',
+                    'payload' => json_encode([
+                        'old_status' => $oldStatus,
+                        'new_status' => $newStatus,
+                        'group_id' => $preMatch->group_id,
+                    ]),
+                ]);
+
+                // Log especial para cuando pasa a ACTIVE
+                if ($newStatus === 'active' && $oldStatus === 'pending') {
+                    PreMatchEvent::create([
+                        'pre_match_id' => $preMatch->id,
+                        'event_type' => 'status.pending_to_active',
+                        'payload' => json_encode([
+                            'message' => 'Todas las propuestas fueron aprobadas',
+                            'propositions_approved' => $preMatch->propositions()->where('validation_status', 'approved')->count(),
+                        ]),
+                    ]);
+                }
+
+                // Log especial para cuando pasa a RESOLVED
+                if ($newStatus === 'resolved') {
+                    PreMatchEvent::create([
+                        'pre_match_id' => $preMatch->id,
+                        'event_type' => 'status.resolved',
+                        'payload' => json_encode([
+                            'message' => 'Pre-match resuelto',
+                            'resolved_at' => now()->toIso8601String(),
+                        ]),
+                    ]);
+                }
+            }
+        });
+    }
 }
