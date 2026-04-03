@@ -116,6 +116,9 @@ Route::middleware('auth:web')->prefix('pre-matches')->group(function () {
 
     // Resolver Pre Match (Admin)
     Route::put('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch']);
+
+    // Stream de eventos SSE (Real-time updates)
+    Route::get('/{preMatch}/events', [\App\Http\Controllers\PreMatchEventController::class, 'stream']);
 });
 
 // Pre Match Propositions - Votos en proposiciones

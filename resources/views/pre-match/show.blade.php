@@ -156,7 +156,7 @@
                                             </p>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Status Badge -->
                                     <div style="flex-shrink: 0;">
                                         @if($proposition->validation_status === 'approved')
