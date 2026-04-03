@@ -136,7 +136,7 @@
                     @if($preMatch->propositions->count() > 0)
                         <div style="display: grid; gap: 12px;">
                             @foreach($preMatch->propositions as $proposition)
-                            <div style="background: {{ $bgSecondary }}; padding: 16px; border-radius: 8px; border: 1px solid {{ $borderColor }};">
+                            <div data-proposition-id="{{ $proposition->id }}" style="background: {{ $bgSecondary }}; padding: 16px; border-radius: 8px; border: 1px solid {{ $borderColor }};">
                                 <!-- Proposition Header -->
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
                                     <!-- Avatar + Info -->
@@ -184,10 +184,10 @@
                                 <div style="margin-top: 12px; padding: 12px; background: {{ $bgSecondary }}; border-radius: 8px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                         <span style="font-size: 12px; color: {{ $textSecondary }};">Aprobaciones: {{ $proposition->approved_votes }}/{{ $group->users->count() }}</span>
-                                        <span style="font-size: 12px; font-weight: 700; color: {{ $accentColor }};">{{ number_format($proposition->approval_percentage, 0) }}%</span>
+                                        <span data-progress-value style="font-size: 12px; font-weight: 700; color: {{ $accentColor }};">{{ number_format($proposition->approval_percentage, 0) }}%</span>
                                     </div>
                                     <div style="width: 100%; height: 6px; background: {{ $borderColor }}; border-radius: 3px; overflow: hidden;">
-                                        <div style="height: 100%; background: {{ $accentColor }}; width: {{ min($proposition->approval_percentage, 100) }}%; transition: width 0.3s ease;"></div>
+                                        <div data-progress-bar style="height: 100%; background: {{ $accentColor }}; width: {{ min($proposition->approval_percentage, 100) }}%; transition: width 0.3s ease;"></div>
                                     </div>
                                 </div>
 
@@ -356,7 +356,7 @@
         <div style="background: {{ $bgTertiary }}; border-radius: 16px; width: 100%; max-width: 600px; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;">
             <h2 style="font-size: 18px; font-weight: 700; color: {{ $textPrimary }}; margin: 0 0 12px 0;">
                 ⚖️ Resolver Desafío
-            </h2> class="checkboxes-container"
+            </h2>
             <p style="color: {{ $textSecondary }}; font-size: 13px; margin: 0 0 16px 0;">
                 @if($preMatch->penalty_type === 'POINTS')
                     Selecciona cuál(es) de estas acciones sucedieron en el partido. Los perdedores tendrán una resta de {{ $preMatch->penalty_points }} puntos.
@@ -372,7 +372,7 @@
                         ✅ ¿Cuál de estas acciones sucedieron en el partido?
                     </label>
 
-                    <div style="display: grid; gap: 8px; max-height: 55vh; overflow-y: auto;">
+                    <div style="display: grid; gap: 8px; max-height: 55vh; overflow-y: auto;" class="checkboxes-container">
                         @foreach($preMatch->propositions as $proposition)
                             <label style="display: flex; align-items: flex-start; gap: 10px; padding: 10px; background: {{ $bgSecondary }}; border-radius: 8px; border: 1px solid {{ $borderColor }}; cursor: pointer; transition: all 0.2s ease;"
                                    onmouseover="this.style.background='{{ $isDark ? '#1a524e' : '#f0f0f0' }}'"
@@ -446,474 +446,196 @@
     <!-- Toast Container -->
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
 
-    <script>
-        // ============================================================
-        // Push Notifications Configuration
-        // ============================================================
-        let notificationPermission = 'default';
 
-        /**
-         * Solicitar permiso para notificaciones push
-         */
-        function requestNotificationPermission() {
-            if (!('Notification' in window)) {
-                console.log('⚠️ Este navegador no soporta notificaciones');
-                return;
-            }
-
-            if (Notification.permission === 'granted') {
-                notificationPermission = 'granted';
-                console.log('✅ Notificaciones ya tienen permiso');
-            } else if (Notification.permission !== 'denied') {
-                Notification.requestPermission().then(function(permission) {
-                    notificationPermission = permission;
-                    if (permission === 'granted') {
-                        console.log('✅ Permiso de notificaciones otorgado');
-                        // Test notification
-                        new Notification('Offside Club', {
-                            body: 'Recibirás notificaciones de eventos importantes',
-                            icon: '/images/logo_alone.png',
-                            badge: '/images/favicon.ico'
-                        });
-                    }
-                });
-            } else {
-                console.log('⚠️ Notificaciones bloqueadas por el usuario');
-            }
-        }
-
-        /**
-         * Enviar notificación push
-         * @param {string} title - Título de la notificación
-         * @param {string} body - Cuerpo de la notificación
-         * @param {string} icon - URL del icono (default logo)
-         * @param {string} badge - URL del badge (default logo)
-         * @param {Object} options - Opciones adicionales
-         */
-        function sendPushNotification(title, body, icon = null, badge = null, options = {}) {
-            if (notificationPermission !== 'granted' || !('Notification' in window)) {
-                console.log('⏸️ Notificación no enviada (sin permiso)');
-                return;
-            }
-
-            const notifOptions = {
-                body: body,
-                icon: icon || '/images/logo_alone.png',
-                badge: badge || '/images/favicon.ico',
-                tag: 'prematch-' + preMatchId, // Agrupar notificaciones por pre-match
-                requireInteraction: false, // Auto-close después de cierto tiempo
-                ...options
-            };
-
-            try {
-                const notification = new Notification(title, notifOptions);
-                console.log('📢 Push notification enviada:', title);
-
-                // Click en notificación → volver a la pestaña
-                notification.addEventListener('click', function() {
-                    window.focus();
-                    notification.close();
-                });
-
-                // Auto-cerrar después de 7 segundos
-                setTimeout(() => notification.close(), 7000);
-            } catch (err) {
-                console.error('❌ Error enviando notificación:', err);
-            }
-        }
-
-        // ============================================================
-        // SSE (Server-Sent Events) - Real-time updates
-        // ============================================================
-        const preMatchId = {{ $preMatch->id }};
-        let eventSource = null;
-
-        function initializeSSE() {
-            console.log('🔌 Inicializando conexión SSE para pre-match:', preMatchId);
-
-            eventSource = new EventSource(`/api/pre-matches/${preMatchId}/events`);
-
-            // Conexión abierta
-            eventSource.addEventListener('open', function() {
-                console.log('✅ Conectado a eventos en tiempo real');
-                showToast('Conectado a actualizaciones en vivo', 'success', 3000);
-            });
-
-            // Recibir eventos
-            eventSource.addEventListener('message', function(e) {
-                try {
-                    const event = JSON.parse(e.data);
-                    console.log('📡 Evento recibido:', event.event, event.data);
-                    handlePreMatchEvent(event);
-                } catch (err) {
-                    console.error('❌ Error al parsear evento:', err);
-                }
-            });
-
-            // Errores
-            eventSource.addEventListener('error', function() {
-                console.error('❌ Error en conexión SSE');
-                showToast('Desconectado de actualizaciones', 'error', 5000);
-                eventSource.close();
-
-                // Intentar reconectar después de 5 segundos
-                setTimeout(() => {
-                    console.log('🔄 Reintentando conexión...');
-                    initializeSSE();
-                }, 5000);
-            });
-        }
-
-        // ============================================================
-        // Manejador principal de eventos
-        // ============================================================
-        function handlePreMatchEvent(event) {
-            const { event: eventType, data: payload } = event;
-
-            switch(eventType) {
-                case 'proposition.created':
-                    handlePropositionCreated(payload);
-                    break;
-                case 'proposition.deleted':
-                    handlePropositionDeleted(payload);
-                    break;
-                case 'proposition.auto_approved':
-                    handlePropositionAutoApproved(payload);
-                    break;
-                case 'vote.created':
-                    handleVoteCreated(payload);
-                    break;
-                case 'status.changed':
-                    handleStatusChanged(payload);
-                    break;
-                case 'status.pending_to_active':
-                    handleStatusPendingToActive(payload);
-                    break;
-                case 'status.resolved':
-                    handleStatusResolved(payload);
-                    break;
-            }
-        }
-
-        // ============================================================
-        // Handlers específicos por evento
-        // ============================================================
-
-        function handlePropositionCreated(payload) {
-            showToast(`✅ ${payload.user_name} propuso: "${payload.action}"`, 'info', 5000);
-            sendPushNotification(
-                '💡 Nueva Propuesta',
-                `${payload.user_name}: ${payload.action}`,
-                payload.user_avatar
-            );
-            // Nota: La actualización del DOM se hace con un pequeño delay para que se complete el evento del servidor
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        }
-
-        function handlePropositionDeleted(payload) {
-            showToast(`🗑️ ${payload.user_name} eliminó su propuesta`, 'warning', 4000);
-            setTimeout(() => {
-                location.reload();
-            }, 500);
-        }
-
-        function handlePropositionAutoApproved(payload) {
-            showToast(`✨ ¡"${payload.action}" fue aprobado unánimemente!`, 'success', 5000);
-        }
-
-        function handleVoteCreated(payload) {
-            // Solo notificar si es el creador de la propuesta
-            if (payload.proposition_creator_id === {{ auth()->id() }}) {
-                showToast(`🗳️ Tu propuesta recibió un voto`, 'info', 3000);
-                sendPushNotification(
-                    '🗳️ Tu Propuesta Fue Votada',
-                    `"${payload.approved_votes}/${payload.votes_count}" han votado por tu propuesta`
-                );
-            }
-            // Actualizar barra de progreso en tiempo real
-            updatePropositionProgress(payload.proposition_id, payload.approved_votes, payload.votes_count, payload.approval_percentage);
-        }
-
-        function handleStatusPendingToActive(payload) {
-            showToast(`🔴 ¡El pre-match está ACTIVO! Todas las propuestas fueron aprobadas.`, 'warning', 7000);
-            sendPushNotification(
-                '🔴 Pre-Match ACTIVO',
-                'El desafío está activo. Las propuestas serán validadas después del partido.',
-                null,
-                null,
-                { requireInteraction: true }
-            );
-            // Actualizar header
-            updatePreMatchStatus('active');
-        }
-
-        function handleStatusChanged(payload) {
-            console.log('Estado cambió de', payload.old_status, 'a', payload.new_status);
-        }
-
-        function handleStatusResolved(payload) {
-            showToast(`✅ Pre-match resuelto. Penalidades aplicadas.`, 'success', 7000);
-            sendPushNotification(
-                '✅ Desafío Resuelto',
-                'Las penalidades han sido aplicadas. La página se actualizará en breves.',
-                null,
-                null,
-                { requireInteraction: false }
-            );
-            updatePreMatchStatus('resolved');
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
-        }
-
-        // ============================================================
-        // Funciones auxiliares
-        // ============================================================
-
-        function updatePropositionProgress(propositionId, approvedVotes, totalVotes, percentage) {
-            // Aquí iría lógica para actualizar el UI sin reload
-            // Por ahora, solo log
-            console.log(`📊 Propuesta ${propositionId}: ${approvedVotes}/${totalVotes} (${percentage}%)`);
-        }
-
-        function updatePreMatchStatus(newStatus) {
-            // Actualizar el header del pre-match
-            const header = document.querySelector('[style*="background"]');
-            if (header && newStatus === 'active') {
-                header.style.background = 'linear-gradient(135deg, #ffa726, #ffb74d)';
-            }
-        }
-
-        function showToast(message, type = 'info', duration = 5000) {
-            const container = document.getElementById('toast-container');
-
-            // Colores según el tipo
-            const colors = {
-                'success': { bg: '#4CAF50', text: '#fff' },
-                'error': { bg: '#ff6b6b', text: '#fff' },
-                'warning': { bg: '#ff9500', text: '#fff' },
-                'info': { bg: '#2196F3', text: '#fff' }
-            };
-
-            const color = colors[type] || colors['info'];
-
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                background: ${color.bg};
-                color: ${color.text};
-                padding: 16px 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                font-size: 14px;
-                font-weight: 600;
-                animation: slideInRight 0.3s ease-out;
-                min-width: 280px;
-                max-width: 400px;
-                pointer-events: auto;
-            `;
-            toast.textContent = message;
-
-            container.appendChild(toast);
-
-            // Auto-remove después de duration
-            setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.3s ease-out';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
-
-        // Agregar keyframes para animaciones
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-
-            @keyframes slideOutRight {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(400px);
-                    opacity: 0;
-                }
-            }
-
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.7; }
-            }
-
-            .proposition-updating {
-                animation: pulse 0.5s ease-in-out;
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Inicializar SSE y solicitar permisos de notificaciones cuando se carga la página
-        document.addEventListener('DOMContentLoaded', function() {
-            requestNotificationPermission();
-            initializeSSE();
-        });
-
-        // Cerrar conexión SSE antes de descargar la página
-        window.addEventListener('beforeunload', () => {
-            if (eventSource) {
-                eventSource.close();
-                console.log('🔌 SSE desconectado');
-            }
-        });
-
-        // ============================================================
-        // Functions originales (modificadas)
-        // ============================================================
-
-        function openPropositionModal() {
-            document.getElementById('propositionModal').style.display = 'flex';
-        }
-
-        function closePropositionModal() {
-            document.getElementById('propositionModal').style.display = 'none';
-            document.getElementById('propositionText').value = '';
-        }
-
-        document.getElementById('propositionForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const text = document.getElementById('propositionText').value;
-
-            try {
-                const response = await fetch(`/api/pre-matches/${preMatchId}/propositions`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        action: text
-                    })
-                });
-
-                if (!response.ok) throw new Error('Error al enviar propuesta');
-
-                showToast('✅ Propuesta enviada exitosamente!', 'success', 3000);
-                closePropositionModal();
-                // El evento SSE disparará el reload automáticamente
-            } catch (err) {
-                showToast('❌ Error: ' + err.message, 'error', 5000);
-            }
-        });
-
-        async function voteProposition(propositionId, voteType) {
-            try {
-                const response = await fetch(`/api/pre-match-propositions/${propositionId}/vote`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        approved: voteType === 'ACCEPT'
-                    })
-                });
-
-                if (!response.ok) throw new Error('Error al votar');
-
-                showToast('🗳️ Voto registrado', 'success', 2000);
-                // El evento SSE disparará actualizaciones automáticas
-            } catch (err) {
-                showToast('❌ Error: ' + err.message, 'error', 5000);
-            }
-        }
-
-        async function deleteProposition(propositionId) {
-            if (!confirm('¿Estás seguro de que deseas eliminar esta propuesta?')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/pre-match-propositions/${propositionId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    credentials: 'include'
-                });
-
-                if (!response.ok) throw new Error('Error al eliminar propuesta');
-
-                showToast('✅ Propuesta eliminada exitosamente', 'success', 3000);
-                // El evento SSE disparará el reload automáticamente
-            } catch (err) {
-                showToast('❌ Error: ' + err.message, 'error', 5000);
-            }
-        }
-
-        function resolvePreMatch() {
-            document.getElementById('resolveModal').style.display = 'flex';
-        }
-
-        function closeResolveModal() {
-            document.getElementById('resolveModal').style.display = 'none';
-        }
-
-        // Form submission for resolution
-        document.getElementById('resolveForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            // Get all checked loser_ids
-            const loserCheckboxes = document.querySelectorAll('input[name="loser_ids"]:checked');
-            const loser_ids = Array.from(loserCheckboxes).map(cb => parseInt(cb.value));
-
-            const payload = {
-                loser_ids: loser_ids,
-                penalty_points: {{ $preMatch->penalty_points }}
-            };
-
-            try {
-                const response = await fetch(`/api/pre-matches/${preMatchId}/resolve`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': document.querySelector('input[name="_token"]').value,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    showToast('Error: ' + (error.message || 'No se pudo resolver el desafío'), 'error', 5000);
-                    return;
-                }
-
-                showToast('✅ Desafío resuelto exitosamente', 'success', 3000);
-                closeResolveModal();
-                // El evento SSE disparará el reload automáticamente
-
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error al resolver el desafío: ' + error.message, 'error', 5000);
-            }
-        });
-    </script>
 
     <x-layout.bottom-navigation active-item="pre-matches" />
 
+    <script>
+        const preMatchId = {{ $preMatch->id }};
+        let eventSource = null;
+        let notificationPermission = 'default';
+
+        function openPropositionModal() { document.getElementById('propositionModal').style.display = 'flex'; }
+        function closePropositionModal() { document.getElementById('propositionModal').style.display = 'none'; document.getElementById('propositionText').value = ''; }
+        function resolvePreMatch() { document.getElementById('resolveModal').style.display = 'flex'; }
+        function closeResolveModal() { document.getElementById('resolveModal').style.display = 'none'; }
+
+        async function voteProposition(id, type) {
+            try {
+                const r = await fetch(`/api/pre-match-propositions/${id}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                    credentials: 'include',
+                    body: JSON.stringify({ approved: type === 'ACCEPT' })
+                });
+                if (!r.ok) throw new Error('Error al votar (HTTP ' + r.status + ')');
+                const updatedProp = await r.json();
+                console.log('[vote.created] Voto registrado:', updatedProp);
+                showToast('✓ Voto registrado', 'success', 2000);
+                setTimeout(() => {
+                    console.log('[vote.created] Recargando página...');
+                    location.reload();
+                }, 900);
+            } catch (e) { 
+                console.error('[vote.error]', e);
+                showToast('❌ ' + e.message, 'error', 5000); 
+            }
+        }
+
+        async function deleteProposition(id) {
+            try {
+                const r = await fetch(`/api/pre-match-propositions/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                    credentials: 'include'
+                });
+                if (!r.ok) throw new Error('Error al eliminar (HTTP ' + r.status + ')');
+                console.log('[proposition.deleted] Propuesta eliminada');
+                showToast('✓ Eliminado', 'success', 2000);
+                setTimeout(() => {
+                    console.log('[proposition.deleted] Recargando página...');
+                    location.reload();
+                }, 600);
+            } catch (e) { 
+                console.error('[proposition.delete_error]', e);
+                showToast('❌ ' + e.message, 'error', 5000); 
+            }
+        }
+
+        function showToast(msg, type = 'info', duration = 5000) {
+            const c = { 'success': '#4CAF50', 'error': '#ff6b6b', 'warning': '#ff9500', 'info': '#2196F3' };
+            const t = document.createElement('div');
+            t.style.cssText = `background: ${c[type]}; color: #fff; padding: 16px; border-radius: 8px; font-weight: 600; animation: slideIn 0.3s;`;
+            t.textContent = msg;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => { t.style.animation = 'slideOut 0.3s'; setTimeout(() => t.remove(), 300); }, duration);
+        }
+
+        function requestNotificationPermission() {
+            if (Notification.permission === 'granted') { notificationPermission = 'granted'; }
+            else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(p => {
+                    notificationPermission = p;
+                    if (p === 'granted') new Notification('Offside Club', { body: 'Recibirás notificaciones', icon: '/images/logo_alone.png' });
+                });
+            }
+        }
+
+        function sendPushNotification(title, body) {
+            try {
+                const n = new Notification(title, { body, icon: '/images/logo_alone.png', tag: 'prematch-' + preMatchId });
+                setTimeout(() => n.close(), 7000);
+            } catch (e) { console.error(e); }
+        }
+
+        function initializeSSE() {
+            eventSource = new EventSource(`/api/pre-matches/${preMatchId}/events`);
+            eventSource.addEventListener('open', () => showToast('Conectado', 'success', 3000));
+            eventSource.addEventListener('message', (e) => {
+                try { const ev = JSON.parse(e.data); handleEvent(ev); }
+                catch (err) { console.error(err); }
+            });
+            eventSource.addEventListener('error', () => {
+                eventSource.close();
+                setTimeout(() => initializeSSE(), 5000);
+            });
+        }
+
+        function handleEvent(event) {
+            const { event: type, data } = event;
+            if (type === 'proposition.created') {
+                showToast('Nueva propuesta', 'info', 5000);
+                setTimeout(() => location.reload(), 300);
+            }
+            else if (type === 'proposition.deleted') {
+                showToast('Propuesta eliminada', 'warning', 4000);
+                setTimeout(() => location.reload(), 200);
+            }
+            else if (type === 'vote.created') {
+                setTimeout(() => location.reload(), 500);
+            }
+            else if (type === 'proposition.auto_approved') {
+                showToast('¡Aprobada unánimemente!', 'success', 5000);
+                setTimeout(() => location.reload(), 1000);
+            }
+            else if (type === 'status.pending_to_active') {
+                showToast('Pre-match ACTIVO', 'warning', 7000);
+            }
+            else if (type === 'status.resolved') {
+                showToast('Desafío resuelto', 'success', 7000);
+                setTimeout(() => location.reload(), 2000);
+            }
+        }
+
+        function removePropositionFromUI(id) {
+            location.reload();
+        }
+
+        function updatePropositionUI(propData) {
+            location.reload();
+        }
+
+        function updatePropositionCount() {
+            location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const style = document.createElement('style');
+            style.textContent = `@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }`;
+            document.head.appendChild(style);
+
+            requestNotificationPermission();
+            initializeSSE();
+
+            const pForm = document.getElementById('propositionForm');
+            if (pForm) pForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const text = document.getElementById('propositionText').value;
+                try {
+                    const r = await fetch(`/api/pre-matches/${preMatchId}/propositions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                        credentials: 'include',
+                        body: JSON.stringify({ action: text })
+                    });
+                    if (!r.ok) throw new Error('Error al enviar propuesta (HTTP ' + r.status + ')');
+                    const newProp = await r.json();
+                    console.log('[proposition.created] Propuesta creada:', newProp);
+                    showToast('✓ Enviada!', 'success', 2000);
+                    closePropositionModal();
+                    document.getElementById('propositionText').value = '';
+                    // Recargar después de confirmar creación
+                    setTimeout(() => {
+                        console.log('[proposition.created] Recargando página...');
+                        location.reload();
+                    }, 600);
+                } catch (e) { 
+                    console.error('[proposition.create_error]', e);
+                    showToast('❌ ' + e.message, 'error', 5000); 
+                }
+            });
+
+            const rForm = document.getElementById('resolveForm');
+            if (rForm) rForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const ids = Array.from(document.querySelectorAll('input[name="loser_ids"]:checked')).map(c => parseInt(c.value));
+                try {
+                    const r = await fetch(`/api/pre-matches/${preMatchId}/resolve`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('input[name="_token"]').value, 'Accept': 'application/json' },
+                        body: JSON.stringify({ loser_ids: ids, penalty_points: {{ $preMatch->penalty_points ?? 0 }} })
+                    });
+                    if (!r.ok) throw new Error((await r.json()).message || 'Error');
+                    showToast('✓ Resuelto!', 'success', 3000);
+                    closeResolveModal();
+                    setTimeout(() => location.reload(), 1500);
+                } catch (e) { showToast('Error: ' + e.message, 'error', 5000); }
+            });
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (eventSource) eventSource.close();
+        });
+    </script>
 </x-app-layout>
