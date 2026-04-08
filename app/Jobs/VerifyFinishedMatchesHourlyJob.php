@@ -20,12 +20,7 @@ class VerifyFinishedMatchesHourlyJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 900;
-    public $tries = 1;
-
-    protected int $maxMatches;
-    protected int $windowHours;
-    protected int $cooldownMinutes;
-
+        public $tries = 3; // BUG #7 FIX: Retry on failure
     public function __construct(?int $maxMatches = null, ?int $windowHours = null, ?int $cooldownMinutes = null)
     {
         $this->maxMatches = $maxMatches ?? 100;

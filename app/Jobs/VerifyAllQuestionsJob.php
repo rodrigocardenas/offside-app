@@ -18,7 +18,7 @@ class VerifyAllQuestionsJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 900;
-    public $tries = 1;
+    public $tries = 3; // BUG #7 FIX: Retry on failure
 
     /** @var array<int> */
     protected array $matchIds;

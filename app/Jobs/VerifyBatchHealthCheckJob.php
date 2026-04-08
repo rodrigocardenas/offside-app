@@ -29,7 +29,7 @@ class VerifyBatchHealthCheckJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 60;
-    public $tries = 1;
+    public $tries = 3; // BUG #7 FIX: Retry on failure
 
     protected int $unfinalizedThreshold = 5;      // Alerta si hay >5 partidos sin finalizar
     protected int $unverifiedThreshold = 10;      // Alerta si hay >10 preguntas sin verificar
