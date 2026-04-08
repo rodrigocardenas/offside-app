@@ -189,7 +189,7 @@ return [
             'maxTime' => 0,
             'maxJobs' => 0,
             'memory' => 128,
-            'tries' => 1,
+            'tries' => 3,  // BUG #7 FIX: Allow job retries
             'timeout' => 60,
             'nice' => 0,
         ],
@@ -201,6 +201,7 @@ return [
                 'maxProcesses' => 10,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
+                'tries' => 3,  // BUG #7 FIX: Allow job retries in production
             ],
         ],
 
