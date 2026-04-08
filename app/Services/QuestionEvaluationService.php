@@ -467,6 +467,17 @@ class QuestionEvaluationService
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
+        // ✅ BUG FIX #8: Mejorar logging cuando los eventos no están disponibles
+        if (empty($events)) {
+            Log::warning('⚠️  No events available for last goal evaluation - may lead to incorrect scoring', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'match_name' => "{$match->home_team} vs {$match->away_team}",
+                'raw_events_length' => strlen($match->events ?? ''),
+                'note' => 'This can happen if events were not extracted from API yet. Question will be marked with "Ninguno" and may need re-verification once events are available.'
+            ]);
+        }
+
         // Encontrar último gol (excluyendo penales fallados)
         $lastGoalTeam = null;
         foreach (array_reverse($events) as $event) {
@@ -478,9 +489,18 @@ class QuestionEvaluationService
         }
 
         if (!$lastGoalTeam) {
+            // No se encontró gol - marcar "Ninguno" como correcto
             foreach ($question->options as $option) {
                 if (strpos(strtolower($option->text), 'ninguno') !== false) {
                     $correctOptionIds[] = $option->id;
+                    
+                    // ✅ BUG FIX #8: Log when marking "Ninguno" as correct
+                    Log::info('✅ Last goal evaluation: no valid goals found, marking "Ninguno" as correct', [
+                        'question_id' => $question->id,
+                        'match_id' => $match->id,
+                        'option_id' => $option->id,
+                        'event_count' => count($events),
+                    ]);
                 }
             }
             return $correctOptionIds;
@@ -490,6 +510,15 @@ class QuestionEvaluationService
         foreach ($question->options as $option) {
             if (strpos(strtolower($option->text), strtolower($lastGoalTeam)) !== false) {
                 $correctOptionIds[] = $option->id;
+                
+                // ✅ LOG: Confirm that we found the correct option
+                Log::info('✅ Last goal evaluation: found matching option', [
+                    'question_id' => $question->id,
+                    'match_id' => $match->id,
+                    'goal_team' => $lastGoalTeam,
+                    'option_id' => $option->id,
+                    'option_text' => $option->text
+                ]);
             }
         }
 
