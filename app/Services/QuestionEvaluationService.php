@@ -461,21 +461,30 @@ class QuestionEvaluationService
 
     /**
      * TIPO: ÚLTIMO GOL
+     * 
+     * ✅ BUG FIX #8: CRITICAL FIX - Return empty array if events are missing
+     * This prevents marking questions as verified when event data isn't available yet.
+     * VerifyAllQuestionsJob will then skip the question and retry later.
      */
     private function evaluateLastGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
         $events = $this->parseEvents($match->events ?? []);
 
-        // ✅ BUG FIX #8: Mejorar logging cuando los eventos no están disponibles
+        // ✅ BUG FIX #8: PREVENTION - If events are missing, return empty array
+        // This triggers VerifyAllQuestionsJob's protection: "if (empty($correctOptionIds)) return;"
+        // The question will NOT be marked as verified and will be retried later
         if (empty($events)) {
-            Log::warning('⚠️  No events available for last goal evaluation - may lead to incorrect scoring', [
+            Log::warning('⚠️  BUG #8 PREVENTION: No events available - returning empty array to prevent incorrect verification', [
                 'question_id' => $question->id,
                 'match_id' => $match->id,
                 'match_name' => "{$match->home_team} vs {$match->away_team}",
                 'raw_events_length' => strlen($match->events ?? ''),
-                'note' => 'This can happen if events were not extracted from API yet. Question will be marked with "Ninguno" and may need re-verification once events are available.'
+                'action' => 'Question will NOT be marked as verified and will be retried once events are available'
             ]);
+            // ✅ CRITICAL: Return empty array, NOT array with "Ninguno"
+            // This prevents VerifyAllQuestionsJob from marking the question as verified
+            return [];
         }
 
         // Encontrar último gol (excluyendo penales fallados)
@@ -494,8 +503,8 @@ class QuestionEvaluationService
                 if (strpos(strtolower($option->text), 'ninguno') !== false) {
                     $correctOptionIds[] = $option->id;
                     
-                    // ✅ BUG FIX #8: Log when marking "Ninguno" as correct
-                    Log::info('✅ Last goal evaluation: no valid goals found, marking "Ninguno" as correct', [
+                    // ✅ LOG when marking "Ninguno" as correct
+                    Log::info('✅ Last goal evaluation: no valid goals found (but events exist), marking "Ninguno" as correct', [
                         'question_id' => $question->id,
                         'match_id' => $match->id,
                         'option_id' => $option->id,
