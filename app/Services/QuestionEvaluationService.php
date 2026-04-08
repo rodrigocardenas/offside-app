@@ -119,6 +119,23 @@ class QuestionEvaluationService
             $correctOptions = [];
             $questionHandled = false;
 
+            // ✅ BUG #8 PREVENTION: Check if this is an event-based question and events are missing
+            // This prevents ANY event-based question from being marked with incorrect answers
+            $isEventBased = $this->isEventBasedQuestion($questionText);
+            $hasEvents = !empty($match->events);
+
+            if ($isEventBased && !$hasEvents) {
+                Log::warning('⚠️  BUG #8 PREVENTION: Event-based question but no events available - will retry later', [
+                    'question_id' => $question->id,
+                    'question_text' => $question->title,
+                    'match_id' => $match->id,
+                    'match_name' => "{$match->home_team} vs {$match->away_team}",
+                    'reason' => 'Question will NOT be marked as verified and will be retried when events are available'
+                ]);
+                // Return empty array so VerifyAllQuestionsJob skips this question
+                return [];
+            }
+
             // Determinar tipo de pregunta y evaluar
             if ($this->isQuestionAbout($questionText, 'resultado|ganador|victoria|gana|ganará')) {
                 // ✅ Score-based: Siempre se puede verificar
@@ -1141,6 +1158,33 @@ class QuestionEvaluationService
         return strpos($questionText, 'gol') !== false &&
             (strpos($questionText, 'antes') !== false || strpos($questionText, 'primeros') !== false) &&
             (strpos($questionText, 'minuto') !== false || strpos($questionText, 'minutos') !== false);
+    }
+
+    /**
+     * ✅ BUG #8 PREVENTION: Detecta si una pregunta está basada en eventos
+     * 
+     * Las preguntas basadas en eventos son vulnerables a verificación prematura
+     * porque pueden retornar respuestas por defecto cuando los eventos no existen.
+     * 
+     * Si los eventos no están disponibles, esta pregunta debe retornar []
+     * para que VerifyAllQuestionsJob la reintente más tarde.
+     */
+    private function isEventBasedQuestion(string $questionText): bool
+    {
+        $eventKeywords = [
+            'gol', 'primer gol', 'ultimo gol', 'autogol', 'penal', 'tiro libre', 'córner', 'corner',
+            'tarjetas', 'amarillas', 'rojas', 'faltas', 'tiros al arco', 'shots on target', 'remates'
+        ];
+
+        $questionLower = strtolower($questionText);
+
+        foreach ($eventKeywords as $keyword) {
+            if (strpos($questionLower, $keyword) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
