@@ -130,4 +130,38 @@ class PreMatchEventController extends Controller
         \Log::info('✅ SSE: Stream terminado después de ' . $iteration . ' iteraciones');
         exit(0);
     }
+
+    /**
+     * Polling endpoint - Mas simple y confiable que SSE
+     * GET /api/pre-matches/{preMatch}/events-poll?last_id=0
+     */
+    public function poll(PreMatch $preMatch)
+    {
+        // Validar acceso
+        if (!auth()->user()->groups()->where('groups.id', $preMatch->group_id)->exists()) {
+            abort(403, 'No tienes acceso a este pre-match');
+        }
+
+        $lastId = request()->query('last_id', 0);
+        
+        // Buscar eventos nuevos desde el último que el cliente recibió
+        $events = PreMatchEvent::where('pre_match_id', $preMatch->id)
+            ->where('id', '>', $lastId)
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function($event) {
+                return [
+                    'event' => $event->event_type,
+                    'data' => $event->payload ?? [],
+                    'id' => $event->id,
+                    'timestamp' => $event->created_at->toIso8601String(),
+                    'is_historical' => false,
+                ];
+            });
+
+        return response()->json([
+            'events' => $events,
+            'last_id' => $events->isEmpty() ? $lastId : $events->last()['id'],
+        ]);
+    }
 }

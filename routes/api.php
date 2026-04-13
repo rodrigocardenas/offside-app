@@ -118,10 +118,10 @@ Route::middleware('auth:web')->prefix('pre-matches')->group(function () {
     Route::put('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch']);
 });
 
-// SSE Stream - SIN MIDDLEWARE (para que no haya buffering)
-Route::get('/pre-matches/{preMatch}/events', [\App\Http\Controllers\PreMatchEventController::class, 'stream'])
+// Polling endpoint para obtener nuevos eventos (fallback si SSE falla)
+Route::get('/pre-matches/{preMatch}/events-poll', [\App\Http\Controllers\PreMatchEventController::class, 'poll'])
     ->middleware('auth:web')
-    ->withoutMiddleware([\Illuminate\Routing\Middleware\ThrottleRequests::class, \Barryvdh\Debugbar\Middleware\InjectDebugbar::class]);
+    ->name('pre-matches.events-poll');
 
 // Pre Match Propositions - Votos en proposiciones
 Route::middleware('auth:web')->prefix('pre-match-propositions')->group(function () {

@@ -524,40 +524,44 @@
             } catch (e) { console.error(e); }
         }
 
-        function initializeSSE() {
-            console.log(`🔌 Intentando conectar a SSE: /api/pre-matches/${preMatchId}/events`);
-            eventSource = new EventSource(`/api/pre-matches/${preMatchId}/events`);
+        function initializePolling() {
+            console.log(`📡 Iniciando polling: /api/pre-matches/${preMatchId}/events-poll`);
+            let lastId = 0;
+            let isConnected = false;
             
-            // Evento de conexión abierta (no usado en SSE, pero por si acaso)
-            eventSource.addEventListener('open', () => {
-                console.log('✅ EventSource ABIERTO (low-level)');
-            });
-            
-            // Mensajes de eventos normales
-            eventSource.addEventListener('message', (e) => {
-                console.log('📨 Mensaje SSE recibido (raw):', e.data.substring(0, 200) + '...');
-                try {
-                    const ev = JSON.parse(e.data);
-                    console.log('✅ Mensaje parseado correctamente:', ev);
-                    handleEvent(ev);
-                } catch (err) {
-                    console.error('❌ Error parseando SSE:', err);
-                    console.error('Raw data:', e.data);
-                }
-            });
+            function poll() {
+                fetch(`/api/pre-matches/${preMatchId}/events-poll?last_id=${lastId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        // Marcar como conectado en el primer poll exitoso
+                        if (!isConnected) {
+                            isConnected = true;
+                            console.log('🎉 Conexión establecida (polling activo)');
+                            showToast('✅ Conectado al servidor en tiempo real', 'success', 3000);
+                        }
 
-            // Ignorar pings del servidor (líneas que empiezan con :)
-            eventSource.addEventListener('error', (e) => {
-                console.error('❌ EventSource ERROR:', e);
-                console.error('Ready state:', eventSource.readyState, ' (0=connecting, 1=open, 2=closed)');
-                eventSource.close();
-                console.log('↻ Reconectando en 5 segundos...');
-                showToast('⚠️ Desconectado - reconectando...', 'warning', 5000);
-                setTimeout(() => {
-                    console.log('🔄 Reconectando SSE...');
-                    initializeSSE();
-                }, 5000);
-            });
+                        if (data.events && data.events.length > 0) {
+                            console.log(`📨 Recibidos ${data.events.length} eventos`);
+                            data.events.forEach(ev => {
+                                console.log(`📡 Evento SSE: ${ev.event} (id: ${ev.id})`);
+                                handleEvent(ev);
+                            });
+                            lastId = data.last_id;
+                        }
+
+                        // Siguiente polling en 1 segundo
+                        setTimeout(poll, 1000);
+                    })
+                    .catch(err => {
+                        console.error('❌ Error en polling:', err);
+                        isConnected = false;
+                        showToast('⚠️ Error de conexión - reintentando...', 'warning', 3000);
+                        setTimeout(poll, 3000); // Reintentar en 3 segundos
+                    });
+            }
+
+            poll();
+        }
         }
 
         function handleEvent(event) {
@@ -777,9 +781,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const style = document.createElement('style');
-            style.textContent = `@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-            @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+            console.log('🚀 Pre-Match Show view initialized');
+            initializePolling();  // Usar polling en lugar de SSE
             @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }`;
             document.head.appendChild(style);
 
