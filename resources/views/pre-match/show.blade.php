@@ -454,6 +454,7 @@
         const preMatchId = {{ $preMatch->id }};
         let eventSource = null;
         let notificationPermission = 'default';
+        const reloadedEvents = new Set(); // Rastrear eventos que ya causaron reload
 
         function openPropositionModal() { document.getElementById('propositionModal').style.display = 'flex'; }
         function closePropositionModal() { document.getElementById('propositionModal').style.display = 'none'; document.getElementById('propositionText').value = ''; }
@@ -526,7 +527,11 @@
 
         function initializePolling() {
             console.log(`📡 Iniciando polling: /api/pre-matches/${preMatchId}/events-poll`);
-            let lastId = 0;
+            
+            // Restaurar último evento ID desde localStorage
+            let lastId = parseInt(localStorage.getItem(`prematch_${preMatchId}_lastEventId`) || '0');
+            console.log(`📡 Iniciando desde evento ID: ${lastId}`);
+            
             let isConnected = false;
             
             function poll() {
@@ -544,9 +549,13 @@
                             console.log(`📨 Recibidos ${data.events.length} eventos`);
                             data.events.forEach(ev => {
                                 console.log(`📡 Evento SSE: ${ev.event} (id: ${ev.id})`);
+                                // Marcar como "en vivo" ahora que viene de polling actual
+                                ev.is_historical = false;
                                 handleEvent(ev);
                             });
                             lastId = data.last_id;
+                            // Guardar en localStorage para recordar después de reload
+                            localStorage.setItem(`prematch_${preMatchId}_lastEventId`, lastId);
                         }
 
                         // Siguiente polling en 1 segundo
@@ -600,9 +609,16 @@
             if (type === 'proposition.created') {
                 console.log('✅ Manejando: proposition.created');
                 if (shouldShowToast) {
-                    showToast('✅ Nueva propuesta recibida', 'success', 3000);
-                    console.log('   → Recargando página para mostrar nueva propuesta');
-                    setTimeout(() => location.reload(), 1500);
+                    // Verificar si ya se hizo reload por este evento
+                    const eventKey = `${type}_${event.id}`;
+                    if (!reloadedEvents.has(eventKey)) {
+                        reloadedEvents.add(eventKey);
+                        showToast('✅ Nueva propuesta recibida', 'success', 3000);
+                        console.log('   → Recargando página para mostrar nueva propuesta');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        console.log('   → Ya se hizo reload para este evento, ignorando');
+                    }
                 } else {
                     console.log('   → Evento histórico, ignorando reload');
                 }
@@ -610,9 +626,13 @@
             else if (type === 'proposition.deleted') {
                 console.log('✅ Manejando: proposition.deleted');
                 if (shouldShowToast) {
-                    showToast('🗑️ Propuesta eliminada', 'warning', 3000);
-                    console.log('   → Recargando página para actualizar');
-                    setTimeout(() => location.reload(), 1500);
+                    const eventKey = `${type}_${event.id}`;
+                    if (!reloadedEvents.has(eventKey)) {
+                        reloadedEvents.add(eventKey);
+                        showToast('🗑️ Propuesta eliminada', 'warning', 3000);
+                        console.log('   → Recargando página para actualizar');
+                        setTimeout(() => location.reload(), 1500);
+                    }
                 } else {
                     console.log('   → Evento histórico, ignorando reload');
                 }
@@ -630,10 +650,14 @@
             else if (type === 'proposition.auto_approved') {
                 console.log('✅ Manejando: proposition.auto_approved');
                 if (shouldShowToast) {
-                    showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
-                    console.log('   → Recargando página para actualizar aprobación');
-                    updatePropositionStatusUI(eventData.proposition_id, 'approved');
-                    setTimeout(() => location.reload(), 2000);
+                    const eventKey = `${type}_${event.id}`;
+                    if (!reloadedEvents.has(eventKey)) {
+                        reloadedEvents.add(eventKey);
+                        showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
+                        console.log('   → Recargando página para actualizar aprobación');
+                        updatePropositionStatusUI(eventData.proposition_id, 'approved');
+                        setTimeout(() => location.reload(), 2000);
+                    }
                 } else {
                     console.log('   → Evento histórico, ignorando reload');
                 }
@@ -646,10 +670,14 @@
             else if (type === 'status.resolved') {
                 console.log('✅ Manejando: status.resolved');
                 if (shouldShowToast) {
-                    showToast('✅ Desafío resuelto', 'success', 5000);
-                    updateHeaderStatus('✅ Completado');
-                    // Recargar página después de 30 segundos para mostrar cambios
-                    setTimeout(() => location.reload(), 30000);
+                    const eventKey = `${type}_${event.id}`;
+                    if (!reloadedEvents.has(eventKey)) {
+                        reloadedEvents.add(eventKey);
+                        showToast('✅ Desafío resuelto', 'success', 5000);
+                        updateHeaderStatus('✅ Completado');
+                        // Recargar página después de 30 segundos para mostrar cambios
+                        setTimeout(() => location.reload(), 30000);
+                    }
                 } else {
                     console.log('   → Evento histórico, ignorando reload');
                 }
