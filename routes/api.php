@@ -116,10 +116,10 @@ Route::middleware('auth:web')->prefix('pre-matches')->group(function () {
 
     // Resolver Pre Match (Admin)
     Route::put('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch']);
-
-    // Stream de eventos SSE (Real-time updates) - requiere autenticación web (cookies)
-    Route::get('/{preMatch}/events', [\App\Http\Controllers\PreMatchEventController::class, 'stream']);
 });
+
+// SSE Stream - SIN middleware de buffering (solo auth + BindModel)
+Route::middleware(['auth:web'])->get('/pre-matches/{preMatch}/events', [\App\Http\Controllers\PreMatchEventController::class, 'stream'])->withoutMiddleware(['Illuminate\Routing\Middleware\ThrottleRequests', 'Barryvdh\Debugbar\Middleware\InjectDebugbar']);
 
 // Pre Match Propositions - Votos en proposiciones
 Route::middleware('auth:web')->prefix('pre-match-propositions')->group(function () {
