@@ -599,16 +599,23 @@
 
             if (type === 'proposition.created') {
                 console.log('✅ Manejando: proposition.created');
-                if (shouldShowToast) showToast('✅ Nueva propuesta recibida', 'success', 3000);
-                console.log('   → Recargando página para mostrar nueva propuesta');
-                // Reload después de mostrar el toast
-                setTimeout(() => location.reload(), 1500);
+                if (shouldShowToast) {
+                    showToast('✅ Nueva propuesta recibida', 'success', 3000);
+                    console.log('   → Recargando página para mostrar nueva propuesta');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    console.log('   → Evento histórico, ignorando reload');
+                }
             }
             else if (type === 'proposition.deleted') {
                 console.log('✅ Manejando: proposition.deleted');
-                if (shouldShowToast) showToast('🗑️ Propuesta eliminada', 'warning', 3000);
-                console.log('   → Recargando página para actualizar');
-                setTimeout(() => location.reload(), 1500);
+                if (shouldShowToast) {
+                    showToast('🗑️ Propuesta eliminada', 'warning', 3000);
+                    console.log('   → Recargando página para actualizar');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    console.log('   → Evento histórico, ignorando reload');
+                }
             }
             else if (type === 'vote.created') {
                 console.log('✅ Manejando: vote.created');
@@ -622,13 +629,13 @@
             }
             else if (type === 'proposition.auto_approved') {
                 console.log('✅ Manejando: proposition.auto_approved');
-                if (shouldShowToast) showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
-                if (eventData?.proposition_id) {
-                    console.log(`   → Recargando página para actualizar aprobación`);
+                if (shouldShowToast) {
+                    showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
+                    console.log('   → Recargando página para actualizar aprobación');
                     updatePropositionStatusUI(eventData.proposition_id, 'approved');
                     setTimeout(() => location.reload(), 2000);
                 } else {
-                    console.warn('   ⚠️ Sin proposition_id');
+                    console.log('   → Evento histórico, ignorando reload');
                 }
             }
             else if (type === 'status.pending_to_active') {
@@ -638,10 +645,14 @@
             }
             else if (type === 'status.resolved') {
                 console.log('✅ Manejando: status.resolved');
-                if (shouldShowToast) showToast('✅ Desafío resuelto', 'success', 5000);
-                updateHeaderStatus('✅ Completado');
-                // Recargar página después de 30 segundos para mostrar cambios
-                setTimeout(() => location.reload(), 30000);
+                if (shouldShowToast) {
+                    showToast('✅ Desafío resuelto', 'success', 5000);
+                    updateHeaderStatus('✅ Completado');
+                    // Recargar página después de 30 segundos para mostrar cambios
+                    setTimeout(() => location.reload(), 30000);
+                } else {
+                    console.log('   → Evento histórico, ignorando reload');
+                }
             }
             else {
                 console.log('⚠️ Tipo de evento no manejado:', type);
