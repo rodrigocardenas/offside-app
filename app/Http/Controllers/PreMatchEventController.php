@@ -36,10 +36,10 @@ class PreMatchEventController extends Controller
                         $lastId = $event->id;
 
                         // Enviar evento en formato SSE
-                        // ⚠️ Decodificar payload JSON para que el cliente lo reciba como objeto, no string
+                        // ℹ️ $event->payload ya es array gracias al json cast en el modelo
                         echo "data: " . json_encode([
                             'event' => $event->event_type,
-                            'data' => json_decode($event->payload, true),  // Decodificar aquí
+                            'data' => $event->payload,  // Ya es array, no necesita decode
                             'timestamp' => $event->created_at->toIso8601String(),
                             'id' => $event->id,
                         ]) . "\n\n";
