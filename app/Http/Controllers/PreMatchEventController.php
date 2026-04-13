@@ -14,8 +14,19 @@ class PreMatchEventController extends Controller
      */
     public function stream(PreMatch $preMatch)
     {
+        // Log para debuguear
+        \Log::info('SSE Stream iniciado', [
+            'user_id' => auth()->id(),
+            'user_name' => auth()->user()?->name ?? 'No autenticado',
+            'pre_match_id' => $preMatch->id,
+        ]);
+
         // Validar que el usuario pertenece al grupo
         if (!auth()->user()->groups()->where('groups.id', $preMatch->group_id)->exists()) {
+            \Log::warning('SSE: Usuario sin acceso al grupo', [
+                'user_id' => auth()->id(),
+                'group_id' => $preMatch->group_id,
+            ]);
             abort(403, 'No tienes acceso a este pre-match');
         }
 
