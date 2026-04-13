@@ -454,7 +454,7 @@
         const preMatchId = {{ $preMatch->id }};
         let eventSource = null;
         let notificationPermission = 'default';
-        const reloadedEvents = new Set(); // Rastrear eventos que ya causaron reload
+        const currentUserId = {{ auth()->id() }}; // Usuario actual
 
         function openPropositionModal() { document.getElementById('propositionModal').style.display = 'flex'; }
         function closePropositionModal() { document.getElementById('propositionModal').style.display = 'none'; document.getElementById('propositionText').value = ''; }
@@ -609,32 +609,42 @@
             if (type === 'proposition.created') {
                 console.log('✅ Manejando: proposition.created');
                 if (shouldShowToast) {
-                    // Verificar si ya se hizo reload por este evento
-                    const eventKey = `${type}_${event.id}`;
-                    if (!reloadedEvents.has(eventKey)) {
-                        reloadedEvents.add(eventKey);
+                    const eventKey = `proposition_created_${event.id}`;
+                    const alreadyToasted = localStorage.getItem(eventKey);
+                    const isMyProposition = eventData?.user_id === currentUserId;
+                    
+                    // Solo mostrar toast si: no se mostró antes Y no es mi propuesta
+                    if (!alreadyToasted && !isMyProposition) {
+                        localStorage.setItem(eventKey, 'true');
                         showToast('✅ Nueva propuesta recibida', 'success', 3000);
-                        console.log('   → Recargando página para mostrar nueva propuesta');
+                        console.log('   → Mostrando toast y recargando página');
+                        setTimeout(() => location.reload(), 1500);
+                    } else if (!alreadyToasted && isMyProposition) {
+                        // Es mi propuesta, solo reload sin toast
+                        localStorage.setItem(eventKey, 'true');
+                        console.log('   → Es mi propuesta, recargando sin toast');
                         setTimeout(() => location.reload(), 1500);
                     } else {
-                        console.log('   → Ya se hizo reload para este evento, ignorando');
+                        console.log('   → Toast ya mostrado para este evento');
                     }
                 } else {
-                    console.log('   → Evento histórico, ignorando reload');
+                    console.log('   → Evento histórico, ignorando');
                 }
             }
             else if (type === 'proposition.deleted') {
                 console.log('✅ Manejando: proposition.deleted');
                 if (shouldShowToast) {
-                    const eventKey = `${type}_${event.id}`;
-                    if (!reloadedEvents.has(eventKey)) {
-                        reloadedEvents.add(eventKey);
+                    const eventKey = `proposition_deleted_${event.id}`;
+                    const alreadyToasted = localStorage.getItem(eventKey);
+                    
+                    if (!alreadyToasted) {
+                        localStorage.setItem(eventKey, 'true');
                         showToast('🗑️ Propuesta eliminada', 'warning', 3000);
-                        console.log('   → Recargando página para actualizar');
+                        console.log('   → Recargando página');
                         setTimeout(() => location.reload(), 1500);
                     }
                 } else {
-                    console.log('   → Evento histórico, ignorando reload');
+                    console.log('   → Evento histórico, ignorando');
                 }
             }
             else if (type === 'vote.created') {
@@ -650,16 +660,18 @@
             else if (type === 'proposition.auto_approved') {
                 console.log('✅ Manejando: proposition.auto_approved');
                 if (shouldShowToast) {
-                    const eventKey = `${type}_${event.id}`;
-                    if (!reloadedEvents.has(eventKey)) {
-                        reloadedEvents.add(eventKey);
+                    const eventKey = `auto_approved_${event.id}`;
+                    const alreadyToasted = localStorage.getItem(eventKey);
+                    
+                    if (!alreadyToasted) {
+                        localStorage.setItem(eventKey, 'true');
                         showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
-                        console.log('   → Recargando página para actualizar aprobación');
+                        console.log('   → Recargando página');
                         updatePropositionStatusUI(eventData.proposition_id, 'approved');
                         setTimeout(() => location.reload(), 2000);
                     }
                 } else {
-                    console.log('   → Evento histórico, ignorando reload');
+                    console.log('   → Evento histórico, ignorando');
                 }
             }
             else if (type === 'status.pending_to_active') {
@@ -670,16 +682,17 @@
             else if (type === 'status.resolved') {
                 console.log('✅ Manejando: status.resolved');
                 if (shouldShowToast) {
-                    const eventKey = `${type}_${event.id}`;
-                    if (!reloadedEvents.has(eventKey)) {
-                        reloadedEvents.add(eventKey);
+                    const eventKey = `status_resolved_${event.id}`;
+                    const alreadyToasted = localStorage.getItem(eventKey);
+                    
+                    if (!alreadyToasted) {
+                        localStorage.setItem(eventKey, 'true');
                         showToast('✅ Desafío resuelto', 'success', 5000);
                         updateHeaderStatus('✅ Completado');
-                        // Recargar página después de 30 segundos para mostrar cambios
                         setTimeout(() => location.reload(), 30000);
                     }
                 } else {
-                    console.log('   → Evento histórico, ignorando reload');
+                    console.log('   → Evento histórico, ignorando');
                 }
             }
             else {
