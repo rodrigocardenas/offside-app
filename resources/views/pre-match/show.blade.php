@@ -542,7 +542,7 @@
                         if (!isConnected) {
                             isConnected = true;
                             console.log('🎉 Conexión establecida (polling activo)');
-                            showToast('✅ Conectado al servidor en tiempo real', 'success', 3000);
+                            // No mostrar toast de conexión al usuario
                         }
 
                         if (data.events && data.events.length > 0) {
@@ -564,7 +564,7 @@
                     .catch(err => {
                         console.error('❌ Error en polling:', err);
                         isConnected = false;
-                        showToast('⚠️ Error de conexión - reintentando...', 'warning', 3000);
+                        // Sin toast de error - reconectar silenciosamente
                         setTimeout(poll, 3000); // Reintentar en 3 segundos
                     });
             }
@@ -642,7 +642,7 @@
                 if (eventData?.proposition_id) {
                     console.log(`   → Actualizando proposición ${eventData.proposition_id} a ${eventData.approval_percentage}%`);
                     updatePropositionApprovalUI(eventData.proposition_id, eventData.approval_percentage);
-                    if (shouldShowToast) showToast('📊 Voto registrado', 'info', 2000);
+                    // Sin toast - es ruido
                 } else {
                     console.warn('   ⚠️ Sin proposition_id en evento de voto');
                 }
@@ -664,7 +664,7 @@
             }
             else if (type === 'status.pending_to_active') {
                 console.log('✅ Manejando: status.pending_to_active');
-                if (shouldShowToast) showToast('🔴 Pre-match ACTIVO', 'warning', 5000);
+                // Sin toast - cambio de estado automático
                 updateHeaderStatus('🔴 Activo');
             }
             else if (type === 'status.resolved') {
@@ -833,12 +833,9 @@
                     if (!r.ok) throw new Error('Error al enviar propuesta (HTTP ' + r.status + ')');
                     const newProp = await r.json();
                     console.log('[proposition.created] Propuesta creada:', newProp);
-                    showToast('✓ Propuesta enviada! Actualizando...', 'success', 2000);
+                    // Toast se mostrará cuando polling reciba el evento
                     closePropositionModal();
                     document.getElementById('propositionText').value = '';
-                    
-                    // ✅ El polling automático recargarà la página cuando reciba el evento
-                    console.log('[proposition.created] Esperando evento de polling...');
                 } catch (e) { 
                     console.error('[proposition.create_error]', e);
                     showToast('❌ ' + e.message, 'error', 5000); 
@@ -856,7 +853,7 @@
                         body: JSON.stringify({ loser_ids: ids, penalty_points: {{ $preMatch->penalty_points ?? 0 }} })
                     });
                     if (!r.ok) throw new Error((await r.json()).message || 'Error');
-                    showToast('✓ Resuelto!', 'success', 3000);
+                    showToast('✓ Desafío resuelto!', 'success', 3000);
                     closeResolveModal();
                     setTimeout(() => location.reload(), 30000); // Reload después de 30 segundos
                 } catch (e) { showToast('Error: ' + e.message, 'error', 5000); }
