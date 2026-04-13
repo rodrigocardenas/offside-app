@@ -62,7 +62,7 @@ class PreMatchEventController extends Controller
         @flush();
         \Log::info('🟢 SSE: sse.connected enviado al cliente');
 
-        // 2️⃣  Stream existing events
+        // 2️⃣  Stream existing events (marked as historical)
         $events = PreMatchEvent::where('pre_match_id', $preMatch->id)
             ->orderBy('created_at', 'asc')
             ->get();
@@ -75,6 +75,7 @@ class PreMatchEventController extends Controller
                 'data' => $event->payload ?? [],
                 'id' => $event->id,
                 'timestamp' => $event->created_at->toIso8601String(),
+                'is_historical' => true,  // 🔑 Flag para evitar toasts duplicados
             ];
 
             echo "data: " . json_encode($payload) . "\n\n";

@@ -561,7 +561,7 @@
         }
 
         function handleEvent(event) {
-            const { event: type, data, is_recent } = event;
+            const { event: type, data, is_historical } = event;
             
             // ⚠️ Asegurar que data es un objeto (decoder si viene como string)
             let eventData = data;
@@ -574,7 +574,8 @@
                 }
             }
             
-            console.log(`📡 Evento SSE: ${type}` + (is_recent ? ' (reciente)' : ''));
+            const badge = is_historical ? '📜 (histórico)' : '🆕 (en vivo)';
+            console.log(`📡 Evento SSE: ${type} ${badge}`);
             console.log('   Data:', eventData);
 
             // Ignorar pings
@@ -582,7 +583,6 @@
                 console.log('🎉 Conexión establecida:');
                 console.log(`   Usuario: ${eventData.user_name} (${eventData.user_id})`);
                 console.log(`   Pre-match: ${eventData.pre_match_id}`);
-                console.log(`   Último evento cargado: ${eventData.last_loaded_event_id}`);
                 showToast('✅ Conectado al servidor en tiempo real', 'success', 3000);
                 return;
             }
@@ -591,15 +591,18 @@
                 return; // Ignorar pings
             }
 
+            // 🔑 NO mostrar toasts para eventos históricos (solo actualizar DOM silenciosamente)
+            const shouldShowToast = !is_historical;
+
             if (type === 'proposition.created') {
                 console.log('✅ Manejando: proposition.created');
-                showToast('✅ Nueva propuesta recibida', 'success', 3000);
+                if (shouldShowToast) showToast('✅ Nueva propuesta recibida', 'success', 3000);
                 console.log('   → Llamando reloadPropositionsSection()');
                 reloadPropositionsSection();
             }
             else if (type === 'proposition.deleted') {
                 console.log('✅ Manejando: proposition.deleted');
-                showToast('🗑️ Propuesta eliminada', 'warning', 3000);
+                if (shouldShowToast) showToast('🗑️ Propuesta eliminada', 'warning', 3000);
                 if (eventData?.proposition_id) {
                     console.log(`   → Removiendo proposición ${eventData.proposition_id}`);
                     removePropositionElement(eventData.proposition_id);
@@ -613,14 +616,14 @@
                 if (eventData?.proposition_id) {
                     console.log(`   → Actualizando proposición ${eventData.proposition_id} a ${eventData.approval_percentage}%`);
                     updatePropositionApprovalUI(eventData.proposition_id, eventData.approval_percentage);
-                    showToast('📊 Voto registrado', 'info', 2000);
+                    if (shouldShowToast) showToast('📊 Voto registrado', 'info', 2000);
                 } else {
                     console.warn('   ⚠️ Sin proposition_id en evento de voto');
                 }
             }
             else if (type === 'proposition.auto_approved') {
                 console.log('✅ Manejando: proposition.auto_approved');
-                showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
+                if (shouldShowToast) showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
                 if (eventData?.proposition_id) {
                     console.log(`   → Marcando proposición ${eventData.proposition_id} como aprobada`);
                     updatePropositionStatusUI(eventData.proposition_id, 'approved');
@@ -630,12 +633,12 @@
             }
             else if (type === 'status.pending_to_active') {
                 console.log('✅ Manejando: status.pending_to_active');
-                showToast('🔴 Pre-match ACTIVO', 'warning', 5000);
+                if (shouldShowToast) showToast('🔴 Pre-match ACTIVO', 'warning', 5000);
                 updateHeaderStatus('🔴 Activo');
             }
             else if (type === 'status.resolved') {
                 console.log('✅ Manejando: status.resolved');
-                showToast('✅ Desafío resuelto', 'success', 5000);
+                if (shouldShowToast) showToast('✅ Desafío resuelto', 'success', 5000);
                 updateHeaderStatus('✅ Completado');
                 setTimeout(() => location.reload(), 2000);
             }
