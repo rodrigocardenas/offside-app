@@ -600,19 +600,15 @@
             if (type === 'proposition.created') {
                 console.log('✅ Manejando: proposition.created');
                 if (shouldShowToast) showToast('✅ Nueva propuesta recibida', 'success', 3000);
-                console.log('   → Llamando reloadPropositionsSection()');
-                reloadPropositionsSection();
+                console.log('   → Recargando página para mostrar nueva propuesta');
+                // Reload después de mostrar el toast
+                setTimeout(() => location.reload(), 1500);
             }
             else if (type === 'proposition.deleted') {
                 console.log('✅ Manejando: proposition.deleted');
                 if (shouldShowToast) showToast('🗑️ Propuesta eliminada', 'warning', 3000);
-                if (eventData?.proposition_id) {
-                    console.log(`   → Removiendo proposición ${eventData.proposition_id}`);
-                    removePropositionElement(eventData.proposition_id);
-                } else {
-                    console.log('   → Sin ID, recargando sección');
-                    reloadPropositionsSection();
-                }
+                console.log('   → Recargando página para actualizar');
+                setTimeout(() => location.reload(), 1500);
             }
             else if (type === 'vote.created') {
                 console.log('✅ Manejando: vote.created');
@@ -628,8 +624,9 @@
                 console.log('✅ Manejando: proposition.auto_approved');
                 if (shouldShowToast) showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
                 if (eventData?.proposition_id) {
-                    console.log(`   → Marcando proposición ${eventData.proposition_id} como aprobada`);
+                    console.log(`   → Recargando página para actualizar aprobación`);
                     updatePropositionStatusUI(eventData.proposition_id, 'approved');
+                    setTimeout(() => location.reload(), 2000);
                 } else {
                     console.warn('   ⚠️ Sin proposition_id');
                 }
@@ -801,13 +798,8 @@
                     closePropositionModal();
                     document.getElementById('propositionText').value = '';
                     
-                    // ✅ Esperar 30 segundos a que polling actualice, si no → reload
-                    console.log('[proposition.created] Esperando actualización por 30 segundos...');
-                    setTimeout(() => {
-                        // Si sigue con el mismo layout, haz reload
-                        console.log('[proposition.created] Reload de seguridad después de 30s (por si polling falló)');
-                        location.reload();
-                    }, 30000);
+                    // ✅ El polling automático recargarà la página cuando reciba el evento
+                    console.log('[proposition.created] Esperando evento de polling...');
                 } catch (e) { 
                     console.error('[proposition.create_error]', e);
                     showToast('❌ ' + e.message, 'error', 5000); 
