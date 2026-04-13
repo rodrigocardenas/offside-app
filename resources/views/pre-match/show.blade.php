@@ -471,12 +471,8 @@
                 });
                 if (!r.ok) throw new Error('Error al votar (HTTP ' + r.status + ')');
                 const updatedProp = await r.json();
-                console.log('[vote.created] Voto registrado:', updatedProp);
                 showToast('✓ Voto registrado', 'success', 2000);
-                // ✅ NO RECARGAMOS - SSE manejará la actualización
-                console.log('[vote.created] Esperando actualización SSE...');
             } catch (e) { 
-                console.error('[vote.error]', e);
                 showToast('❌ ' + e.message, 'error', 5000); 
             }
         }
@@ -489,12 +485,8 @@
                     credentials: 'include'
                 });
                 if (!r.ok) throw new Error('Error al eliminar (HTTP ' + r.status + ')');
-                console.log('[proposition.deleted] Propuesta eliminada');
                 showToast('✓ Eliminado', 'success', 2000);
-                // ✅ NO RECARGAMOS - SSE manejará la actualización
-                console.log('[proposition.deleted] Esperando actualización SSE...');
             } catch (e) { 
-                console.error('[proposition.delete_error]', e);
                 showToast('❌ ' + e.message, 'error', 5000); 
             }
         }
@@ -522,15 +514,12 @@
             try {
                 const n = new Notification(title, { body, icon: '/images/logo_alone.png', tag: 'prematch-' + preMatchId });
                 setTimeout(() => n.close(), 7000);
-            } catch (e) { console.error(e); }
+            } catch (e) { }
         }
 
         function initializePolling() {
-            console.log(`📡 Iniciando polling: /api/pre-matches/${preMatchId}/events-poll`);
-            
             // Restaurar último evento ID desde localStorage
             let lastId = parseInt(localStorage.getItem(`prematch_${preMatchId}_lastEventId`) || '0');
-            console.log(`📡 Iniciando desde evento ID: ${lastId}`);
             
             let isConnected = false;
             
@@ -541,14 +530,10 @@
                         // Marcar como conectado en el primer poll exitoso
                         if (!isConnected) {
                             isConnected = true;
-                            console.log('🎉 Conexión establecida (polling activo)');
-                            // No mostrar toast de conexión al usuario
                         }
 
                         if (data.events && data.events.length > 0) {
-                            console.log(`📨 Recibidos ${data.events.length} eventos`);
                             data.events.forEach(ev => {
-                                console.log(`📡 Evento SSE: ${ev.event} (id: ${ev.id})`);
                                 // Marcar como "en vivo" ahora que viene de polling actual
                                 ev.is_historical = false;
                                 handleEvent(ev);
@@ -562,9 +547,7 @@
                         setTimeout(poll, 1000);
                     })
                     .catch(err => {
-                        console.error('❌ Error en polling:', err);
                         isConnected = false;
-                        // Sin toast de error - reconectar silenciosamente
                         setTimeout(poll, 3000); // Reintentar en 3 segundos
                     });
             }
@@ -575,26 +558,18 @@
         function handleEvent(event) {
             const { event: type, data, is_historical } = event;
             
-            // ⚠️ Asegurar que data es un objeto (decoder si viene como string)
+            // Asegurar que data es un objeto (decoder si viene como string)
             let eventData = data;
             if (typeof data === 'string') {
                 try {
                     eventData = JSON.parse(data);
                 } catch (e) {
-                    console.warn('⚠️ No se pudo decodificar payload:', data);
                     eventData = data;
                 }
             }
-            
-            const badge = is_historical ? '📜 (histórico)' : '🆕 (en vivo)';
-            console.log(`📡 Evento SSE: ${type} ${badge}`);
-            console.log('   Data:', eventData);
 
             // Ignorar pings
             if (type === 'sse.connected') {
-                console.log('🎉 Conexión establecida:');
-                console.log(`   Usuario: ${eventData.user_name} (${eventData.user_id})`);
-                console.log(`   Pre-match: ${eventData.pre_match_id}`);
                 showToast('✅ Conectado al servidor en tiempo real', 'success', 3000);
                 return;
             }
@@ -607,7 +582,6 @@
             const shouldShowToast = !is_historical;
 
             if (type === 'proposition.created') {
-                console.log('✅ Manejando: proposition.created');
                 if (shouldShowToast) {
                     const eventKey = `proposition_created_${event.id}`;
                     const alreadyToasted = localStorage.getItem(eventKey);
@@ -617,22 +591,15 @@
                     if (!alreadyToasted && !isMyProposition) {
                         localStorage.setItem(eventKey, 'true');
                         showToast('✅ Nueva propuesta recibida', 'success', 3000);
-                        console.log('   → Mostrando toast y recargando página');
                         setTimeout(() => location.reload(), 1500);
                     } else if (!alreadyToasted && isMyProposition) {
                         // Es mi propuesta, solo reload sin toast
                         localStorage.setItem(eventKey, 'true');
-                        console.log('   → Es mi propuesta, recargando sin toast');
                         setTimeout(() => location.reload(), 1500);
-                    } else {
-                        console.log('   → Toast ya mostrado para este evento');
                     }
-                } else {
-                    console.log('   → Evento histórico, ignorando');
                 }
             }
             else if (type === 'proposition.deleted') {
-                console.log('✅ Manejando: proposition.deleted');
                 if (shouldShowToast) {
                     const eventKey = `proposition_deleted_${event.id}`;
                     const alreadyToasted = localStorage.getItem(eventKey);
@@ -640,25 +607,17 @@
                     if (!alreadyToasted) {
                         localStorage.setItem(eventKey, 'true');
                         showToast('🗑️ Propuesta eliminada', 'warning', 3000);
-                        console.log('   → Recargando página');
                         setTimeout(() => location.reload(), 1500);
                     }
-                } else {
-                    console.log('   → Evento histórico, ignorando');
                 }
             }
             else if (type === 'vote.created') {
-                console.log('✅ Manejando: vote.created');
                 if (eventData?.proposition_id) {
-                    console.log(`   → Actualizando proposición ${eventData.proposition_id} a ${eventData.approval_percentage}%`);
                     updatePropositionApprovalUI(eventData.proposition_id, eventData.approval_percentage);
                     // Sin toast - es ruido
-                } else {
-                    console.warn('   ⚠️ Sin proposition_id en evento de voto');
                 }
             }
             else if (type === 'proposition.auto_approved') {
-                console.log('✅ Manejando: proposition.auto_approved');
                 if (shouldShowToast) {
                     const eventKey = `auto_approved_${event.id}`;
                     const alreadyToasted = localStorage.getItem(eventKey);
@@ -666,21 +625,16 @@
                     if (!alreadyToasted) {
                         localStorage.setItem(eventKey, 'true');
                         showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
-                        console.log('   → Recargando página');
                         updatePropositionStatusUI(eventData.proposition_id, 'approved');
                         setTimeout(() => location.reload(), 2000);
                     }
-                } else {
-                    console.log('   → Evento histórico, ignorando');
                 }
             }
             else if (type === 'status.pending_to_active') {
-                console.log('✅ Manejando: status.pending_to_active');
                 // Sin toast - cambio de estado automático
                 updateHeaderStatus('🔴 Activo');
             }
             else if (type === 'status.resolved') {
-                console.log('✅ Manejando: status.resolved');
                 if (shouldShowToast) {
                     const eventKey = `status_resolved_${event.id}`;
                     const alreadyToasted = localStorage.getItem(eventKey);
@@ -691,72 +645,26 @@
                         updateHeaderStatus('✅ Completado');
                         setTimeout(() => location.reload(), 30000);
                     }
-                } else {
-                    console.log('   → Evento histórico, ignorando');
                 }
-            }
-            else {
-                console.log('⚠️ Tipo de evento no manejado:', type);
             }
         }
 
         // Recargar solo la sección de proposiciones
         function reloadPropositionsSection() {
-            console.log('🔄 Recargando sección de proposiciones...');
-            fetch(`/api/pre-matches/${preMatchId}`)
-                .then(r => {
-                    if (!r.ok) throw new Error('API Error: ' + r.status);
-                    return r.json();
-                })
-                .then(data => {
-                    console.log('✅ Datos recibidos del API:', data);
-                    if (data && data.propositions) {
-                        // Actualizar contador
-                        const countEl = document.querySelector('h2');
-                        if (countEl) {
-                            const newCount = data.propositions.length;
-                            console.log(`📊 Actualizando contador: ${newCount} proposiciones`);
-                            countEl.textContent = `💡 Propuestas (${newCount})`;
-                        }
-                    }
-                })
-                .catch(err => {
-                    console.error('❌ Error recargando proposiciones:', err);
-                });
+            // Función simplificada - ahora polling maneja todo
         }
 
-        // Remover elemento de proposición del DOM
-        function removePropositionElement(propositionId) {
-            const el = document.querySelector(`[data-proposition-id="${propositionId}"]`);
-            if (el) {
-                el.style.animation = 'slideOut 0.3s ease-out';
-                setTimeout(() => el.remove(), 300);
-                // Actualizar contador
-                const count = document.querySelectorAll('[data-proposition-id]').length - 1;
-                const countEl = document.querySelector('h2');
-                if (countEl) {
-                    countEl.textContent = `💡 Propuestas (${count})`;
-                }
-            }
-        }
+        // Remover elemento de proposición del DOM - No se usa
 
         // Actualizar el porcentaje de aprobación de una proposición
         function updatePropositionApprovalUI(propositionId, approvalPercentage) {
-            console.log(`📊 Actualizando aprobación de proposición ${propositionId}: ${approvalPercentage}%`);
             
             // Buscar el elemento por data-proposition-id
             let el = document.querySelector(`[data-proposition-id="${propositionId}"]`);
             
             if (!el) {
-                console.warn(`⚠️ Elemento de proposición ${propositionId} no encontrado en DOM`);
-                console.log('📋 Elementos encontrados en DOM:', document.querySelectorAll('[data-proposition-id]').length);
-                document.querySelectorAll('[data-proposition-id]').forEach((e, i) => {
-                    console.log(`  ${i}: data-proposition-id="${e.getAttribute('data-proposition-id')}"`);
-                });
                 return;
             }
-            
-            console.log('✅ Elemento encontrado:', el);
             
             // Animar el elemento con pulse
             el.style.animation = 'none';
@@ -769,17 +677,11 @@
             if (percentEl) {
                 const roundedPercent = Math.round(approvalPercentage);
                 percentEl.textContent = roundedPercent + '%';
-                console.log(`✅ Porcentaje actualizado en DOM a: ${roundedPercent}%`);
-            } else {
-                console.warn('⚠️ Elemento [data-approval-percentage] no encontrado, buscando alternativas...');
-                // Búsqueda alternativa: texto con % dentro del elemento
-                const allText = el.textContent;
-                console.log('  Texto del elemento:', allText.substring(0, 100));
             }
             
             // Actualizar barra de progreso
             const progressBars = el.querySelectorAll('div[style*="height"]');
-            console.log(`  Encontrados ${progressBars.length} divs con height`);
+
             
             let updated = false;
             progressBars.forEach((bar, idx) => {
@@ -789,14 +691,12 @@
                     if (innerDiv) {
                         const newWidth = Math.min(approvalPercentage, 100);
                         innerDiv.style.width = newWidth + '%';
-                        console.log(`✅ Barra de progreso actualizada (opcion ${idx}): ${newWidth}%`);
                         updated = true;
                     }
                 }
             });
             
             if (!updated) {
-                console.warn('⚠️ No se encontró barra de progreso, requiere reload manual');
                 // Como fallback, recarga la sección
                 setTimeout(() => reloadPropositionsSection(), 1000);
             }
@@ -845,13 +745,11 @@
                     });
                     if (!r.ok) throw new Error('Error al enviar propuesta (HTTP ' + r.status + ')');
                     const newProp = await r.json();
-                    console.log('[proposition.created] Propuesta creada:', newProp);
                     // Toast se mostrará cuando polling reciba el evento
                     closePropositionModal();
                     document.getElementById('propositionText').value = '';
-                } catch (e) { 
-                    console.error('[proposition.create_error]', e);
-                    showToast('❌ ' + e.message, 'error', 5000); 
+                } catch (e) {
+                    showToast('❌ ' + e.message, 'error', 5000);
                 }
             });
 

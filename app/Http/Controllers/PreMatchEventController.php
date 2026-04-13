@@ -14,8 +14,6 @@ class PreMatchEventController extends Controller
      */
     public function stream(PreMatch $preMatch)
     {
-        \Log::info('🔴 SSE: Iniciando stream', ['pre_match_id' => $preMatch->id, 'user_id' => auth()->id()]);
-
         // Validar acceso
         if (!auth()->user()->groups()->where('groups.id', $preMatch->group_id)->exists()) {
             abort(403, 'No tienes acceso a este pre-match');
@@ -44,8 +42,6 @@ class PreMatchEventController extends Controller
         ini_set('zlib.output_compression', 0);
         set_time_limit(0);
 
-        \Log::info('✅ SSE: Headers enviados y buffering deshabilitado');
-
         // 1️⃣  Send sse.connected event
         $connected = [
             'event' => 'sse.connected',
@@ -59,15 +55,12 @@ class PreMatchEventController extends Controller
         
         echo "data: " . json_encode($connected) . "\n\n";
         @flush();
-        \Log::info('🟢 SSE: sse.connected enviado al cliente');
 
         // 2️⃣  Stream existing events (marked as historical, silencioso)
         $lastEventId = 0;
         $events = PreMatchEvent::where('pre_match_id', $preMatch->id)
             ->orderBy('created_at', 'asc')
             ->get();
-
-        \Log::info('📦 SSE: Leyendo ' . count($events) . ' eventos históricos');
 
         foreach ($events as $event) {
             $lastEventId = $event->id;
@@ -96,8 +89,6 @@ class PreMatchEventController extends Controller
                 ->get();
 
             if ($newEvents->count() > 0) {
-                \Log::info('🆕 SSE: ' . $newEvents->count() . ' eventos nuevos encontrados');
-                
                 foreach ($newEvents as $event) {
                     $lastEventId = $event->id;
                     $payload = [
@@ -122,12 +113,10 @@ class PreMatchEventController extends Controller
 
             // Verificar si el cliente se desconectó
             if (connection_aborted()) {
-                \Log::info('🔌 SSE: Cliente desconectado');
                 break;
             }
         }
 
-        \Log::info('✅ SSE: Stream terminado después de ' . $iteration . ' iteraciones');
         exit(0);
     }
 
