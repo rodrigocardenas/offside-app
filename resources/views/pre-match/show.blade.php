@@ -472,8 +472,8 @@
                 if (!r.ok) throw new Error('Error al votar (HTTP ' + r.status + ')');
                 const updatedProp = await r.json();
                 showToast('✓ Voto registrado', 'success', 2000);
-            } catch (e) { 
-                showToast('❌ ' + e.message, 'error', 5000); 
+            } catch (e) {
+                showToast('❌ ' + e.message, 'error', 5000);
             }
         }
 
@@ -486,8 +486,8 @@
                 });
                 if (!r.ok) throw new Error('Error al eliminar (HTTP ' + r.status + ')');
                 showToast('✓ Eliminado', 'success', 2000);
-            } catch (e) { 
-                showToast('❌ ' + e.message, 'error', 5000); 
+            } catch (e) {
+                showToast('❌ ' + e.message, 'error', 5000);
             }
         }
 
@@ -520,9 +520,9 @@
         function initializePolling() {
             // Restaurar último evento ID desde localStorage
             let lastId = parseInt(localStorage.getItem(`prematch_${preMatchId}_lastEventId`) || '0');
-            
+
             let isConnected = false;
-            
+
             function poll() {
                 fetch(`/api/pre-matches/${preMatchId}/events-poll?last_id=${lastId}`)
                     .then(res => res.json())
@@ -557,7 +557,7 @@
 
         function handleEvent(event) {
             const { event: type, data, is_historical } = event;
-            
+
             // Asegurar que data es un objeto (decoder si viene como string)
             let eventData = data;
             if (typeof data === 'string') {
@@ -573,7 +573,7 @@
                 showToast('✅ Conectado al servidor en tiempo real', 'success', 3000);
                 return;
             }
-            
+
             if (!type || type === 'ping') {
                 return; // Ignorar pings
             }
@@ -586,7 +586,7 @@
                     const eventKey = `proposition_created_${event.id}`;
                     const alreadyToasted = localStorage.getItem(eventKey);
                     const isMyProposition = eventData?.user_id === currentUserId;
-                    
+
                     // Solo mostrar toast si: no se mostró antes Y no es mi propuesta
                     if (!alreadyToasted && !isMyProposition) {
                         localStorage.setItem(eventKey, 'true');
@@ -603,7 +603,7 @@
                 if (shouldShowToast) {
                     const eventKey = `proposition_deleted_${event.id}`;
                     const alreadyToasted = localStorage.getItem(eventKey);
-                    
+
                     if (!alreadyToasted) {
                         localStorage.setItem(eventKey, 'true');
                         showToast('🗑️ Propuesta eliminada', 'warning', 3000);
@@ -621,7 +621,7 @@
                 if (shouldShowToast) {
                     const eventKey = `auto_approved_${event.id}`;
                     const alreadyToasted = localStorage.getItem(eventKey);
-                    
+
                     if (!alreadyToasted) {
                         localStorage.setItem(eventKey, 'true');
                         showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
@@ -638,7 +638,7 @@
                 if (shouldShowToast) {
                     const eventKey = `status_resolved_${event.id}`;
                     const alreadyToasted = localStorage.getItem(eventKey);
-                    
+
                     if (!alreadyToasted) {
                         localStorage.setItem(eventKey, 'true');
                         showToast('✅ Desafío resuelto', 'success', 5000);
@@ -658,31 +658,31 @@
 
         // Actualizar el porcentaje de aprobación de una proposición
         function updatePropositionApprovalUI(propositionId, approvalPercentage) {
-            
+
             // Buscar el elemento por data-proposition-id
             let el = document.querySelector(`[data-proposition-id="${propositionId}"]`);
-            
+
             if (!el) {
                 return;
             }
-            
+
             // Animar el elemento con pulse
             el.style.animation = 'none';
             setTimeout(() => {
                 el.style.animation = 'pulse 0.5s';
             }, 10);
-            
+
             // Buscar elementos para actualizar
             const percentEl = el.querySelector('[data-approval-percentage]');
             if (percentEl) {
                 const roundedPercent = Math.round(approvalPercentage);
                 percentEl.textContent = roundedPercent + '%';
             }
-            
+
             // Actualizar barra de progreso
             const progressBars = el.querySelectorAll('div[style*="height"]');
 
-            
+
             let updated = false;
             progressBars.forEach((bar, idx) => {
                 const style = bar.getAttribute('style') || '';
@@ -695,7 +695,7 @@
                     }
                 }
             });
-            
+
             if (!updated) {
                 // Como fallback, recarga la sección
                 setTimeout(() => reloadPropositionsSection(), 1000);

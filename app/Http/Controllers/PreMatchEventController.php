@@ -52,7 +52,7 @@ class PreMatchEventController extends Controller
             'pre_match_id' => $preMatch->id,
             'timestamp' => now()->toIso8601String(),
         ];
-        
+
         echo "data: " . json_encode($connected) . "\n\n";
         @flush();
 
@@ -132,7 +132,7 @@ class PreMatchEventController extends Controller
         }
 
         $lastId = request()->query('last_id', 0);
-        
+
         // Buscar eventos nuevos desde el último que el cliente recibió
         $events = PreMatchEvent::where('pre_match_id', $preMatch->id)
             ->where('id', '>', $lastId)

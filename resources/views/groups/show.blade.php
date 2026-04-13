@@ -56,12 +56,22 @@
                     <button type="button"
                             title="Crear desafío Pre Match"
                             onclick="openCreatePreMatchModal(@js($group->id))"
+                            class="pre-match-btn"
                             style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ff8787); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 107, 107, 0.25); transition: transform 0.2s ease; text-decoration: none;"
                             onmouseover="this.style.transform='translateY(-2px)'"
                             onmouseout="this.style.transform='translateY(0)';">
                         <i class="fas fa-fire"></i>
-                        Pre Match
+                        <span class="pre-match-text">Pre Match</span>
                     </button>
+                    @else
+                    <a href="{{ url('/groups', $group->id) }}/pre-matches"
+                       title="Ver desafíos Pre Match"
+                       style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ff8787); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 107, 107, 0.25); transition: transform 0.2s ease; text-decoration: none;"
+                       onmouseover="this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.transform='translateY(0)';">
+                        <i class="fas fa-fire"></i>
+                        <span class="pre-match-text">Pre Match</span>
+                    </a>
                     @endif
 
                     <!-- Edit Group Button (Only for Creator) -->
@@ -435,6 +445,16 @@
     }
     .question-indicator.active {
         background-color: theme('colors.offside-secondary');
+    }
+
+    /* Pre Match Button - Hide text on mobile */
+    @media (max-width: 768px) {
+        .pre-match-text {
+            display: none;
+        }
+        .pre-match-btn {
+            padding: 8px !important;
+        }
     }
 
     .podium-container {
