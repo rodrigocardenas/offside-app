@@ -562,7 +562,6 @@
 
             poll();
         }
-        }
 
         function handleEvent(event) {
             const { event: type, data, is_historical } = event;
