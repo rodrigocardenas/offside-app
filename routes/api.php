@@ -95,7 +95,7 @@ Route::prefix('matches')->group(function () {
 // ============================================================================
 // RUTAS PRE MATCH - Protegidas con autenticación de sesión
 // ============================================================================
-Route::middleware('auth:web')->prefix('pre-matches')->group(function () {
+Route::middleware('auth:sanctum,web')->prefix('pre-matches')->group(function () {
     // Listar Pre Matches (filtrar por grupo, estado)
     Route::get('/', [\App\Http\Controllers\Api\PreMatchController::class, 'index']);
 
@@ -117,12 +117,12 @@ Route::middleware('auth:web')->prefix('pre-matches')->group(function () {
     // Resolver Pre Match (Admin)
     Route::put('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch']);
 
-    // Stream de eventos SSE (Real-time updates)
+    // Stream de eventos SSE (Real-time updates) - necesita auth:sanctum para funcionar con EventSource
     Route::get('/{preMatch}/events', [\App\Http\Controllers\PreMatchEventController::class, 'stream']);
 });
 
 // Pre Match Propositions - Votos en proposiciones
-Route::middleware('auth:web')->prefix('pre-match-propositions')->group(function () {
+Route::middleware('auth:sanctum,web')->prefix('pre-match-propositions')->group(function () {
     Route::post('/{proposition}/vote', [\App\Http\Controllers\Api\PreMatchController::class, 'voteOnProposition']);
     Route::delete('/{proposition}', [\App\Http\Controllers\Api\PreMatchController::class, 'deleteProposition']);
 });
