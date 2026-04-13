@@ -65,7 +65,7 @@
                     </p>
                 </div>
                 <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between;">
-                    <span style="display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 11px; font-weight: 700;">
+                    <span data-header-status style="display: inline-block; padding: 6px 12px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 11px; font-weight: 700;">
                         {{ $headerStatusLabel }}
                     </span>
                     <p style="font-size: 11px; margin: 0; opacity: 0.8;">
@@ -184,10 +184,10 @@
                                 <div style="margin-top: 12px; padding: 12px; background: {{ $bgSecondary }}; border-radius: 8px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                         <span style="font-size: 12px; color: {{ $textSecondary }};">Aprobaciones: {{ $proposition->approved_votes }}/{{ $group->users->count() }}</span>
-                                        <span data-progress-value style="font-size: 12px; font-weight: 700; color: {{ $accentColor }};">{{ number_format($proposition->approval_percentage, 0) }}%</span>
+                                        <span data-approval-percentage style="font-size: 12px; font-weight: 700; color: {{ $accentColor }};">{{ number_format($proposition->approval_percentage, 0) }}%</span>
                                     </div>
                                     <div style="width: 100%; height: 6px; background: {{ $borderColor }}; border-radius: 3px; overflow: hidden;">
-                                        <div data-progress-bar style="height: 100%; background: {{ $accentColor }}; width: {{ min($proposition->approval_percentage, 100) }}%; transition: width 0.3s ease;"></div>
+                                        <div style="height: 100%; background: {{ $accentColor }}; width: {{ min($proposition->approval_percentage, 100) }}%; transition: width 0.3s ease;"></div>
                                     </div>
                                 </div>
 
@@ -543,46 +543,133 @@
 
         function handleEvent(event) {
             const { event: type, data } = event;
+            console.log('📡 Evento recibido:', type, data);
+
             if (type === 'proposition.created') {
-                showToast('Nueva propuesta', 'info', 5000);
-                setTimeout(() => location.reload(), 300);
+                showToast('✅ Nueva propuesta', 'success', 3000);
+                // Recargar solo la sección de proposiciones sin reload completo
+                reloadPropositionsSection();
             }
             else if (type === 'proposition.deleted') {
-                showToast('Propuesta eliminada', 'warning', 4000);
-                setTimeout(() => location.reload(), 200);
+                showToast('🗑️ Propuesta eliminada', 'warning', 3000);
+                // Si conocemos el ID, podemos removerlo del DOM
+                if (data?.proposition_id) {
+                    removePropositionElement(data.proposition_id);
+                } else {
+                    reloadPropositionsSection();
+                }
             }
             else if (type === 'vote.created') {
-                setTimeout(() => location.reload(), 500);
+                // Actualizar la propuesta específica con el nuevo porcentaje
+                if (data?.proposition_id) {
+                    updatePropositionApprovalUI(data.proposition_id, data.approval_percentage);
+                    showToast('Voto registrado ✓', 'info', 2000);
+                }
             }
             else if (type === 'proposition.auto_approved') {
-                showToast('¡Aprobada unánimemente!', 'success', 5000);
-                setTimeout(() => location.reload(), 1000);
+                showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
+                if (data?.proposition_id) {
+                    updatePropositionStatusUI(data.proposition_id, 'approved');
+                }
             }
             else if (type === 'status.pending_to_active') {
-                showToast('Pre-match ACTIVO', 'warning', 7000);
+                showToast('🔴 Pre-match ACTIVO', 'warning', 5000);
+                updateHeaderStatus('🔴 Activo');
             }
             else if (type === 'status.resolved') {
-                showToast('Desafío resuelto', 'success', 7000);
+                showToast('✅ Desafío resuelto', 'success', 5000);
+                updateHeaderStatus('✅ Completado');
                 setTimeout(() => location.reload(), 2000);
             }
         }
 
-        function removePropositionFromUI(id) {
-            location.reload();
+        // Recargar solo la sección de proposiciones
+        function reloadPropositionsSection() {
+            fetch(`/api/pre-matches/${preMatchId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.propositions) {
+                        // Encontrar el contenedor de proposiciones
+                        const container = document.querySelector('[id*="propositions"]') || 
+                                        document.querySelector('[data-propositions]');
+                        if (container) {
+                            // Actualizar solo el count
+                            const countEl = document.querySelector('h2');
+                            if (countEl) {
+                                countEl.textContent = `💡 Propuestas (${data.propositions.length})`;
+                            }
+                            // Para evitar duplicar lógica HTML, hacemos reload específico
+                            location.reload();
+                        }
+                    }
+                })
+                .catch(err => console.error('Error reloading propositions:', err));
         }
 
-        function updatePropositionUI(propData) {
-            location.reload();
+        // Remover elemento de proposición del DOM
+        function removePropositionElement(propositionId) {
+            const el = document.querySelector(`[data-proposition-id="${propositionId}"]`);
+            if (el) {
+                el.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => el.remove(), 300);
+                // Actualizar contador
+                const count = document.querySelectorAll('[data-proposition-id]').length - 1;
+                const countEl = document.querySelector('h2');
+                if (countEl) {
+                    countEl.textContent = `💡 Propuestas (${count})`;
+                }
+            }
         }
 
-        function updatePropositionCount() {
-            location.reload();
+        // Actualizar el porcentaje de aprobación de una proposición
+        function updatePropositionApprovalUI(propositionId, approvalPercentage) {
+            const el = document.querySelector(`[data-proposition-id="${propositionId}"]`);
+            if (el) {
+                el.style.animation = 'pulse 0.5s';
+                
+                // Actualizar número en porcentaje
+                const percentEl = el.querySelector('[data-approval-percentage]');
+                if (percentEl) {
+                    percentEl.textContent = Math.round(approvalPercentage) + '%';
+                }
+                
+                // Encontrar la barra de progreso dentro de este elemento
+                // (es el div dentro del contenedor con height 100%)
+                const progressContainer = el.querySelector('div[style*="height: 6px"]');
+                if (progressContainer) {
+                    const progressBar = progressContainer.querySelector('div');
+                    if (progressBar) {
+                        progressBar.style.width = Math.min(approvalPercentage, 100) + '%';
+                    }
+                }
+            }
+        }
+
+        // Actualizar estado visual de una proposición
+        function updatePropositionStatusUI(propositionId, status) {
+            const el = document.querySelector(`[data-proposition-id="${propositionId}"]`);
+            if (el) {
+                // Agregar clase o cambiar color según estado
+                el.classList.add('proposition-approved');
+                // Deshabilitar botones de votación
+                const voteButtons = el.querySelectorAll('button[onclick*="vote"]');
+                voteButtons.forEach(btn => btn.disabled = true);
+            }
+        }
+
+        // Actualizar header del status
+        function updateHeaderStatus(newStatus) {
+            const headerStatusEl = document.querySelector('[data-header-status]');
+            if (headerStatusEl) {
+                headerStatusEl.textContent = newStatus;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const style = document.createElement('style');
             style.textContent = `@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-            @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }`;
+            @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }`;
             document.head.appendChild(style);
 
             requestNotificationPermission();

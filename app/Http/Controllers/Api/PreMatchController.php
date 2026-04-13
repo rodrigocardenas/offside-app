@@ -8,6 +8,7 @@ use App\Models\PreMatchProposition;
 use App\Models\PreMatchVote;
 use App\Models\PreMatchResolution;
 use App\Models\GroupPenalty;
+use App\Services\PreMatchEventService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -120,6 +121,9 @@ class PreMatchController extends Controller
         $approvalPercentage = (1 / $groupMembersCount) * 100;
         $proposition->update(['approval_percentage' => $approvalPercentage]);
 
+        // ✨ GENERAR EVENTO: Nueva proposición creada
+        PreMatchEventService::propositionCreated($proposition);
+
         return response()->json($proposition, 201);
     }
 
@@ -159,6 +163,14 @@ class PreMatchController extends Controller
             'validation_status' => $validationStatus,
         ]);
 
+        // ✨ GENERAR EVENTO: Nuevo voto registrado
+        PreMatchEventService::voteCreated($proposition, auth()->id(), $validated['approved']);
+
+        // ✨ GENERAR EVENTO: Si fue auto-aprobada por unanimidad
+        if ($validationStatus === 'approved' && $approvedCount >= $groupMembersCount) {
+            PreMatchEventService::propositionAutoApproved($proposition);
+        }
+
         // Verificar si TODAS las propuestas del pre-match están aprobadas
         $preMatch = $proposition->preMatch;
         $totalPropositions = $preMatch->propositions()->count();
@@ -166,7 +178,10 @@ class PreMatchController extends Controller
 
         // Si todas las propuestas están aprobadas, cambiar estado del pre-match a 'active'
         if ($totalPropositions > 0 && $approvedPropositions === $totalPropositions) {
+            $oldStatus = $preMatch->status;
             $preMatch->update(['status' => 'active']);
+            // ✨ GENERAR EVENTO: Status cambió a active
+            PreMatchEventService::statusChanged($preMatch, $oldStatus, 'active');
         }
 
         return response()->json($proposition);
@@ -191,7 +206,14 @@ class PreMatchController extends Controller
             return response()->json(['error' => 'No puedes eliminar una propuesta aprobada por todos'], 422);
         }
 
+        $propositionId = $proposition->id;
+        $userName = $proposition->user->name;
+        $preMatchId = $proposition->pre_match_id;
+
         $proposition->delete();
+
+        // ✨ GENERAR EVENTO: Proposición eliminada
+        PreMatchEventService::propositionDeleted($preMatchId, $propositionId, $userName);
 
         return response()->json(['message' => 'Propuesta eliminada']);
     }
@@ -249,7 +271,11 @@ class PreMatchController extends Controller
         }
 
         // Update pre-match status to completed
+        $oldStatus = $preMatch->status;
         $preMatch->update(['status' => 'completed']);
+
+        // ✨ GENERAR EVENTO: Pre-Match resuelto
+        PreMatchEventService::statusChanged($preMatch, $oldStatus, 'completed');
 
         return response()->json([
             'message' => 'Desafío resuelto exitosamente',
