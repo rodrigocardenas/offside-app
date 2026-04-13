@@ -94,7 +94,7 @@
               <div class="podium-position second">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    <img src="{{ $topUsers[1]->getAvatarUrl('medium') }}" alt="{{ $topUsers[1]->name }}" class="podium-avatar" loading="lazy">
+                    <img src="{{ $topUsers[1]->getAvatarUrl('medium') }}" alt="{{ $topUsers[1]->name }}" class="podium-avatar" width="50" height="50" loading="eager">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[1]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
@@ -106,7 +106,7 @@
               <div class="podium-position first">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    <img src="{{ $topUsers[0]->getAvatarUrl('medium') }}" alt="{{ $topUsers[0]->name }}" class="podium-avatar" loading="lazy">
+                    <img src="{{ $topUsers[0]->getAvatarUrl('medium') }}" alt="{{ $topUsers[0]->name }}" class="podium-avatar" width="50" height="50" loading="eager">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[0]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
@@ -118,7 +118,7 @@
               <div class="podium-position third">
                 <div class="avatar-section">
                   <div class="avatar-container">
-                    <img src="{{ $topUsers[2]->getAvatarUrl('medium') }}" alt="{{ $topUsers[2]->name }}" class="podium-avatar" loading="lazy">
+                    <img src="{{ $topUsers[2]->getAvatarUrl('medium') }}" alt="{{ $topUsers[2]->name }}" class="podium-avatar" width="50" height="50" loading="eager">
                   </div>
                   <div class="podium-points">{{ number_format($topUsers[2]->total_points ?? 0, 0, ',', '.') }} pts.</div>
                 </div>
@@ -489,12 +489,23 @@
       background: {{ $bgSecondary }};
     }
 
+    .avatar-container {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
     .podium-avatar, .podium-avatar-placeholder {
       width: 50px;
       height: 50px;
       border-radius: 50%;
       border: 3px solid {{ $accentColor }};
       object-fit: cover;
+      display: block;
     }
 
     .podium-avatar-placeholder {
