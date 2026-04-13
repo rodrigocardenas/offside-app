@@ -55,7 +55,7 @@
                     @if (auth()->user()->id === $group->created_by)
                     <button type="button"
                             title="Crear desafío Pre Match"
-                            onclick="openCreatePreMatchModal(@js($group->id))"
+                            onclick="openPreMatchActionModal(@js($group->id))"
                             class="pre-match-btn"
                             style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border: none; border-radius: 999px; background: linear-gradient(135deg, #ff6b6b, #ff8787); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 107, 107, 0.25); transition: transform 0.2s ease; text-decoration: none;"
                             onmouseover="this.style.transform='translateY(-2px)'"
@@ -419,6 +419,67 @@
                 }, 2000);
             }
         })();
+    </script>
+
+    <!-- Pre Match Action Modal -->
+    <div id="preMatchActionModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
+        <div style="background: {{ $bgTertiary }}; border-radius: 16px; width: 100%; max-width: 400px; padding: 28px 24px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); border: 1px solid {{ $borderColor }};">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <h2 style="font-size: 22px; font-weight: 700; color: {{ $textPrimary }}; margin: 0; display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-fire" style="color: #ff6b6b;"></i>
+                    Pre Match
+                </h2>
+                <button onclick="document.getElementById('preMatchActionModal').style.display = 'none'" style="background: none; border: none; font-size: 24px; color: {{ $textSecondary }}; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s ease;"
+                    onmouseover="this.style.background='{{ $isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}'; this.style.color='{{ $textPrimary }}';"
+                    onmouseout="this.style.background='none'; this.style.color='{{ $textSecondary }}';">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <p style="color: {{ $textSecondary }}; font-size: 14px; margin-bottom: 20px; line-height: 1.5;">
+                ¿Qué deseas hacer?
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button type="button" 
+                        onclick="closePreMatchActionModal(); openCreatePreMatchModal(document.getElementById('preMatchGroupId').value);"
+                        style="width: 100%; padding: 14px 16px; background: linear-gradient(135deg, #ff6b6b, #ff8787); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                        onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';"
+                        onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
+                    <i class="fas fa-plus"></i>
+                    <span>Crear nuevo Pre Match</span>
+                </button>
+
+                <button type="button" 
+                        onclick="window.location.href = '/groups/' + document.getElementById('preMatchGroupId').value + '/pre-matches';"
+                        style="width: 100%; padding: 14px 16px; background: {{ $isDark ? '#1a524e' : '#e5f3f0' }}; border: 2px solid {{ $accentColor }}; border-radius: 10px; color: {{ $accentColor }}; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                        onmouseover="this.style.background='{{ $accentColor }}'; this.style.color='#003b2f';"
+                        onmouseout="this.style.background='{{ $isDark ? '#1a524e' : '#e5f3f0' }}'; this.style.color='{{ $accentColor }}';">
+                    <i class="fas fa-eye"></i>
+                    <span>Ver Pre Matches</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="preMatchGroupId" value="0">
+
+    <script>
+        function openPreMatchActionModal(groupId) {
+            document.getElementById('preMatchGroupId').value = groupId;
+            document.getElementById('preMatchActionModal').style.display = 'flex';
+        }
+
+        function closePreMatchActionModal() {
+            document.getElementById('preMatchActionModal').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic en el fondo
+        document.getElementById('preMatchActionModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreMatchActionModal();
+            }
+        });
     </script>
 
     <!-- Pre Match Modal -->
