@@ -529,21 +529,54 @@
         }
 
         function initializeSSE() {
+            console.log(`🔌 Intentando conectar a SSE: /api/pre-matches/${preMatchId}/events`);
             eventSource = new EventSource(`/api/pre-matches/${preMatchId}/events`);
-            eventSource.addEventListener('open', () => showToast('Conectado', 'success', 3000));
-            eventSource.addEventListener('message', (e) => {
-                try { const ev = JSON.parse(e.data); handleEvent(ev); }
-                catch (err) { console.error(err); }
+            
+            eventSource.addEventListener('open', () => {
+                console.log('✅ EventSource ABIERTO - Conectado al servidor');
+                showToast('✅ Conectado al servidor', 'success', 3000);
             });
-            eventSource.addEventListener('error', () => {
+            
+            eventSource.addEventListener('message', (e) => {
+                console.log('📨 Mensaje SSE recibido (raw):', e.data.substring(0, 200) + '...');
+                try {
+                    const ev = JSON.parse(e.data);
+                    console.log('✅ Mensaje parseado correctamente:', ev);
+                    handleEvent(ev);
+                } catch (err) {
+                    console.error('❌ Error parseando SSE:', err);
+                    console.error('Raw data:', e.data);
+                }
+            });
+            
+            eventSource.addEventListener('error', (e) => {
+                console.error('❌ EventSource ERROR:', e);
+                console.error('Ready state:', eventSource.readyState, ' (0=connecting, 1=open, 2=closed)');
                 eventSource.close();
-                setTimeout(() => initializeSSE(), 5000);
+                console.log('↻ Reconectando en 5 segundos...');
+                showToast('⚠️ Desconectado - reconectando...', 'warning', 5000);
+                setTimeout(() => {
+                    console.log('🔄 Reconectando SSE...');
+                    initializeSSE();
+                }, 5000);
             });
         }
 
         function handleEvent(event) {
             const { event: type, data } = event;
-            console.log('📡 Evento recibido:', type, data);
+            
+            // ⚠️ Asegurar que data es un objeto (decoder si viene como string)
+            let eventData = data;
+            if (typeof data === 'string') {
+                try {
+                    eventData = JSON.parse(data);
+                } catch (e) {
+                    console.warn('⚠️  No se pudo decodificar payload:', data);
+                    eventData = data;
+                }
+            }
+            
+            console.log('📡 Evento recibido:', type, eventData);
 
             if (type === 'proposition.created') {
                 showToast('✅ Nueva propuesta', 'success', 3000);
@@ -553,23 +586,23 @@
             else if (type === 'proposition.deleted') {
                 showToast('🗑️ Propuesta eliminada', 'warning', 3000);
                 // Si conocemos el ID, podemos removerlo del DOM
-                if (data?.proposition_id) {
-                    removePropositionElement(data.proposition_id);
+                if (eventData?.proposition_id) {
+                    removePropositionElement(eventData.proposition_id);
                 } else {
                     reloadPropositionsSection();
                 }
             }
             else if (type === 'vote.created') {
                 // Actualizar la propuesta específica con el nuevo porcentaje
-                if (data?.proposition_id) {
-                    updatePropositionApprovalUI(data.proposition_id, data.approval_percentage);
+                if (eventData?.proposition_id) {
+                    updatePropositionApprovalUI(eventData.proposition_id, eventData.approval_percentage);
                     showToast('Voto registrado ✓', 'info', 2000);
                 }
             }
             else if (type === 'proposition.auto_approved') {
                 showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
-                if (data?.proposition_id) {
-                    updatePropositionStatusUI(data.proposition_id, 'approved');
+                if (eventData?.proposition_id) {
+                    updatePropositionStatusUI(eventData.proposition_id, 'approved');
                 }
             }
             else if (type === 'status.pending_to_active') {
@@ -585,25 +618,33 @@
 
         // Recargar solo la sección de proposiciones
         function reloadPropositionsSection() {
+            console.log('🔄 Recargando sección de proposiciones...');
             fetch(`/api/pre-matches/${preMatchId}`)
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error('API Error: ' + r.status);
+                    return r.json();
+                })
                 .then(data => {
+                    console.log('✅ Datos recibidos del API:', data);
                     if (data && data.propositions) {
-                        // Encontrar el contenedor de proposiciones
-                        const container = document.querySelector('[id*="propositions"]') || 
-                                        document.querySelector('[data-propositions]');
-                        if (container) {
-                            // Actualizar solo el count
-                            const countEl = document.querySelector('h2');
-                            if (countEl) {
-                                countEl.textContent = `💡 Propuestas (${data.propositions.length})`;
-                            }
-                            // Para evitar duplicar lógica HTML, hacemos reload específico
-                            location.reload();
+                        // Actualizar contador
+                        const countEl = document.querySelector('h2');
+                        if (countEl) {
+                            const newCount = data.propositions.length;
+                            console.log(`📊 Actualizando contador: ${newCount} proposiciones`);
+                            countEl.textContent = `💡 Propuestas (${newCount})`;
                         }
+                        
+                        // Como la estructura HTML es compleja, mejor hacer un reload selectivo
+                        console.log('⚠️ Recargar página para actualizar lista de proposiciones completa');
+                        setTimeout(() => location.reload(), 500);
                     }
                 })
-                .catch(err => console.error('Error reloading propositions:', err));
+                .catch(err => {
+                    console.error('❌ Error recargando proposiciones:', err);
+                    showToast('Error actualizando proposiciones', 'error', 3000);
+                    setTimeout(() => location.reload(), 2000);
+                });
         }
 
         // Remover elemento de proposición del DOM
@@ -623,25 +664,43 @@
 
         // Actualizar el porcentaje de aprobación de una proposición
         function updatePropositionApprovalUI(propositionId, approvalPercentage) {
+            console.log(`📊 Actualizando aprobación de proposición ${propositionId}: ${approvalPercentage}%`);
             const el = document.querySelector(`[data-proposition-id="${propositionId}"]`);
-            if (el) {
+            if (!el) {
+                console.warn(`⚠️ Elemento de proposición ${propositionId} no encontrado en DOM`);
+                return;
+            }
+            
+            // Animar el elemento
+            el.style.animation = 'none';
+            setTimeout(() => {
                 el.style.animation = 'pulse 0.5s';
-                
-                // Actualizar número en porcentaje
-                const percentEl = el.querySelector('[data-approval-percentage]');
-                if (percentEl) {
-                    percentEl.textContent = Math.round(approvalPercentage) + '%';
+            }, 10);
+            
+            // Actualizar número en porcentaje
+            const percentEl = el.querySelector('[data-approval-percentage]');
+            if (percentEl) {
+                const roundedPercent = Math.round(approvalPercentage);
+                percentEl.textContent = roundedPercent + '%';
+                console.log(`✅ Porcentaje actualizado a: ${roundedPercent}%`);
+            } else {
+                console.warn('⚠️ Elemento de porcentaje no encontrado');
+            }
+            
+            // Encontrar y actualizar la barra de progreso
+            // La estructura es: div[data-approval-percentage]'s parent > div con height 100%
+            const progressContainer = el.querySelector('div[style*="height: 6px"]');
+            if (progressContainer) {
+                const progressBar = progressContainer.querySelector('div');
+                if (progressBar) {
+                    const newWidth = Math.min(approvalPercentage, 100);
+                    progressBar.style.width = newWidth + '%';
+                    console.log(`✅ Barra de progreso actualizada a: ${newWidth}%`);
+                } else {
+                    console.warn('⚠️ Barra de progreso (inner div) no encontrada');
                 }
-                
-                // Encontrar la barra de progreso dentro de este elemento
-                // (es el div dentro del contenedor con height 100%)
-                const progressContainer = el.querySelector('div[style*="height: 6px"]');
-                if (progressContainer) {
-                    const progressBar = progressContainer.querySelector('div');
-                    if (progressBar) {
-                        progressBar.style.width = Math.min(approvalPercentage, 100) + '%';
-                    }
-                }
+            } else {
+                console.warn('⚠️ Contenedor de progreso no encontrado');
             }
         }
 
