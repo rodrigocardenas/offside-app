@@ -528,11 +528,12 @@
             console.log(`🔌 Intentando conectar a SSE: /api/pre-matches/${preMatchId}/events`);
             eventSource = new EventSource(`/api/pre-matches/${preMatchId}/events`);
             
+            // Evento de conexión abierta (no usado en SSE, pero por si acaso)
             eventSource.addEventListener('open', () => {
-                console.log('✅ EventSource ABIERTO - Conectado al servidor');
-                showToast('✅ Conectado al servidor', 'success', 3000);
+                console.log('✅ EventSource ABIERTO (low-level)');
             });
             
+            // Mensajes de eventos normales
             eventSource.addEventListener('message', (e) => {
                 console.log('📨 Mensaje SSE recibido (raw):', e.data.substring(0, 200) + '...');
                 try {
@@ -544,7 +545,8 @@
                     console.error('Raw data:', e.data);
                 }
             });
-            
+
+            // Ignorar pings del servidor (líneas que empiezan con :)
             eventSource.addEventListener('error', (e) => {
                 console.error('❌ EventSource ERROR:', e);
                 console.error('Ready state:', eventSource.readyState, ' (0=connecting, 1=open, 2=closed)');
@@ -559,7 +561,7 @@
         }
 
         function handleEvent(event) {
-            const { event: type, data } = event;
+            const { event: type, data, is_recent } = event;
             
             // ⚠️ Asegurar que data es un objeto (decoder si viene como string)
             let eventData = data;
@@ -567,25 +569,37 @@
                 try {
                     eventData = JSON.parse(data);
                 } catch (e) {
-                    console.warn('⚠️  No se pudo decodificar payload:', data);
+                    console.warn('⚠️ No se pudo decodificar payload:', data);
                     eventData = data;
                 }
             }
             
-            console.log('📡 Evento SSE recibido:', type);
+            console.log(`📡 Evento SSE: ${type}` + (is_recent ? ' (reciente)' : ''));
             console.log('   Data:', eventData);
+
+            // Ignorar pings
+            if (type === 'sse.connected') {
+                console.log('🎉 Conexión establecida:');
+                console.log(`   Usuario: ${eventData.user_name} (${eventData.user_id})`);
+                console.log(`   Pre-match: ${eventData.pre_match_id}`);
+                console.log(`   Último evento cargado: ${eventData.last_loaded_event_id}`);
+                showToast('✅ Conectado al servidor en tiempo real', 'success', 3000);
+                return;
+            }
+            
+            if (!type || type === 'ping') {
+                return; // Ignorar pings
+            }
 
             if (type === 'proposition.created') {
                 console.log('✅ Manejando: proposition.created');
                 showToast('✅ Nueva propuesta recibida', 'success', 3000);
-                // Recargar solo la sección de proposiciones sin reload completo
                 console.log('   → Llamando reloadPropositionsSection()');
                 reloadPropositionsSection();
             }
             else if (type === 'proposition.deleted') {
                 console.log('✅ Manejando: proposition.deleted');
                 showToast('🗑️ Propuesta eliminada', 'warning', 3000);
-                // Si conocemos el ID, podemos removerlo del DOM
                 if (eventData?.proposition_id) {
                     console.log(`   → Removiendo proposición ${eventData.proposition_id}`);
                     removePropositionElement(eventData.proposition_id);
@@ -596,7 +610,6 @@
             }
             else if (type === 'vote.created') {
                 console.log('✅ Manejando: vote.created');
-                // Actualizar la propuesta específica con el nuevo porcentaje
                 if (eventData?.proposition_id) {
                     console.log(`   → Actualizando proposición ${eventData.proposition_id} a ${eventData.approval_percentage}%`);
                     updatePropositionApprovalUI(eventData.proposition_id, eventData.approval_percentage);
