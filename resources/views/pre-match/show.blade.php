@@ -781,13 +781,14 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Pre-Match Show view initialized');
-            initializePolling();  // Usar polling en lugar de SSE
+            const style = document.createElement('style');
+            style.textContent = `@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
             @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }`;
             document.head.appendChild(style);
 
             requestNotificationPermission();
-            initializeSSE();
+            initializePolling();  // Usar polling en lugar de SSE
 
             const pForm = document.getElementById('propositionForm');
             if (pForm) pForm.addEventListener('submit', async (e) => {
@@ -803,17 +804,17 @@
                     if (!r.ok) throw new Error('Error al enviar propuesta (HTTP ' + r.status + ')');
                     const newProp = await r.json();
                     console.log('[proposition.created] Propuesta creada:', newProp);
-                    showToast('✓ Enviada! Esperando actualización SSE...', 'success', 2000);
+                    showToast('✓ Propuesta enviada! Actualizando...', 'success', 2000);
                     closePropositionModal();
                     document.getElementById('propositionText').value = '';
                     
-                    // ✅ Esperar 3 segundos a ver si SSE actualiza, si no → reload
-                    console.log('[proposition.created] Esperando actualización SSE por 3 segundos...');
+                    // ✅ Esperar 2 segundos a que polling actualice, si no → reload
+                    console.log('[proposition.created] Esperando actualización por 2 segundos...');
                     setTimeout(() => {
                         // Si sigue con el mismo layout, haz reload
-                        console.log('[proposition.created] Reload de seguridad después de 3s (por si SSE falló)');
+                        console.log('[proposition.created] Reload de seguridad después de 2s (por si polling falló)');
                         location.reload();
-                    }, 3000);
+                    }, 2000);
                 } catch (e) { 
                     console.error('[proposition.create_error]', e);
                     showToast('❌ ' + e.message, 'error', 5000); 
@@ -838,8 +839,5 @@
             });
         });
 
-        window.addEventListener('beforeunload', () => {
-            if (eventSource) eventSource.close();
-        });
     </script>
 </x-app-layout>
