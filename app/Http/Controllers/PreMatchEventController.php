@@ -23,35 +23,15 @@ class PreMatchEventController extends Controller
 
         // Validar que el usuario pertenece al grupo
         if (!auth()->user()->groups()->where('groups.id', $preMatch->group_id)->exists()) {
-            \Log::warning('SSE: Usuario sin acceso al grupo', [
-                'user_id' => auth()->id(),
-                'group_id' => $preMatch->group_id,
-            ]);
             abort(403, 'No tienes acceso a este pre-match');
         }
 
-        // Usar streaming simple sin callback para evitar problemas con middleware
-        $response = response()->stream(null, 200, [
-            'Content-Type' => 'text/event-stream; charset=utf-8',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-            'Pragma' => 'no-cache',
-            'Expires' => '0',
-            'Connection' => 'keep-alive',
-            'X-Accel-Buffering' => 'no',
-        ]);
-
-        // Obtener el callback para no usar closure
-        $response->setCallback(function () use ($preMatch) {
-            try {
-                // Limpiar buffers
-                if (ob_get_level()) {
-                    ob_end_clean();
-                }
-
+        return response()->stream(
+            function () use ($preMatch) {
                 $lastId = 0;
                 $iteration = 0;
 
-                // Enviar evento de bienvenida inmediatamente
+                // Evento de bienvenida inmediatamente
                 echo "data: " . json_encode([
                     'event' => 'sse.connected',
                     'data' => [
@@ -63,7 +43,6 @@ class PreMatchEventController extends Controller
                     'timestamp' => now()->toIso8601String(),
                 ]) . "\n\n";
                 flush();
-                ob_flush();
 
                 // Loop de polling
                 while ($iteration < 300) {
@@ -91,12 +70,16 @@ class PreMatchEventController extends Controller
                         break;
                     }
                 }
-            } catch (\Exception $e) {
-                \Log::error('SSE Stream error', ['error' => $e->getMessage()]);
-                echo "data: " . json_encode(['event' => 'error', 'data' => $e->getMessage()]) . "\n\n";
-            }
-        });
-
-        return $response;
+            },
+            200,
+            [
+                'Content-Type' => 'text/event-stream; charset=utf-8',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+                'Connection' => 'keep-alive',
+                'X-Accel-Buffering' => 'no',
+            ]
+        );
     }
 }
