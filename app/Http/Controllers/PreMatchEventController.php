@@ -30,79 +30,58 @@ class PreMatchEventController extends Controller
             abort(403, 'No tienes acceso a este pre-match');
         }
 
-        return response()->stream(
-            function () use ($preMatch) {
-                // Limpiar output buffer si existe
-                while (ob_get_level() > 0) {
+        // Usar streaming simple sin callback para evitar problemas con middleware
+        $response = response()->stream(null, 200, [
+            'Content-Type' => 'text/event-stream; charset=utf-8',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
+
+        // Obtener el callback para no usar closure
+        $response->setCallback(function () use ($preMatch) {
+            try {
+                // Limpiar buffers
+                if (ob_get_level()) {
                     ob_end_clean();
                 }
 
                 $lastId = 0;
-                $maxIterations = 300;
                 $iteration = 0;
-                $pingCounter = 0;
 
-                // 1️⃣ Cargar últimos eventos
-                $recentEvents = PreMatchEvent::where('pre_match_id', $preMatch->id)
-                    ->latest('id')
-                    ->limit(20)
-                    ->orderBy('id')
-                    ->get();
-
-                foreach ($recentEvents as $event) {
-                    $lastId = max($lastId, $event->id);
-                    echo "data: " . json_encode([
-                        'event' => $event->event_type,
-                        'data' => $event->payload,
-                        'timestamp' => $event->created_at->toIso8601String(),
-                        'id' => $event->id,
-                        'is_recent' => true,
-                    ]) . "\n\n";
-                    flush();
-                }
-
-                // 2️⃣ Evento de conexión confirmada
+                // Enviar evento de bienvenida inmediatamente
                 echo "data: " . json_encode([
                     'event' => 'sse.connected',
                     'data' => [
                         'user_id' => auth()->id(),
                         'user_name' => auth()->user()->name,
                         'pre_match_id' => $preMatch->id,
-                        'last_loaded_event_id' => $lastId,
-                        'connected_at' => now()->toIso8601String(),
+                        'timestamp' => now()->toIso8601String(),
                     ],
                     'timestamp' => now()->toIso8601String(),
                 ]) . "\n\n";
                 flush();
+                ob_flush();
 
-                // 3️⃣ Loop principal
-                while ($iteration < $maxIterations) {
-                    // Buscar eventos nuevos
+                // Loop de polling
+                while ($iteration < 300) {
                     $events = PreMatchEvent::where('pre_match_id', $preMatch->id)
                         ->where('id', '>', $lastId)
                         ->orderBy('id')
                         ->get();
 
-                    if ($events->count() > 0) {
-                        foreach ($events as $event) {
-                            $lastId = $event->id;
-                            echo "data: " . json_encode([
-                                'event' => $event->event_type,
-                                'data' => $event->payload,
-                                'timestamp' => $event->created_at->toIso8601String(),
-                                'id' => $event->id,
-                            ]) . "\n\n";
-                            $event->update(['processed_at' => now()]);
-                            flush();
-                        }
-                    }
-
-                    // Ping cada 30 segundos
-                    $pingCounter++;
-                    if ($pingCounter >= 30) {
-                        echo ":ping\n\n";
+                    foreach ($events as $event) {
+                        $lastId = $event->id;
+                        echo "data: " . json_encode([
+                            'event' => $event->event_type,
+                            'data' => $event->payload,
+                            'timestamp' => $event->created_at->toIso8601String(),
+                            'id' => $event->id,
+                        ]) . "\n\n";
+                        $event->update(['processed_at' => now()]);
                         flush();
-                        $pingCounter = 0;
                     }
 
                     sleep(1);
@@ -112,16 +91,12 @@ class PreMatchEventController extends Controller
                         break;
                     }
                 }
-            },
-            200,
-            [
-                'Content-Type' => 'text/event-stream; charset=utf-8',
-                'Cache-Control' => 'no-cache, no-store, must-revalidate',
-                'Pragma' => 'no-cache',
-                'Expires' => '0',
-                'Connection' => 'keep-alive',
-                'X-Accel-Buffering' => 'no',
-            ]
-        );
+            } catch (\Exception $e) {
+                \Log::error('SSE Stream error', ['error' => $e->getMessage()]);
+                echo "data: " . json_encode(['event' => 'error', 'data' => $e->getMessage()]) . "\n\n";
+            }
+        });
+
+        return $response;
     }
 }
