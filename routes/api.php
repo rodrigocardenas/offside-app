@@ -118,8 +118,10 @@ Route::middleware('auth:web')->prefix('pre-matches')->group(function () {
     Route::put('/{preMatch}/resolve', [\App\Http\Controllers\Api\PreMatchController::class, 'resolvePreMatch']);
 });
 
-// SSE Stream - SIN middleware de buffering (solo auth + BindModel)
-Route::middleware(['auth:web'])->get('/pre-matches/{preMatch}/events', [\App\Http\Controllers\PreMatchEventController::class, 'stream'])->withoutMiddleware(['Illuminate\Routing\Middleware\ThrottleRequests', 'Barryvdh\Debugbar\Middleware\InjectDebugbar']);
+// SSE Stream - SIN MIDDLEWARE (para que no haya buffering)
+Route::get('/pre-matches/{preMatch}/events', [\App\Http\Controllers\PreMatchEventController::class, 'stream'])
+    ->middleware('auth:web')
+    ->withoutMiddleware([\Illuminate\Routing\Middleware\ThrottleRequests::class, \Barryvdh\Debugbar\Middleware\InjectDebugbar::class]);
 
 // Pre Match Propositions - Votos en proposiciones
 Route::middleware('auth:web')->prefix('pre-match-propositions')->group(function () {
