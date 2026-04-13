@@ -630,8 +630,6 @@
                 if (eventData?.proposition_id) {
                     console.log(`   → Marcando proposición ${eventData.proposition_id} como aprobada`);
                     updatePropositionStatusUI(eventData.proposition_id, 'approved');
-                    // Recargar página después de 2 segundos para mostrar cambios
-                    setTimeout(() => location.reload(), 2000);
                 } else {
                     console.warn('   ⚠️ Sin proposition_id');
                 }
@@ -645,7 +643,8 @@
                 console.log('✅ Manejando: status.resolved');
                 if (shouldShowToast) showToast('✅ Desafío resuelto', 'success', 5000);
                 updateHeaderStatus('✅ Completado');
-                setTimeout(() => location.reload(), 2000);
+                // Recargar página después de 30 segundos para mostrar cambios
+                setTimeout(() => location.reload(), 30000);
             }
             else {
                 console.log('⚠️ Tipo de evento no manejado:', type);
@@ -670,11 +669,6 @@
                             console.log(`📊 Actualizando contador: ${newCount} proposiciones`);
                             countEl.textContent = `💡 Propuestas (${newCount})`;
                         }
-                        
-                        // Re-fetch la página entera para actualizar el HTML correctamente
-                        // La estructura es demasiado compleja para actualizar selectivamente
-                        console.log('⏱️ Recargando página en 1 segundo...');
-                        setTimeout(() => location.reload(), 1000);
                     }
                 })
                 .catch(err => {
@@ -807,13 +801,13 @@
                     closePropositionModal();
                     document.getElementById('propositionText').value = '';
                     
-                    // ✅ Esperar 2 segundos a que polling actualice, si no → reload
-                    console.log('[proposition.created] Esperando actualización por 2 segundos...');
+                    // ✅ Esperar 30 segundos a que polling actualice, si no → reload
+                    console.log('[proposition.created] Esperando actualización por 30 segundos...');
                     setTimeout(() => {
                         // Si sigue con el mismo layout, haz reload
-                        console.log('[proposition.created] Reload de seguridad después de 2s (por si polling falló)');
+                        console.log('[proposition.created] Reload de seguridad después de 30s (por si polling falló)');
                         location.reload();
-                    }, 2000);
+                    }, 30000);
                 } catch (e) { 
                     console.error('[proposition.create_error]', e);
                     showToast('❌ ' + e.message, 'error', 5000); 
@@ -833,7 +827,7 @@
                     if (!r.ok) throw new Error((await r.json()).message || 'Error');
                     showToast('✓ Resuelto!', 'success', 3000);
                     closeResolveModal();
-                    setTimeout(() => location.reload(), 1500);
+                    setTimeout(() => location.reload(), 30000); // Reload después de 30 segundos
                 } catch (e) { showToast('Error: ' + e.message, 'error', 5000); }
             });
         });
