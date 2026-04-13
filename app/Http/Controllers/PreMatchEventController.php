@@ -22,7 +22,6 @@ class PreMatchEventController extends Controller
         }
 
         // ⚠️  CRITICAL: Limpiar TODOS los buffers de salida abiertos
-        // Algunos pueden haber sido abiertos por middleware o Laravel internamente
         while (@ob_get_level()) {
             @ob_end_clean();
         }
@@ -62,7 +61,8 @@ class PreMatchEventController extends Controller
         @flush();
         \Log::info('🟢 SSE: sse.connected enviado al cliente');
 
-        // 2️⃣  Stream existing events (marked as historical)
+        // 2️⃣  Stream existing events (marked as historical, silencioso)
+        $lastEventId = 0;
         $events = PreMatchEvent::where('pre_match_id', $preMatch->id)
             ->orderBy('created_at', 'asc')
             ->get();
@@ -70,12 +70,13 @@ class PreMatchEventController extends Controller
         \Log::info('📦 SSE: Leyendo ' . count($events) . ' eventos históricos');
 
         foreach ($events as $event) {
+            $lastEventId = $event->id;
             $payload = [
                 'event' => $event->event_type,
                 'data' => $event->payload ?? [],
                 'id' => $event->id,
                 'timestamp' => $event->created_at->toIso8601String(),
-                'is_historical' => true,  // 🔑 Flag para evitar toasts duplicados
+                'is_historical' => true,  // 🔑 Flag para evitar toasts
             ];
 
             echo "data: " . json_encode($payload) . "\n\n";
@@ -83,11 +84,50 @@ class PreMatchEventController extends Controller
             sleep(1);
         }
 
-        // 3️⃣  Send final heartbeat
-        echo ": heartbeat at " . now()->toIso8601String() . "\n\n";
-        @flush();
+        // 3️⃣  LOOP CONTINUO: Esperar nuevos eventos en tiempo real (polling)
+        $iteration = 0;
+        $maxIterations = 600; // 10 minutos si sleep es 1 segundo
 
-        \Log::info('✅ SSE: Stream completado exitosamente');
+        while ($iteration < $maxIterations) {
+            // Buscar eventos nuevos desde el último que enviamos
+            $newEvents = PreMatchEvent::where('pre_match_id', $preMatch->id)
+                ->where('id', '>', $lastEventId)
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            if ($newEvents->count() > 0) {
+                \Log::info('🆕 SSE: ' . $newEvents->count() . ' eventos nuevos encontrados');
+                
+                foreach ($newEvents as $event) {
+                    $lastEventId = $event->id;
+                    $payload = [
+                        'event' => $event->event_type,
+                        'data' => $event->payload ?? [],
+                        'id' => $event->id,
+                        'timestamp' => $event->created_at->toIso8601String(),
+                        'is_historical' => false,  // ✅ Eventos nuevos = mostrar toasts
+                    ];
+
+                    echo "data: " . json_encode($payload) . "\n\n";
+                    @flush();
+                }
+            }
+
+            // Heartbeat para mantener conexión viva
+            echo ": heartbeat\n\n";
+            @flush();
+
+            sleep(1);
+            $iteration++;
+
+            // Verificar si el cliente se desconectó
+            if (connection_aborted()) {
+                \Log::info('🔌 SSE: Cliente desconectado');
+                break;
+            }
+        }
+
+        \Log::info('✅ SSE: Stream terminado después de ' . $iteration . ' iteraciones');
         exit(0);
     }
 }

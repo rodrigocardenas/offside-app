@@ -627,6 +627,8 @@
                 if (eventData?.proposition_id) {
                     console.log(`   → Marcando proposición ${eventData.proposition_id} como aprobada`);
                     updatePropositionStatusUI(eventData.proposition_id, 'approved');
+                    // Recargar página después de 2 segundos para mostrar cambios
+                    setTimeout(() => location.reload(), 2000);
                 } else {
                     console.warn('   ⚠️ Sin proposition_id');
                 }
