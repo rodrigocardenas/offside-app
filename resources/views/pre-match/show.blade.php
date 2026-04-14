@@ -106,7 +106,7 @@
                 </div>
 
                 <!-- Propositions Section -->
-                <div style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }};">
+                <div data-propositions-section style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }};">
                     <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 16px;">
                         <h2 style="font-size: 16px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">
                             💡 Propuestas ({{ $preMatch->propositions->count() }})
@@ -561,7 +561,7 @@
             let isConnected = false;
             let backoffMultiplier = 1; // Exponential backoff multiplier
             const MAX_BACKOFF = 30000; // Max 30 seconds between retries
-            const NORMAL_POLL_INTERVAL = 1000; // Normal: 1 second
+            const NORMAL_POLL_INTERVAL = 3000; // Normal: 3 segundos (optimizado para evitar rate limit)
 
             function poll() {
                 const apiUrl = window.location.origin + `/api/pre-matches/${preMatchId}/events-poll?last_id=${lastId}`;
@@ -670,11 +670,11 @@
                     if (!alreadyToasted && !isMyProposition) {
                         localStorage.setItem(eventKey, 'true');
                         showToast('✅ Nueva propuesta recibida', 'success', 3000);
-                        setTimeout(() => location.reload(), 1500);
+                        setTimeout(() => reloadPropositionsSection(), 1000);
                     } else if (!alreadyToasted && isMyProposition) {
                         // Es mi propuesta, solo reload sin toast
                         localStorage.setItem(eventKey, 'true');
-                        setTimeout(() => location.reload(), 1500);
+                        setTimeout(() => reloadPropositionsSection(), 1000);
                     }
                 }
             }
@@ -686,7 +686,7 @@
                     if (!alreadyToasted) {
                         localStorage.setItem(eventKey, 'true');
                         showToast('🗑️ Propuesta eliminada', 'warning', 3000);
-                        setTimeout(() => location.reload(), 1500);
+                        setTimeout(() => reloadPropositionsSection(), 1000);
                     }
                 }
             }
@@ -697,6 +697,7 @@
                     if (!approvedVotes && eventData?.approval_percentage !== undefined) {
                         approvedVotes = Math.round((eventData.approval_percentage / 100) * totalGroupUsers);
                     }
+                    console.log(`[Vote Update] Prop ${eventData.proposition_id}: ${eventData.approval_percentage}% (${approvedVotes}/${totalGroupUsers})`);
                     updatePropositionApprovalUI(eventData.proposition_id, eventData.approval_percentage, approvedVotes);
                     // Sin toast - es ruido
                 }
@@ -710,7 +711,7 @@
                         localStorage.setItem(eventKey, 'true');
                         showToast('¡Aprobada unánimemente! 🎉', 'success', 4000);
                         updatePropositionStatusUI(eventData.proposition_id, 'approved');
-                        setTimeout(() => location.reload(), 2000);
+                        setTimeout(() => reloadPropositionsSection(), 1000);
                     }
                 }
             }
@@ -727,15 +728,42 @@
                         localStorage.setItem(eventKey, 'true');
                         showToast('✅ Desafío resuelto', 'success', 5000);
                         updateHeaderStatus('✅ Completado');
-                        setTimeout(() => location.reload(), 30000);
+                        setTimeout(() => location.reload(), 3000);
                     }
                 }
             }
         }
 
-        // Recargar solo la sección de proposiciones
-        function reloadPropositionsSection() {
-            // Función simplificada - ahora polling maneja todo
+        // Recargar solo la sección de proposiciones sin reload de página
+        async function reloadPropositionsSection() {
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) return;
+                
+                const html = await response.text();
+                const parser = new DOMParser();
+                const newDoc = parser.parseFromString(html, 'text/html');
+                
+                // Buscar la sección de proposiciones en el nuevo HTML
+                const newPropositionsSection = newDoc.querySelector('[data-propositions-section]');
+                const oldPropositionsSection = document.querySelector('[data-propositions-section]');
+                
+                if (newPropositionsSection && oldPropositionsSection) {
+                    // Reemplazar solo esa sección
+                    oldPropositionsSection.innerHTML = newPropositionsSection.innerHTML;
+                }
+            } catch (e) {
+                console.warn('Error reloading propositions section:', e);
+                // Si falla, hacer reload completo de página
+                setTimeout(() => location.reload(), 500);
+            }
         }
 
         // Remover elemento de proposición del DOM - No se usa
