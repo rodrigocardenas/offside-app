@@ -35,6 +35,9 @@ class User extends Authenticatable
         'favorite_national_team_id',
         'language',
         'timezone',
+        'google_id',
+        'google_email',
+        'auth_provider',
     ];
 
     /**
