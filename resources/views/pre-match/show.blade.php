@@ -513,20 +513,44 @@
         }
 
         function requestNotificationPermission() {
-            if (Notification.permission === 'granted') { notificationPermission = 'granted'; }
-            else if (Notification.permission !== 'denied') {
-                Notification.requestPermission().then(p => {
-                    notificationPermission = p;
-                    if (p === 'granted') new Notification('Offside Club', { body: 'Recibirás notificaciones', icon: '/images/logo_alone.png' });
-                });
+            try {
+                // Verificar si Notification API está disponible (no está en Capacitor/Android por defecto)
+                if (typeof Notification === 'undefined') {
+                    console.warn('⚠️ Notification API no disponible en este dispositivo');
+                    return;
+                }
+
+                if (Notification.permission === 'granted') { 
+                    notificationPermission = 'granted'; 
+                }
+                else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(p => {
+                        notificationPermission = p;
+                        if (p === 'granted') {
+                            new Notification('Offside Club', { 
+                                body: 'Recibirás notificaciones', 
+                                icon: '/images/logo_alone.png' 
+                            });
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('⚠️ Error al solicitar permiso de notificaciones:', e.message);
+                // No detener la ejecución
             }
         }
 
         function sendPushNotification(title, body) {
             try {
+                // Verificar si Notification API está disponible
+                if (typeof Notification === 'undefined') {
+                    return; // Silenciosamente ignorar si no está disponible
+                }
                 const n = new Notification(title, { body, icon: '/images/logo_alone.png', tag: 'prematch-' + preMatchId });
                 setTimeout(() => n.close(), 7000);
-            } catch (e) { }
+            } catch (e) { 
+                // Silenciosamente ignorar errores
+            }
         }
 
         function initializePolling() {
@@ -754,8 +778,25 @@
             @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }`;
             document.head.appendChild(style);
 
-            requestNotificationPermission();
-            initializePolling();  // Usar polling en lugar de SSE
+            try {
+                requestNotificationPermission();
+            } catch (e) {
+                console.warn('⚠️ No se pudo inicializar notificaciones:', e.message);
+            }
+
+            try {
+                initializePolling();  // Usar polling en lugar de SSE
+            } catch (e) {
+                console.error('❌ Error al inicializar polling:', e.message);
+                // Reintentar en 3 segundos
+                setTimeout(() => {
+                    try {
+                        initializePolling();
+                    } catch (e2) {
+                        console.error('❌ Reintento de polling falló:', e2.message);
+                    }
+                }, 3000);
+            }
 
             const pForm = document.getElementById('propositionForm');
             if (pForm) pForm.addEventListener('submit', async (e) => {
