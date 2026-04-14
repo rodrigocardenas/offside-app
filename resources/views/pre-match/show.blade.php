@@ -2,7 +2,7 @@
     :logo-url="asset('images/logo_alone.png')"
     alt-text="Offside Club"
 >
-    @section('navigation-title', 'Pre Match - ' . $preMatch->match->home_team . ' vs ' . $preMatch->match->away_team)
+    @section('navigation-title', 'Pre Match - ' . $group->name)
 
     @php
         $themeMode = auth()->user()->theme_mode ?? 'light';
@@ -583,7 +583,7 @@
 
                         if (data.events && data.events.length > 0) {
                             // 🔑 CRÍTICO: Actualizar lastId INMEDIATAMENTE antes de procesar eventos
-                            // De esa forma, si hay un reload durante handleEvent(), el siguiente poll 
+                            // De esa forma, si hay un reload durante handleEvent(), el siguiente poll
                             // comienza desde el siguiente evento (no repetirá este)
                             lastId = data.last_id;
                             localStorage.setItem(`prematch_${preMatchId}_lastEventId`, lastId);

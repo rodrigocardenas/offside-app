@@ -93,7 +93,7 @@
                         style="flex: 1; padding: 10px; border: none; border-radius: 6px; background: {{ $accentColor }}; color: #003b2f; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s ease;"
                         onmouseover="this.style.backgroundColor='{{ $accentDark }}'"
                         onmouseout="this.style.backgroundColor='{{ $accentColor }}';">
-                    👁️ Ver Detalles
+                     Ver Detalles
                 </button>
             @elseif($preMatch->status === 'completed')
                 <button onclick="event.stopPropagation(); window.location.href = '/groups/{{ $preMatch->group_id }}/pre-matches/{{ $preMatch->id }}'"
