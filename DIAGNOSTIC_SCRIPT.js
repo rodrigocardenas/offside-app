@@ -61,7 +61,7 @@ console.log('\n6️⃣ TEST DE FETCH (última propuesta):');
 const preMatchId = window.location.pathname.match(/pre-matches\/(\d+)/)?.[1];
 if (preMatchId) {
     console.log(`   Pre Match ID: ${preMatchId}`);
-    
+
     fetch(`${window.location.origin}/api/pre-matches/${preMatchId}/events-poll?last_id=0`, {
         method: 'GET',
         headers: {

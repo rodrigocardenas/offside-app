@@ -441,7 +441,7 @@
             </p>
 
             <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button type="button" 
+                <button type="button"
                         onclick="closePreMatchActionModal(); openCreatePreMatchModal(document.getElementById('preMatchGroupId').value);"
                         style="width: 100%; padding: 14px 16px; background: linear-gradient(135deg, #ff6b6b, #ff8787); border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;"
                         onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';"
@@ -450,7 +450,7 @@
                     <span>Crear nuevo Pre Match</span>
                 </button>
 
-                <button type="button" 
+                <button type="button"
                         onclick="window.location.href = '/groups/' + document.getElementById('preMatchGroupId').value + '/pre-matches';"
                         style="width: 100%; padding: 14px 16px; background: {{ $isDark ? '#1a524e' : '#e5f3f0' }}; border: 2px solid {{ $accentColor }}; border-radius: 10px; color: {{ $accentColor }}; font-weight: 600; cursor: pointer; transition: all 0.2s ease; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;"
                         onmouseover="this.style.background='{{ $accentColor }}'; this.style.color='#003b2f';"

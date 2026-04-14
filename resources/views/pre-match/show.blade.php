@@ -466,9 +466,9 @@
                 const apiUrl = window.location.origin + `/api/pre-match-propositions/${id}/vote`;
                 const r = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'Accept': 'application/json', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Requested-With': 'XMLHttpRequest'
                     },
@@ -488,9 +488,9 @@
                 const apiUrl = window.location.origin + `/api/pre-match-propositions/${id}`;
                 const r = await fetch(apiUrl, {
                     method: 'DELETE',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'Accept': 'application/json', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Requested-With': 'XMLHttpRequest'
                     },
@@ -520,16 +520,16 @@
                     return;
                 }
 
-                if (Notification.permission === 'granted') { 
-                    notificationPermission = 'granted'; 
+                if (Notification.permission === 'granted') {
+                    notificationPermission = 'granted';
                 }
                 else if (Notification.permission !== 'denied') {
                     Notification.requestPermission().then(p => {
                         notificationPermission = p;
                         if (p === 'granted') {
-                            new Notification('Offside Club', { 
-                                body: 'Recibirás notificaciones', 
-                                icon: '/images/logo_alone.png' 
+                            new Notification('Offside Club', {
+                                body: 'Recibirás notificaciones',
+                                icon: '/images/logo_alone.png'
                             });
                         }
                     });
@@ -548,7 +548,7 @@
                 }
                 const n = new Notification(title, { body, icon: '/images/logo_alone.png', tag: 'prematch-' + preMatchId });
                 setTimeout(() => n.close(), 7000);
-            } catch (e) { 
+            } catch (e) {
                 // Silenciosamente ignorar errores
             }
         }
@@ -561,7 +561,7 @@
 
             function poll() {
                 const apiUrl = window.location.origin + `/api/pre-matches/${preMatchId}/events-poll?last_id=${lastId}`;
-                
+
                 fetch(apiUrl, {
                     method: 'GET',
                     headers: {
@@ -582,14 +582,18 @@
                         }
 
                         if (data.events && data.events.length > 0) {
+                            // 🔑 CRÍTICO: Actualizar lastId INMEDIATAMENTE antes de procesar eventos
+                            // De esa forma, si hay un reload durante handleEvent(), el siguiente poll 
+                            // comienza desde el siguiente evento (no repetirá este)
+                            lastId = data.last_id;
+                            localStorage.setItem(`prematch_${preMatchId}_lastEventId`, lastId);
+
+                            // LUEGO procesar eventos (esto es lo que toma tiempo)
                             data.events.forEach(ev => {
                                 // Marcar como "en vivo" ahora que viene de polling actual
                                 ev.is_historical = false;
                                 handleEvent(ev);
                             });
-                            lastId = data.last_id;
-                            // Guardar en localStorage para recordar después de reload
-                            localStorage.setItem(`prematch_${preMatchId}_lastEventId`, lastId);
                         }
 
                         // Siguiente polling en 1 segundo
@@ -806,9 +810,9 @@
                     const apiUrl = window.location.origin + `/api/pre-matches/${preMatchId}/propositions`;
                     const r = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json', 
-                            'Accept': 'application/json', 
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                             'X-Requested-With': 'XMLHttpRequest'
                         },
@@ -833,8 +837,8 @@
                     const apiUrl = window.location.origin + `/api/pre-matches/${preMatchId}/resolve`;
                     const r = await fetch(apiUrl, {
                         method: 'PUT',
-                        headers: { 
-                            'Content-Type': 'application/json', 
+                        headers: {
+                            'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                             'Accept': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
