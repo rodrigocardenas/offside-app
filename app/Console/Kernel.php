@@ -17,10 +17,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Obtener fixtures de múltiples ligas cada noche a las 23:00
+        // Obtener fixtures de múltiples ligas cada noche a las 23:00 UTC
         $schedule->command('app:update-fixtures-nightly')
             ->dailyAt('23:00')
-            ->timezone('America/Mexico_City')
+            ->timezone('UTC')
             ->onFailure(function () {
                 Log::error('Error en la actualización nocturna de fixtures');
             });
@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
             ->hourly()
             ->name('update-finished-matches')
             ->withoutOverlapping(10)
-            ->timezone('America/Mexico_City')
+            ->timezone('UTC')
             ->onSuccess(function () {
                 Log::info('✅ update-finished-matches completado: partidos actualizados desde API y Gemini');
             })
@@ -46,7 +46,7 @@ class Kernel extends ConsoleKernel
         // BUG #7 FIX: Aumentar timing gap de :05 a :15 para dar más tiempo a ProcessMatchBatchJob
         $schedule->job(new VerifyFinishedMatchesHourlyJob())
             ->hourly()
-            ->timezone('America/Mexico_City')
+            ->timezone('UTC')
             ->at(':15')  // 15 minutos después de la hora (era :05)
             ->name('verify-matches-hourly')
             ->withoutOverlapping(15)
@@ -63,16 +63,16 @@ class Kernel extends ConsoleKernel
         // Monitorea que el flujo de resultados → verificación → puntos está funcionando
         $schedule->job(new \App\Jobs\VerifyBatchHealthCheckJob())
             ->hourly()
-            ->timezone('America/Mexico_City')
+            ->timezone('UTC')
             ->at(':20')  // 20 minutos después de la hora
             ->name('verify-batch-health-check')
             ->withoutOverlapping(10);
 
-        // 4️⃣ Diaria (18:00): Enviar reminder de preguntas sin responder
+        // 4️⃣ Diaria (18:00 UTC): Enviar reminder de preguntas sin responder
         // Notifica a usuarios si tienen preguntas predictivas pendientes de responder
         $schedule->job(new SendDailyUnanswerQuestionReminderPushNotification())
             ->dailyAt('18:00')
-            ->timezone('America/Mexico_City')
+            ->timezone('UTC')
             ->name('daily-unanswer-questions-reminder')
             ->withoutOverlapping(10)
             ->onSuccess(function () {
@@ -84,11 +84,11 @@ class Kernel extends ConsoleKernel
                 ]);
             });
 
-        // 5️⃣ Diaria (00:00): Eliminar grupos públicos expirados
+        // 5️⃣ Diaria (00:00 UTC): Eliminar grupos públicos expirados
         // Limpia automáticamente los grupos públicos que han pasado su fecha de expiración
         $schedule->command('groups:delete-expired')
             ->dailyAt('00:00')
-            ->timezone('America/Mexico_City')
+            ->timezone('UTC')
             ->name('delete-expired-groups')
             ->withoutOverlapping(10)
             ->onSuccess(function () {
