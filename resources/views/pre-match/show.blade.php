@@ -463,9 +463,15 @@
 
         async function voteProposition(id, type) {
             try {
-                const r = await fetch(`/api/pre-match-propositions/${id}/vote`, {
+                const apiUrl = window.location.origin + `/api/pre-match-propositions/${id}/vote`;
+                const r = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Accept': 'application/json', 
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
                     credentials: 'include',
                     body: JSON.stringify({ approved: type === 'ACCEPT' })
                 });
@@ -479,9 +485,15 @@
 
         async function deleteProposition(id) {
             try {
-                const r = await fetch(`/api/pre-match-propositions/${id}`, {
+                const apiUrl = window.location.origin + `/api/pre-match-propositions/${id}`;
+                const r = await fetch(apiUrl, {
                     method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Accept': 'application/json', 
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
                     credentials: 'include'
                 });
                 if (!r.ok) throw new Error('Error al eliminar (HTTP ' + r.status + ')');
@@ -524,8 +536,21 @@
             let isConnected = false;
 
             function poll() {
-                fetch(`/api/pre-matches/${preMatchId}/events-poll?last_id=${lastId}`)
-                    .then(res => res.json())
+                const apiUrl = window.location.origin + `/api/pre-matches/${preMatchId}/events-poll?last_id=${lastId}`;
+                
+                fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        return res.json();
+                    })
                     .then(data => {
                         // Marcar como conectado en el primer poll exitoso
                         if (!isConnected) {
@@ -737,9 +762,15 @@
                 e.preventDefault();
                 const text = document.getElementById('propositionText').value;
                 try {
-                    const r = await fetch(`/api/pre-matches/${preMatchId}/propositions`, {
+                    const apiUrl = window.location.origin + `/api/pre-matches/${preMatchId}/propositions`;
+                    const r = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') },
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'Accept': 'application/json', 
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
                         credentials: 'include',
                         body: JSON.stringify({ action: text })
                     });
@@ -758,9 +789,16 @@
                 e.preventDefault();
                 const ids = Array.from(document.querySelectorAll('input[name="loser_ids"]:checked')).map(c => parseInt(c.value));
                 try {
-                    const r = await fetch(`/api/pre-matches/${preMatchId}/resolve`, {
+                    const apiUrl = window.location.origin + `/api/pre-matches/${preMatchId}/resolve`;
+                    const r = await fetch(apiUrl, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('input[name="_token"]').value, 'Accept': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'include',
                         body: JSON.stringify({ loser_ids: ids, penalty_points: {{ $preMatch->penalty_points ?? 0 }} })
                     });
                     if (!r.ok) throw new Error((await r.json()).message || 'Error');
