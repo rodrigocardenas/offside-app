@@ -32,7 +32,7 @@
                 <div>
                     <h1 style="font-size: 28px; font-weight: 700; color: {{ $textPrimary }}; margin: 0; display: flex; align-items: center; gap: 12px;">
                         <span style="font-size: 36px;">🔥</span>
-                        {{ $group->name }} - Pre Match Challenges
+                        Pre Match Challenges
                     </h1>
                     <p style="color: {{ $textSecondary }}; margin: 8px 0 0 0; font-size: 14px;">
                         Crea desafíos y compite con tu grupo
@@ -42,13 +42,13 @@
                    style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: none; border-radius: 8px; background: {{ $isDark ? '#2a4a47' : '#e5f3f0' }}; color: {{ $accentColor }}; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid {{ $borderColor }}; transition: all 0.2s ease; text-decoration: none;"
                    onmouseover="this.style.background='{{ $accentLight }}'"
                    onmouseout="this.style.background='{{ $isDark ? '#2a4a47' : '#e5f3f0' }}';">
-                    ← Volver al Grupo
+                    ← Volver
                 </a>
             </div>
         </div>
 
         <!-- Stats Cards -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px;">
             <!-- Total Desafíos -->
             <div style="background: {{ $bgTertiary }}; padding: 16px; border-radius: 12px; border: 1px solid {{ $borderColor }};">
                 <p style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; margin: 0; text-transform: uppercase;">
