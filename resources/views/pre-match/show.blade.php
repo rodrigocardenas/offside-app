@@ -183,11 +183,11 @@
                                 <!-- Vote Progress & Info -->
                                 <div style="margin-top: 12px; padding: 12px; background: {{ $bgSecondary }}; border-radius: 8px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                        <span style="font-size: 12px; color: {{ $textSecondary }};">Aprobaciones: {{ $proposition->approved_votes }}/{{ $group->users->count() }}</span>
+                                        <span data-approval-counter style="font-size: 12px; color: {{ $textSecondary }};">Aprobaciones: {{ $proposition->approved_votes }}/{{ $group->users->count() }}</span>
                                         <span data-approval-percentage style="font-size: 12px; font-weight: 700; color: {{ $accentColor }};">{{ number_format($proposition->approval_percentage, 0) }}%</span>
                                     </div>
                                     <div style="width: 100%; height: 6px; background: {{ $borderColor }}; border-radius: 3px; overflow: hidden;">
-                                        <div style="height: 100%; background: {{ $accentColor }}; width: {{ min($proposition->approval_percentage, 100) }}%; transition: width 0.3s ease;"></div>
+                                        <div data-progress-bar style="height: 100%; background: {{ $accentColor }}; width: {{ min($proposition->approval_percentage, 100) }}%; transition: width 0.3s ease;"></div>
                                     </div>
                                 </div>
 
@@ -452,6 +452,7 @@
 
     <script>
         const preMatchId = {{ $preMatch->id }};
+        const totalGroupUsers = {{ $group->users->count() }}; // Total de usuarios en el grupo para cálculos
         let eventSource = null;
         let notificationPermission = 'default';
         const currentUserId = {{ auth()->id() }}; // Usuario actual
@@ -558,6 +559,9 @@
             let lastId = parseInt(localStorage.getItem(`prematch_${preMatchId}_lastEventId`) || '0');
 
             let isConnected = false;
+            let backoffMultiplier = 1; // Exponential backoff multiplier
+            const MAX_BACKOFF = 30000; // Max 30 seconds between retries
+            const NORMAL_POLL_INTERVAL = 1000; // Normal: 1 second
 
             function poll() {
                 const apiUrl = window.location.origin + `/api/pre-matches/${preMatchId}/events-poll?last_id=${lastId}`;
@@ -572,10 +576,28 @@
                     credentials: 'include'
                 })
                     .then(res => {
+                        // Manejar específicamente 429 (Too Many Requests)
+                        if (res.status === 429) {
+                            // Respetar Retry-After header si existe, sino usar backoff exponencial
+                            const retryAfter = res.headers.get('Retry-After');
+                            const retryDelay = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(3000 * backoffMultiplier, MAX_BACKOFF);
+                            backoffMultiplier = Math.min(backoffMultiplier * 2, 10); // Cap at 10x
+
+                            console.warn(`[Rate Limited] Retrying in ${retryDelay}ms (429 Too Many Requests)`);
+                            isConnected = false;
+                            setTimeout(poll, retryDelay);
+                            return; // No procesar respuesta
+                        }
+
                         if (!res.ok) throw new Error(`HTTP ${res.status}`);
                         return res.json();
                     })
                     .then(data => {
+                        if (!data) return; // Es null si fue 429
+
+                        // ✅ Solicitud exitosa: resetear backoff
+                        backoffMultiplier = 1;
+
                         // Marcar como conectado en el primer poll exitoso
                         if (!isConnected) {
                             isConnected = true;
@@ -596,12 +618,16 @@
                             });
                         }
 
-                        // Siguiente polling en 1 segundo
-                        setTimeout(poll, 1000);
+                        // Siguiente polling en 1 segundo (solo si fue exitoso)
+                        setTimeout(poll, NORMAL_POLL_INTERVAL);
                     })
                     .catch(err => {
                         isConnected = false;
-                        setTimeout(poll, 3000); // Reintentar en 3 segundos
+                        // Backoff exponencial para otros errores
+                        const backoffDelay = Math.min(3000 * backoffMultiplier, MAX_BACKOFF);
+                        backoffMultiplier = Math.min(backoffMultiplier * 2, 10);
+                        console.warn(`[Polling Error] ${err.message}. Retrying in ${backoffDelay}ms`);
+                        setTimeout(poll, backoffDelay);
                     });
             }
 
@@ -666,7 +692,12 @@
             }
             else if (type === 'vote.created') {
                 if (eventData?.proposition_id) {
-                    updatePropositionApprovalUI(eventData.proposition_id, eventData.approval_percentage);
+                    // Calcular el número de aprobaciones si no viene en el evento
+                    let approvedVotes = eventData?.approved_votes;
+                    if (!approvedVotes && eventData?.approval_percentage !== undefined) {
+                        approvedVotes = Math.round((eventData.approval_percentage / 100) * totalGroupUsers);
+                    }
+                    updatePropositionApprovalUI(eventData.proposition_id, eventData.approval_percentage, approvedVotes);
                     // Sin toast - es ruido
                 }
             }
@@ -710,7 +741,7 @@
         // Remover elemento de proposición del DOM - No se usa
 
         // Actualizar el porcentaje de aprobación de una proposición
-        function updatePropositionApprovalUI(propositionId, approvalPercentage) {
+        function updatePropositionApprovalUI(propositionId, approvalPercentage, approvedVotes = null) {
 
             // Buscar el elemento por data-proposition-id
             let el = document.querySelector(`[data-proposition-id="${propositionId}"]`);
@@ -725,33 +756,29 @@
                 el.style.animation = 'pulse 0.5s';
             }, 10);
 
-            // Buscar elementos para actualizar
+            // Actualizar el porcentaje
             const percentEl = el.querySelector('[data-approval-percentage]');
             if (percentEl) {
                 const roundedPercent = Math.round(approvalPercentage);
                 percentEl.textContent = roundedPercent + '%';
             }
 
+            // Si no tenemos approvedVotes, calcularlo del porcentaje
+            if (approvedVotes === null && approvalPercentage !== undefined) {
+                approvedVotes = Math.round((approvalPercentage / 100) * totalGroupUsers);
+            }
+
+            // Actualizar el contador de aprobaciones
+            const counterEl = el.querySelector('[data-approval-counter]');
+            if (counterEl && approvedVotes !== null) {
+                counterEl.textContent = `Aprobaciones: ${approvedVotes}/${totalGroupUsers}`;
+            }
+
             // Actualizar barra de progreso
-            const progressBars = el.querySelectorAll('div[style*="height"]');
-
-
-            let updated = false;
-            progressBars.forEach((bar, idx) => {
-                const style = bar.getAttribute('style') || '';
-                if (style.includes('height: 6px') || style.includes('height:6px')) {
-                    const innerDiv = bar.querySelector('div');
-                    if (innerDiv) {
-                        const newWidth = Math.min(approvalPercentage, 100);
-                        innerDiv.style.width = newWidth + '%';
-                        updated = true;
-                    }
-                }
-            });
-
-            if (!updated) {
-                // Como fallback, recarga la sección
-                setTimeout(() => reloadPropositionsSection(), 1000);
+            const progressBar = el.querySelector('[data-progress-bar]');
+            if (progressBar) {
+                const newWidth = Math.min(approvalPercentage, 100);
+                progressBar.style.width = newWidth + '%';
             }
         }
 
@@ -772,6 +799,21 @@
             const headerStatusEl = document.querySelector('[data-header-status]');
             if (headerStatusEl) {
                 headerStatusEl.textContent = newStatus;
+
+                // Determinar el nuevo gradient basado en el status
+                let newGradient = 'linear-gradient(135deg, #ff6b6b, #ff8787)'; // pending - rojo (default)
+
+                if (newStatus.includes('Activo')) {
+                    newGradient = 'linear-gradient(135deg, #ffa726, #ffb74d)'; // active - naranja
+                } else if (newStatus.includes('Completado')) {
+                    newGradient = 'linear-gradient(135deg, #66bb6a, #81c784)'; // completed - verde
+                }
+
+                // Buscar el elemento padre que es el header (el div con class="ml-1 mr-1" que tiene el gradient)
+                let header = headerStatusEl.closest('div[style*="background"]');
+                if (header) {
+                    header.style.background = newGradient;
+                }
             }
         }
 
