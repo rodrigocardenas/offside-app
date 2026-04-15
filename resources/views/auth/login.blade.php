@@ -66,6 +66,8 @@
                         {{ __('auth.login_button') }}
                     </button>
 
+                    {{-- Botón Google OAuth - Oculto hasta completar Fase 6 (implementación Capacitor) --}}
+                    {{-- Descomenta cuando Capacitor esté listo
                     <!-- Divisor O -->
                     <div style="display: flex; align-items: center; gap: 12px; margin: 16px 0;">
                         <div style="flex: 1; height: 1px; background: {{ $borderColor }};"></div>
@@ -83,6 +85,7 @@
                         </svg>
                         Google
                     </a>
+                    --}}
 
                     <!-- Enlaces alternativos -->
                     @if (Route::has('register'))
