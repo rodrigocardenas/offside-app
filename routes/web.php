@@ -9,6 +9,7 @@ use App\Http\Controllers\RankingController;
 use App\Http\Controllers\MarketController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Auth\MobileOAuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CompetitionController;
@@ -64,6 +65,10 @@ Route::middleware('guest')->group(function () {
 // Google OAuth Routes (accesibles para guests y autenticados)
 Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])->name('auth.google');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+
+// Mobile OAuth Routes (para Capacitor - sin CSRF)
+Route::post('/api/auth/mobile/google-login', [MobileOAuthController::class, 'mobileGoogleLogin'])->name('api.mobile.google.login')->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+Route::get('/api/auth/mobile/google-url', [MobileOAuthController::class, 'getGoogleAuthUrl'])->name('api.mobile.google.url');
 
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
 
