@@ -12,12 +12,18 @@ class MatchActionController extends Controller
      */
     public function index(): JsonResponse
     {
-        $actions = MatchAction::where('active', true)
-            ->orderByDesc('popularity')
-            ->orderBy('title')
-            ->get(['id', 'title', 'description', 'category', 'icon']);
+        try {
+            $actions = MatchAction::where('active', true)
+                ->orderByDesc('popularity')
+                ->orderBy('title')
+                ->get(['id', 'title', 'description', 'category', 'icon']);
 
-        return response()->json($actions);
+            return response()->json($actions);
+        } catch (\Exception $e) {
+            // Si la tabla no existe aún (en desarrollo), retornar array vacío
+            \Log::warning('MatchAction table not accessible: ' . $e->getMessage());
+            return response()->json([]);
+        }
     }
 
     /**
@@ -25,11 +31,18 @@ class MatchActionController extends Controller
      */
     public function incrementPopularity(MatchAction $matchAction): JsonResponse
     {
-        $matchAction->increment('popularity');
-        
-        return response()->json([
-            'message' => 'Popularidad incrementada',
-            'popularity' => $matchAction->popularity
-        ]);
+        try {
+            $matchAction->increment('popularity');
+            
+            return response()->json([
+                'message' => 'Popularidad incrementada',
+                'popularity' => $matchAction->popularity
+            ]);
+        } catch (\Exception $e) {
+            \Log::warning('Error incrementing popularity: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error actualizando popularidad'
+            ], 500);
+        }
     }
 }
