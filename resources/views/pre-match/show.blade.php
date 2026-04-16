@@ -328,10 +328,19 @@
 
             <form id="propositionForm" style="display: grid; gap: 16px;">
                 @csrf
-                <textarea id="propositionText"
-                          placeholder="Describe tu propuesta o acción para resolver el desafío..."
-                          style="width: 100%; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $bgSecondary }}; color: {{ $textPrimary }}; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px;"
-                          required></textarea>
+                <div style="display: flex; gap: 8px; align-items: flex-start;">
+                    <textarea id="propositionText"
+                              placeholder="Describe tu propuesta o acción para resolver el desafío..."
+                              style="flex: 1; padding: 12px; border: 1px solid {{ $borderColor }}; border-radius: 8px; background: {{ $bgSecondary }}; color: {{ $textPrimary }}; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px;"
+                              required></textarea>
+                    <button type="button" onclick="openPreMatchActionsModal()"
+                            style="padding: 12px 8px; border: none; border-radius: 6px; background: #2196F3; color: white; font-weight: 700; cursor: pointer; transition: all 0.2s ease; font-size: 12px; min-width: 50px; text-align: center; white-space: nowrap; align-self: center;"
+                            onmouseover="this.style.backgroundColor='#1976D2'"
+                            onmouseout="this.style.backgroundColor='#2196F3';
+                            title="Seleccionar acciones predefinidas">
+                        📋<br>Acciones
+                    </button>
+                </div>
 
                 <div style="display: flex; gap: 12px;">
                     <button type="button" onclick="closePropositionModal()"
@@ -442,6 +451,41 @@
         </div>
     </div>
 
+    <!-- Match Actions Modal (Pre-Match) -->
+    <div id="preMatchActionsModalContainer" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1001; align-items: center; justify-content: center; padding: 1rem;">
+        <div style="background: {{ $bgTertiary }}; border-radius: 16px; width: 100%; max-width: 500px; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-height: 85vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="font-size: 18px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">
+                    📋 Acciones de Partido
+                </h2>
+                <button type="button" onclick="closePreMatchActionsModal()" 
+                        style="background: none; border: none; font-size: 20px; cursor: pointer; color: {{ $textSecondary }}; padding: 0;">
+                    ✕
+                </button>
+            </div>
+
+            <p style="color: {{ $textSecondary }}; font-size: 12px; margin: 0 0 12px 0;">
+                Selecciona una acción para agregarla a tu propuesta
+            </p>
+
+            <div id="preMatchActionsLoading" style="display: none; text-align: center; padding: 20px;">
+                <p style="color: {{ $textSecondary }};">⏳ Cargando acciones...</p>
+            </div>
+
+            <div id="preMatchActionsContainer" style="max-height: 60vh; overflow-y: auto;">
+                <!-- Las acciones se cargan aquí dinámicamente -->
+            </div>
+
+            <div style="margin-top: 12px; text-align: center;">
+                <button type="button" onclick="closePreMatchActionsModal()"
+                        style="padding: 8px 16px; border: 1px solid {{ $borderColor }}; border-radius: 6px; background: {{ $bgSecondary }}; color: {{ $textPrimary }}; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s ease;"
+                        onmouseover="this.style.background='{{ $borderColor }}'"
+                        onmouseout="this.style.background='{{ $bgSecondary }}';">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Container -->
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
@@ -924,5 +968,120 @@
             });
         });
 
+        // ============ MATCH ACTIONS MODAL (Pre-Match) ============
+        function openPreMatchActionsModal() {
+            const modal = document.getElementById('preMatchActionsModalContainer');
+            if (!modal) {
+                console.error('❌ Match Actions Modal no encontrado');
+                return;
+            }
+            modal.style.display = 'flex';
+            loadPreMatchActions();
+        }
+
+        function closePreMatchActionsModal() {
+            const modal = document.getElementById('preMatchActionsModalContainer');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function loadPreMatchActions() {
+            try {
+                document.getElementById('preMatchActionsLoading').style.display = 'block';
+                document.getElementById('preMatchActionsContainer').innerHTML = '';
+
+                const response = await fetch('/api/match-actions', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const actions = await response.json();
+
+                // Agrupar por categoría
+                const grouped = {};
+                actions.forEach(action => {
+                    if (!grouped[action.category]) grouped[action.category] = [];
+                    grouped[action.category].push(action);
+                });
+
+                // Renderizar categorías
+                const container = document.getElementById('preMatchActionsContainer');
+                Object.entries(grouped).forEach(([category, items]) => {
+                    const categoryEl = document.createElement('div');
+                    categoryEl.style.marginBottom = '16px';
+                    
+                    const title = document.createElement('h4');
+                    title.style.fontWeight = 'bold';
+                    title.style.color = '{{ $textPrimary }}';
+                    title.style.marginBottom = '8px';
+                    title.style.fontSize = '12px';
+                    title.textContent = getPreMatchCategoryLabel(category);
+                    categoryEl.appendChild(title);
+
+                    items.forEach(action => {
+                        const button = document.createElement('button');
+                        button.type = 'button';
+                        button.style.width = '100%';
+                        button.style.textAlign = 'left';
+                        button.style.padding = '8px';
+                        button.style.marginBottom = '6px';
+                        button.style.background = '{{ $bgSecondary }}';
+                        button.style.border = '1px solid {{ $borderColor }}';
+                        button.style.borderRadius = '6px';
+                        button.style.color = '{{ $textPrimary }}';
+                        button.style.fontSize = '12px';
+                        button.style.cursor = 'pointer';
+                        button.style.transition = 'all 0.2s';
+                        button.onmouseover = () => button.style.background = '{{ $accentLight }}';
+                        button.onmouseout = () => button.style.background = '{{ $bgSecondary }}';
+                        button.innerHTML = `<strong>${action.icon} ${action.title}</strong><br><small style="color: {{ $textSecondary }}">${action.description}</small>`;
+                        button.onclick = () => selectPreMatchAction(action);
+                        categoryEl.appendChild(button);
+                    });
+
+                    container.appendChild(categoryEl);
+                });
+
+                document.getElementById('preMatchActionsLoading').style.display = 'none';
+            } catch (error) {
+                console.error('❌ Error loading match actions:', error);
+                document.getElementById('preMatchActionsLoading').style.display = 'none';
+                document.getElementById('preMatchActionsContainer').innerHTML = '<p style="color: #ff6b6b;">Error al cargar acciones</p>';
+            }
+        }
+
+        function getPreMatchCategoryLabel(category) {
+            const labels = {
+                'goal': '⚽ Goles y Anotaciones',
+                'condition': '📊 Condiciones de Partido',
+                'event': '⚡ Eventos del Partido',
+                'timing': '⏱️ Tiempo y Ritmo',
+                'default': category
+            };
+            return labels[category] || labels['default'];
+        }
+
+        function selectPreMatchAction(action) {
+            const textarea = document.getElementById('propositionText');
+            if (textarea) {
+                textarea.value += (textarea.value ? ' + ' : '') + action.title;
+            }
+            closePreMatchActionsModal();
+
+            // Incrementar popularidad
+            fetch(`/api/match-actions/${action.id}/popularity`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }).catch(err => console.log('Popularidad actualizada'));
+        }
+
     </script>
+
 </x-app-layout>
