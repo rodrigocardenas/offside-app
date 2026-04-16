@@ -336,7 +336,7 @@
                     <button type="button" onclick="openPreMatchActionsModal()"
                             style="padding: 12px 8px; border: none; border-radius: 6px; background: #2196F3; color: white; font-weight: 700; cursor: pointer; transition: all 0.2s ease; font-size: 12px; min-width: 50px; text-align: center; white-space: nowrap; align-self: center;"
                             onmouseover="this.style.backgroundColor='#1976D2'"
-                            onmouseout="this.style.backgroundColor='#2196F3';
+                            onmouseout="this.style.backgroundColor='#2196F3'"
                             title="Seleccionar acciones predefinidas">
                         📋<br>Acciones
                     </button>
