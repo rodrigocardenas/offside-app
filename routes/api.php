@@ -140,6 +140,12 @@ Route::middleware('auth:web')->group(function () {
         Route::get('/category/{category}', [\App\Http\Controllers\ActionTemplateController::class, 'byCategory']);
     });
 
+    // Match Actions - Sugerencias de acciones de partido
+    Route::prefix('match-actions')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MatchActionController::class, 'index']);
+        Route::post('/{matchAction}/popularity', [\App\Http\Controllers\MatchActionController::class, 'incrementPopularity']);
+    });
+
     // Penalties - Historial de castigos (Admin)
     Route::prefix('penalties')->group(function () {
         Route::patch('/{penalty}/fulfill', [\App\Http\Controllers\Api\PreMatchController::class, 'markPenaltyFulfilled']);
