@@ -191,6 +191,38 @@
                                     </div>
                                 </div>
 
+                                <!-- Votes Display with Avatars -->
+                                <div data-votes-section-{{ $proposition->id }} style="margin-top: 12px; padding: 12px; background: {{ $bgSecondary }}; border-radius: 8px; display: flex; flex-direction: column; gap: 8px;">
+                                    <!-- Approvers -->
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; min-width: 60px;">👍 {{ $proposition->votes->where('approved', true)->count() }}:</span>
+                                        <div data-approvers-{{ $proposition->id }} style="display: flex; gap: -8px; align-items: center; flex-wrap: wrap;">
+                                            @foreach($proposition->votes->where('approved', true) as $vote)
+                                                <img src="{{ $vote->user->avatar }}" 
+                                                     alt="{{ $vote->user->name }}" 
+                                                     title="{{ $vote->user->name }}"
+                                                     style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid {{ $accentColor }}; margin-right: -8px; cursor: pointer; transition: transform 0.2s ease;"
+                                                     onmouseover="this.style.transform='scale(1.15); z-index: 10;'"
+                                                     onmouseout="this.style.transform='scale(1)'; this.style.zIndex='auto';">
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <!-- Rejectors -->
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; min-width: 60px;">👎 {{ $proposition->votes->where('approved', false)->count() }}:</span>
+                                        <div data-rejectors-{{ $proposition->id }} style="display: flex; gap: -8px; align-items: center; flex-wrap: wrap;">
+                                            @foreach($proposition->votes->where('approved', false) as $vote)
+                                                <img src="{{ $vote->user->avatar }}" 
+                                                     alt="{{ $vote->user->name }}" 
+                                                     title="{{ $vote->user->name }}"
+                                                     style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid {{ $redAccent }}; margin-right: -8px; cursor: pointer; opacity: 0.7; transition: transform 0.2s ease;"
+                                                     onmouseover="this.style.transform='scale(1.15); z-index: 10;'"
+                                                     onmouseout="this.style.transform='scale(1)'; this.style.zIndex='auto';">
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Action Buttons -->
                                 <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid {{ $borderColor }};">
                                     @php
@@ -200,12 +232,18 @@
                                     @endphp
 
                                     @if(!$hasVoted && !$isMyProposition)
-                                        <!-- Only show ACCEPT button if haven't voted and not my proposition -->
+                                        <!-- Approve & Reject buttons -->
                                         <button onclick="voteProposition({{ $proposition->id }}, 'ACCEPT')"
                                                 style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: {{ $accentColor }}; color: #003b2f; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s ease;"
                                                 onmouseover="this.style.backgroundColor='{{ $accentDark }}'"
                                                 onmouseout="this.style.backgroundColor='{{ $accentColor }}';">
                                             👍 Aceptar
+                                        </button>
+                                        <button onclick="voteProposition({{ $proposition->id }}, 'REJECT')"
+                                                style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: {{ $redAccent }}; color: #fff; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s ease; opacity: 0.7;"
+                                                onmouseover="this.style.backgroundColor='#ff5252'; this.style.opacity='1';"
+                                                onmouseout="this.style.backgroundColor='{{ $redAccent }}'; this.style.opacity='0.7';">
+                                            👎 Rechazar
                                         </button>
                                     @elseif($hasVoted && !$isMyProposition)
                                         <span style="flex: 1; padding: 8px; text-align: center; font-size: 12px; color: {{ $accentColor }}; font-weight: 700;">✓ Ya votaste</span>
@@ -521,10 +559,69 @@
                     body: JSON.stringify({ approved: type === 'ACCEPT' })
                 });
                 if (!r.ok) throw new Error('Error al votar (HTTP ' + r.status + ')');
-                const updatedProp = await r.json();
+                const data = await r.json();
+                
+                // ✨ Actualizar UI con datos del servidor
+                updateVotesDisplay(id, data);
                 showToast('✓ Voto registrado', 'success', 2000);
             } catch (e) {
                 showToast('❌ ' + e.message, 'error', 5000);
+            }
+        }
+
+        function updateVotesDisplay(propositionId, data) {
+            // Actualizar contadores
+            const counter = document.querySelector(`[data-approval-counter]`);
+            if (counter) {
+                counter.textContent = `Aprobaciones: ${data.approval_count}/${data.total_votes}`;
+            }
+
+            // Actualizar porcentaje
+            const percentage = document.querySelector(`[data-approval-percentage]`);
+            if (percentage) {
+                percentage.textContent = data.approval_percentage + '%';
+            }
+
+            // Actualizar barra de progreso
+            const progressBar = document.querySelector(`[data-progress-bar]`);
+            if (progressBar) {
+                progressBar.style.width = Math.min(data.approval_percentage, 100) + '%';
+            }
+
+            // Actualizar avatares de aprobadores
+            const approversContainer = document.querySelector(`[data-approvers-${propositionId}]`);
+            if (approversContainer && data.approvers) {
+                approversContainer.innerHTML = data.approvers.map(user => `
+                    <img src="${user.avatar}" 
+                         alt="${user.name}" 
+                         title="${user.name}"
+                         style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid #00deb0; margin-right: -8px; cursor: pointer; transition: transform 0.2s ease;"
+                         onmouseover="this.style.transform='scale(1.15); z-index: 10;'"
+                         onmouseout="this.style.transform='scale(1)'; this.style.zIndex='auto';">
+                `).join('');
+            }
+
+            // Actualizar avatares de desaprobadores
+            const rejectorsContainer = document.querySelector(`[data-rejectors-${propositionId}]`);
+            if (rejectorsContainer && data.rejectors) {
+                rejectorsContainer.innerHTML = data.rejectors.map(user => `
+                    <img src="${user.avatar}" 
+                         alt="${user.name}" 
+                         title="${user.name}"
+                         style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ff6b6b; margin-right: -8px; cursor: pointer; opacity: 0.7; transition: transform 0.2s ease;"
+                         onmouseover="this.style.transform='scale(1.15); z-index: 10;'"
+                         onmouseout="this.style.transform='scale(1)'; this.style.zIndex='auto';">
+                `).join('');
+            }
+
+            // Buscar el contenedor de botones de la proposición y reemplazar con "Ya votaste"
+            const propCard = document.querySelector(`[data-proposition-id="${propositionId}"]`);
+            if (propCard) {
+                const buttonContainer = propCard.querySelector('div[style*="border-top"]');
+                if (buttonContainer) {
+                    // Reemplazar botones con "Ya votaste"
+                    buttonContainer.innerHTML = `<span style="flex: 1; padding: 8px; text-align: center; font-size: 12px; color: #00deb0; font-weight: 700;">✓ Ya votaste</span>`;
+                }
             }
         }
 

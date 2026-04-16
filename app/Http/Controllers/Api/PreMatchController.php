@@ -184,7 +184,34 @@ class PreMatchController extends Controller
             PreMatchEventService::statusChanged($preMatch, $oldStatus, 'active');
         }
 
-        return response()->json($proposition);
+        // ✅ NUEVO: Obtener datos desglosados de votos con avatares
+        $approvalVotes = $proposition->votes()
+            ->where('approved', true)
+            ->with('user:id,name,avatar')
+            ->get();
+
+        $rejectionVotes = $proposition->votes()
+            ->where('approved', false)
+            ->with('user:id,name,avatar')
+            ->get();
+
+        return response()->json([
+            'proposition' => $proposition,
+            'approval_count' => $approvalVotes->count(),
+            'rejection_count' => $rejectionVotes->count(),
+            'total_votes' => $totalVotes,
+            'approval_percentage' => round($proposition->approval_percentage),
+            'approvers' => $approvalVotes->map(fn($v) => [
+                'id' => $v->user->id,
+                'name' => $v->user->name,
+                'avatar' => $v->user->avatar,
+            ]),
+            'rejectors' => $rejectionVotes->map(fn($v) => [
+                'id' => $v->user->id,
+                'name' => $v->user->name,
+                'avatar' => $v->user->avatar,
+            ])
+        ]);
     }
 
     /**
