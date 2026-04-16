@@ -187,12 +187,12 @@ class PreMatchController extends Controller
         // ✅ NUEVO: Obtener datos desglosados de votos con avatares
         $approvalVotes = $proposition->votes()
             ->where('approved', true)
-            ->with('user:id,name,avatar')
+            ->with('user:id,name,avatar,avatar_cloudflare_id,avatar_provider')
             ->get();
 
         $rejectionVotes = $proposition->votes()
             ->where('approved', false)
-            ->with('user:id,name,avatar')
+            ->with('user:id,name,avatar,avatar_cloudflare_id,avatar_provider')
             ->get();
 
         return response()->json([
@@ -204,12 +204,12 @@ class PreMatchController extends Controller
             'approvers' => $approvalVotes->map(fn($v) => [
                 'id' => $v->user->id,
                 'name' => $v->user->name,
-                'avatar' => $v->user->avatar,
+                'avatar' => $v->user->getAvatarUrl('small'),
             ]),
             'rejectors' => $rejectionVotes->map(fn($v) => [
                 'id' => $v->user->id,
                 'name' => $v->user->name,
-                'avatar' => $v->user->avatar,
+                'avatar' => $v->user->getAvatarUrl('small'),
             ])
         ]);
     }

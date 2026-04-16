@@ -198,7 +198,7 @@
                                         <span style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; min-width: 60px;">👍 {{ $proposition->votes->where('approved', true)->count() }}:</span>
                                         <div data-approvers-{{ $proposition->id }} style="display: flex; gap: -8px; align-items: center; flex-wrap: wrap;">
                                             @foreach($proposition->votes->where('approved', true) as $vote)
-                                                <img src="{{ $vote->user->avatar }}" 
+                                                <img src="{{ $vote->user->getAvatarUrl('small') }}" 
                                                      alt="{{ $vote->user->name }}" 
                                                      title="{{ $vote->user->name }}"
                                                      style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid {{ $accentColor }}; margin-right: -8px; cursor: pointer; transition: transform 0.2s ease;"
@@ -212,7 +212,7 @@
                                         <span style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; min-width: 60px;">👎 {{ $proposition->votes->where('approved', false)->count() }}:</span>
                                         <div data-rejectors-{{ $proposition->id }} style="display: flex; gap: -8px; align-items: center; flex-wrap: wrap;">
                                             @foreach($proposition->votes->where('approved', false) as $vote)
-                                                <img src="{{ $vote->user->avatar }}" 
+                                                <img src="{{ $vote->user->getAvatarUrl('small') }}" 
                                                      alt="{{ $vote->user->name }}" 
                                                      title="{{ $vote->user->name }}"
                                                      style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid {{ $redAccent }}; margin-right: -8px; cursor: pointer; opacity: 0.7; transition: transform 0.2s ease;"
