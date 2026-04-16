@@ -570,58 +570,59 @@
         }
 
         function updateVotesDisplay(propositionId, data) {
-            // Actualizar contadores
-            const counter = document.querySelector(`[data-approval-counter]`);
+            // Obtener el contenedor de la proposición específica
+            const propCard = document.querySelector(`[data-proposition-id="${propositionId}"]`);
+            if (!propCard) return; // Si no encuentra la tarjeta, no hacer nada
+
+            // Actualizar contadores dentro de esta tarjeta
+            const counter = propCard.querySelector(`[data-approval-counter]`);
             if (counter) {
                 counter.textContent = `Aprobaciones: ${data.approval_count}/${data.total_votes}`;
             }
 
-            // Actualizar porcentaje
-            const percentage = document.querySelector(`[data-approval-percentage]`);
+            // Actualizar porcentaje dentro de esta tarjeta
+            const percentage = propCard.querySelector(`[data-approval-percentage]`);
             if (percentage) {
                 percentage.textContent = data.approval_percentage + '%';
             }
 
-            // Actualizar barra de progreso
-            const progressBar = document.querySelector(`[data-progress-bar]`);
+            // Actualizar barra de progreso dentro de esta tarjeta
+            const progressBar = propCard.querySelector(`[data-progress-bar]`);
             if (progressBar) {
                 progressBar.style.width = Math.min(data.approval_percentage, 100) + '%';
             }
 
             // Actualizar avatares de aprobadores
-            const approversContainer = document.querySelector(`[data-approvers-${propositionId}]`);
+            const approversContainer = propCard.querySelector(`[data-approvers-${propositionId}]`);
             if (approversContainer && data.approvers) {
                 approversContainer.innerHTML = data.approvers.map(user => `
                     <img src="${user.avatar}" 
                          alt="${user.name}" 
                          title="${user.name}"
                          style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid #00deb0; margin-right: -8px; cursor: pointer; transition: transform 0.2s ease;"
-                         onmouseover="this.style.transform='scale(1.15); z-index: 10;'"
+                         onmouseover="this.style.transform='scale(1.15)'; this.style.zIndex='10';"
                          onmouseout="this.style.transform='scale(1)'; this.style.zIndex='auto';">
                 `).join('');
             }
 
             // Actualizar avatares de desaprobadores
-            const rejectorsContainer = document.querySelector(`[data-rejectors-${propositionId}]`);
+            const rejectorsContainer = propCard.querySelector(`[data-rejectors-${propositionId}]`);
             if (rejectorsContainer && data.rejectors) {
                 rejectorsContainer.innerHTML = data.rejectors.map(user => `
                     <img src="${user.avatar}" 
                          alt="${user.name}" 
                          title="${user.name}"
                          style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid #ff6b6b; margin-right: -8px; cursor: pointer; opacity: 0.7; transition: transform 0.2s ease;"
-                         onmouseover="this.style.transform='scale(1.15); z-index: 10;'"
+                         onmouseover="this.style.transform='scale(1.15)'; this.style.zIndex='10';"
                          onmouseout="this.style.transform='scale(1)'; this.style.zIndex='auto';">
                 `).join('');
             }
 
-            // Buscar el contenedor de botones de la proposición y reemplazar con "Ya votaste"
-            const propCard = document.querySelector(`[data-proposition-id="${propositionId}"]`);
-            if (propCard) {
-                const buttonContainer = propCard.querySelector('div[style*="border-top"]');
-                if (buttonContainer) {
-                    // Reemplazar botones con "Ya votaste"
-                    buttonContainer.innerHTML = `<span style="flex: 1; padding: 8px; text-align: center; font-size: 12px; color: #00deb0; font-weight: 700;">✓ Ya votaste</span>`;
-                }
+            // Buscar el contenedor de botones y reemplazar con "Ya votaste"
+            const buttonContainer = propCard.querySelector('div[style*="border-top"]');
+            if (buttonContainer) {
+                // Reemplazar botones con "Ya votaste"
+                buttonContainer.innerHTML = `<span style="flex: 1; padding: 8px; text-align: center; font-size: 12px; color: #00deb0; font-weight: 700;">✓ Ya votaste</span>`;
             }
         }
 
