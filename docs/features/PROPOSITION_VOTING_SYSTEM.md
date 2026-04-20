@@ -1,6 +1,6 @@
 # Sistema de Votación de Desaprobación - Pre Match
 
-## 📋 P>lanificación de Tarea
+## 📋 P>>lanificación de Tarea
 
 **Objetivo:** Agregar botón pequeño de desaprobación (👎) al lado del sistema de aprobación existente (sin modificar)
 
