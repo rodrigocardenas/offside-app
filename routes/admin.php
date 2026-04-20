@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::resource('teams', TeamController::class)->except(['show']);
 
     // Template Questions Management
+    Route::resource('template-questions', TemplateQuestionController::class)->except(['show']);
 
     // Route::get('/competitions/{competition}/teams', [AdminCompetitionController::class, 'getTeams'])->name('competitions.teams');
     // Route::get('/competitions/{competition}/matches', [AdminCompetitionController::class, 'getMatches'])->name('competitions.matches');
