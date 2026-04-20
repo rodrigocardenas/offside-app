@@ -209,7 +209,7 @@
                                     </div>
                                     <!-- Rejectors -->
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; min-width: 60px;">👎 {{ $proposition->votes->where('approved', false)->count() }}:</span>
+                                        <span data-rejection-counter-{{ $proposition->id }} style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; min-width: 60px;">👎 {{ $proposition->votes->where('approved', false)->count() }}:</span>
                                         <div data-rejectors-{{ $proposition->id }} style="display: flex; gap: -8px; align-items: center; flex-wrap: wrap;">
                                             @foreach($proposition->votes->where('approved', false) as $vote)
                                                 <img src="{{ $vote->user->getAvatarUrl('small') }}" 
@@ -578,6 +578,12 @@
             const counter = propCard.querySelector(`[data-approval-counter]`);
             if (counter) {
                 counter.textContent = `Aprobaciones: ${data.approval_count}/${data.total_votes}`;
+            }
+
+            // Actualizar contador de rechazos
+            const rejectionCounter = propCard.querySelector(`[data-rejection-counter-${propositionId}]`);
+            if (rejectionCounter) {
+                rejectionCounter.textContent = `👎 ${data.rejection_count}:`;
             }
 
             // Actualizar porcentaje dentro de esta tarjeta
