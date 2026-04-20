@@ -1,34 +1,38 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Editar Plantilla de Pregunta') }}
-            </h2>
-        </div>
-    </x-slot>
+@extends('layouts.app')
 
+@php
+    use Illuminate\Support\Str;
+@endphp
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
+@section('content')
+<div class="min-h-screen bg-slate-950 py-12 text-white">
+    <div class="mx-auto max-w-4xl space-y-6 px-6">
+        <header class="flex items-center justify-between">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Administración</p>
+                <h1 class="mt-1 text-3xl font-semibold text-white">Editar Plantilla de Pregunta</h1>
+            </div>
+            <a href="{{ route('admin.template-questions.index') }}" class="text-sm text-slate-400 hover:text-slate-200">Volver al listado</a>
+        </header>
+
+        <div class="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 shadow-2xl shadow-black/40">
                     <form action="{{ route('admin.template-questions.update', $templateQuestion) }}" method="POST">
                         @csrf
                         @method('PUT')
 
-                        <div class="mb-4">
-                            <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <div class="mb-6">
+                            <label for="type" class="block text-sm font-medium text-slate-300 mb-2">
                                 Tipo de Pregunta
                             </label>
                             <select name="type" id="type"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    class="block w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
                                     required
                                     {{ $templateQuestion->type === 'social' ? 'readonly' : '' }}>
                                 <option value="predictive" {{ $templateQuestion->type === 'predictive' ? 'selected' : '' }}>Predictiva</option>
                                 <option value="social" {{ $templateQuestion->type === 'social' ? 'selected' : '' }}>Social</option>
                             </select>
                             @error('type')
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
                             @enderror
                             {{-- @if($templateQuestion->type !== 'multiple_choice')
                                 <p class="mt-1 text-sm text-yellow-600 dark:text-yellow-400">
@@ -37,25 +41,25 @@
                             @endif --}}
                         </div>
 
-                        <div class="mb-4">
-                            <label for="text" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <div class="mb-6">
+                            <label for="text" class="block text-sm font-medium text-slate-300 mb-2">
                                 Texto de la Pregunta
                             </label>
                             <input type="text" name="text" id="text"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   class="block w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
                                    value="{{ old('text', $templateQuestion->text) }}"
                                    required>
                             @error('text')
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div class="mb-4">
-                            <label for="competition_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <div class="mb-6">
+                            <label for="competition_id" class="block text-sm font-medium text-slate-300 mb-2">
                                 Competencia
                             </label>
                             <select name="competition_id" id="competition_id"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    class="block w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-white focus:border-amber-400 focus:outline-none">
                                 <option value="" {{ old('competition_id', $templateQuestion->competition_id) == '' ? 'selected' : '' }}>Sin Competencia</option>
                                 @foreach($competitions as $competition)
                                     <option value="{{ $competition->id }}" {{ old('competition_id', $templateQuestion->competition_id) == $competition->id ? 'selected' : '' }}>
@@ -64,34 +68,33 @@
                                 @endforeach
                             </select>
                             @error('competition_id')
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-slate-300 mb-2">
                                 Opciones (solo para preguntas predictivas)
                             </label>
-                            <div id="options-container">
+                            <div id="options-container" class="space-y-2">
                                 @if($templateQuestion->type === 'predictive')
                                     @foreach(old('options', $templateQuestion->options) as $index => $option)
-                                        <div class="flex items-center mb-2 option-item">
+                                        <div class="flex items-center gap-2 option-item">
                                             <input type="hidden" name="options[{{ $index }}][id]" value="{{ $option['id'] ?? '' }}">
                                             <input type="text"
                                                    name="options[{{ $index }}][text]"
                                                    placeholder="usa variables home_team y away_team"
                                                    value="{{ $option['text'] ?? '' }}"
-                                                   class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                   class="flex-1 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
                                                    required>
                                             <input type="checkbox"
                                                    name="options[{{ $index }}][is_correct]"
-                                                   class="ml-2 rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600"
-                                                   {{ isset($option['is_correct']) ? 'checked' : '' }}>
-                                            <label for="options[{{ $index }}][is_correct]" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                                Opción correcta
+                                                   class="rounded border-slate-600 bg-slate-900/60 text-amber-500 focus:ring-amber-400">
+                                            <label for="options[{{ $index }}][is_correct]" class="text-sm text-slate-300">
+                                                Correcta
                                             </label>
                                             <button type="button"
-                                                    class="remove-option ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200">
+                                                    class="remove-option text-red-400 hover:text-red-300">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
@@ -100,63 +103,63 @@
                             </div>
                             <button type="button"
                                     id="add-option-btn"
-                                    class="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    class="mt-3 inline-flex items-center px-4 py-2 rounded-lg bg-amber-500/90 text-sm font-semibold text-white hover:bg-amber-400">
                                 <i class="fas fa-plus mr-1"></i> Agregar Opción
                             </button>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p class="mt-2 text-xs text-slate-400">
                                 Para preguntas sociales, las opciones se generarán automáticamente con los integrantes del grupo.
                             </p>
                         </div>
 
-                        <div class="mb-4">
-                            <div class="flex items-center">
+                        <div class="mb-6">
+                            <div class="flex items-center gap-2">
                                 <input type="checkbox" name="is_featured" id="is_featured" value="1"
-                                       class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600"
+                                       class="rounded border-slate-600 bg-slate-900/60 text-amber-500 focus:ring-amber-400"
                                        {{ $templateQuestion->is_featured ? 'checked' : '' }}>
-                                <label for="is_featured" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                <label for="is_featured" class="block text-sm text-slate-300">
                                     ¿Pregunta destacada?
                                 </label>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p class="mt-2 text-xs text-slate-400">
                                 Las preguntas destacadas se mostrarán de manera especial en la aplicación móvil.
                             </p>
                         </div>
 
-                        <div class="mb-4">
-                            <div class="flex items-center">
+                        <div class="mb-6">
+                            <div class="flex items-center gap-2">
                                 <input type="checkbox" name="used_at" id="used_at" value="1"
-                                       class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600"
+                                       class="rounded border-slate-600 bg-slate-900/60 text-amber-500 focus:ring-amber-400"
                                        {{ $templateQuestion->used_at ? 'checked' : '' }}>
-                                <label for="used_at" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                <label for="used_at" class="block text-sm text-slate-300">
                                     ¿Pregunta ya utilizada?
                                 </label>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <p class="mt-2 text-xs text-slate-400">
                                 Marca esta casilla si la pregunta ya ha sido utilizada.
                             </p>
                         </div>
 
-                        <div class="flex items-center justify-end mt-6">
+                        <div class="mt-8 flex items-center justify-end gap-3">
                             <a href="{{ route('admin.template-questions.index') }}"
-                               class="mr-4 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
+                               class="rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-300 hover:border-slate-500 hover:text-slate-200">
                                 Cancelar
                             </a>
                             <button type="submit"
-                                    class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+                                    class="inline-flex items-center rounded-lg bg-amber-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-400">
+                                <i class="fas fa-save mr-2"></i>
                                 Actualizar Plantilla
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
         </div>
     </div>
+</div>
 
-    @push('styles')
-    <style>
-        .hidden { display: none; }
-    </style>
-    @endpush
+@push('styles')
+<style>
+    .hidden { display: none; }
+</style>
+@endpush
 
     @push('scripts')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -167,7 +170,7 @@
             const $optionsContainer = $('#options-container');
             const $addButton = $('#add-option-btn');
             const $questionType = $('select[name="type"]');
-            const $optionsSection = $optionsContainer.closest('.mb-4');
+            const $optionsSection = $optionsContainer.closest('div').closest('.mb-6');
             let optionCount = {{ $templateQuestion->type === 'predictive' ? count(old('options', $templateQuestion->options)) : 0 }};
 
             // Initialize options visibility based on question type
@@ -185,20 +188,20 @@
             function createOptionElement() {
                 const optionIndex = optionCount++;
                 const optionHtml = `
-                    <div class="flex items-center mb-2 option-item">
+                    <div class="flex items-center gap-2 option-item">
                         <input type="text"
                                name="options[${optionIndex}][text]"
                                placeholder="usa variables home_team y away_team"
-                               class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               class="flex-1 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-white focus:border-amber-400 focus:outline-none"
                                required>
                         <input type="checkbox"
                                name="options[${optionIndex}][is_correct]"
-                               class="ml-2 rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600">
-                        <label for="options[${optionIndex}][is_correct]" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                            Opción correcta
+                               class="rounded border-slate-600 bg-slate-900/60 text-amber-500 focus:ring-amber-400">
+                        <label for="options[${optionIndex}][is_correct]" class="text-sm text-slate-300">
+                            Correcta
                         </label>
                         <button type="button"
-                                class="remove-option ml-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200">
+                                class="remove-option text-red-400 hover:text-red-300">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -233,4 +236,4 @@
         });
     </script>
     @endpush
-</x-app-layout>
+@endsection
