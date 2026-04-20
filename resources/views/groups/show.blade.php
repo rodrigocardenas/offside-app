@@ -32,7 +32,9 @@
         $shareModalShadow = $isDark ? '0 14px 40px rgba(0, 0, 0, 0.55)' : '0 10px 40px rgba(0, 0, 0, 0.2)';
         $shareCloseColor = $isDark ? '#d5fdf0' : '#999999';
 
-        $topUsers = $group->users->sortByDesc('total_points')->take(3)->values();
+        // Phase 4 Optimization: topUsers is now pre-sorted by controller (database-level sorting)
+        // Using $topUsers passed from controller instead of in-memory sortByDesc
+        $topUsers = $topUsers ?? collect();
     @endphp
 
     <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">

@@ -191,22 +191,18 @@ class Group extends Model
 
     /**
      * Get ranked users with points
+     * 
+     * NOTE: Phase 4 Optimization - Uses cached group_user.points instead of recalculating
+     * This method depends on VerifyAllQuestionsJob (Phase 1) syncing points to group_user.points
+     * Historical data must be synced via migration (Phase 2)
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Builder
      */
     public function rankedUsers()
     {
         return $this->users()
-            ->select('users.*')
-            ->selectRaw('COALESCE(SUM(answers.points_earned), 0) as total_points')
-            ->leftJoin('answers', 'users.id', '=', 'answers.user_id')
-            ->leftJoin('questions', function($join) {
-                $join->on('answers.question_id', '=', 'questions.id')
-                     ->where('questions.group_id', '=', $this->id);
-            })
-            ->groupBy('users.id')
-            ->orderBy('total_points', 'desc')
-            ->get();
+            ->select('users.*', 'group_user.points as total_points')
+            ->orderBy('group_user.points', 'desc');
     }
 
     /**

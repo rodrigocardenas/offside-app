@@ -313,7 +313,9 @@ class GroupController extends Controller
             $group->load([
                 'competition:id,name,type,crest_url',
                 'users' => function ($query) use ($group) {
+                    // Phase 4 Optimization: Use cached group_user.points instead of recalculating SUM(answers.points_earned)
                     $query->select('users.id', 'users.name', 'users.avatar')
+                          ->selectRaw('group_user.points as total_points')
                           ->with([
                               'answers' => function ($query) use ($group) {
                                   $query->select('answers.id', 'answers.user_id', 'answers.points_earned', 'answers.question_id')
@@ -321,11 +323,7 @@ class GroupController extends Controller
                                             $questionQuery->where('group_id', $group->id);
                                         });
                               }
-                          ])->withSum(['answers as total_points' => function ($query) use ($group) {
-                              $query->whereHas('question', function ($questionQuery) use ($group) {
-                                  $questionQuery->where('group_id', $group->id);
-                              });
-                          }], 'points_earned');
+                          ]);
                 },
                 'chatMessages' => function ($query) {
                     $query->select('chat_messages.id', 'chat_messages.message', 'chat_messages.user_id', 'chat_messages.group_id', 'chat_messages.created_at')
@@ -345,12 +343,16 @@ class GroupController extends Controller
             $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
             $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
+            // Phase 4 Optimization: Prepare top 3 users from database, avoiding in-memory sorting
+            $topUsers = $group->rankedUsers()->limit(3)->get();
+
             return [
                 'group' => $group,
                 'matchQuestions' => $matchQuestions,
                 'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
                 'userAnswers' => $userAnswers,
-                'socialQuestion' => $socialQuestion
+                'socialQuestion' => $socialQuestion,
+                'topUsers' => $topUsers  // Pre-sorted top 3 users
             ];
         });
 
@@ -366,7 +368,9 @@ class GroupController extends Controller
                 $group->load([
                     'competition:id,name,type,crest_url',
                     'users' => function ($query) use ($group) {
+                        // Phase 4 Optimization: Use cached group_user.points instead of recalculating SUM(answers.points_earned)
                         $query->select('users.id', 'users.name', 'users.avatar')
+                              ->selectRaw('group_user.points as total_points')
                               ->with([
                                   'answers' => function ($query) use ($group) {
                                       $query->select('answers.id', 'answers.user_id', 'answers.points_earned', 'answers.question_id')
@@ -374,11 +378,7 @@ class GroupController extends Controller
                                                 $questionQuery->where('group_id', $group->id);
                                             });
                                   }
-                              ])->withSum(['answers as total_points' => function ($query) use ($group) {
-                                  $query->whereHas('question', function ($questionQuery) use ($group) {
-                                      $questionQuery->where('group_id', $group->id);
-                                  });
-                              }], 'points_earned');
+                              ]);
                     },
                     'chatMessages' => function ($query) {
                         $query->select('chat_messages.id', 'chat_messages.message', 'chat_messages.user_id', 'chat_messages.group_id', 'chat_messages.created_at')
@@ -395,12 +395,16 @@ class GroupController extends Controller
                 $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
                 $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
+                // Phase 4 Optimization: Prepare top 3 users from database
+                $topUsers = $group->rankedUsers()->limit(3)->get();
+
                 return view('groups.show', [
                     'group' => $group,
                     'matchQuestions' => $matchQuestions,
                     'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
                     'userAnswers' => $userAnswers,
                     'socialQuestion' => $socialQuestion,
+                    'topUsers' => $topUsers,  // Pre-sorted top 3 users
                     'currentMatchday' => null
                 ])->with('success', __('controllers.groups.joined_official_successfully'));
             }
@@ -433,7 +437,9 @@ class GroupController extends Controller
         $group->load([
             'competition:id,name,type,crest_url',
             'users' => function ($query) use ($group) {
+                // Phase 4 Optimization: Use cached group_user.points instead of recalculating SUM(answers.points_earned)
                 $query->select('users.id', 'users.name', 'users.avatar')
+                      ->selectRaw('group_user.points as total_points')
                       ->with([
                           'answers' => function ($query) use ($group) {
                               $query->select('answers.id', 'answers.user_id', 'answers.points_earned', 'answers.question_id')
@@ -441,11 +447,7 @@ class GroupController extends Controller
                                         $questionQuery->where('group_id', $group->id);
                                     });
                           }
-                      ])->withSum(['answers as total_points' => function ($query) use ($group) {
-                          $query->whereHas('question', function ($questionQuery) use ($group) {
-                              $questionQuery->where('group_id', $group->id);
-                          });
-                      }], 'points_earned');
+                      ]);
             },
             'chatMessages' => function ($query) {
                 $query->select('chat_messages.id', 'chat_messages.message', 'chat_messages.user_id', 'chat_messages.group_id', 'chat_messages.created_at')
@@ -464,12 +466,16 @@ class GroupController extends Controller
         $quizQuestions = $this->getQuizQuestions($group);  // 🎮 Obtener preguntas quiz
         $userAnswers = $this->getUserAnswers($group, $matchQuestions, $socialQuestion);
 
+        // Phase 4 Optimization: Prepare top 3 users from database
+        $topUsers = $group->rankedUsers()->limit(3)->get();
+
         return view('groups.show', [
             'group' => $group,
             'matchQuestions' => $matchQuestions,
             'quizQuestions' => $quizQuestions,  // 🎮 Pasar preguntas quiz
             'userAnswers' => $userAnswers,
             'socialQuestion' => $socialQuestion,
+            'topUsers' => $topUsers,  // Pre-sorted top 3 users
             'currentMatchday' => null
         ]);
     }
