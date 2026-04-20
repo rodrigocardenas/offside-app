@@ -82,11 +82,6 @@ return new class extends Migration
                 'total_points_changed' => $totalPointsDiff,
             ]);
 
-            $this->command->line("✅ Sincronización completada:");
-            $this->command->line("   - Usuarios/Grupos actualizados: {$syncedCount}");
-            $this->command->line("   - Usuarios/Grupos ya sincronizados: {$skippedCount}");
-            $this->command->line("   - Puntos ajustados en total: {$totalPointsDiff}");
-
         } catch (\Exception $e) {
             Log::error('Migration failed: sync_historical_points_to_group_user', [
                 'error' => $e->getMessage(),
@@ -105,9 +100,7 @@ return new class extends Migration
         
         // IMPORTANTE: No restauramos a 0 directamente para evitar pérdida de datos
         // Si se necesita revertir, se recomienda hacer restore desde backup
-        
-        $this->command->warn('⚠️  ADVERTENCIA: Este rollback NO revertirá los cambios en group_user.points');
-        $this->command->warn('   Por seguridad, los datos no se han modificado.');
-        $this->command->warn('   Si es necesario revertir, restaura desde backup de base de datos.');
+        Log::warning('ROLLBACK WARNING: This rollback does NOT revert changes to group_user.points');
+        Log::warning('For safety, data should not be modified. If rollback needed, restore from database backup.');
     }
 };
