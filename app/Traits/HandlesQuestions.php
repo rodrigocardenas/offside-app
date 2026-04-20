@@ -240,11 +240,10 @@ trait HandlesQuestions
 
         // 2. Buscar partidos próximos en el calendario
         // IMPORTANTE: Los partidos están en UTC, así que comparamos con now()->utc()
-        // 🎯 PRIORIZACIÓN: Ordenar por is_featured DESC (destacados primero), luego por fecha ASC
+        // 🎯 PRIORIZACIÓN: Usar orderByFeaturedTeams para ordenar por equipos destacados (Clásicos -> Derbis -> Otros)
         $matches = \App\Models\FootballMatch::where('status', 'Not Started')
             ->where('date', '>=', now()->utc())
-            ->orderBy('is_featured', 'desc')  // 🎯 Prioridad 1: Partidos destacados
-            ->orderBy('date', 'asc')          // 🎯 Prioridad 2: Proximidad en fecha
+            ->orderByFeaturedTeams()  // 🆕 NUEVO: Scope que ordena por featured_priority DESC (1.0 -> 0.7 -> 0.3)
             ->get();
 
         // 3. Filtrar partidos que ya tengan pregunta vigente o reciente (últimas 24 horas) en el grupo
