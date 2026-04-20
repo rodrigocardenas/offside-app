@@ -1,91 +1,101 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Administrador de Preguntas') }}
-            </h2>
+@extends('layouts.app')
+
+@section('content')
+<div class="min-h-screen bg-slate-950 py-12 text-white">
+    <div class="mx-auto flex max-w-7xl flex-col gap-10 px-6">
+        <!-- Header -->
+        <header class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-300">Gestión</p>
+                <h1 class="mt-3 text-4xl font-semibold">Preguntas</h1>
+                <p class="mt-2 max-w-2xl text-base text-slate-400">
+                    Crea y administra las preguntas disponibles en la plataforma. Define tipos, categorías y puntuación.
+                </p>
+            </div>
             <a href="{{ route('admin.questions.create') }}"
-               class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                <i class="fas fa-plus mr-2"></i>Nueva Pregunta
+               class="inline-flex items-center gap-2 rounded-lg bg-sky-500/90 px-4 py-2 font-semibold text-white hover:bg-sky-400 transition-colors">
+                <i class="fas fa-plus"></i>
+                Nueva Pregunta
             </a>
-        </div>
-    </x-slot>
+        </header>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if (session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <!-- Alerts -->
+        @if (session('success'))
+            <div class="rounded-lg bg-emerald-900/30 border border-emerald-600/50 p-4">
+                <p class="text-sm text-emerald-200">{{ session('success') }}</p>
+            </div>
+        @endif
 
+        <!-- Questions Table -->
+        <section class="rounded-3xl border border-slate-800 bg-slate-900/60 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
+                <table class="min-w-full divide-y divide-slate-800 text-sm">
+                    <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.35em] text-slate-400">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Título</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Puntos</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Destacada</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Disponible hasta</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                            <th class="px-4 py-4 text-left">Título</th>
+                            <th class="px-4 py-4 text-left">Tipo</th>
+                            <th class="px-4 py-4 text-left">Categoría</th>
+                            <th class="px-4 py-4 text-center">Puntos</th>
+                            <th class="px-4 py-4 text-center">Destacada</th>
+                            <th class="px-4 py-4 text-left">Disponible hasta</th>
+                            <th class="px-4 py-4 text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody class="divide-y divide-slate-800/80">
                         @forelse ($questions as $question)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                    {{ $question->title }}
+                            <tr class="hover:bg-slate-800/30 transition-colors">
+                                <td class="px-4 py-4">
+                                    <p class="font-semibold text-white truncate max-w-sm">{{ Str::limit($question->title, 50) }}</p>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    @if($question->type === 'multiple_choice')
-                                        Opción múltiple
-                                    @elseif($question->type === 'boolean')
-                                        Verdadero/Falso
-                                    @else
-                                        Texto
-                                    @endif
+                                <td class="px-4 py-4">
+                                    <span class="inline-block px-2 py-1 rounded text-xs font-semibold bg-slate-700/50 text-slate-200">
+                                        @if($question->type === 'multiple_choice')
+                                            Opción múltiple
+                                        @elseif($question->type === 'boolean')
+                                            Sí/No
+                                        @else
+                                            Texto
+                                        @endif
+                                    </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-4 py-4">
                                     @if($question->category === 'predictive')
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900">
+                                        <span class="inline-block px-2 py-1 rounded text-xs font-semibold bg-blue-500/20 text-blue-300">
                                             Predictiva
                                         </span>
                                     @else
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900">
+                                        <span class="inline-block px-2 py-1 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-300">
                                             Social
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $question->points }}
+                                <td class="px-4 py-4 text-center text-amber-300 font-semibold">
+                                    +{{ $question->points }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <input type="checkbox"
-                                               class="toggle-featured rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                               data-question-id="{{ $question->id }}"
-                                               {{ $question->is_featured ? 'checked' : '' }}>
-                                    </div>
+                                <td class="px-4 py-4 text-center">
+                                    <input type="checkbox"
+                                           class="toggle-featured rounded border-slate-600 bg-slate-800 text-sky-500 shadow-sm focus:border-sky-400 focus:ring focus:ring-sky-500/30"
+                                           data-question-id="{{ $question->id }}"
+                                           {{ $question->is_featured ? 'checked' : '' }}>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ @userTime($question->available_until) }}
+                                <td class="px-4 py-4 text-slate-400 text-xs">
+                                    {{ $question->available_until ? \Carbon\Carbon::parse($question->available_until)->locale('es')->diffForHumans() : '—' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex space-x-2">
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.questions.edit', $question) }}"
-                                           class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                           class="text-sky-400 hover:text-sky-300 transition-colors"
                                            title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('admin.questions.destroy', $question) }}"
                                               method="POST"
-                                              onsubmit="return confirm('¿Estás seguro de eliminar esta pregunta?')">
+                                              class="inline"
+                                              onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta pregunta?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                                                    class="text-rose-400 hover:text-rose-300 transition-colors"
                                                     title="Eliminar">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -95,26 +105,32 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    No hay preguntas registradas
+                                <td colspan="7" class="px-4 py-8 text-center text-slate-400">
+                                    <i class="fas fa-inbox text-2xl mb-2 block"></i>
+                                    No hay preguntas registradas. 
+                                    <a href="{{ route('admin.questions.create') }}" class="text-sky-400 hover:text-sky-300">
+                                        Crea la primera
+                                    </a>
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+        </section>
 
-            <div class="mt-4">
+        <!-- Pagination -->
+        @if ($questions->hasPages())
+            <div class="flex justify-center">
                 {{ $questions->links() }}
             </div>
-        </div>
+        @endif
     </div>
 </div>
 
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Toggle para marcar/desmarcar como destacada
         document.querySelectorAll('.toggle-featured').forEach(function(checkbox) {
             checkbox.addEventListener('change', function() {
                 const questionId = this.dataset.questionId;
@@ -126,47 +142,27 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
-                    body: JSON.stringify({
-                        is_featured: isFeatured
-                    })
+                    body: JSON.stringify({ is_featured: isFeatured })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        // Mostrar notificación de éxito
-                        const notification = document.createElement('div');
-                        notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg';
-                        notification.textContent = 'Estado actualizado correctamente';
-                        document.body.appendChild(notification);
-
-                        // Eliminar la notificación después de 3 segundos
-                        setTimeout(() => {
-                            notification.remove();
-                        }, 3000);
-                    } else {
-                        // Revertir el cambio en caso de error
+                    if (!data.success) {
                         this.checked = !isFeatured;
-                        console.error('Error al actualizar el estado');
+                        const notification = document.createElement('div');
+                        notification.className = 'fixed bottom-4 right-4 bg-rose-500 text-white px-4 py-2 rounded-lg shadow-lg';
+                        notification.textContent = 'Error al actualizar el estado';
+                        document.body.appendChild(notification);
+                        setTimeout(() => notification.remove(), 3000);
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     this.checked = !isFeatured;
-
-                    // Mostrar notificación de error
-                    const notification = document.createElement('div');
-                    notification.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg';
-                    notification.textContent = 'Error al actualizar el estado';
-                    document.body.appendChild(notification);
-
-                    // Eliminar la notificación después de 3 segundos
-                    setTimeout(() => {
-                        notification.remove();
-                    }, 3000);
+                    console.error('Error:', error);
                 });
             });
         });
     });
 </script>
 @endpush
-</x-app-layout>
+
+@endsection
