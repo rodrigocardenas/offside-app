@@ -355,7 +355,7 @@ trait HandlesQuestions
                 'match_id' => $match->id,
                 'available_until' => $availableUntil,
                 'points' => $template->type === 'predictive' ? ($match->is_featured ? 600 : 300) : 0,
-                'is_featured' => $match->is_featured ?? false,
+                'is_featured' => $match->getQuestionFeaturedValue(),
                 'options' => $options,
                 'template_question_id' => $template->id ?? null,
             ];
@@ -381,7 +381,7 @@ trait HandlesQuestions
                 'match_id' => $questionData['match_id'],
                 'available_until' => $availableUntil,
                 'points' => $template->type === 'predictive' ? ($match->is_featured ? 600 : 300) : 0,
-                'is_featured' => $match->is_featured ?? false,
+                'is_featured' => $match->getQuestionFeaturedValue(),
                 'template_question_id' => $questionData['template_question_id']
             ]);
 

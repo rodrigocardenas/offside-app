@@ -115,7 +115,8 @@ class CreateQuestionsForFinishedMatches extends Command
                         'points' => 300,
                         'group_id' => $group->id,
                         'match_id' => $match->id,
-                        'available_until' => now()->addDays(7)
+                        'available_until' => now()->addDays(7),
+                        'is_featured' => $match->getQuestionFeaturedValue()
                     ]);
 
                     // Opciones para pregunta 1
@@ -145,7 +146,8 @@ class CreateQuestionsForFinishedMatches extends Command
                         'points' => 300,
                         'group_id' => $group->id,
                         'match_id' => $match->id,
-                        'available_until' => now()->addDays(7)
+                        'available_until' => now()->addDays(7),
+                        'is_featured' => $match->getQuestionFeaturedValue()
                     ]);
 
                     QuestionOption::create([
@@ -169,7 +171,8 @@ class CreateQuestionsForFinishedMatches extends Command
                         'points' => 300,
                         'group_id' => $group->id,
                         'match_id' => $match->id,
-                        'available_until' => now()->addDays(7)
+                        'available_until' => now()->addDays(7),
+                        'is_featured' => $match->getQuestionFeaturedValue()
                     ]);
 
                     QuestionOption::create([

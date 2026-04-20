@@ -106,4 +106,18 @@ class FootballMatch extends Model
     // Removed: This accessor was preventing score column from being saved
     // The 'score' column now stores the text representation (e.g., "2 - 0")
     // Use home_team_score and away_team_score directly for structured data
+
+    /**
+     * Determinar si las preguntas creadas para este match deben ser marcadas como featured.
+     * Retorna TRUE si al menos uno de los equipos es featured.
+     * 
+     * @return bool TRUE si merece preguntas destacadas, FALSE en caso contrario
+     */
+    public function getQuestionFeaturedValue(): bool
+    {
+        $homeIsFeatured = $this->homeTeam?->is_featured ?? false;
+        $awayIsFeatured = $this->awayTeam?->is_featured ?? false;
+        
+        return $homeIsFeatured || $awayIsFeatured;
+    }
 }

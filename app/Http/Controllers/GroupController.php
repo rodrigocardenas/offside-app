@@ -523,6 +523,7 @@ class GroupController extends Controller
                 'group_id' => $questionData['group_id'],
                 'match_id' => $questionData['match_id'],
                 'available_until' => $questionData['available_until'],
+                'is_featured' => $match->getQuestionFeaturedValue(),
             ]);
 
             foreach ($this->generateOptions($match) as $option) {
