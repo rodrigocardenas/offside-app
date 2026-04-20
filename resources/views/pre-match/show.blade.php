@@ -195,7 +195,7 @@
                                 <div data-votes-section-{{ $proposition->id }} style="margin-top: 12px; padding: 12px; background: {{ $bgSecondary }}; border-radius: 8px; display: flex; flex-direction: column; gap: 8px;">
                                     <!-- Approvers -->
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; min-width: 60px;">👍 {{ $proposition->votes->where('approved', true)->count() }}:</span>
+                                        <span data-approval-counter-{{ $proposition->id }} style="font-size: 12px; font-weight: 700; color: {{ $textSecondary }}; min-width: 60px;">👍 {{ $proposition->votes->where('approved', true)->count() }}:</span>
                                         <div data-approvers-{{ $proposition->id }} style="display: flex; gap: -8px; align-items: center; flex-wrap: wrap;">
                                             @foreach($proposition->votes->where('approved', true) as $vote)
                                                 <img src="{{ $vote->user->getAvatarUrl('small') }}" 
@@ -574,16 +574,22 @@
             const propCard = document.querySelector(`[data-proposition-id="${propositionId}"]`);
             if (!propCard) return; // Si no encuentra la tarjeta, no hacer nada
 
-            // Actualizar contadores dentro de esta tarjeta
-            const counter = propCard.querySelector(`[data-approval-counter]`);
-            if (counter) {
-                counter.textContent = `Aprobaciones: ${data.approval_count}/${data.total_votes}`;
+            // Actualizar contador de aprobaciones (👍 X:)
+            const approvalCounter = propCard.querySelector(`[data-approval-counter-${propositionId}]`);
+            if (approvalCounter) {
+                approvalCounter.textContent = `👍 ${data.approval_count}:`;
             }
 
-            // Actualizar contador de rechazos
+            // Actualizar contador de rechazos (👎 X:)
             const rejectionCounter = propCard.querySelector(`[data-rejection-counter-${propositionId}]`);
             if (rejectionCounter) {
                 rejectionCounter.textContent = `👎 ${data.rejection_count}:`;
+            }
+
+            // Actualizar barra superior con datos de aprobaciones
+            const approvalProgressCounter = propCard.querySelector(`[data-approval-counter]`);
+            if (approvalProgressCounter) {
+                approvalProgressCounter.textContent = `Aprobaciones: ${data.approval_count}/${data.total_votes}`;
             }
 
             // Actualizar porcentaje dentro de esta tarjeta
