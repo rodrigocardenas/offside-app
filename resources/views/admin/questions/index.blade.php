@@ -33,11 +33,11 @@
                     <thead class="bg-slate-900/70 text-xs uppercase tracking-[0.35em] text-slate-400">
                         <tr>
                             <th class="px-4 py-4 text-left">Título</th>
-                            <th class="px-4 py-4 text-left">Tipo</th>
                             <th class="px-4 py-4 text-left">Categoría</th>
-                            <th class="px-4 py-4 text-center">Puntos</th>
                             <th class="px-4 py-4 text-center">Destacada</th>
-                            <th class="px-4 py-4 text-left">Disponible hasta</th>
+                            <th class="px-4 py-4 text-left">Match asociado</th>
+                            <th class="px-4 py-4 text-left">Grupo asociado</th>
+                            <th class="px-4 py-4 text-left">Fecha de creación</th>
                             <th class="px-4 py-4 text-right">Acciones</th>
                         </tr>
                     </thead>
@@ -46,17 +46,6 @@
                             <tr class="hover:bg-slate-800/30 transition-colors">
                                 <td class="px-4 py-4">
                                     <p class="font-semibold text-white truncate max-w-sm">{{ Str::limit($question->title, 50) }}</p>
-                                </td>
-                                <td class="px-4 py-4">
-                                    <span class="inline-block px-2 py-1 rounded text-xs font-semibold bg-slate-700/50 text-slate-200">
-                                        @if($question->type === 'multiple_choice')
-                                            Opción múltiple
-                                        @elseif($question->type === 'boolean')
-                                            Sí/No
-                                        @else
-                                            Texto
-                                        @endif
-                                    </span>
                                 </td>
                                 <td class="px-4 py-4">
                                     @if($question->category === 'predictive')
@@ -69,17 +58,33 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-4 text-center text-amber-300 font-semibold">
-                                    +{{ $question->points }}
-                                </td>
                                 <td class="px-4 py-4 text-center">
                                     <input type="checkbox"
                                            class="toggle-featured rounded border-slate-600 bg-slate-800 text-sky-500 shadow-sm focus:border-sky-400 focus:ring focus:ring-sky-500/30"
                                            data-question-id="{{ $question->id }}"
                                            {{ $question->is_featured ? 'checked' : '' }}>
                                 </td>
+                                <td class="px-4 py-4 text-slate-300 text-sm">
+                                    @if($question->football_match)
+                                        <div class="flex flex-col gap-1">
+                                            <span class="font-medium">{{ $question->football_match->home_team }} vs {{ $question->football_match->away_team }}</span>
+                                            <span class="text-xs text-slate-500">{{ $question->football_match->utc_date ? \Carbon\Carbon::parse($question->football_match->utc_date)->locale('es')->format('d M, H:i') : '—' }}</span>
+                                        </div>
+                                    @else
+                                        <span class="text-slate-500">—</span>
+                                    @endif
+                                </td>
+                                <td class="px-4 py-4 text-slate-300 text-sm">
+                                    @if($question->group)
+                                        <span class="inline-block px-2 py-1 rounded bg-indigo-500/20 text-indigo-300 text-xs font-medium">
+                                            {{ $question->group->name }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-500">—</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-4 text-slate-400 text-xs">
-                                    {{ $question->available_until ? \Carbon\Carbon::parse($question->available_until)->locale('es')->diffForHumans() : '—' }}
+                                    {{ $question->created_at ? \Carbon\Carbon::parse($question->created_at)->locale('es')->diffForHumans() : '—' }}
                                 </td>
                                 <td class="px-4 py-4">
                                     <div class="flex items-center justify-end gap-3">
@@ -107,7 +112,7 @@
                             <tr>
                                 <td colspan="7" class="px-4 py-8 text-center text-slate-400">
                                     <i class="fas fa-inbox text-2xl mb-2 block"></i>
-                                    No hay preguntas registradas. 
+                                    No hay preguntas registradas.
                                     <a href="{{ route('admin.questions.create') }}" class="text-sky-400 hover:text-sky-300">
                                         Crea la primera
                                     </a>

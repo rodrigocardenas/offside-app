@@ -18,7 +18,7 @@ class QuestionAdminController extends Controller
 
     public function index()
     {
-        $questions = Question::with('options')
+        $questions = Question::with(['options', 'group', 'football_match'])
             ->latest()
             ->paginate(15);
 

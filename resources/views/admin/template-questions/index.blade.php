@@ -104,7 +104,7 @@
                             <tr>
                                 <td colspan="5" class="px-4 py-8 text-center text-slate-400">
                                     <i class="fas fa-inbox text-2xl mb-2 block"></i>
-                                    No hay plantillas registradas. 
+                                    No hay plantillas registradas.
                                     <a href="{{ route('admin.template-questions.create') }}" class="text-amber-400 hover:text-amber-300">
                                         Crea la primera
                                     </a>

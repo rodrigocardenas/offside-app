@@ -13,7 +13,7 @@
                 </p>
             </div>
             <div>
-                <a href="{{ route('admin.app-health-dashboard') }}" 
+                <a href="{{ route('admin.app-health-dashboard') }}"
                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-500/90 px-4 py-2 font-semibold text-white hover:bg-emerald-400 transition-colors">
                     <i class="fas fa-heartbeat"></i>
                     Salud de la App
@@ -99,7 +99,7 @@
                         <h3 class="text-xl font-semibold">Preguntas Recientes</h3>
                         <p class="text-sm text-slate-400">Últimas preguntas creadas</p>
                     </div>
-                    <a href="{{ route('admin.questions.create') }}" 
+                    <a href="{{ route('admin.questions.create') }}"
                        class="text-xs font-semibold text-sky-300 hover:text-sky-200 flex items-center gap-1">
                         <i class="fas fa-plus"></i> Nueva
                     </a>
@@ -116,7 +116,7 @@
                                         </span>
                                     </p>
                                 </div>
-                                <a href="{{ route('admin.questions.edit', $question) }}" 
+                                <a href="{{ route('admin.questions.edit', $question) }}"
                                    class="text-sky-400 hover:text-sky-300">
                                     <i class="fas fa-edit text-sm"></i>
                                 </a>
@@ -135,7 +135,7 @@
                         <h3 class="text-xl font-semibold">Equipos Recientes</h3>
                         <p class="text-sm text-slate-400">Últimos equipos agregados</p>
                     </div>
-                    <a href="{{ route('admin.teams.create') }}" 
+                    <a href="{{ route('admin.teams.create') }}"
                        class="text-xs font-semibold text-emerald-300 hover:text-emerald-200 flex items-center gap-1">
                         <i class="fas fa-plus"></i> Nuevo
                     </a>
@@ -152,7 +152,7 @@
                                         </span>
                                     </p>
                                 </div>
-                                <a href="{{ route('admin.teams.edit', $team) }}" 
+                                <a href="{{ route('admin.teams.edit', $team) }}"
                                    class="text-emerald-400 hover:text-emerald-300">
                                     <i class="fas fa-edit text-sm"></i>
                                 </a>
@@ -169,22 +169,22 @@
         <section class="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
             <h3 class="text-xl font-semibold mb-5">Acciones Rápidas</h3>
             <div class="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-                <a href="{{ route('admin.questions.create') }}" 
+                <a href="{{ route('admin.questions.create') }}"
                    class="rounded-lg border border-sky-600/40 bg-sky-500/10 px-4 py-3 text-center text-sm font-semibold text-sky-200 hover:bg-sky-500/20 transition-colors">
                     <i class="fas fa-plus mr-2"></i>
                     Nueva Pregunta
                 </a>
-                <a href="{{ route('admin.teams.create') }}" 
+                <a href="{{ route('admin.teams.create') }}"
                    class="rounded-lg border border-emerald-600/40 bg-emerald-500/10 px-4 py-3 text-center text-sm font-semibold text-emerald-200 hover:bg-emerald-500/20 transition-colors">
                     <i class="fas fa-plus mr-2"></i>
                     Nuevo Equipo
                 </a>
-                <a href="{{ route('admin.template-questions.create') }}" 
+                <a href="{{ route('admin.template-questions.create') }}"
                    class="rounded-lg border border-amber-600/40 bg-amber-500/10 px-4 py-3 text-center text-sm font-semibold text-amber-200 hover:bg-amber-500/20 transition-colors">
                     <i class="fas fa-plus mr-2"></i>
                     Nueva Plantilla
                 </a>
-                <a href="{{ route('admin.app-health-dashboard') }}" 
+                <a href="{{ route('admin.app-health-dashboard') }}"
                    class="rounded-lg border border-slate-600/40 bg-slate-500/10 px-4 py-3 text-center text-sm font-semibold text-slate-200 hover:bg-slate-500/20 transition-colors">
                     <i class="fas fa-chart-line mr-2"></i>
                     Estadísticas

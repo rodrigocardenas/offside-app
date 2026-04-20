@@ -107,7 +107,7 @@
                     <label for="available_until" class="block text-sm font-semibold text-white mb-2">
                         Disponible Hasta *
                     </label>
-                    <input type="datetime-local" id="available_until" name="available_until" 
+                    <input type="datetime-local" id="available_until" name="available_until"
                            value="{{ old('available_until', $question->available_until ? $question->available_until->format('Y-m-d\TH:i') : '') }}"
                            class="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-white focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
                            required>
@@ -131,7 +131,7 @@
             <div id="options-section" class="hidden rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-white">Opciones</h3>
-                    <button type="button" onclick="addOption()" 
+                    <button type="button" onclick="addOption()"
                             class="text-sky-400 hover:text-sky-300 text-sm font-semibold">
                         <i class="fas fa-plus mr-1"></i>Agregar opción
                     </button>
@@ -143,7 +143,7 @@
 
             <!-- Buttons -->
             <div class="flex gap-3 pt-6">
-                <button type="submit" 
+                <button type="submit"
                         class="flex-1 rounded-lg bg-sky-500/90 px-6 py-3 font-semibold text-white hover:bg-sky-400 transition-colors">
                     <i class="fas fa-check mr-2"></i>Guardar Cambios
                 </button>
@@ -162,7 +162,7 @@ const existingOptions = @json(old('options', $question->options->map(fn($opt) =>
 function toggleOptions() {
     const type = document.getElementById('type').value;
     const optionsSection = document.getElementById('options-section');
-    
+
     if (type === 'multiple_choice') {
         optionsSection.classList.remove('hidden');
         if (document.getElementById('options-list').children.length === 0) {
@@ -176,13 +176,13 @@ function toggleOptions() {
 function loadOptions() {
     const optionsList = document.getElementById('options-list');
     optionsList.innerHTML = '';
-    
+
     existingOptions.forEach((opt, index) => {
         const option = document.createElement('div');
         option.className = 'flex gap-3 items-end';
         option.innerHTML = `
             <div class="flex-1">
-                <input type="text" name="options[${index}][text]" 
+                <input type="text" name="options[${index}][text]"
                        class="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
                        placeholder="Texto de la opción"
                        value="${opt.text}"
@@ -207,12 +207,12 @@ function loadOptions() {
 function addOption() {
     const optionsList = document.getElementById('options-list');
     const index = existingOptions.length + optionsList.children.length;
-    
+
     const option = document.createElement('div');
     option.className = 'flex gap-3 items-end';
     option.innerHTML = `
         <div class="flex-1">
-            <input type="text" name="options[${index}][text]" 
+            <input type="text" name="options[${index}][text]"
                    class="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
                    placeholder="Texto de la opción"
                    required>
@@ -227,7 +227,7 @@ function addOption() {
             <i class="fas fa-trash"></i>
         </button>
     `;
-    
+
     optionsList.appendChild(option);
 }
 
