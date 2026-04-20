@@ -1679,7 +1679,8 @@ class GroupController extends Controller
                 $query->with([
                     'user:id,name,avatar',
                     'votes' => function ($q) {
-                        $q->where('user_id', auth()->id());
+                        // Load ALL votes (not just current user's) so counters display correctly
+                        $q->with('user:id,name,avatar,avatar_cloudflare_id,avatar_provider');
                     }
                 ])->orderByDesc('created_at');
             }

@@ -564,6 +564,9 @@
                 // ✨ Actualizar UI con datos del servidor
                 updateVotesDisplay(id, data);
                 showToast('✓ Voto registrado', 'success', 2000);
+                
+                // ✨ Recargar toda la sección de propuestas para sincronizar con otros usuarios
+                setTimeout(() => reloadPropositionsSection(), 500);
             } catch (e) {
                 showToast('❌ ' + e.message, 'error', 5000);
             }
