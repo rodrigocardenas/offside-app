@@ -120,4 +120,50 @@ class FootballMatch extends Model
         
         return $homeIsFeatured || $awayIsFeatured;
     }
+
+    /**
+     * Calcular score de prioridad basado en equipos destacados.
+     * - 1.0: Ambos equipos destacados (Clásico)
+     * - 0.7: Un equipo destacado (Derby)
+     * - 0.3: Ningún equipo destacado (Partido regular)
+     * 
+     * @return float Score de prioridad (1.0, 0.7, o 0.3)
+     */
+    public function getFeaturedPriorityScore(): float
+    {
+        $homeIsFeatured = $this->homeTeam?->is_featured ?? false;
+        $awayIsFeatured = $this->awayTeam?->is_featured ?? false;
+        
+        if ($homeIsFeatured && $awayIsFeatured) {
+            return 1.0; // Clásico
+        } elseif ($homeIsFeatured || $awayIsFeatured) {
+            return 0.7; // Derby
+        }
+        
+        return 0.3; // Partido regular
+    }
+
+    /**
+     * Scope: Obtener partidos ordenados por equipos destacados (prioridad mayor primero).
+     * Ordena por: 1) Priority score DESC, 2) Date DESC
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByFeaturedTeams($query)
+    {
+        return $query
+            ->leftJoin('teams as home_teams', 'football_matches.home_team', '=', 'home_teams.api_name')
+            ->leftJoin('teams as away_teams', 'football_matches.away_team', '=', 'away_teams.api_name')
+            ->selectRaw('football_matches.*')
+            ->selectRaw('
+                CASE 
+                    WHEN home_teams.is_featured = 1 AND away_teams.is_featured = 1 THEN 1.0
+                    WHEN home_teams.is_featured = 1 OR away_teams.is_featured = 1 THEN 0.7
+                    ELSE 0.3
+                END as featured_priority
+            ')
+            ->orderByDesc('featured_priority')
+            ->orderByDesc('date');
+    }
 }
