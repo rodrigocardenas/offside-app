@@ -59,6 +59,11 @@ const capacitorConfig: CapacitorConfig = {
     },
     android: {
         allowMixedContent: true
+    },
+    // Deep Links para Google OAuth callback
+    scheme: 'offsideclub',
+    server: {
+        androidScheme: 'https'
     }
 };
 

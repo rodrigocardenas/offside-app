@@ -8,6 +8,7 @@ import './android-back-button';
 import './pull-to-refresh';
 import './deep-links';
 import './profile-preferences';
+import './google-oauth-service'; // ✅ Google OAuth para Capacitor
 
 window.Alpine = Alpine;
 
