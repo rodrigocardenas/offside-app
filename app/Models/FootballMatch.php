@@ -144,8 +144,12 @@ class FootballMatch extends Model
     }
 
     /**
-     * Scope: Obtener partidos ordenados por equipos destacados (prioridad mayor primero).
-     * Ordena por: 1) Priority score DESC, 2) Date DESC
+     * Scope: Obtener partidos ordenados por proximidad, luego por equipos destacados.
+     * Ordena por: 1) Date ASC (más próximos primero), 2) Priority score DESC (de esos, los destacados)
+     * 
+     * Esto asegura que:
+     * - Los partidos más próximos se priorizan
+     * - De esos partidos próximos, se elige primero los Clásicos, luego Derbis, luego Otros
      * 
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
@@ -163,7 +167,7 @@ class FootballMatch extends Model
                     ELSE 0.3
                 END as featured_priority
             ')
-            ->orderByDesc('featured_priority')
-            ->orderByDesc('date');
+            ->orderBy('date')                      // ✅ Proximidad PRIMERO (más próximos)
+            ->orderByDesc('featured_priority');    // ✅ Luego: de los próximos, los destacados
     }
 }
