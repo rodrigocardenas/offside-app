@@ -17,14 +17,9 @@ class RankingController extends Controller
             return $this->getPredictiveResultsJson($group);
         }
 
-        $rankings = $group->users()
-            ->withSum(['answers as total_points' => function ($query) use ($group) {
-                $query->whereHas('question', function ($questionQuery) use ($group) {
-                    $questionQuery->where('group_id', $group->id);
-                });
-            }], 'points_earned')
-            ->orderByDesc('total_points')
-            ->get();
+        // Phase 4 Optimization: Use cached group_user.points instead of recalculating SUM(answers.points_earned)
+        // This uses the rankedUsers() scope which orders by group_user.points DESC
+        $rankings = $group->rankedUsers()->get();
 
         return view('groups.show-unified', compact('group', 'rankings'));
     }
