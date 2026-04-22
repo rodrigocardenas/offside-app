@@ -23,13 +23,20 @@
 
         <!-- Header con Botones de Acción -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 12px; flex-wrap: wrap;">
-            <div>
-                <h1 style="font-size: 28px; font-weight: 700; margin: 0; color: {{ $textPrimary }};">
-                    📊 {{ $group->name }}
-                </h1>
-                <p style="font-size: 14px; color: {{ $textSecondary }}; margin: 8px 0 0 0;">
-                    Resumen de actividad y estadísticas
-                </p>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                @if ($group->cover_image || $group->cover_cloudflare_id)
+                    <img src="{{ $group->cover_image ?: ('https://imagedelivery.net/zchNBk6cxDDwjGC8V0wScA/' . $group->cover_cloudflare_id . '/thumbnail') }}" 
+                         alt="{{ $group->name }}"
+                         style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover; border: 2px solid {{ $accentColor }}; box-shadow: 0 4px 12px rgba(0, 222, 176, 0.2);">
+                @endif
+                <div>
+                    <h1 style="font-size: 28px; font-weight: 700; margin: 0; color: {{ $textPrimary }};">
+                        📊 {{ $group->name }}
+                    </h1>
+                    <p style="font-size: 14px; color: {{ $textSecondary }}; margin: 8px 0 0 0;">
+                        Resumen de actividad y estadísticas
+                    </p>
+                </div>
             </div>
 
             <div style="display: flex; gap: 8px; align-items: center;">

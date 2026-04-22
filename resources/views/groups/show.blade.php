@@ -4,9 +4,17 @@
 >
     {{-- setear en el navigation el yield navigation-title: --}}
     @section('navigation-title', $group->name)
-    @if ($group->id == 69)
-        @section('navigation-logo', asset("images/competitions/".$group->competition?->crest_url))
-    @endif
+    @section('navigation-actions')
+        @if (auth()->user()->id === $group->created_by || auth()->user()->is_admin)
+            <a href="{{ route('groups.summary', $group) }}"
+               title="Ver resumen del grupo"
+               style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 222, 176, 0.15); color: #00deb0; cursor: pointer; border: 1px solid rgba(0, 222, 176, 0.3); transition: all 0.2s ease; text-decoration: none;"
+               onmouseover="this.style.background='rgba(0, 222, 176, 0.25)'; this.style.borderColor='#00deb0';"
+               onmouseout="this.style.background='rgba(0, 222, 176, 0.15)'; this.style.borderColor='rgba(0, 222, 176, 0.3)';">
+                <i class="fas fa-chart-line"></i>
+            </a>
+        @endif
+    @endsection
 
     @php
         $themeMode = auth()->user()->theme_mode ?? 'light';
