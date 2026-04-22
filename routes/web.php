@@ -90,6 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('groups/{group}/quiz-ranking', [GroupController::class, 'getQuizRanking'])->name('groups.quiz-ranking');  // 🎮 Quiz Ranking API
     Route::get('groups/{group}/pre-matches', [GroupController::class, 'showPreMatches'])->name('groups.pre-matches');  // 🔥 Pre Matches
     Route::get('groups/{group}/pre-matches/{preMatch}', [GroupController::class, 'showPreMatchDetail'])->name('groups.pre-matches.show');  // 🔥 Ver detalle
+    Route::get('groups/{group}/summary', [\App\Http\Controllers\GroupSummaryController::class, 'show'])->name('groups.summary');  // 📊 Group Summary
 
     // Preguntas
     Route::resource('questions', QuestionController::class);

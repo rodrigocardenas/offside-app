@@ -24,4 +24,13 @@ class GroupPolicy
         // Solo el creador del grupo puede eliminarlo
         return $user->id === $group->created_by;
     }
+
+    /**
+     * Determine whether the user can view the group summary.
+     */
+    public function viewSummary(User $user, Group $group): bool
+    {
+        // Solo creador del grupo o administradores pueden ver el resumen
+        return $user->id === $group->created_by || $user->is_admin;
+    }
 }
