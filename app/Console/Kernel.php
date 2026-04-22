@@ -8,6 +8,7 @@ use App\Console\Commands\UpdateFootballData;
 use App\Jobs\VerifyFinishedMatchesHourlyJob;
 use App\Jobs\UpdateFinishedMatchesJob;
 use App\Jobs\SendDailyUnanswerQuestionReminderPushNotification;
+use App\Jobs\UpdateGroupTotalPointsJob;
 use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
@@ -67,6 +68,25 @@ class Kernel extends ConsoleKernel
             ->at(':20')  // 20 minutos después de la hora
             ->name('verify-batch-health-check')
             ->withoutOverlapping(10);
+
+        // 3️⃣.5️⃣ Cada hora (:30): Actualizar caché de total_points en grupos
+        // Calcula la suma de puntos de todos los usuarios en cada grupo
+        // Phase 1: Group Summary feature
+        $schedule->job(new UpdateGroupTotalPointsJob())
+            ->hourly()
+            ->name('update-group-total-points')
+            ->timezone('UTC')
+            ->at(':30')  // 30 minutos después de la hora
+            ->onOneServer() // Solo ejecutar en un servidor si hay múltiples
+            ->withoutOverlapping(10)
+            ->onSuccess(function () {
+                Log::info('✅ UpdateGroupTotalPointsJob ran successfully');
+            })
+            ->onFailure(function ($exception) {
+                Log::error('❌ UpdateGroupTotalPointsJob failed', [
+                    'error' => $exception->getMessage(),
+                ]);
+            });
 
         // 4️⃣ Diaria (18:00 UTC): Enviar reminder de preguntas sin responder
         // Notifica a usuarios si tienen preguntas predictivas pendientes de responder
