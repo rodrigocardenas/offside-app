@@ -21,11 +21,14 @@ class Group extends Model
         'expires_at',
         'cover_image',
         'cover_cloudflare_id',
-        'cover_provider'
+        'cover_provider',
+        'total_points',
+        'total_points_updated_at',
     ];
 
     protected $casts = [
-        'expires_at' => 'datetime'
+        'expires_at' => 'datetime',
+        'total_points_updated_at' => 'datetime',
     ];
 
     public function creator()
@@ -246,6 +249,18 @@ class Group extends Model
     public function scopePublic($query)
     {
         return $query->where('category', 'public');
+    }
+
+    /**
+     * Scope: Order groups by total_points
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $direction Ascending or descending
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByTotalPoints($query, $direction = 'desc')
+    {
+        return $query->orderBy('total_points', $direction);
     }
 
     /**
