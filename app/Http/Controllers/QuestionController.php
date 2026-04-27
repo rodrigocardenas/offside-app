@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Question;
 use App\Models\TemplateQuestion;
 use App\Models\Answer;
+use App\Models\Group;
 use App\Services\QuestionEvaluationService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -153,8 +154,14 @@ class QuestionController extends Controller
             $answeredAt = null;
         }
 
+        // 🔧 SYNC TO group_user: Obtener puntos anteriores para calcular diferencia
+        $existingAnswer = Answer::where('user_id', auth()->id())
+            ->where('question_id', $question->id)
+            ->first();
+        $oldPointsEarned = $existingAnswer?->points_earned ?? 0;
+
         // Usar updateOrCreate para crear o actualizar la respuesta
-        Answer::updateOrCreate(
+        $answer = Answer::updateOrCreate(
             [
                 'user_id' => auth()->id(),
                 'question_id' => $question->id,
@@ -167,6 +174,17 @@ class QuestionController extends Controller
                 'answered_at' => $answeredAt,
             ]
         );
+
+        // 🔧 SYNC TO group_user: Sincronizar la diferencia de puntos inmediatamente
+        $pointsDiff = $pointsEarned - $oldPointsEarned;
+        if ($pointsDiff !== 0) {
+            $this->syncGroupUserPoints(
+                auth()->id(),
+                $question->group_id,
+                $pointsDiff,
+                $question->id
+            );
+        }
 
         // limpiar cache de respuestas en ese grupo
         Cache::forget('user_answers_' . $question->group_id);
@@ -183,6 +201,7 @@ class QuestionController extends Controller
             'is_correct' => $isCorrect,
             'points_earned' => $pointsEarned,
             'user_id' => auth()->id(),
+            'points_synced_diff' => $pointsDiff,
         ]);
 
         return redirect()->route('groups.show', $question->group)->withFragment('question' . $question->id);
@@ -205,5 +224,71 @@ class QuestionController extends Controller
             ->groupBy('option_id');
 
         return view('questions.results', compact('question', 'answers'));
+    }
+
+    /**
+     * 🔧 SYNC TO group_user: Sincronizar cambios de puntos en answers → group_user.points
+     *
+     * @param int $userId
+     * @param int $groupId
+     * @param int $pointsDiff Diferencia de puntos (positiva o negativa)
+     * @param int $questionId
+     * @return void
+     */
+    private function syncGroupUserPoints(int $userId, int $groupId, int $pointsDiff, int $questionId = null): void
+    {
+        try {
+            $group = Group::find($groupId);
+            if (!$group) {
+                Log::warning('Grupo no encontrado para sincronización de puntos', [
+                    'group_id' => $groupId,
+                    'user_id' => $userId,
+                ]);
+                return;
+            }
+
+            // Validar que el usuario sea miembro del grupo
+            $isMember = $group->users()->where('user_id', $userId)->exists();
+            if (!$isMember) {
+                Log::warning('Usuario no es miembro del grupo para sincronización de puntos', [
+                    'group_id' => $groupId,
+                    'user_id' => $userId,
+                ]);
+                return;
+            }
+
+            // Obtener puntos actuales en group_user
+            $currentPoints = DB::table('group_user')
+                ->where('group_id', $groupId)
+                ->where('user_id', $userId)
+                ->value('points') ?? 0;
+
+            $newPoints = max(0, $currentPoints + $pointsDiff); // Nunca permitir puntos negativos
+
+            // Actualizar group_user.points
+            DB::table('group_user')
+                ->where('group_id', $groupId)
+                ->where('user_id', $userId)
+                ->update(['points' => $newPoints]);
+
+            Log::info('✅ Puntos sincronizados a group_user (QuestionController)', [
+                'user_id' => $userId,
+                'group_id' => $groupId,
+                'question_id' => $questionId,
+                'old_points' => $currentPoints,
+                'new_points' => $newPoints,
+                'points_diff' => $pointsDiff,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error sincronizando puntos a group_user', [
+                'error' => $e->getMessage(),
+                'user_id' => $userId,
+                'group_id' => $groupId,
+                'question_id' => $questionId,
+                'points_diff' => $pointsDiff,
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
     }
 }
