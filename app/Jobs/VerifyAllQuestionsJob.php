@@ -119,6 +119,21 @@ class VerifyAllQuestionsJob implements ShouldQueue
             return;
         }
 
+        // CRITICAL FIX 2: Validate that at least one returned ID belongs to this question's options.
+        // Gemini may return IDs from other questions; if none match, don't mark as verified.
+        $questionOptionIds = $question->options->pluck('id')->toArray();
+        $validCorrectOptionIds = array_intersect($correctOptionIds, $questionOptionIds);
+        if (empty($validCorrectOptionIds)) {
+            Log::warning('VerifyAllQuestionsJob - evaluator returned IDs not matching any option (Gemini hallucination?)', [
+                'question_id' => $question->id,
+                'match_id' => $match->id,
+                'returned_ids' => $correctOptionIds,
+                'question_option_ids' => $questionOptionIds,
+            ]);
+            return;
+        }
+        $correctOptionIds = $validCorrectOptionIds;
+
         foreach ($question->options as $option) {
             $option->is_correct = in_array($option->id, $correctOptionIds);
             $option->save();
@@ -130,7 +145,7 @@ class VerifyAllQuestionsJob implements ShouldQueue
         foreach ($question->answers as $answer) {
             $wasCorrect = $answer->is_correct;
             $oldPointsEarned = $answer->points_earned;  // Capturar puntos anteriores
-            
+
             $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
             $answer->points_earned = $answer->is_correct ? ($question->points ?? 300) : 0;
             $answer->save();
@@ -165,11 +180,11 @@ class VerifyAllQuestionsJob implements ShouldQueue
 
     /**
      * 🔧 Sincronizar puntos de respuesta a tabla group_user
-     * 
+     *
      * Cuando se verifica una respuesta y se asignan puntos, se debe actualizar
      * el acumulado en group_user.points para que los castigos (pre-match) y
      * rankings usen valores correctos.
-     * 
+     *
      * @param int $userId Usuario que respondió
      * @param int $groupId Grupo donde se respondió la pregunta
      * @param int $pointsDiff Diferencia de puntos (puede ser positivo o negativo)
