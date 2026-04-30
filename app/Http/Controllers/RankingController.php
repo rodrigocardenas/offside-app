@@ -28,12 +28,16 @@ class RankingController extends Controller
     {
         $user = auth()->user();
 
-        // Obtener todas las respuestas verificadas del usuario (sin límite de fecha)
+        // 🔧 FIXED: Obtener TODAS las respuestas del usuario (verificadas y sin verificar)
+        // El frontend mostrará el label apropiado basado en result_verified_at
+        // - Si result_verified_at IS NULL → "Sin Verificar"
+        // - Si result_verified_at IS NOT NULL && is_correct=false → "Respuesta Incorrecta"
+        // - Si result_verified_at IS NOT NULL && is_correct=true → Solo checkmark
         $answers = \App\Models\Answer::where('user_id', $user->id)
             ->whereHas('question', function ($query) use ($group) {
                 $query->where('group_id', $group->id)
-                    ->where('type', 'predictive')
-                    ->whereNotNull('result_verified_at');
+                    ->where('type', 'predictive');
+                // REMOVED: ->whereNotNull('result_verified_at');
             })
             ->with([
                 'question' => function ($query) {

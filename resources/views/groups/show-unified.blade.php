@@ -351,17 +351,17 @@
                                                 ${answer.correct_option.text}
                                             </span>
                                         </div>
-                                    ` : !isCorrect && !answer.correct_option && !answer.question.result_verified_at ? `
+                                    ` : !answer.question.result_verified_at ? `
                                         <div class="text-xs">
                                             <span style="color: ${themeConfig.textSecondary};">Estado:</span>
                                             <span class="px-2.5 py-0.5 rounded-full text-white bg-yellow-500 ml-2">
-                                                Pendiente de verificación
+                                                Sin Verificar
                                             </span>
                                             <p style="color: ${themeConfig.textSecondary}; margin-top: 4px;">
                                                 Partido en estado: <strong>${answer.question.football_match?.status || 'desconocido'}</strong>
                                             </p>
                                         </div>
-                                    ` : !isCorrect && !answer.correct_option ? `
+                                    ` : !isCorrect ? `
                                         <div class="text-xs">
                                             <span style="color: ${themeConfig.textSecondary};">Resultado:</span>
                                             <span class="px-2.5 py-0.5 rounded-full text-white bg-red-500 ml-2">

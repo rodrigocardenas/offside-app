@@ -9,11 +9,11 @@ return new class extends Migration
 {
     /**
      * 🔧 MIGRACIÓN: Sincronizar puntos históricos
-     * 
+     *
      * Sincroniza todos los `answers.points_earned` acumulados a la tabla `group_user.points`
      * para que el sistema tenga un estado consistente antes de aplicar la sincronización
      * en tiempo real.
-     * 
+     *
      * Flujo:
      * 1. Para cada grupo, obtener todos los usuarios miembros
      * 2. Para cada usuario, calcular: SUM(answers.points_earned WHERE grupo)
@@ -41,7 +41,7 @@ return new class extends Migration
             $skippedCount = 0;
             $totalPointsDiff = 0;
 
-            foreach ($userPointsInGroups as $record) {
+            foreach ($userPointsInGroup as $record) {
                 // Calcular puntos totales de respuestas correctas en este grupo
                 $totalPoints = DB::table('answers')
                     ->join('questions', 'answers.question_id', '=', 'questions.id')
@@ -97,7 +97,7 @@ return new class extends Migration
     public function down(): void
     {
         Log::warning('Rolling back migration: sync_historical_points_to_group_user');
-        
+
         // IMPORTANTE: No restauramos a 0 directamente para evitar pérdida de datos
         // Si se necesita revertir, se recomienda hacer restore desde backup
         Log::warning('ROLLBACK WARNING: This rollback does NOT revert changes to group_user.points');
