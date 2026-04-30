@@ -41,7 +41,7 @@ return new class extends Migration
             $skippedCount = 0;
             $totalPointsDiff = 0;
 
-            foreach ($userPointsInGroup as $record) {
+            foreach ($userPointsInGroups as $record) {
                 // Calcular puntos totales de respuestas correctas en este grupo
                 $totalPoints = DB::table('answers')
                     ->join('questions', 'answers.question_id', '=', 'questions.id')
