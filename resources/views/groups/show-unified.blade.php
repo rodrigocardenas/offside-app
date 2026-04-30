@@ -318,7 +318,14 @@
                 html += formattedDate;
                 html += `</div>`;
 
-                answers.forEach(answer => {
+                // 🔧 FILTRO: Excluir partidos que no han comenzado o están sin estado
+                const finishedMatches = answers.filter(answer => {
+                    const matchStatus = answer.question.football_match?.status || '';
+                    // Solo mostrar si el partido terminó
+                    return ['FINISHED', 'Match Finished', 'Finished', 'Ended'].includes(matchStatus);
+                });
+
+                finishedMatches.forEach(answer => {
                     const isCorrect = answer.is_correct;
                     const correctClass = isCorrect ? 'bg-green-500' : 'bg-red-500';
                     const correctIcon = isCorrect ? '✓' : '✗';
