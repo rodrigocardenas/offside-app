@@ -361,13 +361,6 @@
                                                 Partido en estado: <strong>${answer.question.football_match?.status || 'desconocido'}</strong>
                                             </p>
                                         </div>
-                                    ` : !isCorrect ? `
-                                        <div class="text-xs">
-                                            <span style="color: ${themeConfig.textSecondary};">Resultado:</span>
-                                            <span class="px-2.5 py-0.5 rounded-full text-white bg-red-500 ml-2">
-                                                Respuesta Incorrecta
-                                            </span>
-                                        </div>
                                     ` : ''}
                                 </div>
                                 <div class="text-right flex-shrink-0">
