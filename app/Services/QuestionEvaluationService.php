@@ -950,6 +950,13 @@ class QuestionEvaluationService
                 $correctOptionIds[] = $option->id;
             } elseif ($awayPossession > $homePossession && $this->teamNameMatches($optionText, $match->away_team)) {
                 $correctOptionIds[] = $option->id;
+            } elseif ($homePossession === $awayPossession) {
+                // 🔧 FIX: Si hay empate en posesión, ambas opciones son correctas
+                // porque ninguno tiene "más" posesión - son iguales
+                if ($this->teamNameMatches($optionText, $match->home_team) || 
+                    $this->teamNameMatches($optionText, $match->away_team)) {
+                    $correctOptionIds[] = $option->id;
+                }
             }
         }
 
