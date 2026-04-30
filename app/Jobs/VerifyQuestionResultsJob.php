@@ -75,6 +75,18 @@ class VerifyQuestionResultsJob implements ShouldQueue
                             continue;
                         }
 
+                        // CRITICAL FIX: Validate returned IDs belong to this question's options.
+                        // Gemini fallback may return IDs from other questions (hallucination).
+                        $questionOptionIds = $question->options->pluck('id')->toArray();
+                        $correctOptionIds = array_values(array_intersect($correctOptionIds, $questionOptionIds));
+                        if (empty($correctOptionIds)) {
+                            Log::warning('VerifyQuestionResultsJob - returned IDs do not match any option, skipping', [
+                                'question_id' => $question->id,
+                                'match_id' => $match->id,
+                            ]);
+                            continue;
+                        }
+
                         // Actualizar opciones correctas
                         foreach ($question->options as $option) {
                             $wasCorrect = $option->is_correct;
@@ -96,7 +108,7 @@ class VerifyQuestionResultsJob implements ShouldQueue
                         foreach ($question->answers as $answer) {
                             $wasCorrect = $answer->is_correct;
                             $oldPointsEarned = $answer->points_earned;
-                            
+
                             $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
                             $answer->points_earned = $answer->is_correct ? $question->points ?? 300 : 0;
                             $answer->save();
