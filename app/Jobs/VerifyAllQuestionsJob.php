@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -177,22 +178,12 @@ class VerifyAllQuestionsJob implements ShouldQueue
     private function syncGroupUserPoints(int $userId, int $groupId, int $pointsDiff, int $questionId): void
     {
         try {
-            $group = Group::find($groupId);
-            if (!$group) {
-                Log::warning('VerifyAllQuestionsJob - group not found for sync', [
-                    'user_id' => $userId,
-                    'group_id' => $groupId,
-                    'question_id' => $questionId,
-                ]);
-                return;
-            }
+            $exists = DB::table('group_user')
+                ->where('group_id', $groupId)
+                ->where('user_id', $userId)
+                ->exists();
 
-            // Obtener punto actual del usuario en el grupo
-            $groupUser = $group->users()
-                ->where('users.id', $userId)
-                ->first();
-
-            if (!$groupUser) {
+            if (!$exists) {
                 Log::warning('VerifyAllQuestionsJob - user not member of group', [
                     'user_id' => $userId,
                     'group_id' => $groupId,
@@ -201,29 +192,33 @@ class VerifyAllQuestionsJob implements ShouldQueue
                 return;
             }
 
-            $currentPoints = $groupUser->pivot->points ?? 0;
-            $newPoints = max(0, $currentPoints + $pointsDiff);  // No permitir puntos negativos
-
-            // Actualizar el pivote
-            $group->users()->updateExistingPivot($userId, [
-                'points' => $newPoints
-            ]);
+            // Operación ATÓMICA: evita race conditions entre jobs concurrentes
+            // UPDATE group_user SET points = GREATEST(0, points ± N) WHERE ...
+            if ($pointsDiff > 0) {
+                DB::table('group_user')
+                    ->where('group_id', $groupId)
+                    ->where('user_id', $userId)
+                    ->increment('points', $pointsDiff);
+            } elseif ($pointsDiff < 0) {
+                DB::table('group_user')
+                    ->where('group_id', $groupId)
+                    ->where('user_id', $userId)
+                    ->update(['points' => DB::raw('GREATEST(0, points - ' . abs($pointsDiff) . ')')]);
+            }
 
             Log::info('VerifyAllQuestionsJob - points synced to group_user', [
-                'user_id' => $userId,
-                'group_id' => $groupId,
+                'user_id'     => $userId,
+                'group_id'    => $groupId,
                 'question_id' => $questionId,
                 'points_diff' => $pointsDiff,
-                'old_points' => $currentPoints,
-                'new_points' => $newPoints,
             ]);
         } catch (Throwable $e) {
             Log::error('VerifyAllQuestionsJob - failed to sync points', [
-                'user_id' => $userId,
-                'group_id' => $groupId,
+                'user_id'     => $userId,
+                'group_id'    => $groupId,
                 'question_id' => $questionId,
                 'points_diff' => $pointsDiff,
-                'error' => $e->getMessage(),
+                'error'       => $e->getMessage(),
             ]);
         }
     }

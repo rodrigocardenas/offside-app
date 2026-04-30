@@ -257,26 +257,23 @@ class QuestionController extends Controller
                 return;
             }
 
-            // Obtener puntos actuales en group_user
-            $currentPoints = DB::table('group_user')
-                ->where('group_id', $groupId)
-                ->where('user_id', $userId)
-                ->value('points') ?? 0;
-
-            $newPoints = max(0, $currentPoints + $pointsDiff); // Nunca permitir puntos negativos
-
-            // Actualizar group_user.points
-            DB::table('group_user')
-                ->where('group_id', $groupId)
-                ->where('user_id', $userId)
-                ->update(['points' => $newPoints]);
+            // Operación ATÓMICA: evita race conditions entre requests concurrentes
+            if ($pointsDiff > 0) {
+                DB::table('group_user')
+                    ->where('group_id', $groupId)
+                    ->where('user_id', $userId)
+                    ->increment('points', $pointsDiff);
+            } elseif ($pointsDiff < 0) {
+                DB::table('group_user')
+                    ->where('group_id', $groupId)
+                    ->where('user_id', $userId)
+                    ->update(['points' => DB::raw('GREATEST(0, points - ' . abs($pointsDiff) . ')')]);
+            }
 
             Log::info('✅ Puntos sincronizados a group_user (QuestionController)', [
-                'user_id' => $userId,
-                'group_id' => $groupId,
+                'user_id'     => $userId,
+                'group_id'    => $groupId,
                 'question_id' => $questionId,
-                'old_points' => $currentPoints,
-                'new_points' => $newPoints,
                 'points_diff' => $pointsDiff,
             ]);
 
