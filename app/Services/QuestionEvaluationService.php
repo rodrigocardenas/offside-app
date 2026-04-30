@@ -668,22 +668,39 @@ class QuestionEvaluationService
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasOwnGoal);
         if (!empty($binaryResult)) {
+            Log::info('✅ Own goal evaluation - binary result found', [
+                'question_id' => $question->id,
+                'hasOwnGoal' => $hasOwnGoal,
+                'correct_option_ids' => $binaryResult
+            ]);
             return $binaryResult;
         }
 
-        if ($hasOwnGoal) {
+        // 🔧 FIX: Si resolveBinaryQuestionOptions retorna vacío, buscar explícitamente
+        // "ninguno", "0", "no" cuando no hay autogoles
+        if (!$hasOwnGoal) {
+            foreach ($question->options as $option) {
+                $optionText = strtolower(trim($option->text));
+                
+                // Buscar opciones que representen "no hay autogoles"
+                if (strpos($optionText, 'ninguno') !== false ||
+                    strpos($optionText, 'no') !== false ||
+                    $optionText === '0') {
+                    $correctOptionIds[] = $option->id;
+                    Log::info('✅ Own goal evaluation - marking "ninguno" as correct', [
+                        'question_id' => $question->id,
+                        'option_text' => $option->text,
+                        'option_id' => $option->id
+                    ]);
+                }
+            }
+        } else {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
 
                 if ($homeOwnGoals > 0 && strpos($optionText, strtolower($match->home_team)) !== false) {
                     $correctOptionIds[] = $option->id;
                 } elseif ($awayOwnGoals > 0 && strpos($optionText, strtolower($match->away_team)) !== false) {
-                    $correctOptionIds[] = $option->id;
-                }
-            }
-        } else {
-            foreach ($question->options as $option) {
-                if (strpos(strtolower($option->text), 'ninguno') !== false) {
                     $correctOptionIds[] = $option->id;
                 }
             }
@@ -750,22 +767,39 @@ class QuestionEvaluationService
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasPenalty);
         if (!empty($binaryResult)) {
+            Log::info('✅ Penalty goal evaluation - binary result found', [
+                'question_id' => $question->id,
+                'hasPenalty' => $hasPenalty,
+                'correct_option_ids' => $binaryResult
+            ]);
             return $binaryResult;
         }
 
-        if ($hasPenalty) {
+        // 🔧 FIX: Si resolveBinaryQuestionOptions retorna vacío, buscar explícitamente
+        // "ninguno", "0", "no" cuando no hay penales
+        if (!$hasPenalty) {
+            foreach ($question->options as $option) {
+                $optionText = strtolower(trim($option->text));
+                
+                // Buscar opciones que representen "no hay penales"
+                if (strpos($optionText, 'ninguno') !== false ||
+                    strpos($optionText, 'no') !== false ||
+                    $optionText === '0') {
+                    $correctOptionIds[] = $option->id;
+                    Log::info('✅ Penalty goal evaluation - marking "ninguno" as correct', [
+                        'question_id' => $question->id,
+                        'option_text' => $option->text,
+                        'option_id' => $option->id
+                    ]);
+                }
+            }
+        } else {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
 
                 if ($homePenalty > 0 && strpos($optionText, strtolower($match->home_team)) !== false) {
                     $correctOptionIds[] = $option->id;
                 } elseif ($awayPenalty > 0 && strpos($optionText, strtolower($match->away_team)) !== false) {
-                    $correctOptionIds[] = $option->id;
-                }
-            }
-        } else {
-            foreach ($question->options as $option) {
-                if (strpos(strtolower($option->text), 'ninguno') !== false) {
                     $correctOptionIds[] = $option->id;
                 }
             }
@@ -813,22 +847,39 @@ class QuestionEvaluationService
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasFreeKickGoal);
         if (!empty($binaryResult)) {
+            Log::info('✅ Free kick goal evaluation - binary result found', [
+                'question_id' => $question->id,
+                'hasFreeKickGoal' => $hasFreeKickGoal,
+                'correct_option_ids' => $binaryResult
+            ]);
             return $binaryResult;
         }
 
-        if ($hasFreeKickGoal) {
+        // 🔧 FIX: Si resolveBinaryQuestionOptions retorna vacío, buscar explícitamente
+        // "ninguno", "0", "no" cuando no hay tiros libres
+        if (!$hasFreeKickGoal) {
+            foreach ($question->options as $option) {
+                $optionText = strtolower(trim($option->text));
+                
+                // Buscar opciones que representen "no hay goles de tiro libre"
+                if (strpos($optionText, 'ninguno') !== false ||
+                    strpos($optionText, 'no') !== false ||
+                    $optionText === '0') {
+                    $correctOptionIds[] = $option->id;
+                    Log::info('✅ Free kick goal evaluation - marking "ninguno" as correct', [
+                        'question_id' => $question->id,
+                        'option_text' => $option->text,
+                        'option_id' => $option->id
+                    ]);
+                }
+            }
+        } else {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
 
                 if ($homeFreeKick > 0 && strpos($optionText, strtolower($match->home_team)) !== false) {
                     $correctOptionIds[] = $option->id;
                 } elseif ($awayFreeKick > 0 && strpos($optionText, strtolower($match->away_team)) !== false) {
-                    $correctOptionIds[] = $option->id;
-                }
-            }
-        } else {
-            foreach ($question->options as $option) {
-                if (strpos(strtolower($option->text), 'ninguno') !== false) {
                     $correctOptionIds[] = $option->id;
                 }
             }
@@ -878,22 +929,39 @@ class QuestionEvaluationService
 
         $binaryResult = $this->resolveBinaryQuestionOptions($question, $hasCornerGoal);
         if (!empty($binaryResult)) {
+            Log::info('✅ Corner goal evaluation - binary result found', [
+                'question_id' => $question->id,
+                'hasCornerGoal' => $hasCornerGoal,
+                'correct_option_ids' => $binaryResult
+            ]);
             return $binaryResult;
         }
 
-        if ($hasCornerGoal) {
+        // 🔧 FIX: Si resolveBinaryQuestionOptions retorna vacío, buscar explícitamente
+        // "ninguno", "0", "no" cuando no hay goles de córner
+        if (!$hasCornerGoal) {
+            foreach ($question->options as $option) {
+                $optionText = strtolower(trim($option->text));
+                
+                // Buscar opciones que representen "no hay goles de córner"
+                if (strpos($optionText, 'ninguno') !== false ||
+                    strpos($optionText, 'no') !== false ||
+                    $optionText === '0') {
+                    $correctOptionIds[] = $option->id;
+                    Log::info('✅ Corner goal evaluation - marking "ninguno" as correct', [
+                        'question_id' => $question->id,
+                        'option_text' => $option->text,
+                        'option_id' => $option->id
+                    ]);
+                }
+            }
+        } else {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
 
                 if ($homeCorner > 0 && strpos($optionText, strtolower($match->home_team)) !== false) {
                     $correctOptionIds[] = $option->id;
                 } elseif ($awayCorner > 0 && strpos($optionText, strtolower($match->away_team)) !== false) {
-                    $correctOptionIds[] = $option->id;
-                }
-            }
-        } else {
-            foreach ($question->options as $option) {
-                if (strpos(strtolower($option->text), 'ninguno') !== false) {
                     $correctOptionIds[] = $option->id;
                 }
             }
