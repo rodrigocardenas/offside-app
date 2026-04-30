@@ -51,7 +51,7 @@ class VerifyQuestionResultsJob implements ShouldQueue
                     try {
                         $match = $question->football_match;
 
-                        if (!$match || !in_array($match->status, ['FINISHED', 'Match Finished'])) {
+                        if (!$match || !in_array($match->status, ['FINISHED', 'Match Finished', 'Finished'])) {
                             Log::warning('Match not ready for evaluation', [
                                 'question_id' => $question->id,
                                 'match_id' => $match?->id,
