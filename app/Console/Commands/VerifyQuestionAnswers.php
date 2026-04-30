@@ -167,11 +167,28 @@ class VerifyQuestionAnswers extends Command
                     foreach ($question->answers as $answer) {
                         $wasCorrect = $answer->is_correct;
                         $answer->is_correct = in_array($answer->question_option_id, $correctOptionIds);
+                        $oldPoints = $answer->points_earned ?? 0;
                         $answer->points_earned = $answer->is_correct ? ($question->points ?? 300) : 0;
 
                         if ($wasCorrect !== $answer->is_correct) {
                             $answer->save();
                             $answersUpdated++;
+                            
+                            // 🔧 CRÍTICO: Sincronizar puntos en group_user después de actualizar
+                            $pointsDiff = $answer->points_earned - $oldPoints;
+                            if ($pointsDiff !== 0 && $question->group_id) {
+                                $currentPoints = \DB::table('group_user')
+                                    ->where('group_id', $question->group_id)
+                                    ->where('user_id', $answer->user_id)
+                                    ->value('points') ?? 0;
+                                
+                                $newPoints = max(0, $currentPoints + $pointsDiff);
+                                
+                                \DB::table('group_user')
+                                    ->where('group_id', $question->group_id)
+                                    ->where('user_id', $answer->user_id)
+                                    ->update(['points' => $newPoints]);
+                            }
                         }
                     }
 

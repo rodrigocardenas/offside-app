@@ -13,6 +13,7 @@ use App\Models\FootballMatch;
 use App\Models\Question;
 use App\Services\Features\FeaturedMatchService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Models\Group;
 use App\Traits\HandlesQuestions;
 
@@ -155,11 +156,28 @@ class UpdateMatchesAndVerifyResults implements ShouldQueue
                     ]
                 );
 
-                // Actualizar las respuestas correctas
+                // Actualizar las respuestas correctas y sincronizar puntos
                 foreach ($answers as $answer) {
+                    $oldPoints = $answer->points_earned ?? 0;
                     $answer->is_correct = in_array($answer->option_id, $correctAnswers->toArray());
                     $answer->points_earned = $answer->is_correct ? 300 : 0;
                     $answer->save();
+                    
+                    // 🔧 CRÍTICO: Sincronizar puntos en group_user después de actualizar
+                    $pointsDiff = $answer->points_earned - $oldPoints;
+                    if ($pointsDiff !== 0 && $question->group_id) {
+                        $currentPoints = DB::table('group_user')
+                            ->where('group_id', $question->group_id)
+                            ->where('user_id', $answer->user_id)
+                            ->value('points') ?? 0;
+                        
+                        $newPoints = max(0, $currentPoints + $pointsDiff);
+                        
+                        DB::table('group_user')
+                            ->where('group_id', $question->group_id)
+                            ->where('user_id', $answer->user_id)
+                            ->update(['points' => $newPoints]);
+                    }
                 }
 
                 // Marcar la pregunta como verificada

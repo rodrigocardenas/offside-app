@@ -120,12 +120,33 @@ class ForceVerifyQuestionsCommand extends Command
 
             if ($reVerify) {
                 // Reset result_verified_at y points_earned para re-verificar
-                $questionsForMatch = Question::whereIn('match_id', $matchIds)->pluck('id');
+                $questionsForMatch = Question::whereIn('match_id', $matchIds)->get();
 
-                // Reset points_earned in answers for these questions
-                \App\Models\Answer::whereIn('question_id', $questionsForMatch)->update([
-                    'points_earned' => 0,
-                ]);
+                // Reset points_earned in answers for these questions and sync group_user.points
+                foreach ($questionsForMatch as $question) {
+                    $answers = $question->answers()->get();
+                    foreach ($answers as $answer) {
+                        if ($answer->points_earned > 0) {
+                            // 🔧 CRÍTICO: Sincronizar puntos en group_user antes de resetear
+                            if ($question->group_id) {
+                                $currentPoints = \DB::table('group_user')
+                                    ->where('group_id', $question->group_id)
+                                    ->where('user_id', $answer->user_id)
+                                    ->value('points') ?? 0;
+                                
+                                $newPoints = max(0, $currentPoints - $answer->points_earned);
+                                
+                                \DB::table('group_user')
+                                    ->where('group_id', $question->group_id)
+                                    ->where('user_id', $answer->user_id)
+                                    ->update(['points' => $newPoints]);
+                            }
+                            
+                            $answer->points_earned = 0;
+                            $answer->save();
+                        }
+                    }
+                }
 
                 // Reset result_verified_at on questions
                 Question::whereIn('match_id', $matchIds)->update([

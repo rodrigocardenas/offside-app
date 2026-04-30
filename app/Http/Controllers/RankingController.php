@@ -54,29 +54,38 @@ class RankingController extends Controller
                 $answer->created_at->format('Y-m-d');
         })->map(function ($group) {
             return $group->map(function ($answer) {
+                // 🔧 IMPORTANTE: Calcular opción correcta en todos los casos
                 $correctOption = $answer->question->options->where('is_correct', true)->first();
+                
+                // ✅ Determinar si la pregunta ha sido verificada
+                $isVerified = $answer->question->result_verified_at !== null;
+                
                 return [
                     'id' => $answer->id,
                     'question' => [
                         'id' => $answer->question->id,
                         'title' => $answer->question->title,
                         'result_verified_at' => $answer->question->result_verified_at,
+                        'is_verified' => $isVerified,  // 🆕 Flag explícito
                         'football_match' => $answer->question->football_match ? [
                             'id' => $answer->question->football_match->id,
                             'home_team' => $answer->question->football_match->home_team,
                             'away_team' => $answer->question->football_match->away_team,
                             'status' => $answer->question->football_match->status,
+                            'date' => $answer->question->football_match->date->format('Y-m-d'),
                         ] : null,
                     ],
                     'question_option' => [
                         'id' => $answer->questionOption->id,
                         'text' => $answer->questionOption->text,
                     ],
+                    // 🔧 CRÍTICO: Incluir opción correcta SIEMPRE
                     'correct_option' => $correctOption ? [
                         'id' => $correctOption->id,
                         'text' => $correctOption->text,
                     ] : null,
-                    'is_correct' => $answer->is_correct,
+                    'is_correct' => $answer->is_correct,  // null si no verificado, true/false si verificado
+                    'is_verified' => $isVerified,  // Flag de verificación
                     'points_earned' => $answer->points_earned,
                     'created_at' => $answer->created_at,
                 ];

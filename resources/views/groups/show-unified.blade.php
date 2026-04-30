@@ -306,6 +306,18 @@
 
             // Resultados por fecha
             for (const [date, answers] of Object.entries(data.groupedAnswers)) {
+                // 🔧 FILTRO CRÍTICO: Excluir partidos que no han comenzado o están sin estado
+                const finishedMatches = answers.filter(answer => {
+                    const matchStatus = answer.question.football_match?.status || '';
+                    // Solo mostrar si el partido terminó
+                    return ['FINISHED', 'Match Finished', 'Finished', 'Ended'].includes(matchStatus);
+                });
+
+                // ⭐ IMPORTANTE: Solo mostrar la fecha si hay respuestas de partidos terminados
+                if (finishedMatches.length === 0) {
+                    continue;
+                }
+
                 const formattedDate = new Date(date).toLocaleDateString('es-ES', {
                     weekday: 'long',
                     year: 'numeric',
@@ -317,13 +329,6 @@
                 html += `<div class="px-4 md:px-6 py-3 font-bold" style="border-bottom: 1px solid ${themeConfig.borderColor}; color: ${themeConfig.textPrimary};">`;
                 html += formattedDate;
                 html += `</div>`;
-
-                // 🔧 FILTRO: Excluir partidos que no han comenzado o están sin estado
-                const finishedMatches = answers.filter(answer => {
-                    const matchStatus = answer.question.football_match?.status || '';
-                    // Solo mostrar si el partido terminó
-                    return ['FINISHED', 'Match Finished', 'Finished', 'Ended'].includes(matchStatus);
-                });
 
                 finishedMatches.forEach(answer => {
                     const isCorrect = answer.is_correct;
@@ -351,14 +356,14 @@
                                             <i class="fas fa-${isCorrect ? 'check' : 'times'}"></i>
                                         </span>
                                     </div>
-                                    ${!isCorrect && answer.correct_option ? `
+                                    ${!isCorrect && answer.correct_option && answer.is_verified ? `
                                         <div class="text-xs">
                                             <span style="color: ${themeConfig.textSecondary};">Respuesta correcta:</span>
                                             <span class="px-2.5 py-0.5 rounded-full text-white bg-green-500 ml-2">
                                                 ${answer.correct_option.text}
                                             </span>
                                         </div>
-                                    ` : !answer.question.result_verified_at ? `
+                                    ` : !answer.is_verified ? `
                                         <div class="text-xs">
                                             <span style="color: ${themeConfig.textSecondary};">Estado:</span>
                                             <span class="px-2.5 py-0.5 rounded-full text-white bg-yellow-500 ml-2">
