@@ -64,11 +64,15 @@ class VerifyQuestionResultsJob implements ShouldQueue
                         $correctOptionIds = $evaluationService->evaluateQuestion($question, $match);
 
                         if (empty($correctOptionIds)) {
-                            Log::warning('No correct options found for question', [
+                            Log::warning('No correct options found for question — skipping to allow retry', [
                                 'question_id' => $question->id,
                                 'question_title' => $question->title,
                                 'match_id' => $match->id
                             ]);
+                            // ✅ CRITICAL: Do NOT mark as verified when evaluator returns empty.
+                            // Matches VerifyAllQuestionsJob behavior — question stays unverified
+                            // so it will be retried on the next run.
+                            continue;
                         }
 
                         // Actualizar opciones correctas
