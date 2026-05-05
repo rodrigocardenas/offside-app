@@ -118,6 +118,7 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de perfil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/clubs/{competitionId}', [ProfileController::class, 'getClubsByCompetition'])->name('profile.clubs');
     Route::get('/profile/national-teams', [ProfileController::class, 'getNationalTeams'])->name('profile.national-teams');
 

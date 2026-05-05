@@ -183,9 +183,93 @@
                     {{ __('views.profile_section.save_changes') }}
                 </button>
             </form>
+
+            {{-- ZONA DE PELIGRO: ELIMINAR CUENTA --}}
+            <div style="margin: 24px 16px 0 16px; background: {{ $isDark ? '#2d1b1b' : '#fff5f5' }}; border: 1px solid {{ $isDark ? '#6b2020' : '#fecaca' }}; border-radius: 12px; padding: 16px;">
+                <p style="color: {{ $isDark ? '#f87171' : '#dc2626' }}; font-weight: 600; font-size: 14px; margin: 0 0 8px 0;">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 6px;"></i>
+                    {{ __('views.profile_section.delete_account') }}
+                </p>
+                <p style="color: {{ $isDark ? '#fca5a5' : '#991b1b' }}; font-size: 13px; margin: 0 0 12px 0; line-height: 1.5;">
+                    {{ __('views.profile_section.delete_account_warning') }}
+                </p>
+                <button type="button" onclick="openDeleteModal()"
+                    style="width: 100%; padding: 10px 16px; background: transparent; color: {{ $isDark ? '#f87171' : '#dc2626' }}; border: 1.5px solid {{ $isDark ? '#f87171' : '#dc2626' }}; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                    <i class="fas fa-trash-alt"></i>
+                    {{ __('views.profile_section.delete_account') }}
+                </button>
+            </div>
         </div>
         {{-- BOTTOM NAVIGATION --}}
         <x-layout.bottom-navigation active-item="profile" />
+    </div>
+
+    {{-- MODAL PASO 1: CONFIRMACIÓN CON "DELETE" --}}
+    <div id="delete-modal-step1" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+        <div style="background: {{ $isDark ? '#1a2a2a' : '#ffffff' }}; border-radius: 16px; padding: 24px; width:100%; max-width:400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="text-align:center; margin-bottom:16px;">
+                <div style="width:56px; height:56px; background:{{ $isDark ? '#6b2020' : '#fee2e2' }}; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                    <i class="fas fa-trash-alt" style="color:{{ $isDark ? '#f87171' : '#dc2626' }}; font-size:22px;"></i>
+                </div>
+                <h3 style="color:{{ $isDark ? '#f1f1f1' : '#111' }}; font-size:18px; font-weight:700; margin:0 0 8px;">
+                    {{ __('views.profile_section.delete_account_title') }}
+                </h3>
+                <p style="color:{{ $isDark ? '#aaa' : '#666' }}; font-size:13px; line-height:1.5; margin:0;">
+                    {{ __('views.profile_section.delete_account_warning') }}
+                </p>
+            </div>
+
+            <p style="color:{{ $isDark ? '#ccc' : '#444' }}; font-size:13px; margin:0 0 8px;">{!! __('views.profile_section.delete_account_confirm_label') !!}</p>
+            <input type="text" id="delete-confirm-input"
+                placeholder="{{ __('views.profile_section.delete_account_confirm_placeholder') }}"
+                autocomplete="off"
+                oninput="checkDeleteInput()"
+                style="width:100%; border:1.5px solid {{ $isDark ? '#555' : '#d1d5db' }}; border-radius:8px; padding:10px 12px; font-size:14px; color:{{ $isDark ? '#f1f1f1' : '#111' }}; background:{{ $isDark ? '#0f2b2a' : '#f9fafb' }}; box-sizing:border-box; margin-bottom:16px; letter-spacing:1px;">
+
+            <div style="display:flex; gap:10px;">
+                <button type="button" onclick="closeDeleteModal()"
+                    style="flex:1; padding:10px; background:{{ $isDark ? '#2a3a3a' : '#f3f4f6' }}; color:{{ $isDark ? '#ccc' : '#374151' }}; border:none; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer;">
+                    {{ __('views.profile_section.delete_account_cancel') }}
+                </button>
+                <button type="button" id="delete-step1-btn" onclick="openDeleteModalStep2()" disabled
+                    style="flex:1; padding:10px; background:#dc2626; color:white; border:none; border-radius:8px; font-weight:600; font-size:14px; cursor:not-allowed; opacity:0.4; transition:all 0.2s;">
+                    {{ __('views.profile_section.delete_account_button') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL PASO 2: ÚLTIMA CONFIRMACIÓN --}}
+    <div id="delete-modal-step2" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; align-items:center; justify-content:center; padding:16px;">
+        <div style="background: {{ $isDark ? '#1a2a2a' : '#ffffff' }}; border-radius: 16px; padding: 24px; width:100%; max-width:400px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);">
+            <div style="text-align:center; margin-bottom:20px;">
+                <div style="width:56px; height:56px; background:#dc2626; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                    <i class="fas fa-exclamation" style="color:white; font-size:24px;"></i>
+                </div>
+                <h3 style="color:{{ $isDark ? '#f1f1f1' : '#111' }}; font-size:18px; font-weight:700; margin:0 0 8px;">
+                    {{ __('views.profile_section.delete_account_step2_title') }}
+                </h3>
+                <p style="color:{{ $isDark ? '#fca5a5' : '#991b1b' }}; font-size:13px; line-height:1.5; margin:0;">
+                    {{ __('views.profile_section.delete_account_step2_warning') }}
+                </p>
+            </div>
+
+            <form method="POST" action="{{ route('profile.destroy') }}">
+                @csrf
+                @method('DELETE')
+                <input type="hidden" name="confirm_delete" value="DELETE">
+                <div style="display:flex; gap:10px;">
+                    <button type="button" onclick="closeDeleteModalStep2()"
+                        style="flex:1; padding:10px; background:{{ $isDark ? '#2a3a3a' : '#f3f4f6' }}; color:{{ $isDark ? '#ccc' : '#374151' }}; border:none; border-radius:8px; font-weight:600; font-size:14px; cursor:pointer;">
+                        {{ __('views.profile_section.delete_account_cancel') }}
+                    </button>
+                    <button type="submit"
+                        style="flex:1; padding:10px; background:#dc2626; color:white; border:none; border-radius:8px; font-weight:700; font-size:14px; cursor:pointer;">
+                        {{ __('views.profile_section.delete_account_confirm_button') }}
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     {{-- MODALES --}}
@@ -377,6 +461,53 @@
             if (competitionSelectEl && initialCompetitionId) {
                 loadClubsForCompetition(initialCompetitionId, initialClubId);
             }
+        });
+
+        // --- Delete account modal logic ---
+        function openDeleteModal() {
+            const modal = document.getElementById('delete-modal-step1');
+            modal.style.display = 'flex';
+            document.getElementById('delete-confirm-input').value = '';
+            document.getElementById('delete-step1-btn').disabled = true;
+            document.getElementById('delete-step1-btn').style.opacity = '0.4';
+            document.getElementById('delete-step1-btn').style.cursor = 'not-allowed';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal-step1').style.display = 'none';
+        }
+
+        function checkDeleteInput() {
+            const val = document.getElementById('delete-confirm-input').value.trim();
+            const btn = document.getElementById('delete-step1-btn');
+            if (val === 'DELETE') {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.4';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+
+        function openDeleteModalStep2() {
+            document.getElementById('delete-modal-step1').style.display = 'none';
+            document.getElementById('delete-modal-step2').style.display = 'flex';
+        }
+
+        function closeDeleteModalStep2() {
+            document.getElementById('delete-modal-step2').style.display = 'none';
+        }
+
+        // Close step1 modal on backdrop click
+        document.getElementById('delete-modal-step1').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+
+        // Close step2 modal on backdrop click
+        document.getElementById('delete-modal-step2').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModalStep2();
         });
     </script>
 

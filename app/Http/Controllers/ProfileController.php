@@ -173,5 +173,28 @@ class ProfileController extends Controller
 
         return response()->json($teams);
     }
+
+    /**
+     * Soft-delete the authenticated user's account.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'confirm_delete' => ['required', 'in:DELETE'],
+        ]);
+
+        $user = auth()->user();
+
+        Auth::logout();
+
+        $user->delete(); // SoftDeletes — sets deleted_at
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        Log::info('User account soft-deleted', ['user_id' => $user->id]);
+
+        return Redirect::to('/')->with('status', 'account-deleted');
+    }
 }
 
