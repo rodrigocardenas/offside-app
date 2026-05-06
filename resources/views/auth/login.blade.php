@@ -252,6 +252,20 @@
         });
 
         window.addEventListener('load', function() {
+            // 🍎 Ocultar botón de Google en iOS (por Guideline 4.8 de App Store)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            if (isIOS) {
+                const googleBtn = document.getElementById('googleLoginBtn');
+                const separator = googleBtn?.previousElementSibling;
+                if (googleBtn) {
+                    googleBtn.style.display = 'none';
+                    console.log('✅ Botón de Google oculto en iOS');
+                }
+                if (separator && separator.textContent.includes('O CONTINÚA')) {
+                    separator.style.display = 'none';
+                }
+            }
+
             // Verificar si es la primera visita y no está instalada
             if (!localStorage.getItem('pwaInstallShown') && !isPWAInstalled()) {
                 showInstallModal();
