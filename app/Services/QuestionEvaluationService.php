@@ -28,28 +28,11 @@ use Illuminate\Support\Facades\Log;
  */
 class QuestionEvaluationService
 {
-    private ?GeminiService $geminiService;
-
-    /**
-     * ✅ CACHE: Almacena datos completos del partido para evitar llamadas múltiples a Gemini
-     * Clave: match_id, Valor: datos completos obtenidos de Gemini
-     *
-     * Esto es CRUCIAL para evitar rate limiting cuando hay múltiples preguntas
-     * que necesitan información del mismo partido
-     */
-    private array $matchDataCache = [];
-
     /**
      * ✅ DEDUPLICATION CACHE: Agrupa preguntas por (match_id, template_question_id)
      * para evitar verificaciones duplicadas.
      *
-     * Ejemplo:
-     * - Question #29 (template_id: 5, group: 1) → Resultado verificado: [1]
-     * - Question #24 (template_id: 5, group: 2) → Usa MISMO resultado: [1]
-     * - Question #18 (template_id: 5, group: 3) → Usa MISMO resultado: [1]
-     *
      * Clave: "match_id|template_id", Valor: IDs de opciones correctas
-     * Reducción esperada: 80-90% de llamadas a Gemini cuando hay preguntas duplicadas
      */
     private array $templateResultsCache = [];
 
@@ -59,10 +42,8 @@ class QuestionEvaluationService
      */
     private array $teamApiIdsCache = [];
 
-    public function __construct(?GeminiService $geminiService = null)
+    public function __construct()
     {
-        $this->geminiService = $geminiService;
-        $this->matchDataCache = [];
         $this->templateResultsCache = [];
     }
 
@@ -246,15 +227,6 @@ class QuestionEvaluationService
                     'statistics_keys' => is_string($match->statistics) ? array_keys(json_decode($match->statistics, true) ?? []) : array_keys($match->statistics ?? []),
                 ]);
 
-                $fallbackOptions = $this->attemptGeminiFallback(
-                    $question,
-                    $match,
-                    $questionHandled ? 'empty_result' : 'unknown_type'
-                );
-
-                if (!empty($fallbackOptions)) {
-                    return $fallbackOptions;
-                }
             }
 
             // ✅ DEDUPLICATION: Cachear resultado para futuras preguntas del mismo template
@@ -495,7 +467,7 @@ class QuestionEvaluationService
 
     /**
      * TIPO: ÚLTIMO GOL
-     * 
+     *
      * ✅ BUG FIX #8: CRITICAL FIX - Return empty array if events are missing
      * This prevents marking questions as verified when event data isn't available yet.
      * VerifyAllQuestionsJob will then skip the question and retry later.
@@ -536,7 +508,7 @@ class QuestionEvaluationService
             foreach ($question->options as $option) {
                 if (strpos(strtolower($option->text), 'ninguno') !== false) {
                     $correctOptionIds[] = $option->id;
-                    
+
                     // ✅ LOG when marking "Ninguno" as correct
                     Log::info('✅ Last goal evaluation: no valid goals found (but events exist), marking "Ninguno" as correct', [
                         'question_id' => $question->id,
@@ -553,7 +525,7 @@ class QuestionEvaluationService
         foreach ($question->options as $option) {
             if (strpos(strtolower($option->text), strtolower($lastGoalTeam)) !== false) {
                 $correctOptionIds[] = $option->id;
-                
+
                 // ✅ LOG: Confirm that we found the correct option
                 Log::info('✅ Last goal evaluation: found matching option', [
                     'question_id' => $question->id,
@@ -698,7 +670,7 @@ class QuestionEvaluationService
         if (!$hasOwnGoal) {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
-                
+
                 // Buscar opciones que representen "no hay autogoles"
                 if (strpos($optionText, 'ninguno') !== false ||
                     strpos($optionText, 'no') !== false ||
@@ -797,7 +769,7 @@ class QuestionEvaluationService
         if (!$hasPenalty) {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
-                
+
                 // Buscar opciones que representen "no hay penales"
                 if (strpos($optionText, 'ninguno') !== false ||
                     strpos($optionText, 'no') !== false ||
@@ -877,7 +849,7 @@ class QuestionEvaluationService
         if (!$hasFreeKickGoal) {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
-                
+
                 // Buscar opciones que representen "no hay goles de tiro libre"
                 if (strpos($optionText, 'ninguno') !== false ||
                     strpos($optionText, 'no') !== false ||
@@ -959,7 +931,7 @@ class QuestionEvaluationService
         if (!$hasCornerGoal) {
             foreach ($question->options as $option) {
                 $optionText = strtolower(trim($option->text));
-                
+
                 // Buscar opciones que representen "no hay goles de córner"
                 if (strpos($optionText, 'ninguno') !== false ||
                     strpos($optionText, 'no') !== false ||
@@ -1038,7 +1010,7 @@ class QuestionEvaluationService
             } elseif ($homePossession === $awayPossession) {
                 // 🔧 FIX: Si hay empate en posesión, ambas opciones son correctas
                 // porque ninguno tiene "más" posesión - son iguales
-                if ($this->teamNameMatches($optionText, $match->home_team) || 
+                if ($this->teamNameMatches($optionText, $match->home_team) ||
                     $this->teamNameMatches($optionText, $match->away_team)) {
                     $correctOptionIds[] = $option->id;
                 }
@@ -1254,10 +1226,10 @@ class QuestionEvaluationService
 
     /**
      * ✅ BUG #8 PREVENTION: Detecta si una pregunta está basada en eventos
-     * 
+     *
      * Las preguntas basadas en eventos son vulnerables a verificación prematura
      * porque pueden retornar respuestas por defecto cuando los eventos no existen.
-     * 
+     *
      * Si los eventos no están disponibles, esta pregunta debe retornar []
      * para que VerifyAllQuestionsJob la reintente más tarde.
      */
@@ -1614,395 +1586,6 @@ class QuestionEvaluationService
             return (float) str_replace('%', '', $value);
         }
         return null;
-    }
-
-    private function shouldUseGeminiFallback(): bool
-    {
-        return (bool) config('question_evaluation.gemini_fallback_enabled', true);
-    }
-
-    private function attemptGeminiFallback(Question $question, FootballMatch $match, string $reason): array
-    {
-        if (!$this->shouldUseGeminiFallback()) {
-            return [];
-        }
-
-        $gemini = $this->geminiService;
-
-        if (!$gemini) {
-            try {
-                $gemini = app(GeminiService::class);
-                $this->geminiService = $gemini;
-            } catch (\Throwable $e) {
-                Log::error('Unable to resolve GeminiService for fallback', [
-                    'question_id' => $question->id,
-                    'match_id' => $match->id,
-                    'reason' => $reason,
-                    'error' => $e->getMessage()
-                ]);
-                return [];
-            }
-        }
-
-        // ✅ OPTIMIZACIÓN: Usar cache de datos del partido para evitar múltiples llamadas a Gemini
-        $prompt = $this->buildGeminiFallbackPromptOptimized($question, $match, $reason, $gemini);
-
-        // ✅ IMPORTANTE: Determinar si necesitamos grounding (búsqueda web)
-        // - Si NO hay datos verificados en la BD: usar grounding (buscar en internet)
-        // - Si SÍ hay datos verificados: NO usar grounding (más rápido)
-        $hasVerified = $this->hasVerifiedMatchData($match);
-        $useGrounding = !$hasVerified; // Solo usar grounding si NO hay datos verificados
-
-        Log::info('Gemini fallback decision', [
-            'question_id' => $question->id,
-            'match_id' => $match->id,
-            'has_verified_data' => $hasVerified,
-            'use_grounding' => $useGrounding,
-            'reason' => $reason
-        ]);
-
-        try {
-            Log::info('Gemini fallback attempting to resolve question', [
-                'question_id' => $question->id,
-                'match_id' => $match->id,
-                'reason' => $reason,
-                'match_data_cached' => isset($this->matchDataCache[$match->id]),
-                'grounding' => $useGrounding ? '✅ enabled' : '❌ disabled'
-            ]);
-
-            // ⚠️ Usar versión segura con timeout
-            $response = $this->callGeminiSafe($gemini, $prompt, $useGrounding);
-
-            if ($response === null) {
-                Log::warning('Gemini did not respond (timeout or rate limit)', [
-                    'question_id' => $question->id,
-                    'match_id' => $match->id
-                ]);
-                return [];
-            }
-
-            $resolved = $this->parseGeminiFallbackResponse($response, $question);
-
-            if (!empty($resolved)) {
-                Log::info('Gemini fallback resolved question options', [
-                    'question_id' => $question->id,
-                    'match_id' => $match->id,
-                    'reason' => $reason,
-                    'option_ids' => $resolved
-                ]);
-            }
-
-            return $resolved;
-        } catch (\Throwable $e) {
-            Log::error('Gemini fallback failed', [
-                'question_id' => $question->id,
-                'match_id' => $match->id,
-                'reason' => $reason,
-                'error' => $e->getMessage(),
-                'error_type' => get_class($e)
-            ]);
-            return [];
-        }
-    }
-
-    /**
-     * ✅ SEGURIDAD: Llamada a Gemini con timeout y manejo de rate limit
-     * Lanza excepción si hay rate limit o timeout - no retorna null
-     */
-    private function callGeminiSafe(GeminiService $gemini, string $prompt, bool $useGrounding): ?array
-    {
-        $maxWait = 8; // máximo 8 segundos esperando
-        $startTime = microtime(true);
-
-        try {
-            $response = $gemini->callGemini($prompt, $useGrounding);
-
-            $elapsed = microtime(true) - $startTime;
-            Log::info('Gemini responded successfully', [
-                'elapsed_ms' => round($elapsed * 1000, 2)
-            ]);
-
-            return $response;
-
-        } catch (\Exception $e) {
-            $elapsed = microtime(true) - $startTime;
-            $errorMsg = $e->getMessage();
-
-            if (strpos($errorMsg, 'Rate limited') !== false || strpos($errorMsg, '429') !== false) {
-                Log::warning('Gemini rate limited - throwing exception', [
-                    'elapsed_ms' => round($elapsed * 1000, 2),
-                    'error' => substr($errorMsg, 0, 100)
-                ]);
-                throw new \Exception('Rate limited por Gemini');
-            }
-
-            if ($elapsed > $maxWait) {
-                Log::warning('Gemini call exceeded timeout threshold', [
-                    'elapsed_ms' => round($elapsed * 1000, 2),
-                    'max_wait_s' => $maxWait
-                ]);
-                throw new \Exception('Timeout esperando respuesta de Gemini (>' . $maxWait . 's)');
-            }
-
-            // Re-lanzar otros errores
-            throw $e;
-        }
-    }
-
-    /**
-     * ✅ OPTIMIZACIÓN: Construir prompt reutilizando datos en caché
-     *
-     * Si es la primera pregunta del match:
-     *   → Obtener datos del match una sola vez con Gemini
-     *   → Guardar en cache ($this->matchDataCache)
-     *
-     * Para preguntas posteriores del MISMO match:
-     *   → Reutilizar datos en caché
-     *   → NO hacer llamada a Gemini adicional
-     */
-    private function buildGeminiFallbackPromptOptimized(
-        Question $question,
-        FootballMatch $match,
-        string $reason,
-        GeminiService $gemini
-    ): string {
-        // Obtener o generar datos del partido
-        $matchData = $this->getMatchDataOnce($match, $gemini);
-
-        $optionsPayload = [];
-        foreach ($question->options as $index => $option) {
-            $optionsPayload[] = [
-                'key' => 'option_' . ($index + 1),
-                'text' => (string) $option->text
-            ];
-        }
-
-        $matchDate = $match->date ?? $match->match_date ?? null;
-        if ($matchDate instanceof \Carbon\CarbonInterface) {
-            $matchDate = $matchDate->toDateTimeString();
-        }
-
-        $context = [
-            'match' => [
-                'id' => $match->id,
-                'home_team' => $match->home_team,
-                'away_team' => $match->away_team,
-                'status' => $match->status,
-                'date' => $matchDate,
-                'score' => [
-                    'home' => $match->home_team_score,
-                    'away' => $match->away_team_score
-                ],
-                'events' => $matchData['events'] ?? [],
-                'statistics' => $matchData['statistics'] ?? []
-            ],
-            'question' => [
-                'id' => $question->id,
-                'title' => $question->title,
-                'type' => $question->type,
-                'reason' => $reason
-            ],
-            'options' => $optionsPayload
-        ];
-
-        $contextJson = json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if ($contextJson === false) {
-            $contextJson = '{}';
-        }
-
-        return <<<PROMPT
-Eres un árbitro virtual que verifica predicciones de fútbol usando datos estructurados del partido.
-Analiza el contexto proporcionado y determina qué opciones son correctas.
-Responde EXCLUSIVAMENTE con JSON usando la forma {"selected_options":["option_1"]}.
-
-Contexto:
-{$contextJson}
-
-Instrucciones:
-1. Basate solo en la información del contexto.
-2. Si ninguna opción es correcta, devuelve {"selected_options": []}.
-3. No agregues explicaciones ni texto adicional, solo el JSON solicitado.
-PROMPT;
-    }
-
-    /**
-     * ✅ CACHE: Obtener datos del partido UNA SOLA VEZ
-     *
-     * En lugar de hacer múltiples llamadas a Gemini para obtener detalles del partido,
-     * esto cachea los datos en la sesión de QuestionEvaluationService.
-     *
-     * Primera pregunta del match:
-     *   → Si no están los datos en DB → Llamar a Gemini UNA VEZ
-     *   → Guardar en $matchDataCache[$match->id]
-     *
-     * Preguntas posteriores del MISMO match:
-     *   → Usar datos en caché
-     *   → CERO llamadas a Gemini adicionales
-     */
-    private function getMatchDataOnce(FootballMatch $match, GeminiService $gemini): array
-    {
-        $matchId = $match->id;
-
-        // ✅ Si ya tenemos datos en caché, devolverlos inmediatamente
-        if (isset($this->matchDataCache[$matchId])) {
-            Log::debug('Match data retrieved from session cache', ['match_id' => $matchId]);
-            return $this->matchDataCache[$matchId];
-        }
-
-        // Si el partido ya tiene datos en BD, usarlos
-        $existingData = [
-            'events' => $this->parseEvents($match->events ?? []),
-            'statistics' => $this->parseStatistics($match->statistics ?? [])
-        ];
-
-        // Si hay eventos y stats existentes, guardar en caché y devolver
-        if (!empty($existingData['events']) || !empty($existingData['statistics'])) {
-            $this->matchDataCache[$matchId] = $existingData;
-            Log::debug('Match data retrieved from database', ['match_id' => $matchId]);
-            return $existingData;
-        }
-
-        // Solo si NO hay datos en BD, llamar a Gemini
-        Log::info('Fetching match data from Gemini (first time)', ['match_id' => $matchId]);
-
-        try {
-            $details = $gemini->getDetailedMatchData(
-                $match->home_team,
-                $match->away_team,
-                $match->date,
-                $match->league,
-                false // no force refresh
-            );
-
-            if ($details && is_array($details)) {
-                $matchData = [
-                    'events' => $details['events'] ?? [],
-                    'statistics' => $details['statistics'] ?? []
-                ];
-
-                // Guardar en caché para preguntas posteriores del mismo match
-                $this->matchDataCache[$matchId] = $matchData;
-
-                Log::info('Match data cached from Gemini', [
-                    'match_id' => $matchId,
-                    'events_count' => count($matchData['events']),
-                    'stats_keys' => count($matchData['statistics'])
-                ]);
-
-                return $matchData;
-            }
-        } catch (\Throwable $e) {
-            Log::warning('Failed to fetch match data from Gemini', [
-                'match_id' => $matchId,
-                'error' => $e->getMessage()
-            ]);
-        }
-
-        // Fallback: devolver datos vacíos pero cachear para evitar múltiples intentos
-        $matchData = ['events' => [], 'statistics' => []];
-        $this->matchDataCache[$matchId] = $matchData;
-
-        return $matchData;
-    }
-
-    private function parseGeminiFallbackResponse($response, Question $question): array
-    {
-        $payload = null;
-
-        if (is_array($response)) {
-            if (isset($response['selected_options']) || isset($response['selected_option'])) {
-                $payload = $response;
-            } elseif (isset($response['content'])) {
-                $decoded = json_decode((string) $response['content'], true);
-                if (is_array($decoded)) {
-                    $payload = $decoded;
-                }
-            }
-        } elseif (is_string($response)) {
-            $decoded = json_decode($response, true);
-            if (is_array($decoded)) {
-                $payload = $decoded;
-            }
-        }
-
-        if (!is_array($payload)) {
-            return [];
-        }
-
-        $selected = $payload['selected_options'] ?? $payload['selected_option'] ?? null;
-
-        if (is_string($selected)) {
-            $selected = [$selected];
-        }
-
-        if (!is_array($selected)) {
-            return [];
-        }
-
-        $maps = $this->buildOptionMaps($question);
-        $resolvedIds = [];
-
-        foreach ($selected as $candidate) {
-            if (!is_string($candidate)) {
-                continue;
-            }
-
-            $normalized = strtolower(trim($candidate));
-
-            if ($normalized === '') {
-                continue;
-            }
-
-            if (isset($maps['keys'][$normalized])) {
-                $resolvedIds[] = $maps['keys'][$normalized];
-                continue;
-            }
-
-            if (isset($maps['texts'][$normalized])) {
-                $resolvedIds[] = $maps['texts'][$normalized];
-                continue;
-            }
-
-            foreach ($maps['texts'] as $text => $optionId) {
-                if (str_contains($text, $normalized) || str_contains($normalized, $text)) {
-                    $resolvedIds[] = $optionId;
-                    break;
-                }
-            }
-        }
-
-        return array_values(array_unique($resolvedIds));
-    }
-
-    private function buildOptionMaps(Question $question): array
-    {
-        $keyMap = [];
-        $textMap = [];
-
-        foreach ($question->options as $index => $option) {
-            $key = 'option_' . ($index + 1);
-            $keyMap[strtolower($key)] = $option->id;
-            $keyMap[$key] = $option->id;
-
-            $text = strtolower(trim((string) $option->text));
-            if ($text !== '') {
-                $textMap[$text] = $option->id;
-            }
-        }
-
-        return ['keys' => $keyMap, 'texts' => $textMap];
-    }
-
-    private function summarizeEventsForFallback(FootballMatch $match): array
-    {
-        $events = $this->parseEvents($match->events ?? []);
-        $limit = (int) config('question_evaluation.gemini_fallback_max_events', 40);
-
-        if ($limit > 0) {
-            $events = array_slice($events, 0, $limit);
-        }
-
-        return $events;
     }
 
     /**
