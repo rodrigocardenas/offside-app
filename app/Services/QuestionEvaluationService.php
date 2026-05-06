@@ -84,20 +84,37 @@ class QuestionEvaluationService
         }
 
         // ✅ DEDUPLICATION CHECK: Si ya verificamos este template para este partido,
-        // usa el resultado cacheado (mismo template = mismo resultado)
+        // usa el resultado cacheado (mismo template = mismo resultado).
+        // IMPORTANT: validate that the cached option IDs actually belong to THIS question's options.
+        // Different groups share the same template_question_id but have different option IDs,
+        // so we can only use the cache when the IDs match. Otherwise re-evaluate from scratch.
         if ($question->template_question_id) {
             $templateKey = "{$match->id}|{$question->template_question_id}";
 
             if (isset($this->templateResultsCache[$templateKey])) {
-                Log::info('✅ Template result cached (deduplication hit)', [
+                $cachedIds = $this->templateResultsCache[$templateKey];
+                $myOptionIds = $question->options->pluck('id')->toArray();
+                $validCachedIds = array_values(array_intersect($cachedIds, $myOptionIds));
+
+                if (!empty($validCachedIds)) {
+                    Log::info('✅ Template result cached (deduplication hit)', [
+                        'question_id' => $question->id,
+                        'match_id' => $match->id,
+                        'template_question_id' => $question->template_question_id,
+                        'cached_result' => $validCachedIds,
+                        'dedup_group' => $templateKey,
+                    ]);
+                    return $validCachedIds;
+                }
+
+                // Cached IDs belong to a different group's question — re-evaluate from scratch
+                Log::info('⚠️ Template cache IDs mismatch (cross-group) — re-evaluating', [
                     'question_id' => $question->id,
                     'match_id' => $match->id,
                     'template_question_id' => $question->template_question_id,
-                    'cached_result' => $this->templateResultsCache[$templateKey],
-                    'dedup_group' => $templateKey,
+                    'cached_ids' => $cachedIds,
+                    'my_option_ids' => $myOptionIds,
                 ]);
-
-                return $this->templateResultsCache[$templateKey];
             }
         }
 
