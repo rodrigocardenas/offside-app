@@ -18,7 +18,7 @@
         "prod": "npm run build && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan optimize"
     },
     "devDependencies": {
-        "@capacitor/cli": "^7.4.5",
+        "@capacitor/cli": "^6.1.4",
         "autoprefixer": "^10.4.17",
         "axios": "^1.6.4",
         "dotenv": "^16.4.5",
@@ -34,7 +34,7 @@
         "@capacitor/android": "^6.1.4",
         "@capacitor/app": "^6.0.3",
         "@capacitor/app-launcher": "^6.0.4",
-        "@capacitor/browser": "^8.0.3",
+        "@capacitor/browser": "^6.0.0",
         "@capacitor/core": "^6.1.4",
         "@capacitor/device": "^6.0.3",
         "@capacitor/ios": "^6.1.4",

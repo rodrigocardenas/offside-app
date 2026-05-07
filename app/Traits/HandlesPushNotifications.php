@@ -13,7 +13,8 @@ trait HandlesPushNotifications
      */
     protected function getFirebaseMessaging()
     {
-        $credentials_path = base_path("storage/app/offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json");
+        $credentialsFile = config('services.fcm.credentials_file', 'offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json');
+        $credentials_path = base_path("storage/app/{$credentialsFile}");
 
         if (!file_exists($credentials_path)) {
             Log::error('Archivo de credenciales de Firebase no encontrado en: ' . $credentials_path);
@@ -101,23 +102,11 @@ trait HandlesPushNotifications
                         'body' => $body,
                     ],
                     'data' => $data,
-                    'webpush' => [
-                        'headers' => [
-                            'Urgency' => 'high',
-                        ],
-                        'notification' => [
-                            'icon' => '/images/logo_white_bg.png',
-                            'click_action' => $data['link'] ?? '/',
-                        ],
-                        'fcm_options' => [
-                            'link' => $data['link'] ?? '/',
-                        ],
-                    ],
                     'token' => $subscription->device_token,
                 ];
 
-                // Para Capacitor Android/iOS, agregar opciones adicionales
-                if (in_array($subscription->platform, ['android', 'ios'])) {
+                // Configuración específica por plataforma (nunca mezclar)
+                if ($subscription->platform === 'android') {
                     $message['android'] = [
                         'priority' => 'high',
                         'notification' => [
@@ -128,6 +117,7 @@ trait HandlesPushNotifications
                             'clickAction' => $data['link'] ?? '/',
                         ],
                     ];
+                } elseif ($subscription->platform === 'ios') {
                     $message['apns'] = [
                         'payload' => [
                             'aps' => [
@@ -139,6 +129,18 @@ trait HandlesPushNotifications
                                 'badge' => 1,
                             ],
                             'mutableContent' => true,
+                        ],
+                    ];
+                } else {
+                    // Web
+                    $message['webpush'] = [
+                        'headers' => ['Urgency' => 'high'],
+                        'notification' => [
+                            'icon' => '/images/logo_white_bg.png',
+                            'click_action' => $data['link'] ?? '/',
+                        ],
+                        'fcm_options' => [
+                            'link' => $data['link'] ?? '/',
                         ],
                     ];
                 }

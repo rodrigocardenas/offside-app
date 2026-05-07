@@ -25,7 +25,8 @@ class FCMService
 
     public function __construct()
     {
-        $this->credentialsPath = base_path("storage/app/offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json");
+        $credentialsFile = config('services.fcm.credentials_file', 'offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json');
+        $this->credentialsPath = base_path("storage/app/{$credentialsFile}");
         $this->initializeFirebaseMessaging();
     }
 

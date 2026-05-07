@@ -43,6 +43,7 @@ return [
 
     'fcm' => [
         'server_key' => env('FCM_SERVER_KEY'),
+        'credentials_file' => env('FIREBASE_CREDENTIALS', 'offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json'),
     ],
 
     'google' => [
