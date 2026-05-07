@@ -330,12 +330,19 @@ class NativeFirebaseMessagingService {
                 return false;
             }
 
-            // Listen for message received events
+            // Listen for message received events (foreground)
             this.messageListener = await this.plugin.addListener('messageReceived', (message) => {
                 this.handleMessageReceived(message);
             });
 
             this.addLog('📨 Message listener registered for foreground messages', 'info');
+
+            // Listen for notification tap (background / killed state)
+            this.notificationTapListener = await this.plugin.addListener('notificationActionPerformed', (action) => {
+                this.handleNotificationTap(action);
+            });
+
+            this.addLog('👆 Notification tap listener registered', 'info');
 
             // Listen for token refresh events
             this.tokenRefreshListener = await this.plugin.addListener('tokenReceived', (result) => {
@@ -379,6 +386,66 @@ class NativeFirebaseMessagingService {
         }));
 
         this.addLog('✅ Custom event "pushMessageReceived" dispatched', 'log');
+    }
+
+    /**
+     * Handle notification tap (background / killed state)
+     * Called when user taps on a push notification in the system tray
+     */
+    handleNotificationTap(action) {
+        this.addLog('👆 Notification TAPPED:', 'info');
+
+        const data = action?.notification?.data || action?.data || {};
+        const link = data.link || null;
+        const type = data.type || null;
+
+        this.addLog(`   Type: ${type || 'N/A'}`, 'log');
+        this.addLog(`   Link: ${link || 'N/A'}`, 'log');
+
+        // Dispatch event for any custom listener in the app
+        window.dispatchEvent(new CustomEvent('pushNotificationTapped', {
+            detail: { data, link, type, action },
+            bubbles: true,
+            cancelable: true
+        }));
+
+        // Navigate to the appropriate route
+        this.navigateToNotificationTarget(link, type);
+    }
+
+    /**
+     * Navigate to the correct in-app URL based on notification data
+     * Maps notification types to their canonical routes
+     */
+    navigateToNotificationTarget(link, type) {
+        const BASE = 'https://app.offsideclub.es';
+
+        // Resolve destination: explicit link takes priority, then type-based defaults
+        let destination = null;
+
+        if (link) {
+            // Strip base URL if present so we navigate internally
+            destination = link.replace(BASE, '');
+            if (!destination.startsWith('/')) destination = '/' + destination;
+        } else {
+            // Fallback routes per notification type
+            const typeRoutes = {
+                'chat_message':              '/groups',
+                'new_predictive_questions':  '/groups',
+                'predictive_results':        '/groups',
+                'social_question':           '/groups',
+                'daily_unanswer_reminder':   '/groups',
+                'test':                      '/matches/calendar',
+            };
+            destination = typeRoutes[type] || '/groups';
+        }
+
+        this.addLog(`🚀 Navigating to: ${destination}`, 'info');
+
+        // On Capacitor (native webview), window.location navigates inside the app
+        if (window.location.pathname !== destination) {
+            window.location.href = destination;
+        }
     }
 
     /**
