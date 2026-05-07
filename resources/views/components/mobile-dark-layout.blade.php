@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @auth
+    <meta name="user-id" content="{{ auth()->id() }}">
+    @endauth
 
     <title>{{ config('app.name', 'Offside Club') }}</title>
 
@@ -259,6 +262,18 @@
     {{ $slot }}
 
     @stack('scripts')
+
+    <!-- Firebase Push Notifications -->
+    <script src="{{ asset('js/firebase-messaging-native.js') }}"></script>
+    @auth
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof window.initializePushNotifications === 'function') {
+                window.initializePushNotifications();
+            }
+        });
+    </script>
+    @endauth
 
     <!-- Toast Initialization Script -->
     <script>
