@@ -46,10 +46,15 @@
         });
         
         {{-- Escuchar eventos de notificaciones (opcional) --}}
-        document.addEventListener('pushMessageReceived', function(event) {
+        window.addEventListener('pushMessageReceived', function(event) {
             console.log('📬 Nueva notificación recibida:', event.detail);
-            // Aquí puedes hacer algo cuando se reciba una notificación
-            // Por ejemplo: reproducir sonido, mostrar toast, etc
+            const detail = event.detail || {};
+            const title = detail.title || 'Nueva notificación';
+            const body = detail.body || '';
+            const msg = body ? `${title}: ${body}` : title;
+            if (typeof window.showSuccessToast === 'function') {
+                window.showSuccessToast(msg);
+            }
         });
         
         document.addEventListener('pushTokenRefreshed', function(event) {
