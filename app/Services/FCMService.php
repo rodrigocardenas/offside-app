@@ -103,7 +103,8 @@ class FCMService
                         'channelId' => 'high_importance_channel',
                         'title' => $title,
                         'body' => $body,
-                        'icon' => 'icon',
+                        'icon' => 'ic_notification',
+                        'color' => '#00C7A8',
                         'clickAction' => $data['link'] ?? '/',
                     ],
                 ];
