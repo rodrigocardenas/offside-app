@@ -372,6 +372,14 @@ class NativeFirebaseMessagingService {
             this.addLog(`   Data: ${JSON.stringify(message.data)}`, 'log');
         }
 
+        // Show toast notification when app is in foreground
+        const title = message?.notification?.title || "Nueva notificacion";
+        const body = message?.notification?.body || "";
+        const toastMsg = body ? `${title}: ${body}` : title;
+        if (typeof window.showSuccessToast === "function") {
+            window.showSuccessToast(toastMsg);
+        }
+
         // Dispatch custom event so app can listen to it
         const eventDetail = {
             title: message?.notification?.title,
@@ -418,14 +426,16 @@ class NativeFirebaseMessagingService {
      * Maps notification types to their canonical routes
      */
     navigateToNotificationTarget(link, type) {
-        const BASE = 'https://app.offsideclub.es';
+        const BASE_HTTPS = 'https://app.offsideclub.es';
+        const BASE_HTTP = 'http://app.offsideclub.es';
 
         // Resolve destination: explicit link takes priority, then type-based defaults
         let destination = null;
 
         if (link) {
             // Strip base URL if present so we navigate internally
-            destination = link.replace(BASE, '');
+            destination = link.replace(BASE_HTTPS, '')
+                                     .replace(BASE_HTTP, '')
             if (!destination.startsWith('/')) destination = '/' + destination;
         } else {
             // Fallback routes per notification type

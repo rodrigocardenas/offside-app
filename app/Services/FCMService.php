@@ -25,8 +25,7 @@ class FCMService
 
     public function __construct()
     {
-        $credentialsFile = config('services.fcm.credentials_file', 'offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json');
-        $this->credentialsPath = base_path("storage/app/{$credentialsFile}");
+        $this->credentialsPath = base_path("storage/app/offside-dd226-firebase-adminsdk-fbsvc-54f29fd43f.json");
         $this->initializeFirebaseMessaging();
     }
 
@@ -104,8 +103,7 @@ class FCMService
                         'title' => $title,
                         'body' => $body,
                         'icon' => 'ic_notification',
-                        'color' => '#00C7A8',
-                        'clickAction' => $data['link'] ?? '/',
+                        // No clickAction: dejar que FCM/Capacitor abra la app por defecto
                     ],
                 ];
             } elseif ($platform === 'ios') {

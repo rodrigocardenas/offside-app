@@ -125,7 +125,8 @@ trait HandlesPushNotifications
                             'title' => $title,
                             'body' => $body,
                             'icon' => 'ic_notification',
-                            'clickAction' => $data['link'] ?? '/',
+                            // No clickAction: dejar que FCM/Capacitor abra la app por defecto
+                            // Los datos de navegación van en $data (link, type)
                         ],
                     ];
                     $message['apns'] = [
