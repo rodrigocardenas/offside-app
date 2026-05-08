@@ -403,12 +403,18 @@ class NativeFirebaseMessagingService {
     handleNotificationTap(action) {
         this.addLog('👆 Notification TAPPED:', 'info');
 
+        // DEBUG: dump full action object to understand structure
+        try {
+            this.addLog('   RAW action: ' + JSON.stringify(action), 'log');
+        } catch(e) {}
+
         const data = action?.notification?.data || action?.data || {};
         const link = data.link || null;
         const type = data.type || null;
 
         this.addLog(`   Type: ${type || 'N/A'}`, 'log');
         this.addLog(`   Link: ${link || 'N/A'}`, 'log');
+        this.addLog(`   data keys: ${Object.keys(data).join(', ') || 'EMPTY'}`, 'log');
 
         // Dispatch event for any custom listener in the app
         window.dispatchEvent(new CustomEvent('pushNotificationTapped', {
@@ -451,8 +457,13 @@ class NativeFirebaseMessagingService {
 
         this.addLog(`🚀 Navigating to: ${destination}`, 'info');
 
+        // DEBUG toast to show destination
+        if (typeof window.showSuccessToast === 'function') {
+            window.showSuccessToast('Nav→ ' + destination);
+        }
+
         // On Capacitor (native webview), window.location navigates inside the app
-        if (window.location.pathname !== destination) {
+        if (window.location.pathname !== destination.split('#')[0]) {
             window.location.href = destination;
         }
     }
