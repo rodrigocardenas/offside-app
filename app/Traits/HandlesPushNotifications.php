@@ -101,18 +101,6 @@ trait HandlesPushNotifications
                         'body' => $body,
                     ],
                     'data' => $data,
-                    'webpush' => [
-                        'headers' => [
-                            'Urgency' => 'high',
-                        ],
-                        'notification' => [
-                            'icon' => '/images/logo_white_bg.png',
-                            'click_action' => $data['link'] ?? '/',
-                        ],
-                        'fcm_options' => [
-                            'link' => $data['link'] ?? '/',
-                        ],
-                    ],
                     'token' => $subscription->device_token,
                 ];
 
