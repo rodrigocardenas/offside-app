@@ -434,8 +434,7 @@ class NativeFirebaseMessagingService {
 
         if (link) {
             // Strip base URL if present so we navigate internally
-            destination = link.replace(BASE_HTTPS, '')
-                                     .replace(BASE_HTTP, '')
+            destination = link.replace(BASE_HTTPS, '').replace(BASE_HTTP, '');
             if (!destination.startsWith('/')) destination = '/' + destination;
         } else {
             // Fallback routes per notification type
