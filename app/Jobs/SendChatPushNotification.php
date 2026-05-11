@@ -36,14 +36,19 @@ class SendChatPushNotification implements ShouldQueue
             return;
         }
 
+        $group = $chatMessage->group;
+        if (in_array($group->category, ['public', 'trivia'])) {
+            return;
+        }
+
         try {
             $this->sendPushNotificationToGroupUsers(
-                $chatMessage->group,
-                'Nuevo mensaje en el grupo ' . $chatMessage->group->name,
+                $group,
+                'Nuevo mensaje en el grupo ' . $group->name,
                 $chatMessage->user->name . ': ' . $chatMessage->message,
                 [
-                    'link' => url('/groups/' . $chatMessage->group->id . '#chatSection'),
-                    'group_id' => (string) $chatMessage->group->id,
+                    'link' => url('/groups/' . $group->id . '#chatSection'),
+                    'group_id' => (string) $group->id,
                     'message_id' => (string) $chatMessage->id,
                     'type' => 'chat_message'
                 ],
