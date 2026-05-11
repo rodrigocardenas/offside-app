@@ -9,6 +9,8 @@ use App\Jobs\VerifyFinishedMatchesHourlyJob;
 use App\Jobs\UpdateFinishedMatchesJob;
 use App\Jobs\SendDailyUnanswerQuestionReminderPushNotification;
 use App\Jobs\UpdateGroupTotalPointsJob;
+use App\Jobs\SendRankingOvertakenPushNotification;
+use App\Jobs\SendDailyPointsEarnedPushNotification;
 use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
@@ -104,7 +106,21 @@ class Kernel extends ConsoleKernel
                 ]);
             });
 
-        // 5️⃣ Diaria (00:00 UTC): Eliminar grupos públicos expirados
+        // 5️⃣ Diaria (19:00 UTC): Notificar puntos ganados en el día
+        $schedule->job(new SendDailyPointsEarnedPushNotification())
+            ->dailyAt('19:00')
+            ->timezone('UTC')
+            ->name('daily-points-earned')
+            ->withoutOverlapping(10);
+
+        // 6️⃣ Diaria (20:00 UTC): Notificar cuando el usuario ha sido superado en el ranking
+        $schedule->job(new SendRankingOvertakenPushNotification())
+            ->dailyAt('20:00')
+            ->timezone('UTC')
+            ->name('ranking-overtaken-check')
+            ->withoutOverlapping(10);
+
+        // 7️⃣ Diaria (00:00 UTC): Eliminar grupos públicos expirados
         // Limpia automáticamente los grupos públicos que han pasado su fecha de expiración
         $schedule->command('groups:delete-expired')
             ->dailyAt('00:00')

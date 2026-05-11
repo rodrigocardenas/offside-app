@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Spatie\SlackAlerts\Facades\SlackAlert;
+use App\Models\Question;
+use App\Observers\QuestionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerBladeDirectives();
+
+        Question::observe(QuestionObserver::class);
 
         if ($this->app->runningInConsole()) {
             $this->registerConsoleSlackAlerts();
