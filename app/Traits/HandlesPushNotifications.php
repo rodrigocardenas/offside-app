@@ -40,12 +40,16 @@ trait HandlesPushNotifications
         $excludeUserId = null
     ) {
         try {
+            error_log('[PUSH] sendPushNotificationToGroupUsers START group=' . $group->id . ' exclude=' . $excludeUserId);
+
             $messaging = $this->getFirebaseMessaging();
             $groupUsers = $group->users()
                 ->when($excludeUserId, function ($query) use ($excludeUserId) {
                     return $query->where('users.id', '!=', $excludeUserId);
                 })
                 ->get();
+
+            error_log('[PUSH] Usuarios encontrados: ' . $groupUsers->count() . ' -> ' . $groupUsers->pluck('id')->implode(', '));
 
             Log::info('Usuarios a notificar para grupo', [
                 'group_id' => $group->id,
@@ -57,6 +61,9 @@ trait HandlesPushNotifications
             $failureCount = 0;
 
             foreach ($groupUsers as $user) {
+                $subCount = $user->pushSubscriptions()->count();
+                error_log('[PUSH] User ' . $user->id . ' (' . $user->name . '): ' . $subCount . ' subscriptions');
+
                 $userSuccessCount = $this->sendPushNotificationToUser(
                     $messaging,
                     $user,
@@ -65,8 +72,10 @@ trait HandlesPushNotifications
                     $data
                 );
                 $successCount += $userSuccessCount;
-                $failureCount += ($user->pushSubscriptions->count() - $userSuccessCount);
+                $failureCount += ($subCount - $userSuccessCount);
             }
+
+            error_log('[PUSH] DONE group=' . $group->id . ' success=' . $successCount . ' failures=' . $failureCount);
 
             Log::info('Notificaciones enviadas', [
                 'group_id' => $group->id,
@@ -76,6 +85,7 @@ trait HandlesPushNotifications
 
             return ['success' => $successCount, 'failures' => $failureCount];
         } catch (\Exception $e) {
+            error_log('[PUSH] EXCEPTION: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
             Log::error('Error enviando notificaciones al grupo: ' . $e->getMessage());
             throw $e;
         }
@@ -95,6 +105,8 @@ trait HandlesPushNotifications
 
         foreach ($user->pushSubscriptions as $subscription) {
             try {
+                error_log('[PUSH] Sending to user=' . $user->id . ' platform=' . $subscription->platform . ' token=' . substr($subscription->device_token, 0, 25) . '...');
+
                 $message = [
                     'notification' => [
                         'title' => $title,
@@ -134,6 +146,7 @@ trait HandlesPushNotifications
 
                 $messaging->send($message);
                 $successCount++;
+                error_log('[PUSH] SUCCESS user=' . $user->id . ' platform=' . $subscription->platform);
 
                 Log::info('Notificación enviada a usuario', [
                     'user_id' => $user->id,
@@ -142,6 +155,7 @@ trait HandlesPushNotifications
                     'device_token' => substr($subscription->device_token, 0, 20) . '...'
                 ]);
             } catch (\Throwable $e) {
+                error_log('[PUSH] FAILED user=' . $user->id . ' error=' . $e->getMessage());
                 Log::error('Error enviando notificación FCM al usuario: ' . $e->getMessage(), [
                     'user_id' => $user->id,
                     'platform' => $subscription->platform,
