@@ -584,9 +584,8 @@ class GroupController extends Controller
         ])->get();
 
         $members = $group->users()->get();
-        $groupRoles = $group->groupRoles()->get()->keyBy('user_id');
 
-        return view('groups.edit', compact('group', 'competitions', 'members', 'groupRoles'));
+        return view('groups.edit', compact('group', 'competitions', 'members'));
     }
 
     /**
@@ -821,7 +820,6 @@ class GroupController extends Controller
         }
 
         $group->users()->detach($user->id);
-        $this->groupRoleService->removeRole($user, $group);
 
         return redirect()->route('groups.edit', $group)
             ->with('status', 'member-removed');
@@ -838,23 +836,17 @@ class GroupController extends Controller
         }
 
         // Verificar que sea miembro
-        if (!$group->users()->where('user_id', $user->id)->exists()) {
+        $membership = $group->users()->where('user_id', $user->id)->first();
+        if (!$membership) {
             return redirect()->route('groups.edit', $group)
                 ->with('error', __('El usuario no pertenece a este grupo.'));
         }
 
-        $existingRole = $group->groupRoles()->where('user_id', $user->id)->first();
-
-        if ($existingRole && $existingRole->role === 'admin') {
-            $this->groupRoleService->removeRole($user, $group);
-            $statusMsg = 'admin-removed';
-        } else {
-            $this->groupRoleService->assignRole($user, $group, 'admin');
-            $statusMsg = 'admin-assigned';
-        }
+        $isAdmin = (bool) $membership->pivot->is_admin;
+        $group->users()->updateExistingPivot($user->id, ['is_admin' => !$isAdmin]);
 
         return redirect()->route('groups.edit', $group)
-            ->with('status', $statusMsg);
+            ->with('status', $isAdmin ? 'admin-removed' : 'admin-assigned');
     }
 
     public function joinByInvite($code)

@@ -187,8 +187,7 @@
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     @forelse ($members as $member)
                         @php
-                            $memberRole = $groupRoles->get($member->id);
-                            $isGroupAdmin = $memberRole && $memberRole->role === 'admin';
+                            $isGroupAdmin = (bool) $member->pivot->is_admin;
                             $isCreator = $member->id === $group->created_by;
                             $isSelf = $member->id === auth()->id();
                         @endphp
