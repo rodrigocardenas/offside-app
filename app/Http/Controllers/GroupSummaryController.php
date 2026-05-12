@@ -17,19 +17,34 @@ class GroupSummaryController extends Controller
         Gate::authorize('viewSummary', $group);
 
         // Obtener todas las estadísticas
+        $answeredCount = DB::table('answers')
+            ->join('questions', 'answers.question_id', '=', 'questions.id')
+            ->where('questions.group_id', $group->id)
+            ->whereNotNull('answers.is_correct')
+            ->count();
+
+        $correctCount = DB::table('answers')
+            ->join('questions', 'answers.question_id', '=', 'questions.id')
+            ->where('questions.group_id', $group->id)
+            ->where('answers.is_correct', 1)
+            ->count();
+
+        $memberCount = $group->users()->count();
+        $questionCount = $group->questions()->count();
+
         $stats = [
-            'total_points' => $group->total_points,
-            'member_count' => $group->users()->count(),
-            'question_count' => $group->questions()->count(),
-            'answered_count' => DB::table('answers')
-                ->join('questions', 'answers.question_id', '=', 'questions.id')
-                ->where('questions.group_id', $group->id)
-                ->whereNotNull('answers.is_correct')
-                ->count(),
-            'message_count' => $group->chatMessages()->count(),
-            'top_members' => $this->getTopMembers($group, 10),
-            'points_distribution' => $this->getPointsDistribution($group),
-            'member_stats' => $this->getMemberStats($group),
+            'total_points'        => $group->total_points,
+            'member_count'        => $memberCount,
+            'question_count'      => $questionCount,
+            'answered_count'      => $answeredCount,
+            'correct_count'       => $correctCount,
+            'accuracy_rate'       => $answeredCount > 0 ? round(($correctCount / $answeredCount) * 100, 1) : 0,
+            'participation_rate'  => ($memberCount > 0 && $questionCount > 0)
+                                        ? round(($answeredCount / ($memberCount * $questionCount)) * 100, 1)
+                                        : 0,
+            'message_count'       => $group->chatMessages()->count(),
+            'top_members'         => $this->getTopMembers($group, 10),
+            'member_stats'        => $this->getMemberStats($group),
         ];
 
         return view('groups.summary', compact('group', 'stats'));
@@ -95,32 +110,15 @@ class GroupSummaryController extends Controller
                 'avg_points' => 0,
                 'max_points' => 0,
                 'min_points' => 0,
-                'median_points' => 0,
-                'std_dev_points' => 0,
             ];
         }
 
-        // Calcular mediana
-        $median = 0;
-        if ($count % 2 === 0) {
-            $median = ($userPoints[($count / 2) - 1] + $userPoints[$count / 2]) / 2;
-        } else {
-            $median = $userPoints[floor($count / 2)];
-        }
-
-        // Calcular desviación estándar
         $avg = array_sum($userPoints) / $count;
-        $variance = array_sum(
-            array_map(fn($x) => pow($x - $avg, 2), $userPoints)
-        ) / $count;
-        $stdDev = sqrt($variance);
 
         return [
-            'avg_points' => (int)$avg,
+            'avg_points' => (int) $avg,
             'max_points' => max($userPoints),
             'min_points' => min($userPoints),
-            'median_points' => (int)$median,
-            'std_dev_points' => (int)$stdDev,
         ];
     }
 }
