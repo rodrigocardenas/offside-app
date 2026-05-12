@@ -112,11 +112,9 @@ class DeepLinksHandler {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         new DeepLinksHandler();
-        requestDeepLinksPermission();
     });
 } else {
     new DeepLinksHandler();
-    requestDeepLinksPermission();
 }
 
 /**
