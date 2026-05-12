@@ -153,6 +153,110 @@
                     @endif
                 </form>
             </div>
+
+            <!-- Members Management -->
+            <div style="background: {{ $bgPrimary }}; border: 1px solid {{ $borderColor }}; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, {{ $isDark ? '0.3' : '0.1' }}); margin-top: 20px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                    <i class="fas fa-users" style="font-size: 22px; color: {{ $accentColor }};"></i>
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: {{ $textPrimary }}; margin: 0;">{{ __('Integrantes') }}</h3>
+                        <p style="font-size: 13px; color: {{ $textSecondary }}; margin: 0;">{{ $members->count() }} {{ __('miembros') }}</p>
+                    </div>
+                </div>
+
+                {{-- Status messages --}}
+                @if (session('status') === 'member-removed')
+                    <div style="margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; font-size: 14px;">
+                        <i class="fas fa-user-minus" style="margin-right: 8px;"></i>{{ __('Miembro eliminado del grupo.') }}
+                    </div>
+                @elseif (session('status') === 'admin-assigned')
+                    <div style="margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; font-size: 14px;">
+                        <i class="fas fa-shield-alt" style="margin-right: 8px;"></i>{{ __('Rol de admin asignado.') }}
+                    </div>
+                @elseif (session('status') === 'admin-removed')
+                    <div style="margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; background: {{ $isDark ? '#1a3a4a' : '#eff6ff' }}; color: {{ $isDark ? '#93c5fd' : '#1d4ed8' }}; border-left: 4px solid #3b82f6; font-size: 14px;">
+                        <i class="fas fa-shield-alt" style="margin-right: 8px;"></i>{{ __('Rol de admin removido.') }}
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div style="margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; font-size: 14px;">
+                        <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>{{ session('error') }}
+                    </div>
+                @endif
+
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    @forelse ($members as $member)
+                        @php
+                            $memberRole = $groupRoles->get($member->id);
+                            $isGroupAdmin = $memberRole && $memberRole->role === 'admin';
+                            $isCreator = $member->id === $group->created_by;
+                            $isSelf = $member->id === auth()->id();
+                        @endphp
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; background: {{ $bgSecondary }}; border: 1px solid {{ $borderColor }};">
+                            {{-- Avatar --}}
+                            <div style="flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: {{ $accentColor }}22; border: 2px solid {{ $isGroupAdmin || $isCreator ? $accentColor : $borderColor }}; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                @if ($member->avatar_url)
+                                    <img src="{{ $member->avatar_url }}" alt="{{ $member->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                @else
+                                    <span style="font-size: 16px; font-weight: 700; color: {{ $accentColor }};">{{ strtoupper(substr($member->name, 0, 1)) }}</span>
+                                @endif
+                            </div>
+
+                            {{-- Name & badge --}}
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <span style="font-size: 14px; font-weight: 600; color: {{ $textPrimary }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">{{ $member->name }}</span>
+                                    @if ($isCreator)
+                                        <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: {{ $accentColor }}22; color: {{ $accentColor }}; white-space: nowrap;">CREADOR</span>
+                                    @elseif ($isGroupAdmin)
+                                        <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #f59e0b22; color: #f59e0b; white-space: nowrap;">ADMIN</span>
+                                    @endif
+                                    @if ($isSelf)
+                                        <span style="font-size: 10px; padding: 2px 6px; border-radius: 4px; background: {{ $isDark ? '#1a524e' : '#e5f9f4' }}; color: {{ $textSecondary }}; white-space: nowrap;">Tú</span>
+                                    @endif
+                                </div>
+                                <span style="font-size: 12px; color: {{ $textSecondary }};">{{ $member->email }}</span>
+                            </div>
+
+                            {{-- Actions --}}
+                            @if (!$isCreator && !$isSelf)
+                                <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                                    {{-- Toggle admin --}}
+                                    <form method="POST" action="{{ route('groups.members.toggle-admin', [$group, $member]) }}" style="display: inline;"
+                                          onsubmit="return confirm('{{ $isGroupAdmin ? __('¿Quitar rol de admin a :name?', ['name' => $member->name]) : __('¿Asignar admin a :name?', ['name' => $member->name]) }}')">
+                                        @csrf
+                                        <button type="submit"
+                                                title="{{ $isGroupAdmin ? __('Quitar admin') : __('Hacer admin') }}"
+                                                style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid {{ $isGroupAdmin ? '#f59e0b' : $borderColor }}; background: {{ $isGroupAdmin ? '#f59e0b22' : $bgPrimary }}; color: {{ $isGroupAdmin ? '#f59e0b' : $textSecondary }}; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                                                onmouseover="this.style.borderColor='#f59e0b'; this.style.color='#f59e0b';"
+                                                onmouseout="this.style.borderColor='{{ $isGroupAdmin ? '#f59e0b' : $borderColor }}'; this.style.color='{{ $isGroupAdmin ? '#f59e0b' : $textSecondary }}';">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </button>
+                                    </form>
+
+                                    {{-- Remove member --}}
+                                    <form method="POST" action="{{ route('groups.members.remove', [$group, $member]) }}" style="display: inline;"
+                                          onsubmit="return confirm('{{ __('¿Eliminar a :name del grupo?', ['name' => $member->name]) }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                title="{{ __('Eliminar del grupo') }}"
+                                                style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #ef444455; background: #ef444411; color: #ef4444; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                                                onmouseover="this.style.background='#ef444422'; this.style.borderColor='#ef4444';"
+                                                onmouseout="this.style.background='#ef444411'; this.style.borderColor='#ef444455';">
+                                            <i class="fas fa-user-minus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            @else
+                                <div style="width: 74px; flex-shrink: 0;"></div>
+                            @endif
+                        </div>
+                    @empty
+                        <p style="text-align: center; color: {{ $textSecondary }}; font-size: 14px; padding: 20px 0;">{{ __('No hay integrantes en este grupo.') }}</p>
+                    @endforelse
+                </div>
+            </div>
         </div>
     </div>
 </x-dynamic-layout>

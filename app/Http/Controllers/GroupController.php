@@ -583,7 +583,10 @@ class GroupController extends Controller
             'champions',
         ])->get();
 
-        return view('groups.edit', compact('group', 'competitions'));
+        $members = $group->users()->get();
+        $groupRoles = $group->groupRoles()->get()->keyBy('user_id');
+
+        return view('groups.edit', compact('group', 'competitions', 'members', 'groupRoles'));
     }
 
     /**
@@ -799,6 +802,59 @@ class GroupController extends Controller
 
         return redirect()->route('groups.index')
             ->with('success', __('controllers.groups.left_successfully'));
+    }
+
+    public function removeMember(Group $group, User $user)
+    {
+        $this->authorize('update', $group);
+
+        // No puede eliminarse a sí mismo, use leave para eso
+        if ($user->id === auth()->id()) {
+            return redirect()->route('groups.edit', $group)
+                ->with('error', __('Para salir del grupo usa la opción "Salir del grupo".'));
+        }
+
+        // Verificar que el usuario sea miembro del grupo
+        if (!$group->users()->where('user_id', $user->id)->exists()) {
+            return redirect()->route('groups.edit', $group)
+                ->with('error', __('El usuario no pertenece a este grupo.'));
+        }
+
+        $group->users()->detach($user->id);
+        $this->groupRoleService->removeRole($user, $group);
+
+        return redirect()->route('groups.edit', $group)
+            ->with('status', 'member-removed');
+    }
+
+    public function toggleAdmin(Group $group, User $user)
+    {
+        $this->authorize('update', $group);
+
+        // No puede modificarse a sí mismo
+        if ($user->id === auth()->id()) {
+            return redirect()->route('groups.edit', $group)
+                ->with('error', __('No puedes modificar tu propio rol.'));
+        }
+
+        // Verificar que sea miembro
+        if (!$group->users()->where('user_id', $user->id)->exists()) {
+            return redirect()->route('groups.edit', $group)
+                ->with('error', __('El usuario no pertenece a este grupo.'));
+        }
+
+        $existingRole = $group->groupRoles()->where('user_id', $user->id)->first();
+
+        if ($existingRole && $existingRole->role === 'admin') {
+            $this->groupRoleService->removeRole($user, $group);
+            $statusMsg = 'admin-removed';
+        } else {
+            $this->groupRoleService->assignRole($user, $group, 'admin');
+            $statusMsg = 'admin-assigned';
+        }
+
+        return redirect()->route('groups.edit', $group)
+            ->with('status', $statusMsg);
     }
 
     public function joinByInvite($code)

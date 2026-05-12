@@ -85,6 +85,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('groups', GroupController::class);
     Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
     Route::delete('groups/{group}/leave', [GroupController::class, 'leave'])->name('groups.leave');
+    Route::delete('groups/{group}/members/{user}', [GroupController::class, 'removeMember'])->name('groups.members.remove');
+    Route::post('groups/{group}/members/{user}/toggle-admin', [GroupController::class, 'toggleAdmin'])->name('groups.members.toggle-admin');
     Route::get('groups/by-match/{matchId}', [GroupController::class, 'getGroupsByMatch']);
     Route::get('groups/{group}/ranking-quiz', [GroupController::class, 'showQuizRanking'])->name('groups.ranking-quiz');  // 🎮 Quiz Ranking View
     Route::get('groups/{group}/quiz-ranking', [GroupController::class, 'getQuizRanking'])->name('groups.quiz-ranking');  // 🎮 Quiz Ranking API
