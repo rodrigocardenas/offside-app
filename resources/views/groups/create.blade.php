@@ -95,7 +95,7 @@
                     </div>
                     @endif
 
-                    <div>
+                    {{-- <div>
                         <label for="competition_id" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.competition_label') }}</label>
                         <select id="competition_id" name="competition_id" required
                             style="width: 100%; background: {{ $inputBg }}; border: 1px solid {{ $borderColor }}; border-radius: 8px; padding: 12px 16px; color: {{ $textPrimary }}; font-size: 14px; transition: all 0.3s ease; cursor: pointer;"
@@ -111,7 +111,7 @@
                         @error('competition_id')
                             <p style="margin-top: 6px; font-size: 13px; color: #ef4444;">{{ $message }}</p>
                         @enderror
-                    </div>
+                    </div> --}}
                     {{-- recompensa o penalización --}}
                     <div>
                         <label for="reward_or_penalty" style="display: block; font-size: 14px; font-weight: 600; color: {{ $labelColor }}; margin-bottom: 8px;">{{ __('views.groups.reward_penalty_label') }}</label>
@@ -220,7 +220,7 @@
                                         </button>
                                     </div>
 
-                                    <input type="text" name="quiz_questions[${questionIndex}][title]" 
+                                    <input type="text" name="quiz_questions[${questionIndex}][title]"
                                         placeholder="Enunciado de la pregunta" required
                                         style="width: 100%; background: {{ $bgPrimary }}; border: 1px solid {{ $borderColor }}; border-radius: 6px; padding: 10px 12px; color: {{ $textPrimary }}; font-size: 14px; margin-bottom: 12px;"
                                     />
@@ -256,7 +256,7 @@
                             const optionHTML = `
                                 <div style="display: flex; gap: 8px; align-items: center;">
                                     <input type="radio" name="quiz_questions[${questionIndex}][correct_option]" value="${optionIndex}" style="cursor: pointer; padding: 0; margin: 0; width: 18px; height: 18px;" title="Marcar como respuesta correcta" />
-                                    <input type="text" name="quiz_questions[${questionIndex}][options][]" 
+                                    <input type="text" name="quiz_questions[${questionIndex}][options][]"
                                         placeholder="Opción ${optionIndex + 1}" required
                                         style="flex: 1; background: {{ $bgPrimary }}; border: 1px solid {{ $borderColor }}; border-radius: 6px; padding: 10px 12px; color: {{ $textPrimary }}; font-size: 13px;"
                                     />
