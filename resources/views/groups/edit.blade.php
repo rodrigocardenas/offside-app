@@ -20,7 +20,7 @@
         $accentDark = '#17b796';
     @endphp
 
-    <div style="min-height: 100vh; background: {{ $isDark ? 'linear-gradient(135deg, #0a2e2c 0%, #0f3d3a 100%)' : '#f9f9f9' }}; color: {{ $textPrimary }}; padding: 16px 20px 100px;">
+    <div style="min-height: 100vh; background: {{ $isDark ? 'linear-gradient(135deg, #0a2e2c 0%, #0f3d3a 100%)' : '#f9f9f9' }}; color: {{ $textPrimary }}; padding: 16px 20px 100px; margin-top: 3.75rem;">
         <div style="max-width: 600px; margin: 0 auto;">
             <div style="background: {{ $bgPrimary }}; border: 1px solid {{ $borderColor }}; border-radius: 16px; padding: 32px 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, {{ $isDark ? '0.3' : '0.1' }});">
                 <!-- Header -->
