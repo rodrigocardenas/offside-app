@@ -183,13 +183,72 @@
             {{-- PRIVACY PANEL --}}
             <div id="privacy" class="settings-panel">
                 <div class="settings-section">
-                    <div class="section-title">
+                    <div class="section-title" style="color: {{ $labelColor }};">
                         <i class="fas fa-lock"></i>
-                        {{ __('views.settings.privacy') }}
+                        Política de Privacidad
                     </div>
-                    <div class="coming-soon">
-                        <i class="fas fa-rocket" style="font-size: 48px; color: #ccc;"></i>
-                        <p style="color: #999; margin: 0;">{{ __('views.settings.coming_soon') }}</p>
+                    <p style="color: {{ $descColor }}; font-size: 12px; margin-bottom: 20px; text-align: center;">
+                        Última actualización: 17 de enero de 2026
+                    </p>
+
+                    <div class="privacy-body">
+                        <p>Esta Política de Privacidad explica cómo Offside Club recopila, usa y protege la información personal de los usuarios. Al usar Offside Club aceptas las prácticas descritas a continuación.</p>
+
+                        <h3><i class="fas fa-database"></i> 1. Datos que recopilamos</h3>
+                        <ul>
+                            <li><strong>Datos de cuenta:</strong> nombre, correo electrónico, foto de perfil y preferencias necesarias para operar la cuenta.</li>
+                            <li><strong>Contenido generado:</strong> respuestas a cuestionarios, eventos deportivos registrados, retroalimentación y soporte.</li>
+                            <li><strong>Datos técnicos:</strong> identificadores de dispositivo, sistema operativo, idioma, zona horaria y logs de errores.</li>
+                            <li><strong>Notificaciones:</strong> tokens de Firebase Cloud Messaging para enviar alertas configuradas por el usuario.</li>
+                            <li><strong>Información de uso:</strong> interacciones anonimizadas para mejorar funcionalidades.</li>
+                        </ul>
+
+                        <h3><i class="fas fa-cogs"></i> 2. Cómo usamos la información</h3>
+                        <ul>
+                            <li>Prestar y mantener las funciones de Offside Club.</li>
+                            <li>Soporte técnico, diagnóstico de problemas y detección de fraudes.</li>
+                            <li>Personalizar experiencias (recordatorios, contenidos relevantes, configuraciones).</li>
+                            <li>Enviar comunicaciones relacionadas con el servicio.</li>
+                            <li>Cumplir obligaciones legales y regulatorias.</li>
+                        </ul>
+
+                        <h3><i class="fas fa-balance-scale"></i> 3. Fundamentos legales</h3>
+                        <p>Tratamos los datos para ejecutar el contrato de servicio, cumplir obligaciones legales y en base a intereses legítimos. Cuando sea necesario, solicitaremos tu consentimiento explícito.</p>
+
+                        <h3><i class="fas fa-clock"></i> 4. Conservación de datos</h3>
+                        <p>Conservamos la información personal mientras tengas una cuenta activa. Puedes solicitar la eliminación escribiendo a nuestro canal de contacto.</p>
+
+                        <h3><i class="fas fa-share-alt"></i> 5. Compartición con terceros</h3>
+                        <ul>
+                            <li><strong>Proveedores:</strong> Firebase (notificaciones y métricas), hosting y almacenamiento en la nube.</li>
+                            <li><strong>Analítica:</strong> herramientas para medir rendimiento y uso agregado.</li>
+                            <li><strong>Autoridades:</strong> cuando la ley lo exija o sea necesario para proteger derechos.</li>
+                        </ul>
+                        <p>No vendemos datos personales a terceros.</p>
+
+                        <h3><i class="fas fa-shield-alt"></i> 6. Seguridad</h3>
+                        <p>Implementamos cifrado en tránsito, monitoreo y controles de acceso para proteger los datos. Ninguna plataforma en línea es 100% segura; usa contraseñas robustas y mantén actualizado tu dispositivo.</p>
+
+                        <h3><i class="fas fa-user-check"></i> 7. Tus derechos</h3>
+                        <ul>
+                            <li>Acceder a los datos personales que conservamos.</li>
+                            <li>Solicitar correcciones o actualizaciones.</li>
+                            <li>Pedir la eliminación de tu cuenta y datos asociados.</li>
+                            <li>Oponerte a ciertos tratamientos o solicitar la limitación del procesamiento.</li>
+                            <li>Solicitar la portabilidad de tus datos.</li>
+                        </ul>
+
+                        <h3><i class="fas fa-child"></i> 8. Menores de edad</h3>
+                        <p>Offside Club no está dirigida a menores de 13 años. Si detectamos información de un menor sin consentimiento verificable, la eliminaremos de inmediato.</p>
+
+                        <h3><i class="fas fa-globe"></i> 9. Transferencias internacionales</h3>
+                        <p>Podemos almacenar información en servidores fuera de tu país. En esos casos aplicamos salvaguardas adecuadas para proteger tus datos.</p>
+
+                        <h3><i class="fas fa-sync-alt"></i> 10. Cambios en esta política</h3>
+                        <p>Actualizaremos esta Política cuando sea necesario. Publicaremos la versión vigente en esta página con la fecha de última actualización.</p>
+
+                        <h3><i class="fas fa-envelope"></i> 11. Contacto</h3>
+                        <p>Si tienes preguntas o deseas ejercer tus derechos, contáctanos en <a href="mailto:soporte@offsideclub.com" style="color: #00deb0;">soporte@offsideclub.com</a>.</p>
                     </div>
                 </div>
             </div>
@@ -503,6 +562,41 @@
                 font-size: 11px;
             }
         }
+        /* Privacy body */
+        .privacy-body {
+            font-size: 13px;
+            line-height: 1.7;
+            color: {{ $descColor }};
+        }
+
+        .privacy-body p {
+            margin: 0 0 12px;
+        }
+
+        .privacy-body h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: {{ $labelColor }};
+            margin: 20px 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .privacy-body h3 i {
+            color: #00deb0;
+            font-size: 12px;
+        }
+
+        .privacy-body ul {
+            padding-left: 16px;
+            margin: 0 0 12px;
+        }
+
+        .privacy-body ul li {
+            margin-bottom: 6px;
+        }
+
         /* Notification Row */
         .notif-row {
             display: flex;
