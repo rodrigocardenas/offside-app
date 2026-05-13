@@ -127,6 +127,7 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de configuración
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::put('/settings/notifications', [SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
 
     Route::resource('competitions', CompetitionController::class);
 

@@ -140,14 +140,43 @@
             {{-- NOTIFICATIONS PANEL --}}
             <div id="notifications" class="settings-panel">
                 <div class="settings-section">
-                    <div class="section-title">
+                    <div class="section-title" style="color: {{ $labelColor }};">
                         <i class="fas fa-bell"></i>
                         {{ __('views.settings.notifications') }}
                     </div>
-                    <div class="coming-soon">
-                        <i class="fas fa-rocket" style="font-size: 48px; color: #ccc;"></i>
-                        <p style="color: #999; margin: 0;">{{ __('views.settings.coming_soon') }}</p>
-                    </div>
+                    <p style="color: {{ $descColor }}; font-size: 14px; margin-bottom: 20px;">
+                        Controla qué notificaciones recibes en tu dispositivo.
+                    </p>
+
+                    @php
+                        $notifPrefs = auth()->user()->notification_preferences ?? [];
+                        $notifTypes = [
+                            'chat_message'             => ['label' => 'Mensajes de chat',       'desc' => 'Nuevos mensajes en el chat de tus grupos'],
+                            'new_predictive_questions' => ['label' => 'Nuevas preguntas',       'desc' => 'Cuando hay preguntas nuevas disponibles'],
+                            'predictive_results'       => ['label' => 'Resultados',             'desc' => 'Cuando se publican los resultados de tus predicciones'],
+                            'social_question'          => ['label' => 'Preguntas sociales',     'desc' => 'Cuando aparece una nueva pregunta social'],
+                            'ranking_overtaken'        => ['label' => 'Superado en ranking',    'desc' => 'Cuando alguien te adelanta en la clasificación'],
+                            'featured_question'        => ['label' => 'Pregunta destacada',     'desc' => 'Cuando hay una pregunta destacada disponible'],
+                            'daily_unanswer_reminder'  => ['label' => 'Recordatorio diario',    'desc' => 'Recordatorio de preguntas sin responder'],
+                            'daily_points_earned'      => ['label' => 'Resumen de puntos',      'desc' => 'Resumen diario de los puntos que ganaste'],
+                        ];
+                    @endphp
+
+                    <div id="notif-feedback" class="notif-feedback" style="display:none;"></div>
+
+                    @foreach($notifTypes as $type => $info)
+                        @php $enabled = $notifPrefs[$type] ?? true; @endphp
+                        <div class="notif-row" style="{{ !$loop->last ? 'border-bottom: 1px solid ' . ($isDark ? '#404040' : '#e0e0e0') . ';' : '' }}">
+                            <div class="notif-row-text">
+                                <div style="font-weight: 600; color: {{ $labelColor }}; font-size: 14px;">{{ $info['label'] }}</div>
+                                <div style="font-size: 12px; color: {{ $descColor }}; margin-top: 2px;">{{ $info['desc'] }}</div>
+                            </div>
+                            <label class="notif-toggle">
+                                <input type="checkbox" class="notif-cb" data-type="{{ $type }}" {{ $enabled ? 'checked' : '' }}>
+                                <span class="notif-slider"></span>
+                            </label>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -474,6 +503,85 @@
                 font-size: 11px;
             }
         }
+        /* Notification Row */
+        .notif-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+        }
+
+        .notif-row-text {
+            flex: 1;
+            padding-right: 16px;
+        }
+
+        /* Toggle Switch */
+        .notif-toggle {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .notif-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .notif-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #ccc;
+            border-radius: 24px;
+            transition: 0.25s;
+        }
+
+        .main-container .notif-slider {
+            background: #555;
+        }
+
+        .notif-toggle input:checked + .notif-slider {
+            background: #00deb0;
+        }
+
+        .notif-slider::before {
+            position: absolute;
+            content: '';
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.25s;
+        }
+
+        .notif-toggle input:checked + .notif-slider::before {
+            transform: translateX(20px);
+        }
+
+        /* Notification feedback message */
+        .notif-feedback {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .notif-feedback.success {
+            background: rgba(0, 222, 176, 0.12);
+            color: #00deb0;
+        }
+
+        .notif-feedback.error {
+            background: rgba(220, 53, 69, 0.12);
+            color: #dc3545;
+        }
     </style>
 
     <script>
@@ -494,6 +602,45 @@
                     document.getElementById(tabName).classList.add('active');
                 });
             });
+            // Notification preference toggles
+            const notifFeedback = document.getElementById('notif-feedback');
+            document.querySelectorAll('.notif-cb').forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    const type = this.dataset.type;
+                    const enabled = this.checked;
+                    const checkbox = this;
+                    fetch('{{ route('settings.notifications.update') }}', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
+                        body: JSON.stringify({ type: type, enabled: enabled ? 1 : 0 }),
+                    })
+                    .then(function(r) {
+                        if (!r.ok) throw new Error('server');
+                        return r.json();
+                    })
+                    .then(function(data) {
+                        if (data.ok) {
+                            showNotifFeedback('Preferencia guardada', true);
+                        } else {
+                            throw new Error('not ok');
+                        }
+                    })
+                    .catch(function() {
+                        checkbox.checked = !enabled;
+                        showNotifFeedback('Error al guardar', false);
+                    });
+                });
+            });
+
+            function showNotifFeedback(msg, success) {
+                notifFeedback.textContent = msg;
+                notifFeedback.className = 'notif-feedback ' + (success ? 'success' : 'error');
+                notifFeedback.style.display = 'block';
+                setTimeout(function() { notifFeedback.style.display = 'none'; }, 2500);
+            }
         });
     </script>
 </x-dynamic-layout>

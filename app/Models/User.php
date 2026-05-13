@@ -39,6 +39,7 @@ class User extends Authenticatable
         'google_id',
         'google_email',
         'auth_provider',
+        'notification_preferences',
     ];
 
     /**
@@ -60,7 +61,14 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'is_admin' => 'boolean',
+        'notification_preferences' => 'array',
     ];
+
+    public function isNotificationEnabled(string $type): bool
+    {
+        $preferences = $this->notification_preferences ?? [];
+        return $preferences[$type] ?? true;
+    }
 
     /**
      * Get the user's avatar URL.

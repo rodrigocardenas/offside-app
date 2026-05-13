@@ -93,6 +93,12 @@ trait HandlesPushNotifications
         $body,
         $data = []
     ) {
+        $type = $data['type'] ?? null;
+        if ($type && !$user->isNotificationEnabled($type)) {
+            Log::info("Notificación omitida por preferencias del usuario {$user->id}: tipo={$type}");
+            return 0;
+        }
+
         $successCount = 0;
 
         foreach ($user->pushSubscriptions as $subscription) {

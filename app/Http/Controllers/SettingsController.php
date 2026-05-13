@@ -43,4 +43,33 @@ class SettingsController extends Controller
             ->route('settings.index')
             ->with('success', __('messages.success'));
     }
+
+    /**
+     * Update notification preferences (AJAX).
+     */
+    public function updateNotifications(Request $request)
+    {
+        $validTypes = [
+            'chat_message',
+            'new_predictive_questions',
+            'social_question',
+            'predictive_results',
+            'ranking_overtaken',
+            'daily_unanswer_reminder',
+            'featured_question',
+            'daily_points_earned',
+        ];
+
+        $request->validate([
+            'type'    => 'required|in:' . implode(',', $validTypes),
+            'enabled' => 'required|boolean',
+        ]);
+
+        $user = Auth::user();
+        $preferences = $user->notification_preferences ?? [];
+        $preferences[$request->input('type')] = (bool) $request->input('enabled');
+        $user->update(['notification_preferences' => $preferences]);
+
+        return response()->json(['ok' => true]);
+    }
 }
