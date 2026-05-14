@@ -16,7 +16,12 @@
         <script src="{{ asset('js/groups/notification-checker.js') }}"></script>
     @endpush
 
-    @section('navigation-title', 'Offside Club')
+    @section('navigation-title')
+        Offside Club |
+        <img src="{{ asset('images/2026_FIFA_World_Cup_emblem.svg.png') }}"
+             alt="FIFA World Cup 2026"
+             style="height: 26px; width: auto; object-fit: contain; opacity: 0.9; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));">
+    @endsection
 
     <div class="main-container">
         {{-- 1. HEADER CON LOGO --}}
@@ -24,6 +29,9 @@
             :logo-url="asset('images/logo_alone.png')"
             alt-text="Offside Club"
         />
+
+        {{-- 1.5 COUNTDOWN MUNDIAL 2026 --}}
+        <x-mundial-countdown />
 
         {{-- 2. BARRA DE ESTADÍSTICAS --}}
         <x-groups.stats-bar

@@ -41,6 +41,10 @@
                         <div style="display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; background: {{ $badgeBg }}; color: #000; text-transform: uppercase; letter-spacing: 0.5px;">
                             <i class="fas fa-globe"></i> {{ __('views.groups.public') }}
                         </div>
+                        {{-- Badge Mundial 2026 —— seasonal accent --}}
+                        <div style="display: inline-block; margin-left: 6px; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; background: linear-gradient(135deg, #C9A84C, #E8C96A); color: #3a2700; letter-spacing: 0.4px; vertical-align: middle;">
+                            🏆 Mundial 2026
+                        </div>
                     </div>
 
                     {{-- Nombre del grupo --}}

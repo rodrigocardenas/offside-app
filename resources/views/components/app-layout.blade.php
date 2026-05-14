@@ -162,10 +162,18 @@
             box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
         }
 
+        /* ==================== Mundial 2026 — Paleta dorada ==================== */
+        :root {
+            --mundial-gold:        #C9A84C;
+            --mundial-gold-light:  #E8C96A;
+            --mundial-gold-border: #D4AF37;
+            --mundial-strip-bg:    rgba(201, 168, 76, 0.08);
+        }
+
         /* ==================== Header - Always Light ==================== */
         .header {
             background: #fff !important;
-            border-bottom: 1px solid #e0e0e0 !important;
+            border-bottom: 1px solid var(--mundial-gold-border) !important;
             color: #333 !important;
             z-index: 900 !important;
             display: flex !important;
@@ -183,7 +191,7 @@
         /* Dark theme header */
         .dark-theme .header {
             background: #0f3d3a !important;
-            border-bottom-color: #2a4a47 !important;
+            border-bottom-color: var(--mundial-gold) !important;
             color: #fff !important;
         }
 
