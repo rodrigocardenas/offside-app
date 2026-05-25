@@ -114,6 +114,9 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "⚽ Verificando grupo público del Mundial 2026..."
     php artisan worldcup:create-group || echo "⚠️  worldcup:create-group falló (no crítico)"
 
+    echo "🏆 Verificando grupo quiz del Mundial 2026..."
+    php artisan worldcup:create-quiz-group || echo "⚠️  worldcup:create-quiz-group falló (no crítico)"
+
     echo "� Ejecutando comandos de seguridad..."
     # Limpiar logs de seguridad antiguos (>30 días)
     php artisan tinker --execute "
