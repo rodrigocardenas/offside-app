@@ -108,6 +108,12 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "🗄️ Aplicando migraciones..."
     php artisan migrate --force || true
 
+    echo "⚽ Sincronizando partidos del Mundial 2026..."
+    php artisan worldcup:import-matches --force || echo "⚠️  worldcup:import-matches falló (no crítico)"
+
+    echo "⚽ Verificando grupo público del Mundial 2026..."
+    php artisan worldcup:create-group || echo "⚠️  worldcup:create-group falló (no crítico)"
+
     echo "� Ejecutando comandos de seguridad..."
     # Limpiar logs de seguridad antiguos (>30 días)
     php artisan tinker --execute "

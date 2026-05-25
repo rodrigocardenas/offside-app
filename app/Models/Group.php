@@ -17,6 +17,7 @@ class Group extends Model
         'created_by',
         'competition_id',
         'category',
+        'is_world_cup',
         'reward_or_penalty',
         'expires_at',
         'cover_image',
@@ -29,6 +30,7 @@ class Group extends Model
     protected $casts = [
         'expires_at' => 'datetime',
         'total_points_updated_at' => 'datetime',
+        'is_world_cup' => 'boolean',
     ];
 
     public function creator()
@@ -226,6 +228,24 @@ class Group extends Model
     public function isPublic(): bool
     {
         return $this->category === 'public';
+    }
+
+    /**
+     * Check if this is the World Cup group
+     *
+     * @return bool
+     */
+    public function isWorldCup(): bool
+    {
+        return (bool) $this->is_world_cup;
+    }
+
+    /**
+     * Scope: Get only World Cup groups
+     */
+    public function scopeWorldCup($query)
+    {
+        return $query->where('is_world_cup', true);
     }
 
     /**

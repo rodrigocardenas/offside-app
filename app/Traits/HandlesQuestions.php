@@ -15,6 +15,11 @@ trait HandlesQuestions
     {
         $matchQuestionsCacheKey = "group_{$group->id}_match_questions";
         return Cache::remember($matchQuestionsCacheKey, now()->addMinutes(5), function () use ($group, $roles) {
+            // Grupo del Mundial: lógica especial (todas las predicciones de hoy + mañana)
+            if ($group->is_world_cup) {
+                return $this->processQuestions($this->fillWorldCupPredictiveQuestions($group));
+            }
+
             $questions = $this->getExistingQuestions($group);
 
             // Verificar si hay partidos próximos disponibles
@@ -280,6 +285,112 @@ trait HandlesQuestions
         }
 
         return $vigentes->merge($nuevas)->take(5);
+    }
+
+    /**
+     * 🌍 Lógica especial del grupo del Mundial 2026.
+     *
+     * Crea (o recupera) una predicción por cada partido del Mundial que:
+     *   - Sea "Not Started"
+     *   - Se juegue HOY o MAÑANA (hora UTC)
+     *
+     * Utiliza exclusivamente el template_question con id 44
+     * ("¿Cuál será el resultado del partido?") y no tiene límite de
+     * 5 preguntas como los grupos normales.
+     */
+    public function fillWorldCupPredictiveQuestions($group)
+    {
+        /** @var \App\Models\TemplateQuestion|null */
+        $template = \App\Models\TemplateQuestion::find(44);
+
+        if (!$template) {
+            Log::warning('fillWorldCupPredictiveQuestions: template_question id=44 no encontrado');
+            return collect();
+        }
+
+        $startOfToday    = now()->utc()->startOfDay();
+        $endOfTomorrow   = now()->utc()->addDay()->endOfDay();
+
+        // Obtener competición WC
+        $wcCompetition = \App\Models\Competition::where('type', 'WC')->first();
+
+        // Partidos del Mundial de hoy y mañana que aún no han comenzado
+        $matches = \App\Models\FootballMatch::where('status', 'Not Started')
+            ->where('date', '>=', $startOfToday)
+            ->where('date', '<=', $endOfTomorrow)
+            ->when($wcCompetition, fn($q) => $q->where('competition_id', $wcCompetition->id))
+            ->when(!$wcCompetition, fn($q) => $q->where('league', 'WC'))
+            ->orderBy('date', 'asc')
+            ->get();
+
+        if ($matches->isEmpty()) {
+            Log::info("fillWorldCupPredictiveQuestions: sin partidos WC para hoy/mañana", [
+                'group_id' => $group->id,
+            ]);
+            // Devolver las preguntas vigentes que ya existen
+            return \App\Models\Question::where('type', 'predictive')
+                ->where('group_id', $group->id)
+                ->where('available_until', '>', now()->subHours(4))
+                ->with(['options', 'answers.user', 'answers.questionOption', 'football_match', 'templateQuestion'])
+                ->get();
+        }
+
+        $preguntas = collect();
+
+        foreach ($matches as $match) {
+            // Usar firstOrCreate para evitar duplicados
+            $question = \App\Models\Question::firstOrCreate(
+                [
+                    'match_id'            => $match->id,
+                    'group_id'            => $group->id,
+                    'template_question_id' => $template->id,
+                ],
+                [
+                    'type'           => 'predictive',
+                    'title'          => str_replace(
+                        ['{{home_team}}', '{{away_team}}'],
+                        [$match->home_team, $match->away_team],
+                        $template->text
+                    ),
+                    'description'    => null,
+                    'competition_id' => $match->competition_id,
+                    'available_until' => $match->date->utc()->format('Y-m-d H:i:s'),
+                    'points'         => 300,   // puntos fijos para todos los partidos del Mundial
+                    'is_featured'    => true,
+                ]
+            );
+
+            // Asegurar que las opciones existan
+            if ($question->wasRecentlyCreated) {
+                $rawOptions = is_string($template->options)
+                    ? json_decode($template->options, true)
+                    : (array) $template->options;
+
+                foreach ($rawOptions as $opt) {
+                    $optText = str_replace(
+                        ['{{home_team}}', '{{away_team}}'],
+                        [$match->home_team, $match->away_team],
+                        $opt['text']
+                    );
+                    \App\Models\QuestionOption::firstOrCreate([
+                        'question_id' => $question->id,
+                        'text'        => $optText,
+                    ], [
+                        'is_correct' => false,
+                    ]);
+                }
+
+                Log::info("fillWorldCupPredictiveQuestions: pregunta creada", [
+                    'question_id' => $question->id,
+                    'match'       => "{$match->home_team} vs {$match->away_team}",
+                    'date'        => $match->date,
+                ]);
+            }
+
+            $preguntas->push($question->load(['options', 'answers.user', 'answers.questionOption', 'football_match', 'templateQuestion']));
+        }
+
+        return $preguntas;
     }
 
     /**

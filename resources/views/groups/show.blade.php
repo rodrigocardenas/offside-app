@@ -19,23 +19,63 @@
     @php
         $themeMode = auth()->user()->theme_mode ?? 'light';
         $isDark = $themeMode === 'dark';
+        $isWorldCup = $group->is_world_cup ?? false;
 
         // Colores dinámicos
-        $bgPrimary = $isDark ? '#0a2e2c' : '#f5f5f5';
-        $bgSecondary = $isDark ? '#0f3d3a' : '#f5f5f5';
-        $bgTertiary = $isDark ? '#1a524e' : '#ffffff';
-        $textPrimary = $isDark ? '#ffffff' : '#333333';
-        $textSecondary = $isDark ? '#b0b0b0' : '#999999';
-        $borderColor = $isDark ? '#2a4a47' : '#e0e0e0';
-        $accentColor = '#00deb0';
-        $accentDark = '#17b796';
-        $componentsBackground = $isDark ? '#1a524e' : '#ffffff';
-        $buttonBgHover = $isDark ? 'rgba(0, 222, 176, 0.12)' : 'rgba(0, 222, 176, 0.08)';
+        if ($isWorldCup && $isDark) {
+            // 🌍 Mundial – Dark mode: azul profundo con dorado
+            $bgPrimary          = '#0b1e3a';
+            $bgSecondary        = '#102545';
+            $bgTertiary         = '#162e52';
+            $textPrimary        = '#ffffff';
+            $textSecondary      = '#9ab0cc';
+            $borderColor        = '#1e3e6a';
+            $accentColor        = '#e8c11a';
+            $accentDark         = '#c5a215';
+            $componentsBackground = '#162e52';
+            $buttonBgHover      = 'rgba(232, 193, 26, 0.12)';
+        } elseif ($isWorldCup && !$isDark) {
+            // 🌍 Mundial – Light mode: blanco con dorado
+            $bgPrimary          = '#f7f4e9';
+            $bgSecondary        = '#f7f4e9';
+            $bgTertiary         = '#ffffff';
+            $textPrimary        = '#1a1a2e';
+            $textSecondary      = '#6e6e8a';
+            $borderColor        = '#ddd5a0';
+            $accentColor        = '#c5a215';
+            $accentDark         = '#a38610';
+            $componentsBackground = '#ffffff';
+            $buttonBgHover      = 'rgba(197, 162, 21, 0.08)';
+        } elseif ($isDark) {
+            // Default – Dark mode: verde
+            $bgPrimary          = '#0a2e2c';
+            $bgSecondary        = '#0f3d3a';
+            $bgTertiary         = '#1a524e';
+            $textPrimary        = '#ffffff';
+            $textSecondary      = '#b0b0b0';
+            $borderColor        = '#2a4a47';
+            $accentColor        = '#00deb0';
+            $accentDark         = '#17b796';
+            $componentsBackground = '#1a524e';
+            $buttonBgHover      = 'rgba(0, 222, 176, 0.12)';
+        } else {
+            // Default – Light mode: verde
+            $bgPrimary          = '#f5f5f5';
+            $bgSecondary        = '#f5f5f5';
+            $bgTertiary         = '#ffffff';
+            $textPrimary        = '#333333';
+            $textSecondary      = '#999999';
+            $borderColor        = '#e0e0e0';
+            $accentColor        = '#00deb0';
+            $accentDark         = '#17b796';
+            $componentsBackground = '#ffffff';
+            $buttonBgHover      = 'rgba(0, 222, 176, 0.08)';
+        }
 
         // Theme variables for share modal
-        $shareModalBg = $isDark ? '#10302d' : '#ffffff';
+        $shareModalBg = $isDark ? ($isWorldCup ? '#0e2040' : '#10302d') : '#ffffff';
         $shareModalText = $isDark ? '#f1fff8' : '#333333';
-        $shareModalBorder = $isDark ? '#1d4f4a' : '#e0e0e0';
+        $shareModalBorder = $isDark ? ($isWorldCup ? '#1e3e6a' : '#1d4f4a') : '#e0e0e0';
         $shareTextareaBg = $isDark ? 'rgba(255,255,255,0.05)' : '#f5f5f5';
         $shareModalShadow = $isDark ? '0 14px 40px rgba(0, 0, 0, 0.55)' : '0 10px 40px rgba(0, 0, 0, 0.2)';
         $shareCloseColor = $isDark ? '#d5fdf0' : '#999999';
@@ -46,6 +86,19 @@
     @endphp
 
     <div class="min-h-screen p-1 md:p-6 pb-24" style="background: {{ $bgPrimary }}; color: {{ $textPrimary }}; margin-top: 3.75rem;">
+
+        {{-- 🌍 BANNER MUNDIAL 2026 --}}
+        @if($isWorldCup)
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 16px; margin: 0 4px 12px 4px; border-radius: 14px; background: linear-gradient(135deg, {{ $isDark ? '#0e2040' : '#fff8e1' }}, {{ $isDark ? '#162e52' : '#fffde7' }}); border: 1px solid {{ $accentColor }}44;">
+            <img src="{{ asset('images/2026_FIFA_World_Cup_emblem.svg.png') }}"
+                 alt="FIFA World Cup 2026"
+                 style="height: 32px; width: auto; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.2));">
+            <div>
+                <div style="font-size: 13px; font-weight: 700; color: {{ $accentColor }}; letter-spacing: 0.02em;">⚽ FIFA World Cup 2026</div>
+                <div style="font-size: 11px; color: {{ $textSecondary }};">Predice los partidos del día y acumula puntos</div>
+            </div>
+        </div>
+        @endif
 
         <!-- Ranking Section -->
         <div class="ml-1 mr-1" style="background: {{ $bgTertiary }}; padding: 5px; border-radius: 16px; border: 1px solid {{ $borderColor }}; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 16px;">
