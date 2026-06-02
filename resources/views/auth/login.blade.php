@@ -60,7 +60,9 @@
 
                     <!-- Botón Iniciar Sesión -->
                     <button
-                        type="submit"
+                        type="button"
+                        id="playNowBtn"
+                        onclick="handlePlayNow()"
                         style="width: 100%; padding: 12px 16px; background: linear-gradient(135deg, {{ $accentDark }}, {{ $accentColor }}); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px;">
                         <i class="fas fa-sign-in-alt"></i>
                         {{ __('auth.login_button') }}
@@ -105,6 +107,100 @@
                     <i class="fas fa-info-circle" style="color: {{ $accentColor }}; margin-right: 8px;"></i>
                     <strong>¿Nuevo en Offside Club?</strong> Crea tu cuenta para empezar a hacer predicciones y compite con otros usuarios.
                 </p>
+            </div>
+
+            <!-- Modal de Política de Privacidad -->
+            <div id="privacyModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; align-items: flex-end; justify-content: center; z-index: 10000;">
+                <div style="background: #fff; width: 100%; max-width: 414px; border-radius: 20px 20px 0 0; padding: 24px 20px 32px; color: #333; display: flex; flex-direction: column; max-height: 85vh;">
+                    <!-- Cabecera -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-shrink: 0;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; background: rgba(0,222,176,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-shield-alt" style="color: #00deb0; font-size: 16px;"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 16px; font-weight: 700; color: #222; margin: 0;">Política de Privacidad</h3>
+                                <p style="font-size: 11px; color: #999; margin: 2px 0 0;">Última actualización: 17 enero 2026</p>
+                            </div>
+                        </div>
+                        <button onclick="closePrivacyModal()" style="background: none; border: none; font-size: 20px; color: #aaa; cursor: pointer; padding: 4px;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Contenido scrollable -->
+                    <div style="overflow-y: auto; flex: 1; padding-right: 4px; margin-bottom: 16px;">
+                        <p style="font-size: 13px; color: #555; margin: 0 0 14px; line-height: 1.6;">
+                            Antes de continuar, revisa cómo Offside Club gestiona tu información personal.
+                        </p>
+
+                        <!-- Puntos clave -->
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                <i class="fas fa-database" style="color: #00deb0; font-size: 13px; margin-top: 2px; flex-shrink: 0;"></i>
+                                <div>
+                                    <p style="font-size: 13px; font-weight: 600; color: #333; margin: 0 0 2px;">Datos que recopilamos</p>
+                                    <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.5;">Nombre, correo electrónico, foto de perfil, respuestas a cuestionarios, identificadores de dispositivo y tokens de notificaciones Firebase.</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                <i class="fas fa-cogs" style="color: #00deb0; font-size: 13px; margin-top: 2px; flex-shrink: 0;"></i>
+                                <div>
+                                    <p style="font-size: 13px; font-weight: 600; color: #333; margin: 0 0 2px;">Cómo usamos la información</p>
+                                    <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.5;">Para prestarte el servicio, soporte técnico, personalizar tu experiencia y enviarte notificaciones relacionadas con la app.</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                <i class="fas fa-share-alt" style="color: #00deb0; font-size: 13px; margin-top: 2px; flex-shrink: 0;"></i>
+                                <div>
+                                    <p style="font-size: 13px; font-weight: 600; color: #333; margin: 0 0 2px;">Terceros</p>
+                                    <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.5;">Usamos Firebase (notificaciones), proveedores de hosting y analítica. <strong>No vendemos tus datos.</strong></p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                <i class="fas fa-user-check" style="color: #00deb0; font-size: 13px; margin-top: 2px; flex-shrink: 0;"></i>
+                                <div>
+                                    <p style="font-size: 13px; font-weight: 600; color: #333; margin: 0 0 2px;">Tus derechos</p>
+                                    <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.5;">Puedes acceder, corregir, eliminar o portar tus datos escribiendo a <a href="mailto:soporte@offsideclub.com" style="color: #00deb0;">soporte@offsideclub.com</a>.</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px; align-items: flex-start;">
+                                <i class="fas fa-child" style="color: #00deb0; font-size: 13px; margin-top: 2px; flex-shrink: 0;"></i>
+                                <div>
+                                    <p style="font-size: 13px; font-weight: 600; color: #333; margin: 0 0 2px;">Menores de edad</p>
+                                    <p style="font-size: 12px; color: #666; margin: 0; line-height: 1.5;">Offside Club no está dirigida a menores de 13 años.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 14px; padding: 10px 12px; background: rgba(0,222,176,0.07); border-radius: 8px; border-left: 3px solid #00deb0;">
+                            <p style="font-size: 12px; color: #555; margin: 0; line-height: 1.5;">
+                                Puedes consultar la política completa en <a href="/privacy-policy.html" target="_blank" style="color: #00deb0; font-weight: 600;">privacy-policy.html</a> o en la sección de Privacidad dentro de Ajustes.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox de aceptación -->
+                    <div style="flex-shrink: 0;">
+                        <label id="privacyCheckLabel" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; padding: 12px; border: 1px solid #e0e0e0; border-radius: 10px; margin-bottom: 14px; transition: border-color 0.2s;">
+                            <input type="checkbox" id="privacyAcceptCheck" onchange="togglePrivacyConfirm()" style="width: 18px; height: 18px; accent-color: #00deb0; flex-shrink: 0; margin-top: 1px; cursor: pointer;">
+                            <span style="font-size: 13px; color: #333; line-height: 1.5;">
+                                He leído y acepto la <strong>Política de Privacidad</strong> de Offside Club
+                            </span>
+                        </label>
+
+                        <!-- Botones -->
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="closePrivacyModal()" style="flex: 1; padding: 12px; background: none; color: #666; border: 1px solid #e0e0e0; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                                Cancelar
+                            </button>
+                            <button id="privacyConfirmBtn" onclick="confirmPrivacyAndSubmit()" disabled style="flex: 2; padding: 12px; background: linear-gradient(135deg, #17b796, #00deb0); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: not-allowed; opacity: 0.5; transition: all 0.2s;">
+                                <i class="fas fa-check" style="margin-right: 6px;"></i>
+                                Confirmar y jugar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Modal de instalación PWA -->
@@ -153,13 +249,36 @@
             box-shadow: 0 0 0 3px rgba(0, 222, 176, 0.1);
         }
 
-        .main-container button[type="submit"]:hover {
+        #playNowBtn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 222, 176, 0.3);
         }
 
-        .main-container button[type="submit"]:active {
+        #playNowBtn:active {
             transform: translateY(0);
+        }
+
+        #privacyModal {
+            animation: fadeInModal 0.25s ease;
+        }
+
+        #privacyModal > div {
+            animation: slideUpModal 0.3s ease;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(60px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+
+        #privacyCheckLabel:has(#privacyAcceptCheck:checked) {
+            border-color: #00deb0 !important;
+            background: rgba(0,222,176,0.05);
         }
 
         .main-container a[href*="/auth/google"] {
@@ -197,6 +316,54 @@
     </style>
 
     <script>
+        // ---- PRIVACY MODAL ----
+        const PRIVACY_ACCEPTED_KEY = 'offsideclub_privacy_accepted_v1';
+
+        function handlePlayNow() {
+            const nameInput = document.getElementById('name');
+            if (!nameInput || !nameInput.value.trim()) {
+                nameInput && nameInput.focus();
+                return;
+            }
+            if (localStorage.getItem(PRIVACY_ACCEPTED_KEY) === '1') {
+                document.querySelector('form[action="{{ route('login') }}"]').submit();
+                return;
+            }
+            openPrivacyModal();
+        }
+
+        function openPrivacyModal() {
+            const modal = document.getElementById('privacyModal');
+            modal.style.display = 'flex';
+            document.getElementById('privacyAcceptCheck').checked = false;
+            togglePrivacyConfirm();
+        }
+
+        function closePrivacyModal() {
+            document.getElementById('privacyModal').style.display = 'none';
+        }
+
+        function togglePrivacyConfirm() {
+            const checked = document.getElementById('privacyAcceptCheck').checked;
+            const btn = document.getElementById('privacyConfirmBtn');
+            btn.disabled = !checked;
+            btn.style.opacity = checked ? '1' : '0.5';
+            btn.style.cursor = checked ? 'pointer' : 'not-allowed';
+        }
+
+        function confirmPrivacyAndSubmit() {
+            if (!document.getElementById('privacyAcceptCheck').checked) return;
+            localStorage.setItem(PRIVACY_ACCEPTED_KEY, '1');
+            closePrivacyModal();
+            document.querySelector('form[action="{{ route('login') }}"]').submit();
+        }
+
+        // Cerrar modal al pulsar fuera del panel
+        document.getElementById('privacyModal').addEventListener('click', function(e) {
+            if (e.target === this) closePrivacyModal();
+        });
+        // ---- FIN PRIVACY MODAL ----
+
         // Variables globales
         let deferredPrompt;
         const pwaInstallModal = document.getElementById('pwaInstallModal');
