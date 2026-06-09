@@ -195,7 +195,7 @@
                                                 @else
                                                     @php
                                                         $initials = '';
-                                                        $nameParts = explode(' ', $answer->user->name);
+                                                        $nameParts = explode(' ', $answer->user?->name ?? '');
                                                         foreach($nameParts as $part) {
                                                             $initials .= strtoupper(substr($part, 0, 1));
                                                         }
