@@ -12,7 +12,7 @@
         *{box-sizing:border-box;margin:0;padding:0}
         :root{--gold:#e8c11a;--gold-dk:#c5a215;--navy:#0b1e3a;--navy-mid:#102545;--navy-light:#162e52;--white:#fff;--muted:#9ab0cc;--border:rgba(232,193,26,.2)}
         html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
-        .bg-stadium{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(11,30,58,.80) 0%,rgba(11,30,58,.96) 50%,rgba(11,30,58,1) 100%),url('{{ asset("images/estadio.avif") }}') center/cover no-repeat;z-index:0}
+        .bg-stadium{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(11,30,58,.80) 0%,rgba(11,30,58,.12) 50%,rgba(11,30,58,1) 100%),url('{{ asset("images/estadio.avif") }}') center/cover no-repeat;z-index:0}
         .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
         .corner{position:fixed;z-index:20;opacity:.90}
         .corner.tl{top:14px;left:14px;animation:float 4s ease-in-out infinite}
@@ -52,7 +52,7 @@
 </head>
 <body>
 <div class="bg-stadium"></div>
-<div class="corner tl"><img src="{{ asset('images/logo-offside-192x192.png') }}" alt="Offside Club"></div>
+<div class="corner tl"><img src="{{ asset('images/logo-offside.png') }}" alt="Offside Club"></div>
 <div class="corner tr"><img src="{{ asset('images/2026_FIFA_World_Cup_emblem.svg.png') }}" alt="FIFA World Cup 2026"></div>
 
 <div class="page">
