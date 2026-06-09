@@ -21,7 +21,7 @@
         }
         html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
         /* stadium bg */
-        .bg-stadium{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(11,30,58,.72) 0%,rgba(11,30,58,.90) 50%,rgba(11,30,58,.98) 100%),url('{{ asset("images/estadio.avif") }}') center/cover no-repeat;z-index:0}
+        .bg-stadium{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(11,30,58,.72) 0%,rgba(11,30,58,.12) 50%,rgba(11,30,58,.98) 100%),url('{{ asset("images/estadio.avif") }}') center/cover no-repeat;z-index:0}
         .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
         /* corner logos */
         .corner{position:fixed;z-index:20;opacity:0}
@@ -33,7 +33,7 @@
         /* hero */
         .hero{padding:80px 20px 0;text-align:center;display:flex;flex-direction:column;align-items:center}
         /* match info badge (unified) */
-        .match-info-badge{display:inline-flex;flex-direction:column;align-items:center;gap:5px;background:rgba(232,193,26,.07);border:1.5px solid rgba(232,193,26,.38);border-radius:16px;padding:12px 20px;margin-bottom:26px;min-width:220px}
+        .match-info-badge{display:inline-flex;flex-direction:column;align-items:center;gap:5px;background:rgba(232,193,26,.07);border:1.5px solid rgb(26, 116 ,232 ,.75);border-radius:16px;padding:12px 20px;margin-bottom:26px;min-width:220px}
         .badge-wc{display:flex;align-items:center;gap:7px;color:var(--gold);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
         .badge-sep{width:100%;height:1px;background:rgba(232,193,26,.2)}
         .badge-meta{font-size:12px;color:var(--muted);letter-spacing:.3px}
@@ -97,7 +97,7 @@
 <div class="bg-stadium"></div>
 
 {{-- Logos en esquinas --}}
-<div class="corner tl"><img src="{{ asset('images/logo-offside-192x192.png') }}" alt="Offside Club"></div>
+<div class="corner tl"><img src="{{ asset('images/logo-offside.png') }}" alt="Offside Club"></div>
 <div class="corner tr"><img src="{{ asset('images/2026_FIFA_World_Cup_emblem.svg.png') }}" alt="FIFA World Cup 2026"></div>
 
 <div class="page">
