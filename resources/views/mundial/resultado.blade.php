@@ -24,7 +24,8 @@
         /* share card */
         .share-card{width:100%;max-width:420px;background:rgba(16,37,69,.90);border:1.5px solid var(--border);border-radius:22px;overflow:hidden;margin:50px 0 24px;backdrop-filter:blur(14px);box-shadow:0 8px 40px rgba(0,0,0,.45)}
         .card-head{background:linear-gradient(135deg,rgba(11,30,58,1) 0%,rgba(22,46,82,1) 100%);padding:22px 22px 18px;text-align:center;border-bottom:1px solid rgba(232,193,26,.18)}
-        .card-wc{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+        .card-wc{margin-bottom:12px;display:flex;justify-content:center}
+        .card-wc-logo{height:34px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.35))}
         /* teams in card */
         .card-teams-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
         .card-team{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
@@ -37,8 +38,8 @@
         .pick-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
         .pick-value{font-size:24px;font-weight:900;color:var(--gold);background:rgba(232,193,26,.1);border:1.5px solid rgba(232,193,26,.38);border-radius:13px;padding:14px 20px;display:block;margin-bottom:18px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
         @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-        .branding{font-size:12px;color:var(--muted)}
-        .branding span{color:var(--gold);font-weight:700}
+        .branding{display:flex;justify-content:center}
+        .branding-logo{height:24px;width:auto;object-fit:contain;opacity:.95}
         /* actions */
         .actions{width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px}
         .btn-share{display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);font-size:15px;font-weight:800;border-radius:13px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px rgba(232,193,26,.32)}
@@ -64,7 +65,9 @@
     {{-- Share Card --}}
     <div class="share-card">
         <div class="card-head">
-            <div class="card-wc">⚽ FIFA World Cup 2026</div>
+            <div class="card-wc">
+                <img class="card-wc-logo" src="{{ asset('images/2026_FIFA_World_Cup_emblem.svg.png') }}" alt="FIFA World Cup 2026">
+            </div>
             <div class="card-teams-row">
                 <div class="card-team">
                     <img class="card-crest"
@@ -90,7 +93,9 @@
         <div class="card-body">
             <div class="pick-label">🏅 Mi predicción</div>
             <div class="pick-value">{{ $votedOption }}</div>
-            <div class="branding">Jugado en <span>Offside Club</span> · app.offsideclub.es</div>
+            <div class="branding">
+                <img class="branding-logo" src="{{ asset('images/logo-offside.png') }}" alt="Offside Club">
+            </div>
         </div>
     </div>
 
