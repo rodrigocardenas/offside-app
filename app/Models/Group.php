@@ -196,7 +196,7 @@ class Group extends Model
 
     /**
      * Get ranked users with points
-     * 
+     *
      * NOTE: Phase 4 Optimization - Uses cached group_user.points instead of recalculating
      * This method depends on VerifyAllQuestionsJob (Phase 1) syncing points to group_user.points
      * Historical data must be synced via migration (Phase 2)
