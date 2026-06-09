@@ -90,15 +90,15 @@
                         <div class="card-crests">
                             <img class="card-crest"
                                  src="{{ $m->homeTeam?->crest_url ?? asset('images/default-crest.png') }}"
-                                 alt="{{ $m->home_team }}"
+                                 alt="{{ $m->homeTeam?->name ?? $m->home_team }}"
                                  onerror="this.src='{{ asset('images/default-crest.png') }}'">
                             <div class="card-names">
-                                <div class="card-match-name">{{ $m->home_team }} vs {{ $m->awayTeam- }}</div>
+                                <div class="card-match-name">{{ $m->homeTeam?->name ?? $m->home_team }} vs {{ $m->awayTeam?->name ?? $m->away_team }}</div>
                                 <div class="card-meta">@if($m->group){{ str_replace('GROUP_','Grupo ',$m->group) }} · @endif{{ \Carbon\Carbon::parse($m->date)->format('d M') }}</div>
                             </div>
                             <img class="card-crest"
                                  src="{{ $m->awayTeam?->crest_url ?? asset('images/default-crest.png') }}"
-                                 alt="{{ $m->away_team }}"
+                                 alt="{{ $m->awayTeam?->name ?? $m->away_team }}"
                                  onerror="this.src='{{ asset('images/default-crest.png') }}'">
                         </div>
                         <div class="card-arrow"><i class="fas fa-chevron-right"></i></div>
