@@ -93,7 +93,7 @@
                                  alt="{{ $m->home_team }}"
                                  onerror="this.src='{{ asset('images/default-crest.png') }}'">
                             <div class="card-names">
-                                <div class="card-match-name">{{ $m->home_team }} vs {{ $m->away_team }}</div>
+                                <div class="card-match-name">{{ $m->home_team }} vs {{ $m->awayTeam- }}</div>
                                 <div class="card-meta">@if($m->group){{ str_replace('GROUP_','Grupo ',$m->group) }} · @endif{{ \Carbon\Carbon::parse($m->date)->format('d M') }}</div>
                             </div>
                             <img class="card-crest"
