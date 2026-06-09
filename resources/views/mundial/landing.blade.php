@@ -121,7 +121,7 @@
             <div class="team-block">
                 <div class="crest-ring">
                     <img src="{{ $match->homeTeam?->crest_url ?? asset('images/default-crest.png') }}"
-                         alt="{{ $match->home_team }}"
+                         alt="{{ $match->homeTeam?->name ?? $match->home_team }}"
                          onerror="this.src='{{ asset('images/default-crest.png') }}'">
                 </div>
                 <div class="team-name">{{ $match->homeTeam?->name ?? $match->home_team }}</div>
