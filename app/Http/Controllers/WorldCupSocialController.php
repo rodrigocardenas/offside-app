@@ -30,7 +30,8 @@ class WorldCupSocialController extends Controller
     {
         $wcCompetition = Competition::where('type', 'WC')->first();
 
-        $matches = FootballMatch::where('status', 'Not Started')
+        $matches = FootballMatch::with(['homeTeam', 'awayTeam'])
+            ->where('status', 'Not Started')
             ->where('date', '>=', now()->utc()->startOfDay())
             ->where('date', '<=', now()->utc()->addDay()->endOfDay())
             ->when($wcCompetition, fn($q) => $q->where('competition_id', $wcCompetition->id))
@@ -49,6 +50,8 @@ class WorldCupSocialController extends Controller
     {
         // Seguridad: solo partidos del Mundial
         abort_unless($this->isWcMatch($match), 404);
+
+        $match->loadMissing(['homeTeam', 'awayTeam']);
 
         $wcGroup   = Group::worldCup()->first();
         $question  = $wcGroup ? $this->getOrCreateQuestion($wcGroup, $match) : null;
