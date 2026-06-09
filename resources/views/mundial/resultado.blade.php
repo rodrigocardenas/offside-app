@@ -43,6 +43,7 @@
         .actions{width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px}
         .btn-share{display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);font-size:15px;font-weight:800;border-radius:13px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px rgba(232,193,26,.32)}
         .btn-share:hover{transform:translateY(-2px);box-shadow:0 7px 24px rgba(232,193,26,.42)}
+        .btn-share[disabled]{opacity:.75;cursor:wait}
         .btn-outline{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:transparent;border:1.5px solid rgba(232,193,26,.32);color:var(--white);font-size:14px;font-weight:600;border-radius:13px;cursor:pointer;text-decoration:none;transition:all .2s}
         .btn-outline:hover{border-color:var(--gold);color:var(--gold);background:rgba(232,193,26,.06)}
         .btn-ghost{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;background:transparent;color:var(--muted);font-size:13px;font-weight:600;border-radius:13px;border:none;cursor:pointer;text-decoration:none;transition:color .2s}
@@ -95,8 +96,11 @@
 
     {{-- Actions --}}
     <div class="actions">
-        <button class="btn-share" onclick="shareResult()">
+        <button class="btn-share" id="shareBtn" onclick="shareResult()">
             <i class="fas fa-share-alt"></i> Compartir mi predicción
+        </button>
+        <button class="btn-outline" onclick="downloadShareImage()">
+            <i class="fas fa-image"></i> Descargar imagen
         </button>
         <hr class="divider">
         <a href="{{ route('wc.hoy') }}" class="btn-outline">
@@ -119,9 +123,151 @@
 <script>
     const matchUrl = "{{ route('wc.match', $match->id) }}";
     const shareText = "⚽ Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->home_team }} vs {{ $match->away_team }} \u2014 Mundial 2026.\n\u00bfY t\u00fa? Predice en Offside Club:";
+    const shareFileName = "prediccion-mundial-{{ $match->id }}.png";
+
+    function drawRoundedRect(ctx, x, y, w, h, r){
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+    }
+
+    function buildShareCanvas(){
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1920;
+        const ctx = canvas.getContext('2d');
+
+        // Background gradient
+        const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        bg.addColorStop(0, '#0b1e3a');
+        bg.addColorStop(0.55, '#102545');
+        bg.addColorStop(1, '#162e52');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Header
+        ctx.fillStyle = '#e8c11a';
+        ctx.font = '700 44px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('FIFA World Cup 2026', canvas.width / 2, 160);
+
+        // Match block
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        drawRoundedRect(ctx, 90, 230, 900, 280, 32);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(232,193,26,0.35)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 56px sans-serif';
+        ctx.fillText('{{ $match->home_team }}', canvas.width / 2, 330);
+        ctx.fillStyle = '#9ab0cc';
+        ctx.font = '700 34px sans-serif';
+        ctx.fillText('VS', canvas.width / 2, 390);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 56px sans-serif';
+        ctx.fillText('{{ $match->away_team }}', canvas.width / 2, 460);
+
+        // Pick block
+        ctx.fillStyle = 'rgba(232,193,26,0.10)';
+        drawRoundedRect(ctx, 90, 610, 900, 420, 36);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(232,193,26,0.5)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.fillStyle = '#9ab0cc';
+        ctx.font = '700 36px sans-serif';
+        ctx.fillText('MI PREDICCION', canvas.width / 2, 710);
+
+        ctx.fillStyle = '#e8c11a';
+        ctx.font = '900 64px sans-serif';
+
+        const lines = [];
+        const words = '{{ $votedOption }}'.split(' ');
+        let line = '';
+        for (const word of words){
+            const test = line ? (line + ' ' + word) : word;
+            if (ctx.measureText(test).width > 820){
+                lines.push(line);
+                line = word;
+            } else {
+                line = test;
+            }
+        }
+        if (line) lines.push(line);
+
+        const startY = 820 - ((lines.length - 1) * 44 / 2);
+        lines.forEach((l, i) => ctx.fillText(l, canvas.width / 2, startY + i * 88));
+
+        // Footer
+        ctx.fillStyle = '#9ab0cc';
+        ctx.font = '600 32px sans-serif';
+        ctx.fillText('Jugado en Offside Club', canvas.width / 2, 1120);
+        ctx.fillStyle = '#e8c11a';
+        ctx.font = '700 30px sans-serif';
+        ctx.fillText('app.offsideclub.es', canvas.width / 2, 1170);
+
+        return canvas;
+    }
+
+    async function getShareImageBlob(){
+        const canvas = buildShareCanvas();
+        return await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1));
+    }
+
     async function shareResult(){
-        if(navigator.share){try{await navigator.share({title:'⚽ Mi predicci\u00f3n \u2014 Mundial 2026',text:shareText,url:matchUrl});return}catch(e){if(e.name==='AbortError')return}}
+        const btn = document.getElementById('shareBtn');
+        const old = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando imagen...';
+
+        try {
+            const blob = await getShareImageBlob();
+            if (blob && navigator.share) {
+                const file = new File([blob], shareFileName, { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: '⚽ Mi predicción — Mundial 2026',
+                        text: shareText,
+                        files: [file],
+                    });
+                    return;
+                }
+                await navigator.share({ title: '⚽ Mi predicción — Mundial 2026', text: shareText, url: matchUrl });
+                return;
+            }
+        } catch(e) {
+            if (e && e.name === 'AbortError') return;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = old;
+        }
+
         copyLink();
+    }
+
+    async function downloadShareImage(){
+        try {
+            const blob = await getShareImageBlob();
+            if (!blob) throw new Error('No blob');
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = shareFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✓ Imagen descargada');
+        } catch {
+            showToast('No se pudo generar la imagen');
+        }
     }
     function copyLink(){
         const t=shareText+'\n'+matchUrl;
