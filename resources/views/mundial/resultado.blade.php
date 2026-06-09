@@ -185,12 +185,12 @@
         // Header logo
         const wcLogo = await loadCanvasImage('{{ asset("images/2026_FIFA_World_Cup_emblem.svg.png") }}');
         if (wcLogo) {
-            const maxW = 320;
-            const maxH = 120;
+            const maxW = 640;
+            const maxH = 240;
             const scale = Math.min(maxW / wcLogo.naturalWidth, maxH / wcLogo.naturalHeight);
             const w = wcLogo.naturalWidth * scale;
             const h = wcLogo.naturalHeight * scale;
-            ctx.drawImage(wcLogo, (canvas.width - w) / 2, 90, w, h);
+            ctx.drawImage(wcLogo, (canvas.width - w) / 2, 80, w, h);
         } else {
             ctx.fillStyle = '#e8c11a';
             ctx.font = '700 44px sans-serif';
@@ -251,12 +251,12 @@
         // Footer logo
         const offsideLogo = await loadCanvasImage('{{ asset("images/logo-offside.png") }}');
         if (offsideLogo) {
-            const maxW = 760;
-            const maxH = 240;
+            const maxW = 980;
+            const maxH = 520;
             const scale = Math.min(maxW / offsideLogo.naturalWidth, maxH / offsideLogo.naturalHeight);
             const w = offsideLogo.naturalWidth * scale;
             const h = offsideLogo.naturalHeight * scale;
-            ctx.drawImage(offsideLogo, (canvas.width - w) / 2, 980, w, h);
+            ctx.drawImage(offsideLogo, (canvas.width - w) / 2, 1090, w, h);
         } else {
             ctx.fillStyle = '#9ab0cc';
             ctx.font = '600 32px sans-serif';
@@ -264,7 +264,7 @@
         }
         ctx.fillStyle = '#e8c11a';
         ctx.font = '700 30px sans-serif';
-        ctx.fillText('app.offsideclub.es', canvas.width / 2, 1260);
+        ctx.fillText('app.offsideclub.es', canvas.width / 2, 1395);
 
         return canvas;
     }
