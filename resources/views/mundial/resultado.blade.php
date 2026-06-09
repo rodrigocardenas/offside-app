@@ -39,7 +39,7 @@
         .pick-value{font-size:24px;font-weight:900;color:var(--gold);background:rgba(232,193,26,.1);border:1.5px solid rgba(232,193,26,.38);border-radius:13px;padding:14px 20px;display:block;margin-bottom:18px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
         @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
         .branding{display:flex;justify-content:center}
-        .branding-logo{height:72px;width:auto;max-width:100%;object-fit:contain;opacity:.95;filter:drop-shadow(0 2px 10px rgba(0,0,0,.35))}
+        .branding-logo{height:132px;width:auto;max-width:100%;object-fit:contain;opacity:.98;filter:drop-shadow(0 3px 12px rgba(0,0,0,.38))}
         /* actions */
         .actions{width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px}
         .btn-share{display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);font-size:15px;font-weight:800;border-radius:13px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px rgba(232,193,26,.32)}
@@ -154,6 +154,7 @@
         canvas.width = 1080;
         canvas.height = 1920;
         const ctx = canvas.getContext('2d');
+        ctx.textAlign = 'center';
 
         // Fallback solid background
         ctx.fillStyle = '#0b1e3a';
@@ -250,12 +251,12 @@
         // Footer logo
         const offsideLogo = await loadCanvasImage('{{ asset("images/logo-offside.png") }}');
         if (offsideLogo) {
-            const maxW = 520;
-            const maxH = 140;
+            const maxW = 760;
+            const maxH = 240;
             const scale = Math.min(maxW / offsideLogo.naturalWidth, maxH / offsideLogo.naturalHeight);
             const w = offsideLogo.naturalWidth * scale;
             const h = offsideLogo.naturalHeight * scale;
-            ctx.drawImage(offsideLogo, (canvas.width - w) / 2, 1040, w, h);
+            ctx.drawImage(offsideLogo, (canvas.width - w) / 2, 980, w, h);
         } else {
             ctx.fillStyle = '#9ab0cc';
             ctx.font = '600 32px sans-serif';
@@ -263,7 +264,7 @@
         }
         ctx.fillStyle = '#e8c11a';
         ctx.font = '700 30px sans-serif';
-        ctx.fillText('app.offsideclub.es', canvas.width / 2, 1210);
+        ctx.fillText('app.offsideclub.es', canvas.width / 2, 1260);
 
         return canvas;
     }
