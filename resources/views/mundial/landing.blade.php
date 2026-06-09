@@ -24,17 +24,20 @@
         .bg-stadium{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(11,30,58,.72) 0%,rgba(11,30,58,.90) 50%,rgba(11,30,58,.98) 100%),url('{{ asset("images/estadio.avif") }}') center/cover no-repeat;z-index:0}
         .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
         /* corner logos */
-        .corner{position:fixed;z-index:20;opacity:.92}
-        .corner.tl{top:14px;left:14px;animation:float 4s ease-in-out infinite}
-        .corner.tr{top:14px;right:14px;animation:float 4s ease-in-out infinite reverse}
+        .corner{position:fixed;z-index:20;opacity:0}
+        .corner.tl{top:14px;left:14px;animation:enter-left .6s cubic-bezier(.22,1,.36,1) .1s forwards}
+        .corner.tr{top:14px;right:14px;animation:enter-right .6s cubic-bezier(.22,1,.36,1) .25s forwards}
         .corner img{height:40px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
-        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+        @keyframes enter-left{from{opacity:0;transform:translateX(-18px) scale(.85)}to{opacity:.92;transform:translateX(0) scale(1)}}
+        @keyframes enter-right{from{opacity:0;transform:translateX(18px) scale(.85)}to{opacity:.92;transform:translateX(0) scale(1)}}
         /* hero */
         .hero{padding:80px 20px 0;text-align:center;display:flex;flex-direction:column;align-items:center}
-        .wc-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(232,193,26,.1);border:1px solid rgba(232,193,26,.4);color:var(--gold);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 13px;border-radius:20px;margin-bottom:18px;animation:glow 3s ease-in-out infinite}
-        @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(232,193,26,0)}50%{box-shadow:0 0 10px 3px rgba(232,193,26,.2)}}
-        .match-meta{font-size:12px;color:var(--muted);letter-spacing:.4px;margin-bottom:3px}
-        .match-date{font-size:14px;font-weight:600;color:var(--gold);margin-bottom:28px}
+        /* match info badge (unified) */
+        .match-info-badge{display:inline-flex;flex-direction:column;align-items:center;gap:5px;background:rgba(232,193,26,.07);border:1.5px solid rgba(232,193,26,.38);border-radius:16px;padding:12px 20px;margin-bottom:26px;min-width:220px}
+        .badge-wc{display:flex;align-items:center;gap:7px;color:var(--gold);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+        .badge-sep{width:100%;height:1px;background:rgba(232,193,26,.2)}
+        .badge-meta{font-size:12px;color:var(--muted);letter-spacing:.3px}
+        .badge-date{font-size:14px;font-weight:700;color:var(--gold)}
         /* teams */
         .teams-row{display:flex;align-items:center;justify-content:center;gap:8px;max-width:360px;width:100%;margin-bottom:4px}
         .team-block{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px}
@@ -101,15 +104,17 @@
 
     {{-- HERO --}}
     <div class="hero">
-        <div class="wc-badge"><i class="fas fa-globe-americas"></i> FIFA World Cup 2026</div>
-
-        <div class="match-meta">
-            @if($match->group){{ str_replace('GROUP_', 'Grupo ', $match->group) }} ·@endif
-            {{ $match->stage ? ucwords(strtolower(str_replace('_', ' ', $match->stage))) : 'Fase de grupos' }}
-        </div>
-        <div class="match-date">
-            <i class="far fa-calendar-alt" style="margin-right:5px"></i>
-            {{ \Carbon\Carbon::parse($match->date)->timezone(auth()->user()?->timezone ?? 'UTC')->isoFormat('D [de] MMMM · HH:mm') }}
+        <div class="match-info-badge">
+            <div class="badge-wc"><i class="fas fa-globe-americas"></i> FIFA World Cup 2026</div>
+            <div class="badge-sep"></div>
+            <div class="badge-meta">
+                @if($match->group){{ str_replace('GROUP_', 'Grupo ', $match->group) }} ·@endif
+                {{ $match->stage ? ucwords(strtolower(str_replace('_', ' ', $match->stage))) : 'Fase de grupos' }}
+            </div>
+            <div class="badge-date">
+                <i class="far fa-calendar-alt" style="margin-right:5px"></i>
+                {{ \Carbon\Carbon::parse($match->date)->timezone(auth()->user()?->timezone ?? 'UTC')->isoFormat('D [de] MMMM · HH:mm') }}
+            </div>
         </div>
 
         <div class="teams-row">
