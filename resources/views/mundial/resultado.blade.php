@@ -190,7 +190,7 @@
             const scale = Math.min(maxW / wcLogo.naturalWidth, maxH / wcLogo.naturalHeight);
             const w = wcLogo.naturalWidth * scale;
             const h = wcLogo.naturalHeight * scale;
-            ctx.drawImage(wcLogo, (canvas.width - w) / 2, 80, w, h);
+            ctx.drawImage(wcLogo, (canvas.width - w) / 2, 40, w, h);
         } else {
             ctx.fillStyle = '#e8c11a';
             ctx.font = '700 44px sans-serif';
@@ -262,10 +262,6 @@
             ctx.font = '600 32px sans-serif';
             ctx.fillText('Jugado en Offside Club', canvas.width / 2, 1120);
         }
-        ctx.fillStyle = '#e8c11a';
-        ctx.font = '700 30px sans-serif';
-        ctx.fillText('app.offsideclub.es', canvas.width / 2, 1395);
-
         return canvas;
     }
 
