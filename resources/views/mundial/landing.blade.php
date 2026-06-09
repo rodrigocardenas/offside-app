@@ -33,7 +33,7 @@
         /* hero */
         .hero{padding:80px 20px 0;text-align:center;display:flex;flex-direction:column;align-items:center}
         /* match info badge (unified) */
-        .match-info-badge{display:inline-flex;flex-direction:column;align-items:center;gap:5px;background:rgba(232,193,26,.07);border:1.5px solid rgb(26, 116 ,232 ,.75);border-radius:16px;padding:12px 20px;margin-bottom:26px;min-width:220px}
+        .match-info-badge{display:inline-flex;flex-direction:column;align-items:center;gap:5px;background:rgba(33,150,243,.83);border:1.5px solid rgba(232, 211, 26, 0.75);border-radius:16px;padding:12px 20px;margin-bottom:26px;min-width:220px}
         .badge-wc{display:flex;align-items:center;gap:7px;color:var(--gold);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
         .badge-sep{width:100%;height:1px;background:rgba(232,193,26,.2)}
         .badge-meta{font-size:12px;color:var(--muted);letter-spacing:.3px}
