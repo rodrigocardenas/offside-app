@@ -124,7 +124,7 @@
                          alt="{{ $match->home_team }}"
                          onerror="this.src='{{ asset('images/default-crest.png') }}'">
                 </div>
-                <div class="team-name">{{ $match->home_team }}</div>
+                <div class="team-name">{{ $match->homeTeam?->name ?? $match->home_team }}</div>
             </div>
             <div class="vs-col">
                 <div class="vs-dot"></div>
@@ -134,10 +134,10 @@
             <div class="team-block">
                 <div class="crest-ring">
                     <img src="{{ $match->awayTeam?->crest_url ?? asset('images/default-crest.png') }}"
-                         alt="{{ $match->away_team }}"
+                         alt="{{ $match->awayTeam?->name ?? $match->away_team }}"
                          onerror="this.src='{{ asset('images/default-crest.png') }}'">
                 </div>
-                <div class="team-name">{{ $match->away_team }}</div>
+                <div class="team-name">{{ $match->awayTeam?->name ?? $match->away_team }}</div>
             </div>
         </div>
     </div>
