@@ -19,6 +19,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TestAvatarController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\MatchesController;
+use App\Http\Controllers\WorldCupSocialController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +72,15 @@ Route::post('/api/auth/mobile/google-login', [MobileOAuthController::class, 'mob
 Route::get('/api/auth/mobile/google-url', [MobileOAuthController::class, 'getGoogleAuthUrl'])->name('api.mobile.google.url');
 
 Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+
+// ─── Copa del Mundo 2026 — Flujo social (landing pública + voto) ────────────
+Route::prefix('wc')->name('wc.')->group(function () {
+    Route::get('/', [WorldCupSocialController::class, 'hoy'])->name('hoy');
+    Route::get('/{match}', [WorldCupSocialController::class, 'landing'])->name('match');
+    Route::post('/{match}/auth', [WorldCupSocialController::class, 'quickAuth'])->name('auth');
+    Route::post('/{match}/votar', [WorldCupSocialController::class, 'votar'])->middleware('auth')->name('votar');
+    Route::get('/{match}/resultado', [WorldCupSocialController::class, 'resultado'])->middleware('auth')->name('resultado');
+});
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
