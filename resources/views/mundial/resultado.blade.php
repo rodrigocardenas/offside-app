@@ -69,17 +69,17 @@
                 <div class="card-team">
                     <img class="card-crest"
                          src="{{ $match->homeTeam?->crest_url ?? asset('images/default-crest.png') }}"
-                         alt="{{ $match->home_team }}"
+                         alt="{{ $match->homeTeam?->name ?? $match->home_team }}"
                          onerror="this.src='{{ asset('images/default-crest.png') }}'">
-                    <div class="card-tname">{{ $match->home_team }}</div>
+                    <div class="card-tname">{{ $match->homeTeam?->name ?? $match->home_team }}</div>
                 </div>
                 <div class="card-vs">VS</div>
                 <div class="card-team">
                     <img class="card-crest"
                          src="{{ $match->awayTeam?->crest_url ?? asset('images/default-crest.png') }}"
-                         alt="{{ $match->away_team }}"
+                         alt="{{ $match->awayTeam?->name ?? $match->away_team }}"
                          onerror="this.src='{{ asset('images/default-crest.png') }}'">
-                    <div class="card-tname">{{ $match->away_team }}</div>
+                    <div class="card-tname">{{ $match->awayTeam?->name ?? $match->away_team }}</div>
                 </div>
             </div>
             <div class="card-date">
@@ -122,7 +122,7 @@
 
 <script>
     const matchUrl = "{{ route('wc.match', $match->id) }}";
-    const shareText = "⚽ Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->home_team }} vs {{ $match->away_team }} \u2014 Mundial 2026.\n\u00bfY t\u00fa? Predice en Offside Club:";
+    const shareText = "⚽ Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->homeTeam?->name ?? $match->home_team }} vs {{ $match->awayTeam?->name ?? $match->away_team }} \u2014 Mundial 2026.\n\u00bfY t\u00fa? Predice en Offside Club:";
     const shareFileName = "prediccion-mundial-{{ $match->id }}.png";
 
     function drawRoundedRect(ctx, x, y, w, h, r){
