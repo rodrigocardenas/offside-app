@@ -17,12 +17,12 @@
         .bg-stadium{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(11,30,58,.78) 0%,rgba(11,30,58,.12) 60%,rgba(11,30,58,.99) 100%),url('{{ asset("images/estadio.avif") }}') center/cover no-repeat;z-index:0}
         .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 64px}
         .corner{position:fixed;z-index:20;opacity:.90}
-        .corner.tl{top:14px;left:14px;animation:float 4s ease-in-out infinite}
-        .corner.tr{top:14px;right:14px;animation:float 4s ease-in-out infinite reverse}
+        .corner.tl{top:8px;left:14px;animation:slideDown .6s ease-out both}
+        .corner.tr{top:8px;right:14px;animation:slideDown .6s .15s ease-out both}
         .corner img{height:38px;width:auto;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5))}
-        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+        @keyframes slideDown{from{transform:translateY(-18px);opacity:0}to{transform:translateY(0);opacity:1}}
         /* share card */
-        .share-card{width:100%;max-width:420px;background:rgba(16,37,69,.90);border:1.5px solid var(--border);border-radius:22px;overflow:hidden;margin:64px 0 24px;backdrop-filter:blur(14px);box-shadow:0 8px 40px rgba(0,0,0,.45)}
+        .share-card{width:100%;max-width:420px;background:rgba(16,37,69,.90);border:1.5px solid var(--border);border-radius:22px;overflow:hidden;margin:50px 0 24px;backdrop-filter:blur(14px);box-shadow:0 8px 40px rgba(0,0,0,.45)}
         .card-head{background:linear-gradient(135deg,rgba(11,30,58,1) 0%,rgba(22,46,82,1) 100%);padding:22px 22px 18px;text-align:center;border-bottom:1px solid rgba(232,193,26,.18)}
         .card-wc{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
         /* teams in card */
@@ -135,19 +135,37 @@
         ctx.closePath();
     }
 
-    function buildShareCanvas(){
+    async function buildShareCanvas(){
         const canvas = document.createElement('canvas');
         canvas.width = 1080;
         canvas.height = 1920;
         const ctx = canvas.getContext('2d');
 
-        // Background gradient
-        const bg = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        bg.addColorStop(0, '#0b1e3a');
-        bg.addColorStop(0.55, '#102545');
-        bg.addColorStop(1, '#162e52');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Fallback solid background
+        ctx.fillStyle = '#0b1e3a';
+        ctx.fillRect(0, 0, 1080, 1920);
+
+        // Stadium image
+        await new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => {
+                const scale = Math.max(1080 / img.naturalWidth, 1920 / img.naturalHeight);
+                const w = img.naturalWidth * scale;
+                const h = img.naturalHeight * scale;
+                ctx.drawImage(img, (1080 - w) / 2, (1920 - h) / 2, w, h);
+                resolve();
+            };
+            img.onerror = resolve;
+            img.src = '{{ asset("images/estadio.avif") }}';
+        });
+
+        // Dark gradient overlay (same as CSS)
+        const ov = ctx.createLinearGradient(0, 0, 0, 1920);
+        ov.addColorStop(0,    'rgba(11,30,58,0.82)');
+        ov.addColorStop(0.55, 'rgba(11,30,58,0.22)');
+        ov.addColorStop(1,    'rgba(11,30,58,0.98)');
+        ctx.fillStyle = ov;
+        ctx.fillRect(0, 0, 1080, 1920);
 
         // Header
         ctx.fillStyle = '#e8c11a';
@@ -217,7 +235,7 @@
     }
 
     async function getShareImageBlob(){
-        const canvas = buildShareCanvas();
+        const canvas = await buildShareCanvas();
         return await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1));
     }
 
