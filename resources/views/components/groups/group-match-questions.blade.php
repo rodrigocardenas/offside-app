@@ -186,7 +186,7 @@
                                     @if($answers->count() > 0)
                                         <div class="flex items-center {{ $isStacked ? '-space-x-4' : 'space-x-1' }}" @if($isStacked) title="Votaron: {{ $allNames }}" @endif>
                                             @foreach($answers->take(3) as $answer)
-                                                @if($answer->user->avatar)
+                                                @if($answer->user?->avatar && !$answer->user->is_guest)
                                                     <img src="{{ $answer->user->avatar_url }}"
                                                          alt="{{ $answer->user->name }}"
                                                          class="w-5 h-5 rounded-full border border-white shadow-sm object-cover {{ $isStacked ? 'ring-1 ring-white' : '' }}"
