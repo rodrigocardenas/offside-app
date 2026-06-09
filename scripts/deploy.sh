@@ -59,7 +59,7 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     cd $REMOTE_PATH
 
     # Ejecutar artisan como www-data para evitar errores de permisos en storage/framework
-    PA="sudo -u www-data php artisan"
+
 
     echo "🔧 Asegurando directorio de bootstrap/cache..."
     mkdir -p bootstrap/cache
@@ -86,7 +86,7 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     fi
 
     echo "Entrando en modo mantenimiento..."
-    $PA down --retry=60
+    sudo -u www-data php artisan down --retry=60
 
     echo "🧹 Limpiando y extrayendo..."
     rm -rf public/build
@@ -103,26 +103,26 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     chown -R www-data:www-data storage 2>/dev/null || true
 
     echo "📦 Ejecutando comandos de optimización..."
-    $PA config:clear || true
-    $PA cache:clear || true
-    $PA optimize
-    $PA view:cache
+    sudo -u www-data php artisan config:clear || true
+    sudo -u www-data php artisan cache:clear || true
+    sudo -u www-data php artisan optimize
+    sudo -u www-data php artisan view:cache
 
     echo "🗄️ Aplicando migraciones..."
-    $PA migrate --force || true
+    sudo -u www-data php artisan migrate --force || true
 
     echo "⚽ Sincronizando partidos del Mundial 2026..."
-    $PA worldcup:import-matches --force || echo "⚠️  worldcup:import-matches falló (no crítico)"
+    sudo -u www-data php artisan worldcup:import-matches --force || echo "⚠️  worldcup:import-matches falló (no crítico)"
 
     echo "⚽ Verificando grupo público del Mundial 2026..."
-    $PA worldcup:create-group || echo "⚠️  worldcup:create-group falló (no crítico)"
+    sudo -u www-data php artisan worldcup:create-group || echo "⚠️  worldcup:create-group falló (no crítico)"
 
     echo "🏆 Verificando grupo quiz del Mundial 2026..."
-    $PA worldcup:create-quiz-group || echo "⚠️  worldcup:create-quiz-group falló (no crítico)"
+    sudo -u www-data php artisan worldcup:create-quiz-group || echo "⚠️  worldcup:create-quiz-group falló (no crítico)"
 
     echo "� Ejecutando comandos de seguridad..."
     # Limpiar logs de seguridad antiguos (>30 días)
-    $PA tinker --execute "
+    sudo -u www-data php artisan tinker --execute "
       \$logPath = storage_path('logs/security.log');
       if (file_exists(\$logPath) && time() - filemtime(\$logPath) > 2592000) {
         file_put_contents(\$logPath, '');
@@ -133,28 +133,28 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     # Limpiar usuarios duplicados (si CLEAN_DUPLICATES=true)
     if [ "$CLEAN_DUPLICATES" = "true" ]; then
         echo "🧹 Eliminando usuarios duplicados..."
-        $PA users:clean-duplicates --delete || {
+        sudo -u www-data php artisan users:clean-duplicates --delete || {
             echo "⚠️  Aviso: No se lograron limpiar todos los duplicados"
         }
     fi
 
     echo "�🔗 Verificando symlink de storage..."
-    $PA storage:link --force || {
+    sudo -u www-data php artisan storage:link --force || {
         echo "⚠️  Creando symlink manualmente..."
         rm -f $REMOTE_PATH/public/storage
         ln -s ../storage/app/public $REMOTE_PATH/public/storage
     }
 
     echo "✨ Saliendo del modo mantenimiento..."
-    $PA up
+    sudo -u www-data php artisan up
 
     echo "🔄 Reiniciando Horizon..."
-    $PA horizon:terminate || true
+    sudo -u www-data php artisan horizon:terminate || true
     sleep 3
-    $PA horizon > /dev/null 2>&1 &
+    sudo -u www-data php artisan horizon > /dev/null 2>&1 &
 
     echo "📣 Notificando despliegue exitoso..."
-    $PA deployment:notify success --branch=$REQUIRED_BRANCH --env=production --channel=deployments --initiator="$DEPLOY_INITIATOR" --commit="$COMMIT_SHA" --summary="$COMMIT_MESSAGE"
+    sudo -u www-data php artisan deployment:notify success --branch=$REQUIRED_BRANCH --env=production --channel=deployments --initiator="$DEPLOY_INITIATOR" --commit="$COMMIT_SHA" --summary="$COMMIT_MESSAGE"
 
     echo "✅ Servidor actualizado exitosamente."
 EOF
