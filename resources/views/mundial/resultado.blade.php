@@ -200,7 +200,7 @@
 
         // Match block
         ctx.fillStyle = 'rgba(255,255,255,0.06)';
-        drawRoundedRect(ctx, 90, 230, 900, 280, 32);
+        drawRoundedRect(ctx, 90, 320, 900, 280, 32);
         ctx.fill();
         ctx.strokeStyle = 'rgba(232,193,26,0.35)';
         ctx.lineWidth = 3;
@@ -208,17 +208,17 @@
 
         ctx.fillStyle = '#ffffff';
         ctx.font = '700 56px sans-serif';
-        ctx.fillText('{{ $match->home_team }}', canvas.width / 2, 330);
+        ctx.fillText('{{ $match->home_team }}', canvas.width / 2, 420);
         ctx.fillStyle = '#9ab0cc';
         ctx.font = '700 34px sans-serif';
-        ctx.fillText('VS', canvas.width / 2, 390);
+        ctx.fillText('VS', canvas.width / 2, 480);
         ctx.fillStyle = '#ffffff';
         ctx.font = '700 56px sans-serif';
-        ctx.fillText('{{ $match->away_team }}', canvas.width / 2, 460);
+        ctx.fillText('{{ $match->away_team }}', canvas.width / 2, 550);
 
         // Pick block
         ctx.fillStyle = 'rgba(232,193,26,0.10)';
-        drawRoundedRect(ctx, 90, 610, 900, 420, 36);
+        drawRoundedRect(ctx, 90, 700, 900, 420, 36);
         ctx.fill();
         ctx.strokeStyle = 'rgba(232,193,26,0.5)';
         ctx.lineWidth = 3;
@@ -226,7 +226,7 @@
 
         ctx.fillStyle = '#9ab0cc';
         ctx.font = '700 36px sans-serif';
-        ctx.fillText('MI PREDICCION', canvas.width / 2, 710);
+        ctx.fillText('MI PREDICCION', canvas.width / 2, 800);
 
         ctx.fillStyle = '#e8c11a';
         ctx.font = '900 64px sans-serif';
@@ -245,7 +245,7 @@
         }
         if (line) lines.push(line);
 
-        const startY = 820 - ((lines.length - 1) * 44 / 2);
+        const startY = 910 - ((lines.length - 1) * 44 / 2);
         lines.forEach((l, i) => ctx.fillText(l, canvas.width / 2, startY + i * 88));
 
         // Footer logo
@@ -256,7 +256,7 @@
             const scale = Math.min(maxW / offsideLogo.naturalWidth, maxH / offsideLogo.naturalHeight);
             const w = offsideLogo.naturalWidth * scale;
             const h = offsideLogo.naturalHeight * scale;
-            ctx.drawImage(offsideLogo, (canvas.width - w) / 2, 1090, w, h);
+            ctx.drawImage(offsideLogo, (canvas.width - w) / 2, 1160, w, h);
         } else {
             ctx.fillStyle = '#9ab0cc';
             ctx.font = '600 32px sans-serif';
