@@ -53,6 +53,14 @@
         /* toast */
         .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy-light);border:1px solid var(--border);color:var(--white);padding:11px 22px;border-radius:50px;font-size:13px;font-weight:600;transition:transform .3s;z-index:100;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3)}
         .toast.show{transform:translateX(-50%) translateY(0)}
+        .preview-modal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:120;display:none;align-items:center;justify-content:center;padding:18px}
+        .preview-card{width:min(92vw,460px);background:rgba(16,37,69,.98);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:0 12px 36px rgba(0,0,0,.5)}
+        .preview-title{font-size:13px;color:var(--muted);text-align:center;margin:0 0 10px}
+        .preview-image-wrap{border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
+        .preview-image{display:block;width:100%;height:auto;max-height:68vh;object-fit:contain}
+        .preview-actions{display:flex;gap:10px;margin-top:12px}
+        .preview-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:12px;border:1px solid rgba(232,193,26,.35);background:transparent;color:var(--white);text-decoration:none;font-size:13px;font-weight:700}
+        .preview-btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);border:none}
     </style>
 </head>
 <body>
@@ -125,10 +133,28 @@
 
 <div class="toast" id="toast">✓ Copiado</div>
 
+<div class="preview-modal" id="previewModal" aria-hidden="true">
+    <div class="preview-card">
+        <p class="preview-title">Si no aparece el menu nativo, manten presionada la imagen para guardar o compartir</p>
+        <div class="preview-image-wrap">
+            <img id="previewImage" class="preview-image" alt="Vista previa de tu prediccion">
+        </div>
+        <div class="preview-actions">
+            <a id="previewOpenLink" class="preview-btn" href="#" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-external-link-alt"></i> Abrir imagen
+            </a>
+            <button type="button" class="preview-btn gold" onclick="closePreviewModal()">
+                <i class="fas fa-check"></i> Listo
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     const matchUrl = "{{ route('wc.match', $match->id) }}";
     const shareText = "⚽ Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->homeTeam?->name ?? $match->home_team }} vs {{ $match->awayTeam?->name ?? $match->away_team }} \u2014 Mundial 2026.\n\u00bfY t\u00fa? Predice en Offside Club:";
     const shareFileName = "prediccion-mundial-{{ $match->id }}.png";
+    let previewBlobUrl = null;
 
     function drawRoundedRect(ctx, x, y, w, h, r){
         ctx.beginPath();
@@ -288,6 +314,53 @@
         return ua.includes('instagram') || ua.includes('fb_iab') || ua.includes('fbav') || ua.includes('line/') || ua.includes('micromessenger');
     }
 
+    function isMobileDevice(){
+        return /android|iphone|ipad|ipod/i.test(navigator.userAgent || '');
+    }
+
+    function openPreviewModal(blob){
+        const modal = document.getElementById('previewModal');
+        const img = document.getElementById('previewImage');
+        const link = document.getElementById('previewOpenLink');
+        if (!modal || !img || !link) return;
+
+        if (previewBlobUrl) {
+            URL.revokeObjectURL(previewBlobUrl);
+        }
+
+        previewBlobUrl = URL.createObjectURL(blob);
+        img.src = previewBlobUrl;
+        link.href = previewBlobUrl;
+        link.setAttribute('download', shareFileName);
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closePreviewModal(){
+        const modal = document.getElementById('previewModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    async function attemptClassicDownload(blob){
+        try {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = shareFileName;
+            a.rel = 'noopener';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
     async function tryWebShare(blob){
         if (!blob || !navigator.share) return false;
 
@@ -378,6 +451,15 @@
             btn.innerHTML = old;
         }
 
+        try {
+            const blob = await getShareImageBlob();
+            if (blob) {
+                openPreviewModal(blob);
+                showToast('Imagen lista. Usa "Abrir imagen" o manten presionada para compartir');
+                return;
+            }
+        } catch (_) {}
+
         if (isLikelyInAppBrowser()) {
             showToast('Navegador interno detectado: descarga la imagen y compartela desde tu galeria');
         } else {
@@ -390,15 +472,27 @@
         try {
             const blob = await getShareImageBlob();
             if (!blob) throw new Error('No blob');
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = shareFileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('✓ Imagen descargada');
+
+            if (await tryCapacitorShare(blob)) {
+                showToast('✓ Se abrio el menu de compartir');
+                return;
+            }
+
+            const attempted = await attemptClassicDownload(blob);
+
+            if (isLikelyInAppBrowser() || isMobileDevice()) {
+                openPreviewModal(blob);
+                showToast('Imagen lista. Manten presionada para guardar/compartir');
+                return;
+            }
+
+            if (attempted) {
+                showToast('✓ Descarga iniciada');
+                return;
+            }
+
+            openPreviewModal(blob);
+            showToast('No se pudo descargar automatico. Abre la imagen para guardarla');
         } catch {
             showToast('No se pudo generar la imagen');
         }
@@ -408,6 +502,15 @@
         navigator.clipboard?.writeText(t).then(()=>showToast('✓ Texto copiado')).catch(()=>{const el=document.createElement('textarea');el.value=t;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);showToast('✓ Texto copiado')});
     }
     function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('previewModal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closePreviewModal();
+            });
+        }
+    });
 </script>
 </body>
 </html>
