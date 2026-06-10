@@ -270,6 +270,96 @@
         return await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1));
     }
 
+    async function blobToBase64(blob){
+        return await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result || '';
+                const base64 = String(result).split(',')[1] || '';
+                resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    function isLikelyInAppBrowser(){
+        const ua = (navigator.userAgent || '').toLowerCase();
+        return ua.includes('instagram') || ua.includes('fb_iab') || ua.includes('fbav') || ua.includes('line/') || ua.includes('micromessenger');
+    }
+
+    async function tryWebShare(blob){
+        if (!blob || !navigator.share) return false;
+
+        const file = new File([blob], shareFileName, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: '⚽ Mi predicción — Mundial 2026',
+                text: shareText,
+                files: [file],
+            });
+            return true;
+        }
+
+        await navigator.share({
+            title: '⚽ Mi predicción — Mundial 2026',
+            text: shareText,
+            url: matchUrl
+        });
+        return true;
+    }
+
+    async function tryCapacitorShare(blob){
+        const plugins = window.Capacitor?.Plugins;
+        const Share = plugins?.Share;
+        if (!Share?.share) return false;
+
+        try {
+            const Filesystem = plugins?.Filesystem;
+            if (blob && Filesystem?.writeFile) {
+                const path = `offside-share/${shareFileName}`;
+                const data = await blobToBase64(blob);
+
+                await Filesystem.writeFile({
+                    path,
+                    data,
+                    directory: 'CACHE',
+                    recursive: true,
+                });
+
+                let fileUri = null;
+                if (Filesystem.getUri) {
+                    const uri = await Filesystem.getUri({ path, directory: 'CACHE' });
+                    fileUri = uri?.uri || null;
+                }
+
+                if (fileUri) {
+                    await Share.share({
+                        title: '⚽ Mi predicción — Mundial 2026',
+                        text: shareText,
+                        files: [fileUri],
+                        dialogTitle: 'Compartir mi predicción'
+                    });
+                    return true;
+                }
+            }
+        } catch (err) {
+            console.warn('Capacitor share con imagen no disponible, usando fallback de texto/url', err);
+        }
+
+        try {
+            await Share.share({
+                title: '⚽ Mi predicción — Mundial 2026',
+                text: `${shareText}\n${matchUrl}`,
+                dialogTitle: 'Compartir mi predicción'
+            });
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
     async function shareResult(){
         const btn = document.getElementById('shareBtn');
         const old = btn.innerHTML;
@@ -278,26 +368,21 @@
 
         try {
             const blob = await getShareImageBlob();
-            if (blob && navigator.share) {
-                const file = new File([blob], shareFileName, { type: 'image/png' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        title: '⚽ Mi predicción — Mundial 2026',
-                        text: shareText,
-                        files: [file],
-                    });
-                    return;
-                }
-                await navigator.share({ title: '⚽ Mi predicción — Mundial 2026', text: shareText, url: matchUrl });
-                return;
-            }
+            if (await tryWebShare(blob)) return;
+            if (await tryCapacitorShare(blob)) return;
         } catch(e) {
             if (e && e.name === 'AbortError') return;
+            console.warn('No se pudo compartir con APIs nativas/web:', e);
         } finally {
             btn.disabled = false;
             btn.innerHTML = old;
         }
 
+        if (isLikelyInAppBrowser()) {
+            showToast('Navegador interno detectado: descarga la imagen y compartela desde tu galeria');
+        } else {
+            showToast('No se pudo abrir el menu nativo. Copiamos el texto para compartir');
+        }
         copyLink();
     }
 
