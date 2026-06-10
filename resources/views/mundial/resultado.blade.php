@@ -140,7 +140,7 @@
             <img id="previewImage" class="preview-image" alt="Vista previa de tu prediccion">
         </div>
         <div class="preview-actions">
-            <a id="previewOpenLink" class="preview-btn" href="#" target="_blank" rel="noopener noreferrer">
+            <a id="previewOpenLink" class="preview-btn" href="#" onclick="return openImageFromPreview(event)">
                 <i class="fas fa-external-link-alt"></i> Abrir imagen
             </a>
             <button type="button" class="preview-btn gold" onclick="closePreviewModal()">
@@ -154,7 +154,7 @@
     const matchUrl = "{{ route('wc.match', $match->id) }}";
     const shareText = "⚽ Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->homeTeam?->name ?? $match->home_team }} vs {{ $match->awayTeam?->name ?? $match->away_team }} \u2014 Mundial 2026.\n\u00bfY t\u00fa? Predice en Offside Club:";
     const shareFileName = "prediccion-mundial-{{ $match->id }}.png";
-    let previewBlobUrl = null;
+    let previewDataUrl = '';
 
     function drawRoundedRect(ctx, x, y, w, h, r){
         ctx.beginPath();
@@ -318,22 +318,31 @@
         return /android|iphone|ipad|ipod/i.test(navigator.userAgent || '');
     }
 
-    function openPreviewModal(blob){
+    async function openPreviewModal(blob){
         const modal = document.getElementById('previewModal');
         const img = document.getElementById('previewImage');
         const link = document.getElementById('previewOpenLink');
         if (!modal || !img || !link) return;
 
-        if (previewBlobUrl) {
-            URL.revokeObjectURL(previewBlobUrl);
-        }
-
-        previewBlobUrl = URL.createObjectURL(blob);
-        img.src = previewBlobUrl;
-        link.href = previewBlobUrl;
+        previewDataUrl = `data:image/png;base64,${await blobToBase64(blob)}`;
+        img.src = previewDataUrl;
+        link.href = previewDataUrl;
         link.setAttribute('download', shareFileName);
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function openImageFromPreview(event){
+        if (event) event.preventDefault();
+        if (!previewDataUrl) return false;
+
+        if (isLikelyInAppBrowser() || isMobileDevice()) {
+            window.location.href = previewDataUrl;
+            return false;
+        }
+
+        window.open(previewDataUrl, '_blank', 'noopener,noreferrer');
+        return false;
     }
 
     function closePreviewModal(){
@@ -346,15 +355,14 @@
 
     async function attemptClassicDownload(blob){
         try {
-            const url = URL.createObjectURL(blob);
+            const dataUrl = `data:image/png;base64,${await blobToBase64(blob)}`;
             const a = document.createElement('a');
-            a.href = url;
+            a.href = dataUrl;
             a.download = shareFileName;
             a.rel = 'noopener';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(url), 1500);
             return true;
         } catch {
             return false;
@@ -454,7 +462,7 @@
         try {
             const blob = await getShareImageBlob();
             if (blob) {
-                openPreviewModal(blob);
+                await openPreviewModal(blob);
                 showToast('Imagen lista. Usa "Abrir imagen" o manten presionada para compartir');
                 return;
             }
@@ -481,8 +489,8 @@
             const attempted = await attemptClassicDownload(blob);
 
             if (isLikelyInAppBrowser() || isMobileDevice()) {
-                openPreviewModal(blob);
-                showToast('Imagen lista. Manten presionada para guardar/compartir');
+                await openPreviewModal(blob);
+                showToast('Imagen lista. Usa "Abrir imagen" para guardar/compartir');
                 return;
             }
 
@@ -491,7 +499,7 @@
                 return;
             }
 
-            openPreviewModal(blob);
+            await openPreviewModal(blob);
             showToast('No se pudo descargar automatico. Abre la imagen para guardarla');
         } catch {
             showToast('No se pudo generar la imagen');
