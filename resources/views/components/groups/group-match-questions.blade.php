@@ -42,6 +42,10 @@
                     $questionExpired = $question->available_until->setTimezone($userTimezone)->addHours(4) < $nowUser;
                     $shouldDim = $question->is_disabled || $questionExpired;
                     $userHasAnswered = $question->answers->firstWhere('user_id', auth()->id());
+                    $isWorldCupGroup = (bool) ($group->is_world_cup ?? false);
+                    $matchId = $question->football_match?->id;
+                    $canSharePrediction = $isWorldCupGroup && !is_null($userHasAnswered) && !empty($matchId);
+                    $sharePredictionUrl = $canSharePrediction ? route('wc.resultado', $matchId) : null;
                 @endphp
                 <!-- Prediction Section (Similar to HTML design) -->
                 <div class="snap-center flex-none w-full rounded-2xl p-5 border shadow-sm" id="question{{ $question->id }}" style="background: {{ $componentsBackground }}; border-color: {{ ($question->is_featured ?? false) ? $accentColor : $borderColor }}; border-width: {{ ($question->is_featured ?? false) ? '2px' : '1px' }}; min-width: 300px; {{ $shouldDim ? 'opacity-60;' : '' }}">
@@ -236,29 +240,44 @@
                 @endif
 
                 <!-- Like/Dislike Buttons -->
-                <div class="flex justify-end gap-3 mt-4">
+                <div class="flex items-center justify-between gap-3 mt-4">
+                    @if($canSharePrediction)
+                        <a href="{{ $sharePredictionUrl }}"
+                           class="inline-flex items-center justify-center w-8 h-8 rounded-full transition-all"
+                           style="background: {{ $bgSecondary }}; color: {{ $textSecondary }}; border: 1px solid {{ $borderColor }};"
+                           title="Compartir prediccion"
+                           aria-label="Compartir prediccion"
+                           onmouseover="this.style.color='{{ $accentColor }}'; this.style.borderColor='{{ $accentColor }}'; this.style.backgroundColor='{{ $buttonBgHover }}'"
+                           onmouseout="this.style.color='{{ $textSecondary }}'; this.style.borderColor='{{ $borderColor }}'; this.style.backgroundColor='{{ $bgSecondary }}'">
+                            <i class="fas fa-share-alt text-xs"></i>
+                        </a>
+                    @else
+                        <span></span>
+                    @endif
                     @php
                         $userLiked = isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'like')->isNotEmpty();
                         $userDisliked = isset($question->templateQuestion) && $question->templateQuestion->userReactions->where('id', auth()->id())->where('pivot.reaction', 'dislike')->isNotEmpty();
                     @endphp
-                    <button type="button"
-                            class="like-btn text-sm transition-colors"
-                            data-question-id="{{ $question->id }}"
-                            data-template-question-id="{{ $question->template_question_id }}"
-                            data-default-color="{{ $textSecondary }}"
-                            data-active-color="{{ $accentColor }}"
-                            style="color: {{ $userLiked ? $accentColor : $textSecondary }};">
-                        <i class="fas fa-thumbs-up"></i>
-                    </button>
-                    <button type="button"
-                            class="dislike-btn text-sm transition-colors"
-                            data-question-id="{{ $question->id }}"
-                            data-template-question-id="{{ $question->template_question_id }}"
-                            data-default-color="{{ $textSecondary }}"
-                            data-active-color="#ef4444"
-                            style="color: {{ $userDisliked ? '#ef4444' : $textSecondary }};">
-                        <i class="fas fa-thumbs-down"></i>
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <button type="button"
+                                class="like-btn text-sm transition-colors"
+                                data-question-id="{{ $question->id }}"
+                                data-template-question-id="{{ $question->template_question_id }}"
+                                data-default-color="{{ $textSecondary }}"
+                                data-active-color="{{ $accentColor }}"
+                                style="color: {{ $userLiked ? $accentColor : $textSecondary }};">
+                            <i class="fas fa-thumbs-up"></i>
+                        </button>
+                        <button type="button"
+                                class="dislike-btn text-sm transition-colors"
+                                data-question-id="{{ $question->id }}"
+                                data-template-question-id="{{ $question->template_question_id }}"
+                                data-default-color="{{ $textSecondary }}"
+                                data-active-color="#ef4444"
+                                style="color: {{ $userDisliked ? '#ef4444' : $textSecondary }};">
+                            <i class="fas fa-thumbs-down"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         @empty
