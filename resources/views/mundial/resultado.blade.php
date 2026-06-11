@@ -135,14 +135,14 @@
 
 <div class="preview-modal" id="previewModal" aria-hidden="true">
     <div class="preview-card">
-        <p class="preview-title">Si no aparece el menu nativo, manten presionada la imagen para guardar o compartir</p>
+        <p class="preview-title">Si no aparece el menu nativo, usa el boton para descargar la imagen</p>
         <div class="preview-image-wrap">
             <img id="previewImage" class="preview-image" alt="Vista previa de tu prediccion">
         </div>
         <div class="preview-actions">
-            <a id="previewOpenLink" class="preview-btn" href="#" onclick="return openImageFromPreview(event)">
-                <i class="fas fa-external-link-alt"></i> Abrir imagen
-            </a>
+            <button type="button" id="previewDownloadBtn" class="preview-btn" onclick="downloadPreviewImage(event)">
+                <i class="fas fa-download"></i> Descargar imagen
+            </button>
             <button type="button" class="preview-btn gold" onclick="closePreviewModal()">
                 <i class="fas fa-check"></i> Listo
             </button>
@@ -322,8 +322,8 @@
     async function openPreviewModal(blob){
         const modal = document.getElementById('previewModal');
         const img = document.getElementById('previewImage');
-        const link = document.getElementById('previewOpenLink');
-        if (!modal || !img || !link) return;
+        const downloadBtn = document.getElementById('previewDownloadBtn');
+        if (!modal || !img || !downloadBtn) return;
 
         if (previewObjectUrl) {
             URL.revokeObjectURL(previewObjectUrl);
@@ -335,21 +335,30 @@
         img.src = previewObjectUrl;
         img.setAttribute('draggable', 'false');
         img.setAttribute('oncontextmenu', 'return false;');
-        link.href = previewObjectUrl;
-        link.setAttribute('download', shareFileName);
+        downloadBtn.disabled = false;
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
     }
 
-    function openImageFromPreview(event){
+    async function downloadPreviewImage(event){
         if (event) event.preventDefault();
         if (!previewObjectUrl) return false;
 
-        const opened = window.open(previewObjectUrl, '_blank', 'noopener,noreferrer');
-        if (!opened) {
-            window.location.assign(previewObjectUrl);
+        const blob = await fetch(previewObjectUrl).then(response => response.blob()).catch(() => null);
+        if (!blob) return false;
+
+        if (await tryCapacitorShare(blob)) {
+            showToast('✓ Se abrio el menu de compartir');
+            return false;
         }
 
+        const attempted = await attemptClassicDownload(blob);
+        if (attempted) {
+            showToast('✓ Descarga iniciada');
+            return false;
+        }
+
+        showToast('No se pudo descargar automaticamente');
         return false;
     }
 
@@ -537,6 +546,11 @@
         if (previewImage) {
             previewImage.addEventListener('contextmenu', event => event.preventDefault());
             previewImage.addEventListener('touchstart', event => event.preventDefault(), { passive: false });
+        }
+
+        const downloadBtn = document.getElementById('previewDownloadBtn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('touchstart', event => event.preventDefault(), { passive: false });
         }
     });
 </script>
