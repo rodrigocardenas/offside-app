@@ -682,7 +682,7 @@ class GroupController extends Controller
      */
     private function storeCoverImageLocally($file, $group, &$data): void
     {
-        $filename = 'cover_' . $group->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $filename = 'cover_' . $group->id . '_' . time() . '.' . $file->extension();
 
         // Guardar en storage/app/public/covers
         $path = $file->storeAs('covers', $filename, 'public');

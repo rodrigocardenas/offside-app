@@ -27,13 +27,13 @@ class TestAvatarController extends Controller
             if ($file->isValid()) {
                 try {
                     // Método 1: Usar storeAs
-                    $filename1 = 'test1_' . time() . '.' . ($file->getClientOriginalExtension() ?: 'jpg');
+                    $filename1 = 'test1_' . time() . '.' . ($file->extension() ?: 'jpg');
                     Log::info('Intentando método 1 con: ' . $filename1);
                     $file->storeAs('avatars', $filename1, 'public');
                     Log::info('Método 1 exitoso');
 
                     // Método 2: Usar move
-                    $filename2 = 'test2_' . time() . '.' . ($file->getClientOriginalExtension() ?: 'jpg');
+                    $filename2 = 'test2_' . time() . '.' . ($file->extension() ?: 'jpg');
                     Log::info('Intentando método 2 con: ' . $filename2);
                     $path = storage_path('app/public/avatars');
                     if (!is_dir($path)) {

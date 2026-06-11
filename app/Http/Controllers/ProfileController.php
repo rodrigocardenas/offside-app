@@ -131,7 +131,7 @@ class ProfileController extends Controller
      */
     private function storeAvatarLocally($file, $user, &$data): void
     {
-        $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->extension();
 
         // Guardar en storage/app/public/avatars
         $path = $file->storeAs('avatars', $filename, 'public');
