@@ -58,9 +58,9 @@
         .preview-title{font-size:13px;color:var(--muted);text-align:center;margin:0 0 10px}
         .preview-image-wrap{border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
         .preview-loading{display:flex;align-items:center;justify-content:center;min-height:280px;padding:24px;color:var(--muted);font-size:14px;text-align:center;background:rgba(255,255,255,.02)}
-        .preview-image{display:block;width:100%;height:auto;max-height:68vh;object-fit:contain;touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
-        .preview-actions{display:flex;gap:10px;margin-top:12px}
-        .preview-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:12px;border:1px solid rgba(232,193,26,.35);background:transparent;color:var(--white);text-decoration:none;font-size:13px;font-weight:700}
+        .preview-image{display:block;width:100%;height:auto;max-height:68vh;object-fit:contain;touch-action:manipulation}
+        .preview-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+        .preview-btn{flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:12px;border:1px solid rgba(232,193,26,.35);background:transparent;color:var(--white);text-decoration:none;font-size:13px;font-weight:700}
         .preview-btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);border:none}
     </style>
 </head>
@@ -136,14 +136,14 @@
 
 <div class="preview-modal" id="previewModal" aria-hidden="true">
     <div class="preview-card">
-        <p class="preview-title" id="previewTitle">Si no aparece el menu nativo, usa el boton para descargar la imagen</p>
+        <p class="preview-title" id="previewTitle">Mantén presionada la imagen para guardarla o compartirla</p>
         <div class="preview-image-wrap">
             <div id="previewLoading" class="preview-loading" style="display:none;">Generando imagen...</div>
             <img id="previewImage" class="preview-image" alt="Vista previa de tu prediccion">
         </div>
-        <div class="preview-actions">
+        <div class="preview-actions" id="previewActions">
             <button type="button" id="previewDownloadBtn" class="preview-btn" onclick="downloadPreviewImage(event)">
-                <i class="fas fa-download"></i> Descargar imagen
+                <i class="fas fa-download"></i> Descargar
             </button>
             <button type="button" class="preview-btn gold" onclick="closePreviewModal()">
                 <i class="fas fa-check"></i> Listo
@@ -346,6 +346,7 @@
         const img = document.getElementById('previewImage');
         const loading = document.getElementById('previewLoading');
         const downloadBtn = document.getElementById('previewDownloadBtn');
+        const actions = document.getElementById('previewActions');
         if (!modal || !img || !loading || !downloadBtn || !title) return;
 
         previewBlob = blob;
@@ -355,16 +356,33 @@
             previewObjectUrl = '';
         }
 
-        previewObjectUrl = URL.createObjectURL(blob);
-        previewDataUrl = previewObjectUrl;
-        img.src = previewObjectUrl;
-        img.setAttribute('draggable', 'false');
-        img.setAttribute('oncontextmenu', 'return false;');
+        const b64 = await blobToBase64(blob);
+        previewDataUrl = 'data:image/png;base64,' + b64;
+        img.src = previewDataUrl;
+        
         loading.style.display = 'none';
         img.style.display = 'block';
-        title.textContent = 'Imagen lista. Usa el boton para descargarla';
+        title.textContent = 'Mantén presionada la imagen para guardarla o compartirla';
         downloadBtn.disabled = false;
-        downloadBtn.innerHTML = '<i class="fas fa-download"></i> Descargar imagen';
+        downloadBtn.innerHTML = '<i class="fas fa-download"></i> Descargar';
+        
+        // Add Chrome Intent button if Android In-App Browser
+        let chromeBtn = document.getElementById('chromeIntentBtn');
+        if (isMobileDevice() && isLikelyInAppBrowser() && navigator.userAgent.toLowerCase().includes('android')) {
+            if (!chromeBtn) {
+                chromeBtn = document.createElement('a');
+                chromeBtn.id = 'chromeIntentBtn';
+                chromeBtn.className = 'preview-btn';
+                chromeBtn.innerHTML = '<i class="fab fa-chrome"></i> Abrir en Chrome';
+                const currentUrl = window.location.href.replace(/^https?:\/\//, '');
+                chromeBtn.href = `intent://${currentUrl}#Intent;scheme=https;package=com.android.chrome;end;`;
+                actions.appendChild(chromeBtn);
+            }
+            chromeBtn.style.display = 'flex';
+        } else if (chromeBtn) {
+            chromeBtn.style.display = 'none';
+        }
+
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
     }
@@ -401,7 +419,7 @@
         }
 
         if (title) {
-            title.textContent = 'Si no aparece el menu nativo, usa el boton para descargar la imagen';
+            title.textContent = 'Mantén presionada la imagen para guardarla o compartirla';
         }
 
         if (loading) {
@@ -414,7 +432,7 @@
 
         if (downloadBtn) {
             downloadBtn.disabled = false;
-            downloadBtn.innerHTML = '<i class="fas fa-download"></i> Descargar imagen';
+            downloadBtn.innerHTML = '<i class="fas fa-download"></i> Descargar';
         }
 
         if (previewObjectUrl) {
@@ -608,10 +626,7 @@
         }
 
         const previewImage = document.getElementById('previewImage');
-        if (previewImage) {
-            previewImage.addEventListener('contextmenu', event => event.preventDefault());
-            previewImage.addEventListener('touchstart', event => event.preventDefault(), { passive: false });
-        }
+        // Removed contextmenu blocking to allow long-press saves
 
         const downloadBtn = document.getElementById('previewDownloadBtn');
         if (downloadBtn) {
