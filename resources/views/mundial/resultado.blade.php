@@ -57,6 +57,7 @@
         .preview-card{width:min(92vw,460px);background:rgba(16,37,69,.98);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:0 12px 36px rgba(0,0,0,.5)}
         .preview-title{font-size:13px;color:var(--muted);text-align:center;margin:0 0 10px}
         .preview-image-wrap{border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
+        .preview-loading{display:flex;align-items:center;justify-content:center;min-height:280px;padding:24px;color:var(--muted);font-size:14px;text-align:center;background:rgba(255,255,255,.02)}
         .preview-image{display:block;width:100%;height:auto;max-height:68vh;object-fit:contain;touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
         .preview-actions{display:flex;gap:10px;margin-top:12px}
         .preview-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:12px;border:1px solid rgba(232,193,26,.35);background:transparent;color:var(--white);text-decoration:none;font-size:13px;font-weight:700}
@@ -135,8 +136,9 @@
 
 <div class="preview-modal" id="previewModal" aria-hidden="true">
     <div class="preview-card">
-        <p class="preview-title">Si no aparece el menu nativo, usa el boton para descargar la imagen</p>
+        <p class="preview-title" id="previewTitle">Si no aparece el menu nativo, usa el boton para descargar la imagen</p>
         <div class="preview-image-wrap">
+            <div id="previewLoading" class="preview-loading" style="display:none;">Generando imagen...</div>
             <img id="previewImage" class="preview-image" alt="Vista previa de tu prediccion">
         </div>
         <div class="preview-actions">
@@ -154,6 +156,7 @@
     const matchUrl = "{{ route('wc.match', $match->id) }}";
     const shareText = "⚽ Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->homeTeam?->name ?? $match->home_team }} vs {{ $match->awayTeam?->name ?? $match->away_team }} \u2014 Mundial 2026.\n\u00bfY t\u00fa? Predice en Offside Club:";
     const shareFileName = "prediccion-mundial-{{ $match->id }}.png";
+    let previewBlob = null;
     let previewDataUrl = '';
     let previewObjectUrl = '';
 
@@ -319,11 +322,33 @@
         return /android|iphone|ipad|ipod/i.test(navigator.userAgent || '');
     }
 
+    function showPreviewLoading(){
+        const modal = document.getElementById('previewModal');
+        const title = document.getElementById('previewTitle');
+        const img = document.getElementById('previewImage');
+        const loading = document.getElementById('previewLoading');
+        const downloadBtn = document.getElementById('previewDownloadBtn');
+        if (!modal || !img || !loading || !downloadBtn || !title) return;
+
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        title.textContent = 'Generando imagen...';
+        loading.style.display = 'flex';
+        img.style.display = 'none';
+        img.removeAttribute('src');
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+    }
+
     async function openPreviewModal(blob){
         const modal = document.getElementById('previewModal');
+        const title = document.getElementById('previewTitle');
         const img = document.getElementById('previewImage');
+        const loading = document.getElementById('previewLoading');
         const downloadBtn = document.getElementById('previewDownloadBtn');
-        if (!modal || !img || !downloadBtn) return;
+        if (!modal || !img || !loading || !downloadBtn || !title) return;
+
+        previewBlob = blob;
 
         if (previewObjectUrl) {
             URL.revokeObjectURL(previewObjectUrl);
@@ -335,16 +360,18 @@
         img.src = previewObjectUrl;
         img.setAttribute('draggable', 'false');
         img.setAttribute('oncontextmenu', 'return false;');
+        loading.style.display = 'none';
+        img.style.display = 'block';
+        title.textContent = 'Imagen lista. Usa el boton para descargarla';
         downloadBtn.disabled = false;
+        downloadBtn.innerHTML = '<i class="fas fa-download"></i> Descargar imagen';
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
     }
 
     async function downloadPreviewImage(event){
         if (event) event.preventDefault();
-        if (!previewObjectUrl) return false;
-
-        const blob = await fetch(previewObjectUrl).then(response => response.blob()).catch(() => null);
+        const blob = previewBlob || await ensurePreviewBlob();
         if (!blob) return false;
 
         if (await tryCapacitorShare(blob)) {
@@ -364,9 +391,30 @@
 
     function closePreviewModal(){
         const modal = document.getElementById('previewModal');
+        const title = document.getElementById('previewTitle');
+        const loading = document.getElementById('previewLoading');
+        const img = document.getElementById('previewImage');
+        const downloadBtn = document.getElementById('previewDownloadBtn');
         if (modal) {
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
+        }
+
+        if (title) {
+            title.textContent = 'Si no aparece el menu nativo, usa el boton para descargar la imagen';
+        }
+
+        if (loading) {
+            loading.style.display = 'none';
+        }
+
+        if (img) {
+            img.style.display = 'block';
+        }
+
+        if (downloadBtn) {
+            downloadBtn.disabled = false;
+            downloadBtn.innerHTML = '<i class="fas fa-download"></i> Descargar imagen';
         }
 
         if (previewObjectUrl) {
@@ -374,21 +422,41 @@
             previewObjectUrl = '';
             previewDataUrl = '';
         }
+
+        previewBlob = null;
     }
 
     async function attemptClassicDownload(blob){
         try {
-            const dataUrl = `data:image/png;base64,${await blobToBase64(blob)}`;
+            const objectUrl = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = dataUrl;
+            a.href = objectUrl;
             a.download = shareFileName;
             a.rel = 'noopener';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
             return true;
         } catch {
             return false;
+        }
+    }
+
+    async function ensurePreviewBlob(){
+        if (previewBlob) {
+            return previewBlob;
+        }
+
+        showPreviewLoading();
+        try {
+            previewBlob = await getShareImageBlob();
+            if (previewBlob) {
+                await openPreviewModal(previewBlob);
+            }
+            return previewBlob;
+        } catch {
+            return null;
         }
     }
 
@@ -501,8 +569,11 @@
 
     async function downloadShareImage(){
         try {
-            const blob = await getShareImageBlob();
+            showPreviewLoading();
+            const blob = await ensurePreviewBlob();
             if (!blob) throw new Error('No blob');
+
+            await openPreviewModal(blob);
 
             if (await tryCapacitorShare(blob)) {
                 showToast('✓ Se abrio el menu de compartir');
@@ -511,20 +582,14 @@
 
             const attempted = await attemptClassicDownload(blob);
 
-            if (isLikelyInAppBrowser() || isMobileDevice()) {
-                await openPreviewModal(blob);
-                showToast('Imagen lista. Usa "Abrir imagen" para guardar/compartir');
-                return;
-            }
-
             if (attempted) {
                 showToast('✓ Descarga iniciada');
                 return;
             }
 
-            await openPreviewModal(blob);
-            showToast('No se pudo descargar automatico. Abre la imagen para guardarla');
+            showToast('No se pudo descargar automaticamente. Usa el boton de descargar');
         } catch {
+            closePreviewModal();
             showToast('No se pudo generar la imagen');
         }
     }
