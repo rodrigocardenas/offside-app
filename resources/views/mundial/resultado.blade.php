@@ -57,7 +57,7 @@
         .preview-card{width:min(92vw,460px);background:rgba(16,37,69,.98);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:0 12px 36px rgba(0,0,0,.5)}
         .preview-title{font-size:13px;color:var(--muted);text-align:center;margin:0 0 10px}
         .preview-image-wrap{border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
-        .preview-image{display:block;width:100%;height:auto;max-height:68vh;object-fit:contain}
+        .preview-image{display:block;width:100%;height:auto;max-height:68vh;object-fit:contain;touch-action:manipulation;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
         .preview-actions{display:flex;gap:10px;margin-top:12px}
         .preview-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:12px;border:1px solid rgba(232,193,26,.35);background:transparent;color:var(--white);text-decoration:none;font-size:13px;font-weight:700}
         .preview-btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);border:none}
@@ -155,6 +155,7 @@
     const shareText = "⚽ Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->homeTeam?->name ?? $match->home_team }} vs {{ $match->awayTeam?->name ?? $match->away_team }} \u2014 Mundial 2026.\n\u00bfY t\u00fa? Predice en Offside Club:";
     const shareFileName = "prediccion-mundial-{{ $match->id }}.png";
     let previewDataUrl = '';
+    let previewObjectUrl = '';
 
     function drawRoundedRect(ctx, x, y, w, h, r){
         ctx.beginPath();
@@ -324,9 +325,17 @@
         const link = document.getElementById('previewOpenLink');
         if (!modal || !img || !link) return;
 
-        previewDataUrl = `data:image/png;base64,${await blobToBase64(blob)}`;
-        img.src = previewDataUrl;
-        link.href = previewDataUrl;
+        if (previewObjectUrl) {
+            URL.revokeObjectURL(previewObjectUrl);
+            previewObjectUrl = '';
+        }
+
+        previewObjectUrl = URL.createObjectURL(blob);
+        previewDataUrl = previewObjectUrl;
+        img.src = previewObjectUrl;
+        img.setAttribute('draggable', 'false');
+        img.setAttribute('oncontextmenu', 'return false;');
+        link.href = previewObjectUrl;
         link.setAttribute('download', shareFileName);
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
@@ -334,14 +343,13 @@
 
     function openImageFromPreview(event){
         if (event) event.preventDefault();
-        if (!previewDataUrl) return false;
+        if (!previewObjectUrl) return false;
 
-        if (isLikelyInAppBrowser() || isMobileDevice()) {
-            window.location.href = previewDataUrl;
-            return false;
+        const opened = window.open(previewObjectUrl, '_blank', 'noopener,noreferrer');
+        if (!opened) {
+            window.location.assign(previewObjectUrl);
         }
 
-        window.open(previewDataUrl, '_blank', 'noopener,noreferrer');
         return false;
     }
 
@@ -350,6 +358,12 @@
         if (modal) {
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
+        }
+
+        if (previewObjectUrl) {
+            URL.revokeObjectURL(previewObjectUrl);
+            previewObjectUrl = '';
+            previewDataUrl = '';
         }
     }
 
@@ -517,6 +531,12 @@
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closePreviewModal();
             });
+        }
+
+        const previewImage = document.getElementById('previewImage');
+        if (previewImage) {
+            previewImage.addEventListener('contextmenu', event => event.preventDefault());
+            previewImage.addEventListener('touchstart', event => event.preventDefault(), { passive: false });
         }
     });
 </script>
