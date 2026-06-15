@@ -333,25 +333,32 @@ class QuestionEvaluationService
         $homeScore = $match->home_team_score ?? 0;
         $awayScore = $match->away_team_score ?? 0;
 
+        $teamIds = $this->getTeamApiIds($match);
+        $homeTeamId = $teamIds['home_id'] ?? null;
+        $awayTeamId = $teamIds['away_id'] ?? null;
+
         foreach ($question->options as $option) {
             $optionText = strtolower(trim($option->text));
 
+            $isHomeMatch = $this->teamNameMatches($optionText, $match->home_team, $homeTeamId);
+            $isAwayMatch = $this->teamNameMatches($optionText, $match->away_team, $awayTeamId);
+
             // Victoria home
-            if (($homeScore > $awayScore && strpos($optionText, strtolower($match->home_team)) !== false) ||
-                (strpos($optionText, 'victoria') !== false && strpos($optionText, strtolower($match->home_team)) !== false)) {
+            if (($homeScore > $awayScore && $isHomeMatch) ||
+                (strpos($optionText, 'victoria') !== false && $isHomeMatch)) {
                 if ($homeScore > $awayScore) {
                     $correctOptionIds[] = $option->id;
                 }
             }
             // Victoria away
-            elseif (($awayScore > $homeScore && strpos($optionText, strtolower($match->away_team)) !== false) ||
-                    (strpos($optionText, 'victoria') !== false && strpos($optionText, strtolower($match->away_team)) !== false)) {
+            elseif (($awayScore > $homeScore && $isAwayMatch) ||
+                    (strpos($optionText, 'victoria') !== false && $isAwayMatch)) {
                 if ($awayScore > $homeScore) {
                     $correctOptionIds[] = $option->id;
                 }
             }
             // Empate
-            elseif ($homeScore === $awayScore && strpos($optionText, 'empate') !== false) {
+            elseif ($homeScore === $awayScore && (strpos($optionText, 'empate') !== false || strpos($optionText, 'igualdad') !== false)) {
                 $correctOptionIds[] = $option->id;
             }
         }
@@ -365,7 +372,7 @@ class QuestionEvaluationService
     private function evaluateFirstGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // Encontrar primer gol (excluyendo penales fallados)
         $firstGoalTeam = null;
@@ -421,7 +428,7 @@ class QuestionEvaluationService
     private function evaluateGoalBeforeMinute(Question $question, FootballMatch $match, int $thresholdMinutes): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // Encontrar primer gol antes del umbral (excluyendo penales fallados)
         $firstGoalTeamBeforeThreshold = null;
@@ -475,7 +482,7 @@ class QuestionEvaluationService
     private function evaluateLastGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // ✅ BUG FIX #8: PREVENTION - If events are missing, return empty array
         // This triggers VerifyAllQuestionsJob's protection: "if (empty($correctOptionIds)) return;"
@@ -579,7 +586,7 @@ class QuestionEvaluationService
     private function evaluateYellowCards(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
         $questionText = strtolower($question->title ?? '');
 
         // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
@@ -621,7 +628,7 @@ class QuestionEvaluationService
     private function evaluateRedCards(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
         $homeRed = count(array_filter($events, fn($e) => $this->isCardEventOfType($e, 'RED') && ($e['team'] ?? null) === $match->home_team));
@@ -648,7 +655,7 @@ class QuestionEvaluationService
     private function evaluateOwnGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // event['team'] contiene el nombre del equipo (string), no HOME/AWAY
         $homeOwnGoals = count(array_filter($events, fn($e) => $e['type'] === 'OWN_GOAL' && ($e['team'] ?? null) === $match->home_team));
@@ -713,7 +720,7 @@ class QuestionEvaluationService
     private function evaluatePenaltyGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // Buscar penales en el campo 'detail' (ahora disponible)
         $homePenalty = 0;
@@ -803,7 +810,7 @@ class QuestionEvaluationService
     private function evaluateFreeKickGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // ✅ AHORA FUNCIONA: El campo 'detail' contiene "Free Kick"
         $homeFreeKick = 0;
@@ -885,7 +892,7 @@ class QuestionEvaluationService
     private function evaluateCornerGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // ✅ AHORA BUSCAMOS EN 'detail' para "Corner"
         $homeCorner = 0;
@@ -1117,7 +1124,7 @@ class QuestionEvaluationService
     private function evaluateLateGoal(Question $question, FootballMatch $match): array
     {
         $correctOptionIds = [];
-        $events = $this->parseEvents($match->events ?? []);
+        $events = $this->parseEvents($match->events ?? [], $match);
 
         // Buscar goles en los últimos 15 minutos (minuto >= 75, excluyendo penales fallados)
         $lateGoals = array_filter($events, fn($e) =>
@@ -1468,7 +1475,7 @@ class QuestionEvaluationService
     /**
      * Parsea eventos JSON del partido
      */
-    private function parseEvents($events): array
+    private function parseEvents($events, ?FootballMatch $match = null): array
     {
         if (is_string($events)) {
             $events = json_decode($events, true) ?? [];
@@ -1479,7 +1486,7 @@ class QuestionEvaluationService
         }
 
         // ✅ NORMALIZAR eventos para manejar múltiples formatos
-        return array_map(fn($event) => $this->normalizeEvent($event), $events);
+        return array_map(fn($event) => $this->normalizeEvent($event, $match), $events);
     }
 
     /**
@@ -1491,15 +1498,26 @@ class QuestionEvaluationService
      *
      * Retorna formato estándar: {'minute': 15, 'type': 'GOAL', 'team': 'equipo_name', ...}
      */
-    private function normalizeEvent(array $event): array
+    private function normalizeEvent(array $event, ?FootballMatch $match = null): array
     {
+        $team = $event['team'] ?? null;
+        
+        if ($match && $team) {
+            $teamUpper = strtoupper(trim($team));
+            if ($teamUpper === 'HOME') {
+                $team = $match->home_team;
+            } elseif ($teamUpper === 'AWAY') {
+                $team = $match->away_team;
+            }
+        }
+        
         return [
             // Normalizar minuto (puede ser 'minute' o 'time', string o int)
             'minute' => $this->parseMinuteValue($event['minute'] ?? $event['time'] ?? null),
             // Normalizar tipo de evento a UPPERCASE
             'type' => strtoupper($event['type'] ?? ''),
-            // Mantener el equipo tal cual (puede ser HOME/AWAY o nombre real)
-            'team' => $event['team'] ?? null,
+            // Mantener el equipo tal cual, con transformación si era HOME/AWAY y teníamos match
+            'team' => $team,
             // Campos adicionales opcionales
             'player' => $event['player'] ?? null,
             'detail' => $event['detail'] ?? null,

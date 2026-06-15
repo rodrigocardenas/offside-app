@@ -48,9 +48,8 @@ class Kernel extends ConsoleKernel
         // Este job DEPENDE de que UpdateFinishedMatchesJob haya marcado los partidos como FINISHED
         // BUG #7 FIX: Aumentar timing gap de :05 a :15 para dar más tiempo a ProcessMatchBatchJob
         $schedule->job(new VerifyFinishedMatchesHourlyJob())
-            ->hourly()
+            ->hourlyAt(15)
             ->timezone('UTC')
-            ->at(':15')  // 15 minutos después de la hora (era :05)
             ->name('verify-matches-hourly')
             ->withoutOverlapping(15)
             ->onSuccess(function () {

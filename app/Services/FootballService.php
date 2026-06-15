@@ -1263,8 +1263,6 @@ class FootballService
 
         // 6️⃣ Actualizar partido en BD
         $updateData = [
-            'home_team' => $fixture['teams']['home']['name'] ?? $match->home_team,
-            'away_team' => $fixture['teams']['away']['name'] ?? $match->away_team,
             'status' => $matchStatus,
             'home_team_score' => $homeScore,
             'away_team_score' => $awayScore,
