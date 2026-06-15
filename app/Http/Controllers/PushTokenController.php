@@ -31,12 +31,13 @@ class PushTokenController extends Controller
             'token' => substr($request->token, 0, 20) . '...'
         ]);
 
-        // Guardar o actualizar el token en la relación pushSubscriptions
-        $user->pushSubscriptions()->updateOrCreate(
+        // Guardar o actualizar el token globalmente para evitar duplicados si cambia de usuario
+        \App\Models\PushSubscription::updateOrCreate(
             [
                 'device_token' => $request->token,
             ],
             [
+                'user_id' => $user->id,
                 'endpoint' => $request->endpoint,
                 'public_key' => $request->public_key,
                 'auth_token' => $request->auth_token,
