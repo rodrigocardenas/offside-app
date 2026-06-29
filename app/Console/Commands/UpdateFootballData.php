@@ -90,19 +90,33 @@ class UpdateFootballData extends Command
         $leagueId = $leagueMap[$competitionCode] ?? 39;
 
         // Determinar season (2025 para enero 2026)
-        $season = now()->month >= 7 ? now()->year : now()->year - 1;
+        if ($competitionCode === 'WC') {
+            $season = 2026;
+        } else {
+            $season = now()->month >= 7 ? now()->year : now()->year - 1;
+        }
 
         $this->line("   Liga: {$competitionCode} (ID: {$leagueId})");
         $this->line("   Temporada: {$season}");
         $this->newLine();
 
+        $params = [
+            'league' => $leagueId,
+            'season' => $season,
+        ];
+
+        if ($competitionCode === 'WC') {
+            $params['from'] = '2026-06-28';
+            $params['to'] = '2026-07-20';
+        } elseif ($daysAhead) {
+            $params['from'] = now()->format('Y-m-d');
+            $params['to'] = now()->addDays($daysAhead)->format('Y-m-d');
+        }
+
         // Obtener fixtures de api-sports.io
         $response = Http::withoutVerifying()
             ->withHeaders(['x-apisports-key' => $apiKey])
-            ->get('https://v3.football.api-sports.io/fixtures', [
-                'league' => $leagueId,
-                'season' => $season,
-            ]);
+            ->get('https://v3.football.api-sports.io/fixtures', $params);
 
         if ($response->failed()) {
             Log::error('API Response Failed', [
@@ -121,7 +135,7 @@ class UpdateFootballData extends Command
 
         $saved = 0;
 
-        $competitions = Competition::get()->toBase();
+        $competitions = Competition::all();
 
         foreach ($matches as $match) {
             try {
@@ -145,19 +159,30 @@ class UpdateFootballData extends Command
                 // Crear o actualizar partido
                 $status = $this->normalizeMatchStatus($match['fixture']['status']['short'] ?? 'NS');
 
+                $competition = $competitions->first(function ($comp) use ($competitionCode) {
+                    return $comp->type === $competitionCode || $comp->league_code === $competitionCode;
+                });
+
+                $attributes = [
+                    'home_team' => $homeTeam->api_name ?? $homeTeam->name,
+                    'away_team' => $awayTeam->api_name ?? $awayTeam->name,
+                    'date' => $date,
+                    'status' => $status,
+                    'home_team_score' => $match['goals']['home'] ?? null,
+                    'away_team_score' => $match['goals']['away'] ?? null,
+                    'matchday' => $match['league']['round'] ? preg_replace('/\D/', '', $match['league']['round']) : null,
+                    'league' => $competitionCode,
+                    'competition_id' => $competition->id ?? null,
+                ];
+
+                if ($competitionCode === 'WC') {
+                    $attributes['is_featured'] = true;
+                    $attributes['verification_priority'] = 1;
+                }
+
                 $footballMatch = FootballMatch::updateOrCreate(
                     ['external_id' => $match['fixture']['id']],
-                    [
-                        'home_team' => $homeTeam->api_name ?? $homeTeam->name,
-                        'away_team' => $awayTeam->api_name ?? $awayTeam->name,
-                        'date' => $date,
-                        'status' => $status,
-                        'home_team_score' => $match['goals']['home'] ?? null,
-                        'away_team_score' => $match['goals']['away'] ?? null,
-                        'matchday' => $match['league']['round'] ? preg_replace('/\D/', '', $match['league']['round']) : null,
-                        'league' => $competitionCode,
-                        'competition_id' => $competitions->where('league_code', $competitionCode)->first()->id ?? null,
-                    ]
+                    $attributes
                 );
 
                 $homeName = $homeTeam->api_name ?? $homeTeam->name;
