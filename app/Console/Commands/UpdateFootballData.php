@@ -214,18 +214,10 @@ class UpdateFootballData extends Command
             throw new \InvalidArgumentException('Nombre de equipo no disponible en la respuesta de la API');
         }
 
-        $team = null;
-
-        if ($externalId) {
-            $team = Team::where('external_id', $externalId)->first();
-        }
-
-        if (!$team) {
-            $team = Team::where(function ($query) use ($apiName) {
-                $query->where('api_name', $apiName)
-                    ->orWhere('name', $apiName);
-            })->first();
-        }
+        $team = Team::where(function ($query) use ($apiName) {
+            $query->where('api_name', $apiName)
+                ->orWhere('name', $apiName);
+        })->first();
 
         if (!$team) {
             $team = TeamResolver::findByComparableName($apiName);
