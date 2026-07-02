@@ -224,25 +224,6 @@ class UpdateFootballData extends Command
         }
 
         if ($team) {
-            $updates = [
-                'api_name' => $apiName,
-            ];
-
-            if ($externalId && !$team->external_id) {
-                $updates['external_id'] = $externalId;
-            }
-
-            if (!$team->short_name) {
-                $updates['short_name'] = TeamResolver::generateShortName($team->name ?? $apiName);
-            }
-
-            $team->fill(array_filter($updates, fn ($value) => !is_null($value)));
-
-            if ($team->isDirty()) {
-                $team->save();
-                TeamResolver::rememberTeam($team);
-            }
-
             return $team;
         }
 
