@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>⚽ Mi predicción · {{ $match->home_team }} vs {{ $match->away_team }}</title>
     <meta property="og:title" content="Predije {{ $votedOption }} en {{ $match->home_team }} vs {{ $match->away_team }}">
-    <meta property="og:description" content="Juega en Offside Club y predice los partidos del Mundial 2026.">
+    <meta property="og:description" content="Comparte tu predicción en Offside Club.">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ asset('images/estadio.avif') }}">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        :root{--gold:#e8c11a;--gold-dk:#c5a215;--navy:#0b1e3a;--navy-mid:#102545;--navy-light:#162e52;--white:#fff;--muted:#9ab0cc;--border:rgba(232,193,26,.22)}
+        :root{--gold:#00deb0;--gold-dk:#17b796;--navy:#0a2e2c;--navy-mid:#0f3d3a;--navy-light:#1a524e;--white:#fff;--muted:#b0b0b0;--border:rgba(0,222,176,.22)}
         html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--navy);color:var(--white);overflow-x:hidden}
-        .bg-stadium{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(11,30,58,.78) 0%,rgba(11,30,58,.12) 60%,rgba(11,30,58,.99) 100%),url('{{ asset("images/estadio.avif") }}') center/cover no-repeat;z-index:0}
+        .bg-stadium{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(10,46,44,.78) 0%,rgba(10,46,44,.12) 60%,rgba(10,46,44,.99) 100%),url('{{ asset("images/estadio.avif") }}') center/cover no-repeat;z-index:0}
         .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 64px}
         .corner{position:fixed;z-index:20;opacity:.90}
         .corner.tl{top:8px;left:14px;animation:slideDown .6s ease-out both}
@@ -23,30 +23,29 @@
         @keyframes slideDown{from{transform:translateY(-18px);opacity:0}to{transform:translateY(0);opacity:1}}
         /* share card */
         .share-card{width:100%;max-width:420px;background:rgba(16,37,69,.90);border:1.5px solid var(--border);border-radius:22px;overflow:hidden;margin:50px 0 24px;backdrop-filter:blur(14px);box-shadow:0 8px 40px rgba(0,0,0,.45)}
-        .card-head{background:linear-gradient(135deg,rgba(11,30,58,1) 0%,rgba(22,46,82,1) 100%);padding:22px 22px 18px;text-align:center;border-bottom:1px solid rgba(232,193,26,.18)}
+        .card-head{background:linear-gradient(135deg,rgba(10,46,44,1) 0%,rgba(26,82,78,1) 100%);padding:22px 22px 18px;text-align:center;border-bottom:1px solid rgba(0,222,176,.18)}
         .card-wc{margin-bottom:12px;display:flex;justify-content:center}
-        .card-wc-logo{height:34px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.35))}
         /* teams in card */
         .card-teams-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
         .card-team{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
-        .card-crest{width:52px;height:52px;object-fit:contain;background:rgba(255,255,255,.06);border-radius:50%;padding:6px;border:1.5px solid rgba(232,193,26,.2)}
+        .card-crest{width:52px;height:52px;object-fit:contain;background:rgba(255,255,255,.06);border-radius:50%;padding:6px;border:1.5px solid rgba(0,222,176,.2)}
         .card-tname{font-size:12px;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:.4px;text-align:center}
         .card-vs{font-size:11px;font-weight:900;color:var(--muted);letter-spacing:2px;flex-shrink:0;padding:0 4px}
         .card-date{font-size:12px;color:var(--muted)}
         /* body */
         .card-body{padding:24px 22px 28px;text-align:center}
         .pick-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-        .pick-value{font-size:24px;font-weight:900;color:var(--gold);background:rgba(232,193,26,.1);border:1.5px solid rgba(232,193,26,.38);border-radius:13px;padding:14px 20px;display:block;margin-bottom:18px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+        .pick-value{font-size:24px;font-weight:900;color:var(--gold);background:rgba(0,222,176,.1);border:1.5px solid rgba(0,222,176,.38);border-radius:13px;padding:14px 20px;display:block;margin-bottom:18px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
         @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
         .branding{display:flex;justify-content:center}
         .branding-logo{height:132px;width:auto;max-width:100%;object-fit:contain;opacity:.98;filter:drop-shadow(0 3px 12px rgba(0,0,0,.38))}
         /* actions */
         .actions{width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px}
-        .btn-share{display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);font-size:15px;font-weight:800;border-radius:13px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px rgba(232,193,26,.32)}
-        .btn-share:hover{transform:translateY(-2px);box-shadow:0 7px 24px rgba(232,193,26,.42)}
+        .btn-share{display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);font-size:15px;font-weight:800;border-radius:13px;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 18px rgba(0,222,176,.32)}
+        .btn-share:hover{transform:translateY(-2px);box-shadow:0 7px 24px rgba(0,222,176,.42)}
         .btn-share[disabled]{opacity:.75;cursor:wait}
-        .btn-outline{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:transparent;border:1.5px solid rgba(232,193,26,.32);color:var(--white);font-size:14px;font-weight:600;border-radius:13px;cursor:pointer;text-decoration:none;transition:all .2s}
-        .btn-outline:hover{border-color:var(--gold);color:var(--gold);background:rgba(232,193,26,.06)}
+        .btn-outline{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:transparent;border:1.5px solid rgba(0,222,176,.32);color:var(--white);font-size:14px;font-weight:600;border-radius:13px;cursor:pointer;text-decoration:none;transition:all .2s}
+        .btn-outline:hover{border-color:var(--gold);color:var(--gold);background:rgba(0,222,176,.06)}
         .btn-ghost{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;background:transparent;color:var(--muted);font-size:13px;font-weight:600;border-radius:13px;border:none;cursor:pointer;text-decoration:none;transition:color .2s}
         .btn-ghost:hover{color:var(--white)}
         .divider{border:none;border-top:1px solid rgba(255,255,255,.07);margin:2px 0}
@@ -60,23 +59,19 @@
         .preview-loading{display:flex;align-items:center;justify-content:center;min-height:280px;padding:24px;color:var(--muted);font-size:14px;text-align:center;background:rgba(255,255,255,.02)}
         .preview-image{display:block;width:100%;height:auto;max-height:68vh;object-fit:contain;touch-action:manipulation}
         .preview-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-        .preview-btn{flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:12px;border:1px solid rgba(232,193,26,.35);background:transparent;color:var(--white);text-decoration:none;font-size:13px;font-weight:700}
+        .preview-btn{flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;border-radius:12px;border:1px solid rgba(0,222,176,.35);background:transparent;color:var(--white);text-decoration:none;font-size:13px;font-weight:700}
         .preview-btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:var(--navy);border:none}
     </style>
 </head>
 <body>
 <div class="bg-stadium"></div>
 <div class="corner tl"><img src="{{ asset('images/logo-offside.png') }}" alt="Offside Club"></div>
-<div class="corner tr"><img src="{{ asset('images/2026_FIFA_World_Cup_emblem.svg.png') }}" alt="FIFA World Cup 2026"></div>
 
 <div class="page">
 
     {{-- Share Card --}}
     <div class="share-card">
         <div class="card-head">
-            <div class="card-wc">
-                <img class="card-wc-logo" src="{{ asset('images/2026_FIFA_World_Cup_emblem.svg.png') }}" alt="FIFA World Cup 2026">
-            </div>
             <div class="card-teams-row">
                 <div class="card-team">
                     <img class="card-crest"
@@ -154,8 +149,8 @@
 
 <script>
     const matchUrl = "{{ route('wc.match', $match->id) }}";
-    const shareText = "⚽ Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->homeTeam?->name ?? $match->home_team }} vs {{ $match->awayTeam?->name ?? $match->away_team }} \u2014 Mundial 2026.\n\u00bfY t\u00fa? Predice en Offside Club:";
-    const shareFileName = "prediccion-mundial-{{ $match->id }}.png";
+    const shareText = "Predije \u00ab{{ $votedOption }}\u00bb en {{ $match->homeTeam?->name ?? $match->home_team }} vs {{ $match->awayTeam?->name ?? $match->away_team }}.\n\u00bfY t\u00fa? Predice en Offside Club:";
+    const shareFileName = "prediccion-{{ $match->id }}.png";
     let previewBlob = null;
     let previewDataUrl = '';
     let previewObjectUrl = '';
@@ -187,7 +182,7 @@
         ctx.textAlign = 'center';
 
         // Fallback solid background
-        ctx.fillStyle = '#0b1e3a';
+        ctx.fillStyle = '#0a2e2c';
         ctx.fillRect(0, 0, 1080, 1920);
 
         // Stadium image
@@ -206,40 +201,24 @@
 
         // Dark gradient overlay (same as CSS)
         const ov = ctx.createLinearGradient(0, 0, 0, 1920);
-        ov.addColorStop(0,    'rgba(11,30,58,0.82)');
-        ov.addColorStop(0.55, 'rgba(11,30,58,0.22)');
-        ov.addColorStop(1,    'rgba(11,30,58,0.98)');
+        ov.addColorStop(0,    'rgba(10,46,44,0.82)');
+        ov.addColorStop(0.55, 'rgba(10,46,44,0.22)');
+        ov.addColorStop(1,    'rgba(10,46,44,0.98)');
         ctx.fillStyle = ov;
         ctx.fillRect(0, 0, 1080, 1920);
-
-        // Header logo
-        const wcLogo = await loadCanvasImage('{{ asset("images/2026_FIFA_World_Cup_emblem.svg.png") }}');
-        if (wcLogo) {
-            const maxW = 640;
-            const maxH = 240;
-            const scale = Math.min(maxW / wcLogo.naturalWidth, maxH / wcLogo.naturalHeight);
-            const w = wcLogo.naturalWidth * scale;
-            const h = wcLogo.naturalHeight * scale;
-            ctx.drawImage(wcLogo, (canvas.width - w) / 2, 40, w, h);
-        } else {
-            ctx.fillStyle = '#e8c11a';
-            ctx.font = '700 44px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('FIFA World Cup 2026', canvas.width / 2, 160);
-        }
 
         // Match block
         ctx.fillStyle = 'rgba(255,255,255,0.06)';
         drawRoundedRect(ctx, 90, 320, 900, 280, 32);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(232,193,26,0.35)';
+        ctx.strokeStyle = 'rgba(0,222,176,0.35)';
         ctx.lineWidth = 3;
         ctx.stroke();
 
         ctx.fillStyle = '#ffffff';
         ctx.font = '700 56px sans-serif';
         ctx.fillText('{{ $match->home_team }}', canvas.width / 2, 420);
-        ctx.fillStyle = '#9ab0cc';
+        ctx.fillStyle = '#b0b0b0';
         ctx.font = '700 34px sans-serif';
         ctx.fillText('VS', canvas.width / 2, 480);
         ctx.fillStyle = '#ffffff';
@@ -247,18 +226,18 @@
         ctx.fillText('{{ $match->away_team }}', canvas.width / 2, 550);
 
         // Pick block
-        ctx.fillStyle = 'rgba(232,193,26,0.10)';
+        ctx.fillStyle = 'rgba(0,222,176,0.10)';
         drawRoundedRect(ctx, 90, 700, 900, 420, 36);
         ctx.fill();
-        ctx.strokeStyle = 'rgba(232,193,26,0.5)';
+        ctx.strokeStyle = 'rgba(0,222,176,0.5)';
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        ctx.fillStyle = '#9ab0cc';
+        ctx.fillStyle = '#b0b0b0';
         ctx.font = '700 36px sans-serif';
         ctx.fillText('MI PREDICCION', canvas.width / 2, 800);
 
-        ctx.fillStyle = '#e8c11a';
+        ctx.fillStyle = '#00deb0';
         ctx.font = '900 64px sans-serif';
 
         const lines = [];
@@ -288,7 +267,7 @@
             const h = offsideLogo.naturalHeight * scale;
             ctx.drawImage(offsideLogo, (canvas.width - w) / 2, 1160, w, h);
         } else {
-            ctx.fillStyle = '#9ab0cc';
+            ctx.fillStyle = '#b0b0b0';
             ctx.font = '600 32px sans-serif';
             ctx.fillText('Jugado en Offside Club', canvas.width / 2, 1120);
         }
@@ -485,7 +464,7 @@
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
-                title: '⚽ Mi predicción — Mundial 2026',
+                title: 'Mi predicción en Offside Club',
                 text: shareText,
                 files: [file],
             });
@@ -493,7 +472,7 @@
         }
 
         await navigator.share({
-            title: '⚽ Mi predicción — Mundial 2026',
+            title: 'Mi predicción en Offside Club',
             text: shareText,
             url: matchUrl
         });
@@ -526,7 +505,7 @@
 
                 if (fileUri) {
                     await Share.share({
-                        title: '⚽ Mi predicción — Mundial 2026',
+                        title: 'Mi predicción en Offside Club',
                         text: shareText,
                         files: [fileUri],
                         dialogTitle: 'Compartir mi predicción'
@@ -540,7 +519,7 @@
 
         try {
             await Share.share({
-                title: '⚽ Mi predicción — Mundial 2026',
+                title: 'Mi predicción en Offside Club',
                 text: `${shareText}\n${matchUrl}`,
                 dialogTitle: 'Compartir mi predicción'
             });

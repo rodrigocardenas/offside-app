@@ -31,7 +31,7 @@ class UpdateFootballData extends Command
                 'la-liga' => 'PD',
                 'premier-league' => 'PL',
                 'champions-league' => 'CL',
-                // 'serie-a' => 'SA',
+                'serie-a' => 'SA',
                 'copa-del-rey' => 'CDR',
                 // 'league-cup' => 'LC',
                 // Competencias Internacionales
@@ -89,12 +89,8 @@ class UpdateFootballData extends Command
 
         $leagueId = $leagueMap[$competitionCode] ?? 39;
 
-        // Determinar season (2025 para enero 2026)
-        if ($competitionCode === 'WC') {
-            $season = 2026;
-        } else {
-            $season = now()->month >= 7 ? now()->year : now()->year - 1;
-        }
+        // Determinar season según el inicio de temporada habitual
+        $season = now()->month >= 7 ? now()->year : now()->year - 1;
 
         $this->line("   Liga: {$competitionCode} (ID: {$leagueId})");
         $this->line("   Temporada: {$season}");
@@ -105,10 +101,7 @@ class UpdateFootballData extends Command
             'season' => $season,
         ];
 
-        if ($competitionCode === 'WC') {
-            $params['from'] = '2026-06-28';
-            $params['to'] = '2026-07-20';
-        } elseif ($daysAhead) {
+        if ($daysAhead) {
             $params['from'] = now()->format('Y-m-d');
             $params['to'] = now()->addDays($daysAhead)->format('Y-m-d');
         }

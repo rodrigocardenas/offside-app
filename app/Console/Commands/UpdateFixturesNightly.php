@@ -23,6 +23,13 @@ class UpdateFixturesNightly extends Command
         $leagues = [
             // 🌍 Competencias Internacionales (Prioridad Alta)
             'world-cup' => 1,           // Mundial - próximas 4 semanas
+            'friendlies' => 10,         // Amistosos - próximos 10 días
+
+            // ⚽ Ligas Locales
+            'la-liga' => 14,             // La Liga - próximas 2 semanas
+            'premier-league' => 14,      // Premier League - próximas 2 semanas
+            'champions-league' => 21,    // Champions League - próximas 3 semanas
+            'serie-a' => 14,             // Serie A - próximas 2 semanas
         ];
 
         $totalMatches = 0;
