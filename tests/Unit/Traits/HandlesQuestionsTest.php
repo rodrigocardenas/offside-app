@@ -9,6 +9,8 @@ use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\FootballMatch;
 use App\Models\Competition;
+use App\Models\Team;
+use App\Models\TemplateQuestion;
 use App\Traits\HandlesQuestions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -103,6 +105,90 @@ class HandlesQuestionsTest extends TestCase
         ]);
 
         $this->testClass = new TestClass();
+    }
+
+    /** @test */
+    public function it_creates_questions_only_for_matches_with_an_unambiguous_featured_team(): void
+    {
+        Team::create([
+            'name' => 'Real Madrid',
+            'api_name' => 'Real Madrid',
+            'short_name' => 'RMA',
+            'external_id' => 'test-real-madrid',
+            'type' => 'club',
+            'is_featured' => true,
+        ]);
+        Team::create([
+            'name' => 'Real Madrid Alias Collision',
+            'api_name' => 'Real Madrid',
+            'short_name' => 'RMC',
+            'external_id' => 'test-real-madrid-collision',
+            'type' => 'club',
+            'is_featured' => false,
+        ]);
+        Team::create([
+            'name' => 'Barcelona',
+            'api_name' => 'Barcelona',
+            'short_name' => 'BAR',
+            'external_id' => 'test-barcelona',
+            'type' => 'club',
+            'is_featured' => false,
+        ]);
+        Team::create([
+            'name' => 'Atletico Madrid',
+            'api_name' => 'Atlético Madrid',
+            'short_name' => 'ATM',
+            'external_id' => 'test-atletico',
+            'type' => 'club',
+            'is_featured' => false,
+        ]);
+        Team::create([
+            'name' => 'Sevilla',
+            'api_name' => 'Sevilla',
+            'short_name' => 'SEV',
+            'external_id' => 'test-sevilla',
+            'type' => 'club',
+            'is_featured' => false,
+        ]);
+        Team::create([
+            'name' => 'Featured Home',
+            'api_name' => 'Featured Home',
+            'short_name' => 'FHM',
+            'external_id' => 'test-featured-home',
+            'type' => 'club',
+            'is_featured' => true,
+        ]);
+        Team::create([
+            'name' => 'Away Team',
+            'api_name' => 'Away Team',
+            'short_name' => 'AWY',
+            'external_id' => 'test-away-team',
+            'type' => 'club',
+            'is_featured' => false,
+        ]);
+
+        $featuredMatch = FootballMatch::create([
+            'home_team' => 'Featured Home',
+            'away_team' => 'Away Team',
+            'date' => now()->addDays(2),
+            'status' => 'Not Started',
+            'league' => 'laliga',
+        ]);
+
+        TemplateQuestion::create([
+            'type' => 'predictive',
+            'text' => '¿Quién ganará {{home_team}} vs {{away_team}}?',
+            'options' => [
+                ['text' => '{{home_team}}'],
+                ['text' => 'Empate'],
+                ['text' => '{{away_team}}'],
+            ],
+        ]);
+
+        $questions = $this->testClass->fillGroupPredictiveQuestions($this->group);
+
+        $this->assertCount(1, $questions);
+        $this->assertSame($featuredMatch->id, $questions->first()->match_id);
     }
 
     /** @test */

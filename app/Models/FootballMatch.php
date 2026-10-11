@@ -80,6 +80,17 @@ class FootballMatch extends Model
         return $this->hasMany(Question::class, 'match_id');
     }
 
+    public function scopeWithFeaturedTeam($query)
+    {
+        return $query
+            ->whereRaw('(SELECT COUNT(*) FROM teams AS matching_home_teams WHERE matching_home_teams.api_name = football_matches.home_team AND matching_home_teams.deleted_at IS NULL) = 1')
+            ->whereRaw('(SELECT COUNT(*) FROM teams AS matching_away_teams WHERE matching_away_teams.api_name = football_matches.away_team AND matching_away_teams.deleted_at IS NULL) = 1')
+            ->where(function ($matches) {
+                $matches->whereHas('homeTeam', fn ($teamQuery) => $teamQuery->where('is_featured', true))
+                    ->orWhereHas('awayTeam', fn ($teamQuery) => $teamQuery->where('is_featured', true));
+            });
+    }
+
     public function getCompetitionNameAttribute()
     {
         $competitions = [
