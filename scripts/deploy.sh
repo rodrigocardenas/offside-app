@@ -114,9 +114,6 @@ ssh -T -i "$SSH_KEY_PATH" $SERVER_ALIAS << EOF
     echo "⚽ Sincronizando partidos del Mundial 2026..."
     sudo -u www-data php artisan worldcup:import-matches --force || echo "⚠️  worldcup:import-matches falló (no crítico)"
 
-    echo "⚽ Verificando grupo público del Mundial 2026..."
-    sudo -u www-data php artisan worldcup:create-group || echo "⚠️  worldcup:create-group falló (no crítico)"
-
     echo "🏆 Verificando grupo quiz del Mundial 2026..."
     sudo -u www-data php artisan worldcup:create-quiz-group || echo "⚠️  worldcup:create-quiz-group falló (no crítico)"
 
