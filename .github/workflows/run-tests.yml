@@ -78,6 +78,15 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: root
 
+      - name: Run featured competition question test
+        run: php artisan test tests/Unit/Traits/HandlesQuestionsTest.php --filter=it_creates_questions_only_for_matches_with_an_unambiguous_featured_team --no-coverage
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: offside2_test
+          DB_USERNAME: root
+          DB_PASSWORD: root
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

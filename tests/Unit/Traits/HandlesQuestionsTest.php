@@ -110,6 +110,11 @@ class HandlesQuestionsTest extends TestCase
     /** @test */
     public function it_creates_questions_only_for_matches_with_an_unambiguous_featured_team(): void
     {
+        $otherCompetition = Competition::create([
+            'name' => 'Premier League',
+            'type' => 'premier',
+        ]);
+
         Team::create([
             'name' => 'Real Madrid',
             'api_name' => 'Real Madrid',
@@ -173,6 +178,16 @@ class HandlesQuestionsTest extends TestCase
             'date' => now()->addDays(2),
             'status' => 'Not Started',
             'league' => 'laliga',
+            'competition_id' => $this->competition->id,
+        ]);
+
+        FootballMatch::create([
+            'home_team' => 'Featured Home',
+            'away_team' => 'Away Team',
+            'date' => now()->addDay(),
+            'status' => 'Not Started',
+            'league' => 'premier',
+            'competition_id' => $otherCompetition->id,
         ]);
 
         TemplateQuestion::create([
