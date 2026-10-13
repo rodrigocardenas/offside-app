@@ -248,7 +248,7 @@ trait HandlesQuestions
         // 🎯 PRIORIZACIÓN: Usar orderByFeaturedTeams para ordenar por equipos destacados (Clásicos -> Derbis -> Otros)
         $matches = \App\Models\FootballMatch::where('status', 'Not Started')
             ->where('date', '>=', now()->utc())
-            ->when($group->competition_id, fn ($query, $competitionId) => $query->where('competition_id', $competitionId))
+            ->when($group->competition_id, fn ($query, $competitionId) => $query->where('football_matches.competition_id', $competitionId))
             ->withFeaturedTeam()
             ->orderByFeaturedTeams()  // 🆕 NUEVO: Scope que ordena por featured_priority DESC (1.0 -> 0.7 -> 0.3)
             ->get();
